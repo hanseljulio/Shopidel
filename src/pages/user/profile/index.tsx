@@ -9,8 +9,6 @@ function UserProfile() {
   const [showEditEmail, setShowEditEmail] = useState<boolean>(false);
   const [imageFile, setImageFile] = useState<File | null>(null);
 
-  console.log(imageFile);
-
   const toggleEditEmail = () => {
     setShowEditEmail((prevBool) => !prevBool);
   };
