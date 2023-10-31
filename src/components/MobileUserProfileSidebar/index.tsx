@@ -23,24 +23,26 @@ function MobileUserProfileSidebar(props: MobileUserProfileSidebarProps) {
         <Button
           text="My Profile"
           onClick={redirectMyProfile}
-          styling="bg-slate-300 py-[12px] rounded-[8px] w-[150px] hover:bg-blue-600 my-4"
+          styling="bg-blue-100 py-[12px] rounded-[8px] w-[150px] hover:bg-blue-300 my-4"
+          disabled={props.currentPage === "My Profile"}
         />
         <Button
           text="Addresses"
-          styling="bg-slate-300 py-[12px] rounded-[8px] w-[150px] hover:bg-blue-600 my-4"
+          styling="bg-blue-100 py-[12px] rounded-[8px] w-[150px] hover:bg-blue-300 my-4"
         />
         <Button
           text="Change Password"
           onClick={redirectChangePassword}
-          styling="bg-slate-300 py-[12px] rounded-[8px] w-[150px] hover:bg-blue-600 my-4"
+          styling="bg-blue-100 py-[12px] rounded-[8px] w-[150px] hover:bg-blue-300 my-4"
+          disabled={props.currentPage === "Change Password"}
         />
         <Button
           text="Purchase History"
-          styling="bg-slate-300 py-[12px] rounded-[8px] w-[150px] hover:bg-blue-600 my-4"
+          styling="bg-blue-100 py-[12px] rounded-[8px] w-[150px] hover:bg-blue-300 my-4"
         />
         <Button
           text="My Vouchers"
-          styling="bg-slate-300 py-[12px] rounded-[8px] w-[150px] hover:bg-blue-600 my-4"
+          styling="bg-blue-100 py-[12px] rounded-[8px] w-[150px] hover:bg-blue-300 my-4"
         />
       </div>
     </div>

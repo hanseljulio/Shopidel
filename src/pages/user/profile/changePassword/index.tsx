@@ -40,7 +40,7 @@ function UserChangePassword() {
       </div>
 
       <div className="invisible mobile:visible">
-        <MobileUserProfileSidebar />
+        <MobileUserProfileSidebar currentPage="Change Password" />
       </div>
       <div className="user-edit-profile-div ml-[680px] pt-[80px] space-y-5 mobile:mx-auto">
         <div className="edit-profile-header pb-3 mobile:text-center">
