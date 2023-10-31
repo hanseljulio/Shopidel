@@ -3,7 +3,7 @@ import classNames from "classnames";
 import { BsStarFill } from "react-icons/bs";
 import Image from "next/image";
 
-interface ICard {
+interface IProductCard {
   image: string;
   price: number;
   order: number;
@@ -20,7 +20,7 @@ const ProductCard = ({
   place,
   star,
   onClick,
-}: ICard) => {
+}: IProductCard) => {
   return (
     <button
       onClick={onClick}
