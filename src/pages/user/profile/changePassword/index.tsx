@@ -9,6 +9,20 @@ function UserChangePassword() {
   const [newPassword, setNewPassword] = useState<string>("");
   const [confirmPassword, setConfirmPassword] = useState<string>("");
 
+  const allEmpty =
+    oldPassword.length === 0 &&
+    newPassword.length === 0 &&
+    confirmPassword.length === 0;
+  const newPasswordConfirmFail =
+    oldPassword.length !== 0 && confirmPassword !== newPassword;
+  const allTheSame =
+    oldPassword.length !== 0 &&
+    oldPassword === newPassword &&
+    oldPassword === confirmPassword &&
+    newPassword === confirmPassword;
+  const fillNewPassword =
+    oldPassword.length !== 0 && !confirmPassword && !newPassword;
+
   const submit = async (e: any) => {
     e.preventDefault();
   };
@@ -63,9 +77,24 @@ function UserChangePassword() {
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     required
                   />
-                  {newPassword !== confirmPassword && (
+                  {allEmpty && (
+                    <p className="text-red-500 py-1 px-4 bg-red-200 my-3">
+                      It&apos;s all empty! Fill in your old and new password.
+                    </p>
+                  )}
+                  {fillNewPassword && (
+                    <p className="text-red-500 py-1 px-4 bg-red-200 my-3">
+                      Now enter your new password.
+                    </p>
+                  )}
+                  {newPasswordConfirmFail && (
                     <p className="text-red-500 py-1 px-4 bg-red-200 my-3">
                       Password is not the same
+                    </p>
+                  )}
+                  {allTheSame && (
+                    <p className="text-red-500 py-1 px-4 bg-red-200 my-3">
+                      You can&apos;t use your old password as the new one.
                     </p>
                   )}
                 </div>
@@ -75,7 +104,12 @@ function UserChangePassword() {
               <Button
                 text="Update Password"
                 styling="bg-blue-400 p-3 rounded-[8px] w-[300px] hover:bg-blue-600 my-4"
-                disabled={newPassword !== confirmPassword}
+                disabled={
+                  allEmpty ||
+                  allTheSame ||
+                  newPasswordConfirmFail ||
+                  fillNewPassword
+                }
               />
             </div>
           </form>
