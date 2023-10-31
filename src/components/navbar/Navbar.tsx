@@ -20,7 +20,7 @@ const Navbar = () => {
               href="#"
               className=" md:items-center md:flex md:px-8 flex gap-1 align-middle"
             >
-              Follow Us <AiOutlineInstagram />
+              <span>Follow Us </span> <AiOutlineInstagram />
               <AiFillFacebook />
             </a>
           </p>
@@ -77,7 +77,7 @@ const Navbar = () => {
             }`}
           >
             <input
-              className="items-center justify-center w-full md:w-[52rem] px-3 py-1"
+              className="items-center justify-center w-full md:w-[20rem] lg:w-[50rem] px-3 py-1"
               type="text"
               name="search"
               id="search"
