@@ -2,6 +2,8 @@ import Input from "@/components/Input";
 import UserProfileSidebar from "@/components/UserProfileSidebar";
 import React, { useState } from "react";
 import Image from "next/image";
+import MobileUserProfileSidebar from "@/components/MobileUserProfileSidebar";
+import Button from "@/components/Button";
 
 function UserProfile() {
   const [showEditEmail, setShowEditEmail] = useState<boolean>(false);
@@ -24,14 +26,19 @@ function UserProfile() {
       <div className="mobile:hidden">
         <UserProfileSidebar />
       </div>
-      <div className="user-edit-profile-div ml-[680px] pt-[120px] space-y-5 mobile:mx-auto">
+
+      <div className="invisible mobile:visible">
+        <MobileUserProfileSidebar />
+      </div>
+
+      <div className="user-edit-profile-div ml-[680px] pt-[80px] space-y-5 mobile:mx-auto">
         <div className="edit-profile-header pb-3 mobile:text-center">
           <h1 className="text-[30px]">My Profile</h1>
           <p className="text-[18px]">Manage your account</p>
         </div>
 
         <form action="">
-          <div className="form-section-wrapper flex gap-[150px] mobile:gap-[50px] mobile:flex-col mobile:items-center">
+          <div className="form-section-wrapper flex gap-[150px] mobile:gap-[20px] mobile:flex-col mobile:items-center">
             <div className="form-section-div">
               <Input
                 label="Username"
@@ -112,14 +119,17 @@ function UserProfile() {
                 }}
               />
               <br />
-              <label className="custom-file-upload bg-amber-400 hover:cursor-pointer hover:bg-amber-500 p-4 rounded-[10px] ml-1.5 text-center">
+              <label className="custom-file-upload bg-blue-400 hover:cursor-pointer hover:bg-blue-600 p-4 rounded-[10px] ml-1.5 text-center">
                 <input type="file" className="hidden" />
                 {"Upload profile photo"}
               </label>
             </div>
           </div>
-          <div className="submit-btn mobile:text-center mobile:py-[50px]">
-            <h1>SUBMIT</h1>
+          <div className="submit-btn mobile:text-center mobile:py-[50px] ml-[250px] mobile:mx-auto">
+            <Button
+              text="Save Changes"
+              styling="bg-blue-400 p-3 rounded-[8px] w-[300px] hover:bg-blue-600 my-4"
+            />
           </div>
         </form>
       </div>
