@@ -14,7 +14,8 @@ function UserProfile() {
 
   const emailConverter = (email: string) => {
     let emailArray = email.split("@");
-    let censoredUserName = emailArray[0].replace(/./g, "*");
+    let censoredUserName =
+      emailArray[0].substring(0, 2) + emailArray[0].slice(3).replace(/./g, "*");
 
     emailArray[0] = censoredUserName;
 

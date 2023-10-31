@@ -38,26 +38,26 @@ function UserProfileSidebar() {
           </h1>
           <ul className="text-[18px] ml-[70px]">
             <li
-              className="py-1 hover:cursor-pointer"
+              className={`py-1 hover:cursor-pointer w-[80px]`}
               onClick={redirectMyProfile}
             >
               Profile
             </li>
-            <li className="py-1 hover:cursor-pointer">Addresses</li>
+            <li className={`py-1 hover:cursor-pointer w-[90px]`}>Addresses</li>
             <li
-              className="py-1 hover:cursor-pointer"
+              className={`py-1 hover:cursor-pointer w-[150px]`}
               onClick={redirectChangePassword}
             >
               Change Password
             </li>
           </ul>
         </div>
-        <div className="remaining-section text-white ml-[50px] pt-[50px]">
-          <h1 className="text-[25px] flex items-center gap-4">
+        <div className="remaining-section text-white ml-[50px] pt-[50px] ">
+          <h1 className="text-[25px] flex items-center gap-4 hover:cursor-pointer w-[250px]">
             <FaDollarSign />
             Purchase History
           </h1>
-          <h1 className="text-[25px] flex items-center gap-4 pt-6">
+          <h1 className="text-[25px] flex items-center gap-4 pt-6 hover:cursor-pointer w-[200px]">
             <FaTag />
             My Vouchers
           </h1>
