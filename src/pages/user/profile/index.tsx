@@ -78,14 +78,14 @@ function UserProfile() {
                 type="text"
                 name="phoneNumber"
               />
-              <Input
+              {/* <Input
                 label="Shop Name"
                 labelStyle="mt-2"
                 styling="flex items-center gap-12 pb-[30px] mobile:flex-col mobile:gap-2 mobile:items-start"
                 width="w-[250px]"
                 type="text"
                 name="shopName"
-              />
+              /> */}
               <Input
                 label="Gender"
                 labelStyle="mt-2"

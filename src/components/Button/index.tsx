@@ -13,7 +13,7 @@ function Button(props: ButtonProps) {
       <button
         className={`${props.styling ? props.styling : ""} ${
           props.disabled
-            ? "hover:cursor-default bg-slate-400 hover:bg-slate-400"
+            ? "hover:cursor-default bg-slate-400 text-white hover:bg-slate-400"
             : ""
         }`}
         onClick={props.onClick}

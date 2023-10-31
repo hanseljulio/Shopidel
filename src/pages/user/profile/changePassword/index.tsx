@@ -27,6 +27,7 @@ function UserChangePassword() {
                   width="w-[250px]"
                   type="password"
                   name="oldPassword"
+                  required
                 />
                 <Input
                   label="New Password"
@@ -35,6 +36,7 @@ function UserChangePassword() {
                   width="w-[250px]"
                   type="password"
                   name="newPassword"
+                  required
                 />
                 <Input
                   label="Confirm Password"
@@ -43,6 +45,7 @@ function UserChangePassword() {
                   width="w-[250px]"
                   type="password"
                   name="confirmPassword"
+                  required
                 />
               </div>
             </div>
@@ -53,43 +56,6 @@ function UserChangePassword() {
               />
             </div>
           </form>
-          {/* <form action="">
-            <div className="flex-col items-center justify-center">
-              <Input
-                label="Old Password"
-                labelStyle="mt-2"
-                styling="flex items-center gap-[90px] pb-[30px] mobile:flex-col mobile:gap-2 mobile:items-start"
-                width="w-[250px]"
-                type="password"
-                name="oldPassword"
-              />
-
-              <Input
-                label="New Password"
-                labelStyle="mt-2"
-                styling="flex items-center gap-[83px] pb-[30px] mobile:flex-col mobile:gap-2 mobile:items-start"
-                width="w-[250px]"
-                type="password"
-                name="newPassword"
-              />
-
-              <Input
-                label="Confirm Password"
-                labelStyle="mt-2"
-                styling="flex items-center gap-[57px] pb-[30px] mobile:flex-col mobile:gap-2 mobile:items-start"
-                width="w-[250px]"
-                type="password"
-                name="confirmPassword"
-              />
-            </div>
-
-            <div className="submit-btn mobile:text-center mobile:py-[50px] ml-[250px] mobile:mx-auto">
-              <Button
-                text="Update Password"
-                styling="bg-blue-400 p-3 rounded-[8px] w-[300px] hover:bg-blue-600 my-4"
-              />
-            </div>
-          </form> */}
         </div>
       </div>
     </div>
