@@ -9,6 +9,8 @@ function UserProfile() {
   const [showEditEmail, setShowEditEmail] = useState<boolean>(false);
   const [imageFile, setImageFile] = useState<File | null>(null);
 
+  console.log(imageFile);
+
   const toggleEditEmail = () => {
     setShowEditEmail((prevBool) => !prevBool);
   };
@@ -136,6 +138,8 @@ function UserProfile() {
               <Image
                 src={`${
                   imageFile === null
+                    ? "/images/defaultuser.png"
+                    : imageFile === undefined
                     ? "/images/defaultuser.png"
                     : URL.createObjectURL(imageFile)
                 }`}
