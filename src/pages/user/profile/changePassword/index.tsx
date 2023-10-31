@@ -29,7 +29,7 @@ function UserChangePassword() {
   const emptyNewPassword =
     newPassword.length === 0 || confirmPassword.length === 0;
 
-  const submit = async (e: any) => {
+  const submit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
   };
 
@@ -108,7 +108,7 @@ function UserChangePassword() {
                       You can&apos;t use your old password as the new one.
                     </p>
                   )}
-                  {emptyNewPassword && (
+                  {emptyNewPassword && !allEmpty && (
                     <p className="text-red-500 py-1 px-4 bg-red-200 my-3">
                       New password cannot be empty!
                     </p>

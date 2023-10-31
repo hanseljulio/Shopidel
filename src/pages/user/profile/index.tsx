@@ -1,6 +1,6 @@
 import Input from "@/components/Input";
 import UserProfileSidebar from "@/components/UserProfileSidebar";
-import React, { useState } from "react";
+import React, { FormEventHandler, useState } from "react";
 import Image from "next/image";
 import MobileUserProfileSidebar from "@/components/MobileUserProfileSidebar";
 import Button from "@/components/Button";
@@ -22,6 +22,10 @@ function UserProfile() {
     return emailArray.join("@");
   };
 
+  const submit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+  };
+
   return (
     <div>
       <div className="mobile:hidden">
@@ -38,7 +42,7 @@ function UserProfile() {
           <p className="text-[18px]">Manage your account</p>
         </div>
 
-        <form action="">
+        <form action="" onSubmit={submit}>
           <div className="form-section-wrapper flex gap-[150px] mobile:gap-[20px] mobile:flex-col mobile:items-center">
             <div className="form-section-div">
               <Input
