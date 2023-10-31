@@ -1,7 +1,7 @@
 import useRegisterStore, { IUser } from '@/store/userStore'
 import React from 'react'
 import { SubmitHandler, useForm } from 'react-hook-form'
-import { IRegisterForm } from './RegisterUserFirst'
+import { IRegisterForm } from '../RegisterUserFirst'
 
 const RegisterUserSecond = ({ onSubmit }: IRegisterForm) => {
     const { registerData, updateRegisterData } = useRegisterStore()

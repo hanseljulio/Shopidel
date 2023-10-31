@@ -1,7 +1,7 @@
 import Image from 'next/image'
 import React, { useState } from 'react'
-import RegisterUserFirst from '../components/RegisterUserFirst'
-import RegisterUserSecond from '../components/RegisterUserSecond'
+import RegisterUserFirst from '../../components/RegisterUserFirst'
+import RegisterUserSecond from '../../components/RegisterUserSecond'
 
 const Register = () => {
     const [page, setPage] = useState<JSX.Element>(
@@ -13,8 +13,8 @@ const Register = () => {
     return (
         <div className=' h-screen flex justify-between items-center'>
             <div className='max-w-7xl w-full mx-auto flex justify-around items-center'>
-                <div>
-                    <Image src={"/auth_hero.png"} width={400} height={400} alt='auth_hero' />
+                <div className='hidden md:flex'>
+                    <Image src={"/images/auth_hero.png"} width={400} height={400} alt='auth_hero' />
                 </div>
                 <div className=''>
                     {page}
