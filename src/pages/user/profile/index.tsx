@@ -5,7 +5,7 @@ import Image from "next/image";
 import MobileUserProfileSidebar from "@/components/MobileUserProfileSidebar";
 import Button from "@/components/Button";
 
-function UserProfile() {
+const UserProfile = () => {
   const [showEditEmail, setShowEditEmail] = useState<boolean>(false);
   const [imageFile, setImageFile] = useState<File | null>(null);
 
@@ -175,6 +175,6 @@ function UserProfile() {
       </div>
     </div>
   );
-}
+};
 
 export default UserProfile;

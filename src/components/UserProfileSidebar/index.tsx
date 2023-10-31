@@ -3,7 +3,7 @@ import Image from "next/image";
 import { FaUser, FaTag, FaDollarSign } from "react-icons/fa";
 import { useRouter } from "next/router";
 
-function UserProfileSidebar() {
+const UserProfileSidebar = () => {
   const router = useRouter();
 
   const redirectMyProfile = () => {
@@ -65,6 +65,6 @@ function UserProfileSidebar() {
       </div>
     </div>
   );
-}
+};
 
 export default UserProfileSidebar;

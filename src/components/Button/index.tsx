@@ -7,7 +7,7 @@ interface ButtonProps {
   disabled?: boolean;
 }
 
-function Button(props: ButtonProps) {
+const Button = (props: ButtonProps) => {
   return (
     <div className="btn-div">
       <button
@@ -23,6 +23,6 @@ function Button(props: ButtonProps) {
       </button>
     </div>
   );
-}
+};
 
 export default Button;

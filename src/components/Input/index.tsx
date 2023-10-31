@@ -17,7 +17,7 @@ interface InputProps {
   checked?: boolean;
 }
 
-function Input(props: InputProps) {
+const Input = (props: InputProps) => {
   return (
     <div className="input-div">
       <div
@@ -47,6 +47,6 @@ function Input(props: InputProps) {
       </div>
     </div>
   );
-}
+};
 
 export default Input;

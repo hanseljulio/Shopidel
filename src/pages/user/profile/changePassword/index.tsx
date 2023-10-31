@@ -4,7 +4,7 @@ import MobileUserProfileSidebar from "@/components/MobileUserProfileSidebar";
 import Input from "@/components/Input";
 import Button from "@/components/Button";
 
-function UserChangePassword() {
+const UserChangePassword = () => {
   const [oldPassword, setOldPassword] = useState<string>("");
   const [newPassword, setNewPassword] = useState<string>("");
   const [confirmPassword, setConfirmPassword] = useState<string>("");
@@ -146,6 +146,6 @@ function UserChangePassword() {
       </div>
     </div>
   );
-}
+};
 
 export default UserChangePassword;

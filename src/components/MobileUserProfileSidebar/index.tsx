@@ -6,7 +6,7 @@ interface MobileUserProfileSidebarProps {
   currentPage?: string;
 }
 
-function MobileUserProfileSidebar(props: MobileUserProfileSidebarProps) {
+const MobileUserProfileSidebar = (props: MobileUserProfileSidebarProps) => {
   const router = useRouter();
 
   const redirectMyProfile = () => {
@@ -47,6 +47,6 @@ function MobileUserProfileSidebar(props: MobileUserProfileSidebarProps) {
       </div>
     </div>
   );
-}
+};
 
 export default MobileUserProfileSidebar;
