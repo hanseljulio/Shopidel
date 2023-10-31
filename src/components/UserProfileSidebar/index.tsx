@@ -1,8 +1,19 @@
 import React from "react";
 import Image from "next/image";
 import { FaUser, FaTag, FaDollarSign } from "react-icons/fa";
+import { useRouter } from "next/router";
 
 function UserProfileSidebar() {
+  const router = useRouter();
+
+  const redirectMyProfile = () => {
+    router.push("/user/profile");
+  };
+
+  const redirectChangePassword = () => {
+    router.push("/user/profile/changePassword");
+  };
+
   return (
     <div className="user-profile-sidebar-div ">
       <div className="admin-nav-wrapper fixed bg-[#59AFFF] w-[400px] h-screen">
@@ -26,9 +37,19 @@ function UserProfileSidebar() {
             My Accounts
           </h1>
           <ul className="text-[18px] ml-[70px]">
-            <li className="py-1">Profile</li>
-            <li className="py-1">Addresses</li>
-            <li className="py-1">Change Password</li>
+            <li
+              className="py-1 hover:cursor-pointer"
+              onClick={redirectMyProfile}
+            >
+              Profile
+            </li>
+            <li className="py-1 hover:cursor-pointer">Addresses</li>
+            <li
+              className="py-1 hover:cursor-pointer"
+              onClick={redirectChangePassword}
+            >
+              Change Password
+            </li>
           </ul>
         </div>
         <div className="remaining-section text-white ml-[50px] pt-[50px]">
