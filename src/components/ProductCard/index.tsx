@@ -12,7 +12,15 @@ interface ICard {
   star?: number;
   onClick?: MouseEventHandler;
 }
-const Card = ({ image, price, order, title, place, star, onClick }: ICard) => {
+const ProductCard = ({
+  image,
+  price,
+  order,
+  title,
+  place,
+  star,
+  onClick,
+}: ICard) => {
   return (
     <button
       onClick={onClick}
@@ -61,4 +69,4 @@ const Card = ({ image, price, order, title, place, star, onClick }: ICard) => {
   );
 };
 
-export default Card;
+export default ProductCard;
