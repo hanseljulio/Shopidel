@@ -7,6 +7,7 @@ import Button from "@/components/Button";
 
 function UserProfile() {
   const [showEditEmail, setShowEditEmail] = useState<boolean>(false);
+  const [imageFile, setImageFile] = useState<File | null>(null);
 
   const toggleEditEmail = () => {
     setShowEditEmail((prevBool) => !prevBool);
@@ -24,6 +25,26 @@ function UserProfile() {
 
   const submit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+  };
+
+  // Function for getting image from cloudinary
+  const urlToLink = async (link: string) => {
+    const randomName =
+      Math.floor(Math.random() * (999999 - 100000) + 100000).toString() +
+      ".jpg";
+
+    let imgFile = fetch(link).then(async (response) => {
+      const blob = await response.blob();
+      const file = new File([blob], randomName);
+      return file;
+    });
+
+    return imgFile;
+  };
+
+  const getFile = async (link: File | string) => {
+    let result = await urlToLink(typeof link === "string" ? link : "");
+    return result;
   };
 
   return (
@@ -113,7 +134,11 @@ function UserProfile() {
               className={`flex-col justify-center items-center admin-edit-photo p-4 mobile:mx-auto`}
             >
               <Image
-                src={`/images/defaultuser.png`}
+                src={`${
+                  imageFile === null
+                    ? "/images/defaultuser.png"
+                    : URL.createObjectURL(imageFile)
+                }`}
                 alt="Nothing"
                 width={200}
                 height={200}
@@ -125,7 +150,15 @@ function UserProfile() {
               />
               <br />
               <label className="custom-file-upload bg-blue-400 hover:cursor-pointer hover:bg-blue-600 p-4 rounded-[10px] ml-1.5 text-center">
-                <input type="file" className="hidden" />
+                <input
+                  type="file"
+                  className="hidden"
+                  onChange={(e) => {
+                    if (e.target.files !== null) {
+                      setImageFile(e.target.files[0]);
+                    }
+                  }}
+                />
                 {"Upload profile photo"}
               </label>
             </div>
