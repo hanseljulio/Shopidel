@@ -1,6 +1,7 @@
 import React, { MouseEventHandler } from "react";
 import classNames from "classnames";
-import { BsFillCartCheckFill, BsStarFill } from "react-icons/bs";
+import { BsStarFill } from "react-icons/bs";
+import Image from "next/image";
 
 interface ICard {
   image: string;
@@ -21,7 +22,13 @@ const Card = ({ image, price, order, title, place, star, onClick }: ICard) => {
     >
       <div className={"relative mt-2 mx-2"}>
         <div className={"h-56 rounded-md overflow-hidden"}>
-          <img src={image} className={"object-cover w-full h-full"} alt="" />
+          <Image
+            width={50}
+            height={50}
+            src={image}
+            className={"object-cover w-full h-full"}
+            alt=""
+          />
         </div>
         <div className={"absolute bottom-0 left-0 -mb-4 ml-3 flex flex-row"}>
           <div

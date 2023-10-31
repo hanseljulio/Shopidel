@@ -1,6 +1,5 @@
-import react from "react";
-import Navbar from "../components/navbar/Navbar";
-import Card from "../components/cards/Card";
+import Navbar from "../components/Navbar";
+import Card from "../components/Cards";
 
 export default function Home() {
   return (
