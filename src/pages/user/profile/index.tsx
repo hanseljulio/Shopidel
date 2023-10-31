@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import Image from "next/image";
 
 function UserProfile() {
-  const [showEditEmail, setShowEditEmail] = useState<boolean>(true);
+  const [showEditEmail, setShowEditEmail] = useState<boolean>(false);
 
   const toggleEditEmail = () => {
     setShowEditEmail((prevBool) => !prevBool);
@@ -21,15 +21,18 @@ function UserProfile() {
 
   return (
     <div>
-      <UserProfileSidebar />
-      <div className="user-edit-profile-div ml-[550px] pt-[200px] space-y-5">
-        <div className="edit-profile-header">
-          <h1 className="text-[25px]">My Profile</h1>
-          <p className="text-[14px]">Manage your account</p>
+      <div className="mobile:hidden">
+        <UserProfileSidebar />
+      </div>
+      <div className="user-edit-profile-div ml-[680px] pt-[120px] space-y-5 mobile:mx-auto">
+        <div className="edit-profile-header pb-3">
+          <h1 className="text-[30px]">My Profile</h1>
+          <p className="text-[18px]">Manage your account</p>
         </div>
-        <div className="form-section-wrapper flex gap-[150px]">
-          <div className="form-section">
-            <form action="">
+
+        <form action="">
+          <div className="form-section-wrapper flex gap-[150px] mobile:flex-col">
+            <div className="form-section-div">
               <Input
                 label="Username"
                 labelStyle="mt-2"
@@ -38,21 +41,24 @@ function UserProfile() {
                 type="text"
                 name="username"
               />
-              <div className="email-section flex items-center gap-[91px] pb-[30px]">
+              <div className="email-section flex items-center pb-[30px]">
                 <p>Email</p>
                 {showEditEmail ? (
                   <Input
                     label=""
+                    styling="flex items-center gap-[91px]"
                     width="w-[250px]"
                     type="email"
                     name="emailEdit"
                   />
                 ) : (
-                  <p>{emailConverter("hanseljulio@yahoo.com")}</p>
+                  <p className="ml-[91px]">
+                    {emailConverter("hanseljulio@yahoo.com")}
+                  </p>
                 )}
                 <p
                   onClick={toggleEditEmail}
-                  className="text-blue-600 underline hover:cursor-pointer"
+                  className="text-blue-600 underline hover:cursor-pointer ml-[30px]"
                 >
                   {showEditEmail ? "Go back" : "Change email"}
                 </p>
@@ -89,29 +95,33 @@ function UserProfile() {
                 styling="flex items-center gap-[36px] pb-[30px]"
                 width="w-[250px]"
               />
-            </form>
+            </div>
+
+            <div
+              className={`flex-col justify-center items-center admin-edit-photo p-4 mobile:mx-auto`}
+            >
+              <Image
+                src={`/images/defaultuser.png`}
+                alt="Nothing"
+                width={200}
+                height={200}
+                className={`w-[200px] h-[200px]`}
+                style={{
+                  objectFit: "cover",
+                  borderRadius: "100%",
+                }}
+              />
+              <br />
+              <label className="custom-file-upload bg-amber-400 hover:cursor-pointer hover:bg-amber-500 p-4 rounded-[10px] ml-1.5 text-center">
+                <input type="file" className="hidden" />
+                {"Upload profile photo"}
+              </label>
+            </div>
           </div>
-          <div
-            className={`flex-col justify-center items-center admin-edit-photo p-4 mobile:mx-auto`}
-          >
-            <Image
-              src={`/images/defaultuser.png`}
-              alt="Nothing"
-              width={200}
-              height={200}
-              className={`w-[200px] h-[200px]`}
-              style={{
-                objectFit: "cover",
-                borderRadius: "100%",
-              }}
-            />
-            <br />
-            <label className="custom-file-upload bg-amber-400 hover:cursor-pointer hover:bg-amber-500 p-4 rounded-[10px] ml-1.5 text-center">
-              <input type="file" className="hidden" />
-              {"Upload profile photo"}
-            </label>
+          <div className="submit-btn">
+            <h1>SUBMIT</h1>
           </div>
-        </div>
+        </form>
       </div>
     </div>
   );
