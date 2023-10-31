@@ -13,6 +13,10 @@ function UserChangePassword() {
     oldPassword.length === 0 &&
     newPassword.length === 0 &&
     confirmPassword.length === 0;
+  const oldPasswordEmpty =
+    oldPassword.length === 0 &&
+    newPassword.length !== 0 &&
+    confirmPassword.length !== 0;
   const newPasswordConfirmFail =
     oldPassword.length !== 0 && confirmPassword !== newPassword;
   const allTheSame =
@@ -22,6 +26,8 @@ function UserChangePassword() {
     newPassword === confirmPassword;
   const fillNewPassword =
     oldPassword.length !== 0 && !confirmPassword && !newPassword;
+  const emptyNewPassword =
+    newPassword.length === 0 || confirmPassword.length === 0;
 
   const submit = async (e: any) => {
     e.preventDefault();
@@ -39,7 +45,7 @@ function UserChangePassword() {
       <div className="user-edit-profile-div ml-[680px] pt-[80px] space-y-5 mobile:mx-auto">
         <div className="edit-profile-header pb-3 mobile:text-center">
           <h1 className="text-[30px] pb-8">Change Password</h1>
-          <form action="">
+          <form action="" onSubmit={submit}>
             <div className="form-section-wrapper flex gap-[150px] mobile:gap-[20px] mobile:flex-col mobile:items-center">
               <div className="form-section-div ml-[180px] mobile:m-0">
                 <div className="old-password-div pb-[30px]">
@@ -87,6 +93,11 @@ function UserChangePassword() {
                       Now enter your new password.
                     </p>
                   )}
+                  {oldPasswordEmpty && (
+                    <p className="text-red-500 py-1 px-4 bg-red-200 my-3">
+                      Old password must not be empty!
+                    </p>
+                  )}
                   {newPasswordConfirmFail && (
                     <p className="text-red-500 py-1 px-4 bg-red-200 my-3">
                       Password is not the same
@@ -95,6 +106,11 @@ function UserChangePassword() {
                   {allTheSame && (
                     <p className="text-red-500 py-1 px-4 bg-red-200 my-3">
                       You can&apos;t use your old password as the new one.
+                    </p>
+                  )}
+                  {emptyNewPassword && (
+                    <p className="text-red-500 py-1 px-4 bg-red-200 my-3">
+                      New password cannot be empty!
                     </p>
                   )}
                 </div>
@@ -108,7 +124,9 @@ function UserChangePassword() {
                   allEmpty ||
                   allTheSame ||
                   newPasswordConfirmFail ||
-                  fillNewPassword
+                  fillNewPassword ||
+                  oldPasswordEmpty ||
+                  emptyNewPassword
                 }
               />
             </div>
