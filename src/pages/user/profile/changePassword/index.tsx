@@ -83,36 +83,38 @@ function UserChangePassword() {
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     required
                   />
-                  {allEmpty && (
-                    <p className="text-red-500 py-1 px-4 bg-red-200 my-3">
-                      It&apos;s all empty! Fill in your old and new password.
-                    </p>
-                  )}
-                  {fillNewPassword && (
-                    <p className="text-red-500 py-1 px-4 bg-red-200 my-3">
-                      Now enter your new password.
-                    </p>
-                  )}
-                  {oldPasswordEmpty && (
-                    <p className="text-red-500 py-1 px-4 bg-red-200 my-3">
-                      Old password must not be empty!
-                    </p>
-                  )}
-                  {newPasswordConfirmFail && (
-                    <p className="text-red-500 py-1 px-4 bg-red-200 my-3">
-                      Password is not the same
-                    </p>
-                  )}
-                  {allTheSame && (
-                    <p className="text-red-500 py-1 px-4 bg-red-200 my-3">
-                      You can&apos;t use your old password as the new one.
-                    </p>
-                  )}
-                  {emptyNewPassword && !allEmpty && (
-                    <p className="text-red-500 py-1 px-4 bg-red-200 my-3">
-                      New password cannot be empty!
-                    </p>
-                  )}
+                  <div className="error-section mobile:w-[250px]">
+                    {allEmpty && (
+                      <p className="text-red-500 py-1 px-4 bg-red-200 my-3">
+                        It&apos;s all empty! Fill in your old and new password.
+                      </p>
+                    )}
+                    {fillNewPassword && (
+                      <p className="text-red-500 py-1 px-4 bg-red-200 my-3">
+                        Now enter your new password.
+                      </p>
+                    )}
+                    {oldPasswordEmpty && (
+                      <p className="text-red-500 py-1 px-4 bg-red-200 my-3">
+                        Old password must not be empty!
+                      </p>
+                    )}
+                    {newPasswordConfirmFail && (
+                      <p className="text-red-500 py-1 px-4 bg-red-200 my-3">
+                        Password is not the same
+                      </p>
+                    )}
+                    {allTheSame && (
+                      <p className="text-red-500 py-1 px-4 bg-red-200 my-3">
+                        You can&apos;t use your old password as the new one.
+                      </p>
+                    )}
+                    {emptyNewPassword && !allEmpty && (
+                      <p className="text-red-500 py-1 px-4 bg-red-200 my-3">
+                        New password cannot be empty!
+                      </p>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
