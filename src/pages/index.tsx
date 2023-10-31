@@ -1,5 +1,5 @@
 import Navbar from "../components/Navbar";
-import Card from "../components/Cards";
+import Card from "../components/ProductCard";
 
 export default function Home() {
   return (
