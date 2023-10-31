@@ -29,6 +29,9 @@ function UserChangePassword() {
   const emptyNewPassword =
     newPassword.length === 0 || confirmPassword.length === 0;
 
+  const passwordContainsUserName =
+    oldPassword.length !== 0 && newPassword.toLowerCase().includes("username");
+
   const submit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
   };
@@ -114,6 +117,11 @@ function UserChangePassword() {
                         New password cannot be empty!
                       </p>
                     )}
+                    {passwordContainsUserName && !allEmpty && (
+                      <p className="text-red-500 py-1 px-4 bg-red-200 my-3">
+                        Password must not contain your username!
+                      </p>
+                    )}
                   </div>
                 </div>
               </div>
@@ -128,7 +136,8 @@ function UserChangePassword() {
                   newPasswordConfirmFail ||
                   fillNewPassword ||
                   oldPasswordEmpty ||
-                  emptyNewPassword
+                  emptyNewPassword ||
+                  passwordContainsUserName
                 }
               />
             </div>
