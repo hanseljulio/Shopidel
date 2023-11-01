@@ -15,15 +15,6 @@ const Navbar = () => {
           <p>
             <a href="#">Seller Centre</a>
           </p>
-          <p>
-            <a
-              href="#"
-              className=" md:items-center md:flex md:px-8 flex gap-1 align-middle"
-            >
-              <span>Follow Us </span> <AiOutlineInstagram />
-              <AiFillFacebook />
-            </a>
-          </p>
         </div>
       </div>
       <div className="justify-between px-4 mx-auto lg:max-w-7xl md:items-center md:flex md:px-8">
