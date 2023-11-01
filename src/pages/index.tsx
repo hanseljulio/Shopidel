@@ -1,3 +1,4 @@
+import CarouselHome from "@/components/Carousel";
 import Navbar from "../components/Navbar";
 import Card from "../components/ProductCard";
 
