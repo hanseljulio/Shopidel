@@ -25,10 +25,10 @@ const ProductCard = ({
     <button
       onClick={onClick}
       className={classNames([
-        "bg-white lg:min-w-45 mt-3 shadow-md hover:shadow-none cursor-pointer w-65 rounded-md flex flex-col items-center justify-center transition-all duration-500 ease-in-out text-left",
+        "bg-white lg:min-w-45 mt-3 shadow-md hover:shadow-none cursor-pointer rounded-md flex flex-col items-center justify-center transition-all duration-500 ease-in-out text-left",
       ])}
     >
-      <div className={"relative mt-2 mx-2"}>
+      <div className={"relative w-[200px ] md mt-2 mx-2"}>
         <div className={"h-56 rounded-md overflow-hidden"}>
           <Image
             width={50}
