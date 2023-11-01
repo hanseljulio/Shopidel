@@ -1,10 +1,8 @@
 import Input from "@/components/Input";
-import UserProfileSidebar from "@/components/UserProfileSidebar";
 import React, { useState } from "react";
 import Image from "next/image";
-import MobileUserProfileSidebar from "@/components/MobileUserProfileSidebar";
 import Button from "@/components/Button";
-import Navbar from "@/components/Navbar";
+import ProfileLayout from "@/components/ProfileLayout";
 
 const UserProfile = () => {
   const [showEditEmail, setShowEditEmail] = useState<boolean>(false);
@@ -50,16 +48,7 @@ const UserProfile = () => {
 
   return (
     <div>
-      <Navbar />
-      <div className="mobile:hidden">
-        <UserProfileSidebar />
-      </div>
-
-      <div className="invisible mobile:visible">
-        <MobileUserProfileSidebar currentPage="My Profile" />
-      </div>
-
-      <div className="user-edit-profile-div ml-[35vw] pt-[20px] space-y-5 mobile:mx-auto">
+      <ProfileLayout currentPage="My Profile">
         <div className="edit-profile-header pb-3 mobile:text-center">
           <h1 className="text-[30px]">My Profile</h1>
           <p className="text-[18px]">Manage your account</p>
@@ -174,7 +163,7 @@ const UserProfile = () => {
             />
           </div>
         </form>
-      </div>
+      </ProfileLayout>
     </div>
   );
 };
