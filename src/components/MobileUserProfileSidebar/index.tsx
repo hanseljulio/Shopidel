@@ -19,7 +19,7 @@ const MobileUserProfileSidebar = (props: MobileUserProfileSidebarProps) => {
 
   return (
     <div className="bg-[#364968]">
-      <div className="scroll-area-div flex gap-6 overflow-y-auto mx-[10px]">
+      <div className="flex gap-6 overflow-y-auto mx-[10px]">
         <Button
           text="My Profile"
           onClick={redirectMyProfile}
