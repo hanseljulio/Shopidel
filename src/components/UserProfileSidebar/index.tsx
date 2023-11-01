@@ -16,7 +16,7 @@ const UserProfileSidebar = () => {
 
   return (
     <div className="user-profile-sidebar-div ">
-      <div className="admin-nav-wrapper fixed bg-[#59AFFF] w-[400px] h-screen">
+      <div className="admin-nav-wrapper absolute bg-[#59AFFF] w-[400px] h-screen">
         <div className="username-section pt-[100px]">
           <div className="flex items-center gap-4 bg-[#2b5dac] py-2 px-3 mx-[50px] rounded-[15px]">
             <Image
