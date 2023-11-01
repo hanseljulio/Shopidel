@@ -1,6 +1,7 @@
 import CarouselHome from "@/components/Carousel";
 import Navbar from "../components/Navbar";
 import Card from "../components/ProductCard";
+import Footer from "@/components/Footer";
 
 export default function Home() {
   return (
@@ -49,6 +50,7 @@ export default function Home() {
           star={5}
         />
       </div>
+      <Footer />
     </div>
   );
 }
