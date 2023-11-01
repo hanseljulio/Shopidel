@@ -16,7 +16,7 @@ const UserProfileSidebar = () => {
 
   return (
     <div className="bg-[#364968] w-[400px] h-full">
-      <div className="username-section">
+      <div className="username-section pt-5">
         <div className="flex items-center gap-4 bg-[#29374e] py-2 px-3 mx-[50px] rounded-[15px]">
           <Image
             src={`/images/defaultuser.png`}
