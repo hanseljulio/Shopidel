@@ -10,7 +10,7 @@ export interface IRegisterForm {
 
 const RegisterUserFirst = ({ onNext }: IRegisterForm) => {
   const { updateRegisterData } = useRegisterStore()
-  const { register, handleSubmit, getValues, setError, clearErrors, formState: { errors, isValid } } = useForm<IUser>({
+  const { register, handleSubmit, getValues, formState: { errors } } = useForm<IUser>({
     mode: "onBlur"
   })
   const onSubmit: SubmitHandler<IUser> = (data) => {
@@ -21,6 +21,7 @@ const RegisterUserFirst = ({ onNext }: IRegisterForm) => {
   return (
     <>
       <form onSubmit={handleSubmit(onSubmit)} className=' w-96 px-5 py-10 rounded-md flex flex-col gap-y-5'>
+        <h1 className='text-xl font-bold'>Register</h1>
         <div className='flex flex-col'>
           <label htmlFor="username" className='text-sm'>Username</label>
           <input {...register("username", { required: "Username is required" })} type="text" name="username" id="username" className='rounded-md border p-2' />
