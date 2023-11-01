@@ -1,5 +1,6 @@
 import Button from '@/components/Button'
 import Image from 'next/image'
+import { useRouter } from 'next/router'
 import React from 'react'
 import { SubmitHandler, useForm } from 'react-hook-form'
 import { FcGoogle } from "react-icons/fc"
@@ -12,6 +13,7 @@ interface ILogin {
 const Login = () => {
 
     const { register, handleSubmit, formState: { errors } } = useForm<ILogin>()
+    const router = useRouter()
 
     const loginHandler: SubmitHandler<ILogin> = (data) => {
         console.log(data)
@@ -54,6 +56,7 @@ const Login = () => {
                                 <p className='text-sm'>Google</p>
                             </div>
                         </div>
+                        <p className='text-sm mt-5'>Don&apos;t have an account? <span className='font-bold hover:cursor-pointer' onClick={() => router.push("/register")}>Register here</span></p>
                     </div>
                 </div>
             </div>
