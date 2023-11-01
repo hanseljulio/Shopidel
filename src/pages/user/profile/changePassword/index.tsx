@@ -131,7 +131,7 @@ const UserChangePassword = () => {
             <div className="submit-btn mobile:text-center mobile:py-[50px] ml-[250px] mobile:mx-auto">
               <Button
                 text="Update Password"
-                styling="bg-blue-400 p-3 rounded-[8px] w-[300px] hover:bg-blue-600 my-4"
+                styling="bg-[#364968] p-3 rounded-[8px] w-[300px] text-white my-4"
                 disabled={
                   allEmpty ||
                   allTheSame ||

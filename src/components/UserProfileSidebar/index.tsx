@@ -34,11 +34,11 @@ const UserProfileSidebar = () => {
           </div>
         </div>
         <div className="options-section text-white mt-[30px] mx-[50px] pl-[24px] border-slate-300 border-b-2 pb-8">
-          <h1 className="text-[25px] flex items-center gap-4">
+          <h1 className="text-[20px] flex items-center gap-4">
             <FaUser />
             My Accounts
           </h1>
-          <ul className="text-[18px] ml-[45px]">
+          <ul className="text-[14px] ml-[38px]">
             <li
               className={`py-1 hover:cursor-pointer w-[80px] hover:text-[#92bcff]`}
               onClick={redirectMyProfile}
@@ -60,19 +60,19 @@ const UserProfileSidebar = () => {
         </div>
         <div className="remaining-section text-white mt-[20px] mx-[50px] ">
           <div className="pl-[24px] border-slate-300 border-b-2 pb-[20px]">
-            <h1 className="text-[25px] flex items-center gap-4 hover:cursor-pointer w-[250px] hover:text-[#92bcff]">
+            <h1 className="text-[20px] flex items-center gap-4 hover:cursor-pointer w-[250px] hover:text-[#92bcff]">
               <FaWallet />
               My Wallet
             </h1>
           </div>
           <div className="pl-[24px] border-slate-300 border-b-2 pb-[20px]">
-            <h1 className="text-[25px] flex items-center gap-4 mt-[20px] hover:cursor-pointer w-[250px] hover:text-[#92bcff]">
+            <h1 className="text-[20px] flex items-center gap-4 mt-[20px] hover:cursor-pointer w-[250px] hover:text-[#92bcff]">
               <FaDollarSign />
               Purchase History
             </h1>
           </div>
           <div className="pl-[26px] border-slate-300 border-b-2 pb-[20px]">
-            <h1 className="text-[25px] flex items-center gap-4 mt-[20px] hover:cursor-pointer w-[200px] hover:text-[#92bcff]">
+            <h1 className="text-[20px] flex items-center gap-4 mt-[20px] hover:cursor-pointer w-[200px] hover:text-[#92bcff]">
               <FaTag />
               My Vouchers
             </h1>
