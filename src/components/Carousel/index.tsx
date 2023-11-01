@@ -4,7 +4,7 @@ import Image from "next/image";
 
 const CarouselHome = () => {
   return (
-    <div className="h-56 rounded-none w-full sm:h-64 xl:h-80 2xl:h-96 px-4 mx-auto lg:max-w-7xl md:items-center md:flex md:px-8 mt-3">
+    <div className="h-56 rounded-none w-full sm:h-64 xl:h-80 2xl:h-96 px-4 md:px-0  mx-auto lg:max-w-7xl md:items-center md:flex mt-3">
       <Carousel>
         <Image
           height={100}
