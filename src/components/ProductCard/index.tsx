@@ -22,19 +22,19 @@ const ProductCard = ({
   onClick,
 }: IProductCard) => {
   return (
-    <button
+    <div
       onClick={onClick}
       className={classNames([
-        "bg-white lg:min-w-45 my-3 shadow-md hover:shadow-none cursor-pointer rounded-md flex flex-col items-center align-middle justify-center transition-all duration-500 ease-in-out text-left",
+        "w-[160px] h-[220px] md:w-auto md:h-auto bg-white my-3 shadow-md hover:shadow-none cursor-pointer rounded-md flex flex-col items-center align-middle justify-center transition-all duration-500 ease-in-out text-left",
       ])}
     >
       <div className={"relative w-[200px ] md mt-2 mx-2"}>
-        <div className={"rounded-md h-52 md:h-48 w-auto overflow-hidden"}>
+        <div className={"rounded-md h-auto md:h-48 w-auto overflow-hidden"}>
           <Image
-            width={50}
-            height={50}
+            width={100}
+            height={100}
             src={image}
-            className={"object-cover w-full h-full"}
+            className={"object-cover w-full md:w-full h-auto md:h-full "}
             alt=""
           />
         </div>
@@ -55,17 +55,17 @@ const ProductCard = ({
           </div>
         </div>
       </div>
-      <div className=" pt-10 pb-6 w-full px-4">
-        <p className=" tracking-wider text-black">
-          {title.length > 25 ? `${title.substring(0, 30)}...` : title}{" "}
+      <div className="pt-3 pb-3 md:pt-10  md:pb-6 w-full px-4 ">
+        <p className=" tracking-wider text-black text-sm md:text-base">
+          {title.length > 18 ? `${title.substring(0, 30)}...` : title}{" "}
         </p>
-        <p className=" tracking-wider text-[#f57b29]">{`Rp. ${price}`}</p>{" "}
-        <div className="flex justify-between text-sm">
+        <p className=" tracking-wider text-[#f57b29] text-sm md:text-base">{`Rp. ${price}`}</p>{" "}
+        <div className="flex justify-between text-xs md:text-sm">
           <p> {place} </p>
           <p className="text-gray-500 "> {`${order} sold`}</p>
         </div>
       </div>
-    </button>
+    </div>
   );
 };
 
