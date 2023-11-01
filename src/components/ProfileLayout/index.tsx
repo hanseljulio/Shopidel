@@ -10,16 +10,20 @@ interface IProfileLayout {
 
 const ProfileLayout = ({ children, currentPage }: IProfileLayout) => {
   return (
-    <div>
-      <Navbar />
-      <div className="flex mobile:flex-col">
-        <div className="mobile:hidden">
-          <UserProfileSidebar />
+    <div className="flex flex-col h-screen">
+      <div>
+        <Navbar />
+      </div>
+      <div className="flex-1">
+        <div className="flex mobile:flex-col h-full">
+          <div className="mobile:hidden">
+            <UserProfileSidebar />
+          </div>
+          <div className="invisible hidden mobile:visible mobile:block">
+            <MobileUserProfileSidebar currentPage={currentPage} />
+          </div>
+          <div className="w-full mobile:mx-auto ">{children}</div>
         </div>
-        <div className="invisible hidden mobile:visible mobile:block">
-          <MobileUserProfileSidebar currentPage={currentPage} />
-        </div>
-        <div className="w-full mobile:mx-auto ">{children}</div>
       </div>
     </div>
   );
