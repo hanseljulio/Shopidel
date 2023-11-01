@@ -4,7 +4,7 @@ import { SubmitHandler, useForm } from 'react-hook-form'
 import { IRegisterForm } from '../RegisterUserFirst'
 
 const RegisterUserSecond = ({ onSubmit }: IRegisterForm) => {
-    const { registerData, updateRegisterData } = useRegisterStore()
+    const { registerData } = useRegisterStore()
     const { register, handleSubmit, formState: { errors }, setValue } = useForm<IUser>({ mode: "onBlur" })
 
     const formSubmitHandler: SubmitHandler<IUser> = (data) => {
@@ -15,7 +15,6 @@ const RegisterUserSecond = ({ onSubmit }: IRegisterForm) => {
     }
     return (
         <form onSubmit={handleSubmit(formSubmitHandler)} className=' w-96 px-5 py-10 rounded-md flex flex-col gap-y-5'>
-
             <div className='flex flex-col'>
                 <label htmlFor="fullname" className='text-sm'>Full name</label>
                 <input {...register("fullname", { required: "Full name is required" })} type="text" name="fullname" id="fullname" className='rounded-md border p-2' />
