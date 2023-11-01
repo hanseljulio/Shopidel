@@ -9,15 +9,15 @@ const Navbar = () => {
   const [navbar, setNavbar] = useState(false);
 
   return (
-    <nav className="w-full bg-[#29374e] shadow">
-      <div className="justify-between  px-4  mx-auto lg:max-w-7xl md:items-center md:flex text-white text-sm ">
-        <div className="justify-between md:items-center md:flex md:px-4 pt-3">
+    <nav className="w-full bg-[#29374e] shadow px-4 md:px-0">
+      <div className="justify-between mx-auto lg:max-w-7xl md:items-center md:flex text-white text-sm ">
+        <div className="justify-between md:items-center md:flex  pt-3">
           <p>
             <a href="#">Seller Centre</a>
           </p>
         </div>
       </div>
-      <div className="justify-between px-4 mx-auto lg:max-w-7xl md:items-center md:flex md:px-8">
+      <div className="justify-between mx-auto lg:max-w-7xl md:items-center md:flex ">
         <div>
           <div className="flex items-center justify-between py-3 md:py-5 md:block">
             <a href="javascript:void(0)">
@@ -100,10 +100,10 @@ const Navbar = () => {
           <button className=" text-white rounded-md shadow align-middle">
             <AiOutlineShoppingCart size={30} />
           </button>
-          <button className="px-3 py-2   text-[#6c4343] bg-[#fddf97] rounded-md shadow transition-all duration-200 hover:bg-[#e09664] hover:text-[#fddf97]">
+          <button className="px-3 py-2 text-[#6c4343] bg-[#fddf97] rounded-md shadow transition-all duration-300 hover:bg-[#e09664] hover:text-[#fddf97]">
             Sign in
           </button>
-          <button className="px-3 py-2 text[#364968] bg-white rounded-md shadow hover:bg-[#6c4343]  hover:text-white">
+          <button className="px-3 py-2 text[#364968] bg-white rounded-md shadow transition-all duration-300 hover:bg-[#6c4343]  hover:text-white">
             Sign up
           </button>
         </div>
