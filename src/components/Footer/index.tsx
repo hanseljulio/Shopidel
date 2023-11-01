@@ -7,7 +7,7 @@ import {
   AiOutlineTwitter,
 } from "react-icons/ai";
 import { FaFacebookF } from "react-icons/fa";
-import ImageProduct from "../Image";
+import Image from "next/image";
 
 const Footer = () => {
   return (
@@ -19,11 +19,12 @@ const Footer = () => {
             <p> Keep buying and selling every day. </p>
             <div className="flex justify-center my-10 ">
               <div className="flex items-center border w-40 md:w-auto rounded-lg px-4 py-2  mx-2">
-                <ImageProduct
+                <Image
                   width={10}
                   height={10}
                   src="/images/googleplay.png"
                   className="w-6 md:w-7"
+                  alt="google play"
                 />
                 <div className="text-left ml-3">
                   <p className="text-xs text-gray-200">Download on </p>
@@ -31,11 +32,12 @@ const Footer = () => {
                 </div>
               </div>
               <div className="flex items-center border  w-40 md:w-44 rounded-lg px-4 py-2 mx-2">
-                <ImageProduct
+                <Image
                   width={10}
                   height={10}
                   src="/images/applestore.png"
                   className="w-6 md:w-7"
+                  alt="apple store"
                 />
                 <div className="text-left ml-3">
                   <p className="text-xs text-gray-200">Download on </p>
