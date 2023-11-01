@@ -18,7 +18,7 @@ const MobileUserProfileSidebar = (props: MobileUserProfileSidebarProps) => {
   };
 
   return (
-    <div className="bg-[#59AFFF]">
+    <div className="bg-[#364968]">
       <div className="scroll-area-div flex gap-6 overflow-y-auto mx-[10px]">
         <Button
           text="My Profile"
@@ -35,6 +35,10 @@ const MobileUserProfileSidebar = (props: MobileUserProfileSidebarProps) => {
           onClick={redirectChangePassword}
           styling="bg-blue-100 py-[12px] rounded-[8px] w-[150px] hover:bg-blue-300 my-4"
           disabled={props.currentPage === "Change Password"}
+        />
+        <Button
+          text="My Wallet"
+          styling="bg-blue-100 py-[12px] rounded-[8px] w-[150px] hover:bg-blue-300 my-4"
         />
         <Button
           text="Purchase History"
