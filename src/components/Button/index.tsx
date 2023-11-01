@@ -9,19 +9,17 @@ interface ButtonProps {
 
 const Button = (props: ButtonProps) => {
   return (
-    <div className="btn-div">
-      <button
-        className={`${props.styling ? props.styling : ""} ${
-          props.disabled
-            ? "hover:cursor-default hover:bg-slate-500 bg-slate-500 text-white"
-            : ""
-        }`}
-        onClick={!props.disabled ? props.onClick : () => {}}
-        disabled={props.disabled}
-      >
-        {props.text}
-      </button>
-    </div>
+    <button
+      className={`${props.styling ? props.styling : ""} ${
+        props.disabled
+          ? "hover:cursor-default hover:bg-slate-500 bg-slate-500 text-white"
+          : ""
+      }`}
+      onClick={!props.disabled ? props.onClick : () => {}}
+      disabled={props.disabled}
+    >
+      {props.text}
+    </button>
   );
 };
 
