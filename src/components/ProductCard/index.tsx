@@ -41,7 +41,7 @@ const ProductCard = ({
         <div className={"absolute bottom-0 left-0 -mb-4 ml-3 flex flex-row"}>
           <div
             className={classNames(
-              "h-10 w-fit px-2 flex items-center justify-center text-sm bg-white hover:bg-red-500 text-[#f57b29] hover:text-white rounded-2xl shadow-xl"
+              "h-10 w-fit px-2 flex items-center justify-center text-sm bg-white hover:shadow-none text-[#f57b29]  rounded-2xl shadow-xl"
             )}
           >
             <BsStarFill />
