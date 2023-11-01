@@ -47,7 +47,7 @@ const UserChangePassword = () => {
       <div className="invisible mobile:visible">
         <MobileUserProfileSidebar currentPage="Change Password" />
       </div>
-      <div className="user-edit-profile-div ml-[680px] pt-[20px] space-y-5 mobile:mx-auto">
+      <div className="user-edit-profile-div ml-[35vw] pt-[20px] space-y-5 mobile:mx-auto">
         <div className="edit-profile-header pb-3 mobile:text-center">
           <h1 className="text-[30px] pb-8">Change Password</h1>
           <form action="" onSubmit={submit}>
