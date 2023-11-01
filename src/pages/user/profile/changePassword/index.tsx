@@ -3,6 +3,7 @@ import UserProfileSidebar from "@/components/UserProfileSidebar";
 import MobileUserProfileSidebar from "@/components/MobileUserProfileSidebar";
 import Input from "@/components/Input";
 import Button from "@/components/Button";
+import Navbar from "@/components/Navbar";
 
 const UserChangePassword = () => {
   const [oldPassword, setOldPassword] = useState<string>("");
@@ -38,6 +39,7 @@ const UserChangePassword = () => {
 
   return (
     <div>
+      <Navbar />
       <div className="mobile:hidden">
         <UserProfileSidebar />
       </div>
@@ -45,7 +47,7 @@ const UserChangePassword = () => {
       <div className="invisible mobile:visible">
         <MobileUserProfileSidebar currentPage="Change Password" />
       </div>
-      <div className="user-edit-profile-div ml-[680px] pt-[80px] space-y-5 mobile:mx-auto">
+      <div className="user-edit-profile-div ml-[680px] pt-[20px] space-y-5 mobile:mx-auto">
         <div className="edit-profile-header pb-3 mobile:text-center">
           <h1 className="text-[30px] pb-8">Change Password</h1>
           <form action="" onSubmit={submit}>
