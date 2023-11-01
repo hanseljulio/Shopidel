@@ -153,7 +153,7 @@ const UserProfile = () => {
                 }}
               />
               <br />
-              <label className="custom-file-upload bg-[#ffd778] hover:cursor-pointer hover:bg-[#e09664] p-4 rounded-[10px] ml-1.5 text-center">
+              <label className="custom-file-upload bg-[#364968] hover:cursor-pointer text-white p-4 rounded-[10px] ml-1.5 text-center">
                 <input
                   type="file"
                   className="hidden"
@@ -170,7 +170,7 @@ const UserProfile = () => {
           <div className="submit-btn mobile:text-center mobile:py-[50px] ml-[250px] mobile:mx-auto">
             <Button
               text="Save Changes"
-              styling="bg-[#ffd778] p-3 rounded-[8px] w-[300px] hover:bg-[#e09664] my-4"
+              styling="bg-[#364968] text-white p-3 rounded-[8px] w-[300px] my-4"
             />
           </div>
         </form>
