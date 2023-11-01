@@ -59,7 +59,7 @@ const UserProfile = () => {
         <MobileUserProfileSidebar currentPage="My Profile" />
       </div>
 
-      <div className="user-edit-profile-div ml-[680px] pt-[20px] space-y-5 mobile:mx-auto">
+      <div className="user-edit-profile-div ml-[35vw] pt-[20px] space-y-5 mobile:mx-auto">
         <div className="edit-profile-header pb-3 mobile:text-center">
           <h1 className="text-[30px]">My Profile</h1>
           <p className="text-[18px]">Manage your account</p>
