@@ -2,6 +2,7 @@ import useRegisterStore, { IUser } from '@/store/userStore'
 import React from 'react'
 import { SubmitHandler, useForm } from 'react-hook-form'
 import Button from '../Button'
+import { useRouter } from 'next/router'
 
 
 export interface IRegisterForm {
@@ -11,6 +12,7 @@ export interface IRegisterForm {
 
 const RegisterUserFirst = ({ onNext }: IRegisterForm) => {
   const { updateRegisterData } = useRegisterStore()
+  const router = useRouter()
   const { register, handleSubmit, getValues, formState: { errors } } = useForm<IUser>({
     mode: "onBlur"
   })
@@ -47,7 +49,7 @@ const RegisterUserFirst = ({ onNext }: IRegisterForm) => {
         </div>
         <Button text='Submit' styling='p-2 bg-[#364968] w-full rounded-md text-white' />
       </form>
-      <p className='text-sm text-center'>Have an account? <span className='font-bold hover:cursor-pointer'>Login here</span></p>
+      <p className='text-sm text-center'>Have an account? <span className='font-bold hover:cursor-pointer' onClick={() => router.push("/login")}>Login here</span></p>
     </>
   )
 }
