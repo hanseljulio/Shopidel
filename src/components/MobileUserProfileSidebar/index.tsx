@@ -39,6 +39,7 @@ const MobileUserProfileSidebar = (props: MobileUserProfileSidebarProps) => {
         <Button
           text="My Wallet"
           styling="bg-blue-100 py-[12px] rounded-[8px] w-[150px] hover:bg-blue-300 my-4"
+          onClick={() => router.push("/user/wallet")}
         />
         <Button
           text="Purchase History"

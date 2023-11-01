@@ -60,7 +60,7 @@ const UserProfileSidebar = () => {
         </div>
         <div className="remaining-section text-white mt-[20px] mx-[50px] ">
           <div className="pl-[24px] border-slate-300 border-b-2 pb-[20px]">
-            <h1 className="text-[20px] flex items-center gap-4 hover:cursor-pointer w-[250px] hover:text-[#92bcff]">
+            <h1 className="text-[20px] flex items-center gap-4 hover:cursor-pointer w-[250px] hover:text-[#92bcff]" onClick={() => router.push("/user/wallet")}>
               <FaWallet />
               My Wallet
             </h1>
