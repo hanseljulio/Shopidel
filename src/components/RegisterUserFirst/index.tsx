@@ -1,6 +1,7 @@
 import useRegisterStore, { IUser } from '@/store/userStore'
 import React from 'react'
 import { SubmitHandler, useForm } from 'react-hook-form'
+import Button from '../Button'
 
 
 export interface IRegisterForm {
@@ -44,7 +45,7 @@ const RegisterUserFirst = ({ onNext }: IRegisterForm) => {
           {errors.password?.type === errors.password?.types?.required && <p role='alert' className='text-xs text-red-500 mt-1'>{errors.password?.message}</p>}
           {errors.password?.types === errors.password?.types?.validate && <p role='alert' className='text-xs text-red-500 mt-1'>{errors.password?.message}</p>}
         </div>
-        <button type="submit" className='p-2 bg-[#364968] w-full rounded-md text-white' >Submit</button>
+        <Button text='Submit' styling='p-2 bg-[#364968] w-full rounded-md text-white' />
       </form>
       <p className='text-sm text-center'>Have an account? <span className='font-bold hover:cursor-pointer'>Login here</span></p>
     </>

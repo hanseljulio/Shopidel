@@ -2,6 +2,7 @@ import useRegisterStore, { IUser } from '@/store/userStore'
 import React from 'react'
 import { SubmitHandler, useForm } from 'react-hook-form'
 import { IRegisterForm } from '../RegisterUserFirst'
+import Button from '../Button'
 
 const RegisterUserSecond = ({ onSubmit }: IRegisterForm) => {
     const { registerData } = useRegisterStore()
@@ -42,7 +43,7 @@ const RegisterUserSecond = ({ onSubmit }: IRegisterForm) => {
                 <input onChange={(e) => setValue("birthdate", new Date(e.target.value).toISOString())} type="date" name="birthdate" id="birthdate" className='rounded-md border p-2' required />
                 {errors.birthdate?.type === "required" && <p role='alert' className='text-xs text-red-500 mt-1'>{errors.birthdate.message}</p>}
             </div>
-            <button type="submit" className='p-2 bg-[#364968] w-full rounded-md text-white'>Submit</button>
+            <Button text='Submit' styling='p-2 bg-[#364968] w-full rounded-md text-white' />
         </form>
     )
 }
