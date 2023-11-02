@@ -4,6 +4,7 @@ import Button from "../Button";
 
 interface ICartCheckoutAreaProps {
   totalPrice: number;
+  checkoutFunction: (e: any) => void;
 }
 
 const CartCheckoutArea = (props: ICartCheckoutAreaProps) => {
@@ -15,6 +16,7 @@ const CartCheckoutArea = (props: ICartCheckoutAreaProps) => {
         </h1>
         <Button
           text="Checkout"
+          onClick={props.checkoutFunction}
           styling="bg-[#fddf97] p-3 rounded-[8px] w-[250px] mobile:w-[100px] my-4"
         />
       </div>
