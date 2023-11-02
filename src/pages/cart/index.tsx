@@ -20,6 +20,7 @@ interface IDataTest {
 }
 
 const CartPage = () => {
+  const router = useRouter();
   const [totalPrice, setTotalPrice] = useState<number>(0);
   const [dataTest, setDataTest] = useState<IDataTest[]>([
     {
@@ -163,6 +164,10 @@ const CartPage = () => {
       emptySelectionMessage();
       return;
     }
+
+    setTimeout(() => {
+      router.push("/checkout");
+    }, 3000);
 
     movingToCheckout();
   };
