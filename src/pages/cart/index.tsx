@@ -1,10 +1,11 @@
 import Navbar from "@/components/Navbar";
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import Button from "@/components/Button";
 import { useRouter } from "next/router";
 import EmptyCart from "@/components/EmptyCart";
 import CartTableHead from "@/components/CartTableHead";
 import CartTableData from "@/components/CartTableData";
+import { currencyConverter } from "@/utils/utils";
 
 interface IDataTest {
   id: number;
@@ -178,7 +179,7 @@ const CartPage = () => {
             <div className="fixed bottom-0 left-0 right-0 bg-[#29374e]">
               <div className="flex justify-between items-center lg:max-w-7xl mx-auto">
                 <h1 className="text-[25px] text-white">
-                  Total Price: Rp. {totalPrice}
+                  Total Price: Rp. {currencyConverter(totalPrice)}
                 </h1>
                 <Button
                   text="Checkout"

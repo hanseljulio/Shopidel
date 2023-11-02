@@ -2,6 +2,7 @@ import React from "react";
 import CartProduct from "../CartProduct";
 import QuantityButton from "../QuantityButton";
 import { BsTrash } from "react-icons/bs";
+import { currencyConverter } from "@/utils/utils";
 
 interface ICartTableDataProps {
   id: number;
@@ -26,7 +27,9 @@ const CartTableData = (props: ICartTableDataProps) => {
         />
       </td>
       <td className="px-[20px] py-[10px] text-center">{<CartProduct />}</td>
-      <td className="px-[20px] py-[10px] text-center">Rp. {props.price}</td>
+      <td className="px-[20px] py-[10px] text-center">
+        Rp. {currencyConverter(props.price)}
+      </td>
       <td className="px-[20px]">
         {
           <QuantityButton
@@ -37,7 +40,7 @@ const CartTableData = (props: ICartTableDataProps) => {
         }
       </td>
       <td className="px-[20px] py-[10px] text-center">
-        Rp. {props.price * props.quantity}
+        Rp. {currencyConverter(props.price * props.quantity)}
       </td>
       <td className="px-[20px] py-[10px] text-center">
         <button
