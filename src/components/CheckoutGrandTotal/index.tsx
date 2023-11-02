@@ -9,7 +9,7 @@ interface ICheckoutGrandTotalProps {
 
 const CheckoutGrandTotal = (props: ICheckoutGrandTotalProps) => {
   return (
-    <div className="bg-[#29374e] text-right px-[20px] py-6 text-white flex items-center justify-end gap-10">
+    <div className="bg-[#29374e] text-right px-[20px] py-6 text-white flex items-center justify-end gap-10 mobile:text-[14px] mobile:justify-center ">
       <div className="text-left h-[150px]">
         <h1>Merchandise Total: </h1>
         <h1>Shipping Total: </h1>

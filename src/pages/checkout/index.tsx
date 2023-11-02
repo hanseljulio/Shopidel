@@ -8,6 +8,8 @@ import CheckoutVoucherSelect from "@/components/CheckoutVoucherSelect";
 import CheckoutShippingSelect from "@/components/CheckoutShippingSelect";
 import Footer from "@/components/Footer";
 import CheckoutGrandTotal from "@/components/CheckoutGrandTotal";
+import CheckoutTableHeadMobile from "@/components/CheckoutTableHeadMobile";
+import CheckoutTableDataMobile from "@/components/CheckoutTableDataMobile";
 
 interface IDataTest {
   id: number;
@@ -42,6 +44,22 @@ const CheckoutPage = () => {
         <div className="flex mt-[30px] justify-between mobile:block pb-8">
           <h1 className="text-[30px] mobile:text-center">Checkout</h1>
         </div>
+        <div className="hidden invisible mobile:visible mobile:block">
+          <table className="mx-auto">
+            <tbody>
+              <CheckoutTableHeadMobile />
+              {dataTest.map((data, index) => (
+                <CheckoutTableDataMobile
+                  key={index}
+                  id={data.id}
+                  quantity={data.quantity}
+                  price={data.price}
+                />
+              ))}
+            </tbody>
+          </table>
+        </div>
+
         <div className="mobile:hidden mobile:invisible">
           <table className="w-full border-2">
             <tbody>
@@ -56,23 +74,23 @@ const CheckoutPage = () => {
               ))}
             </tbody>
           </table>
-          <CheckoutShippingSelect />
-          <div className="bg-[#29374e] text-right px-[20px] text-[20px] p-6 text-white">
-            <h1>Order Total: {currencyConverter(130000)}</h1>
-          </div>
-          <br />
-          <CheckoutVoucherSelect />
-          <CheckoutGrandTotal
-            merchandise={130000}
-            shipping={9000}
-            voucher={1000}
+        </div>
+        <CheckoutShippingSelect />
+        <div className="bg-[#29374e] text-right px-[20px] text-[20px] p-6 text-white mobile:text-center">
+          <h1>Order Total: {currencyConverter(130000)}</h1>
+        </div>
+        <br />
+        <CheckoutVoucherSelect />
+        <CheckoutGrandTotal
+          merchandise={130000}
+          shipping={9000}
+          voucher={1000}
+        />
+        <div className="border-2 text-right text-[18px] mb-20 pr-4 mobile:text-center">
+          <Button
+            text="Place order"
+            styling="bg-[#fddf97] p-3 rounded-[8px] w-[250px]  my-4"
           />
-          <div className="border-2 text-right text-[18px] mb-20 pr-4">
-            <Button
-              text="Place order"
-              styling="bg-[#fddf97] p-3 rounded-[8px] w-[250px] mobile:w-[100px] my-4"
-            />
-          </div>
         </div>
       </div>
       <Footer />
