@@ -35,7 +35,7 @@ const CartTableDataMobile = (props: ICartTableDataProps) => {
             <div className="flex justify-between">
               <div className="left">
                 <h1 className="pb-4 text-[#29374e]">
-                  Rp. {currencyConverter(props.price)}
+                  {currencyConverter(props.price)}
                 </h1>
                 <QuantityButton
                   quantity={props.quantity}

@@ -28,7 +28,7 @@ const CartTableData = (props: ICartTableDataProps) => {
       </td>
       <td className="px-[20px] py-[10px] text-center">{<CartProduct />}</td>
       <td className="px-[20px] py-[10px] text-center">
-        Rp. {currencyConverter(props.price)}
+        {currencyConverter(props.price)}
       </td>
       <td className="px-[20px]">
         {
@@ -40,7 +40,7 @@ const CartTableData = (props: ICartTableDataProps) => {
         }
       </td>
       <td className="px-[20px] py-[10px] text-center">
-        Rp. {currencyConverter(props.price * props.quantity)}
+        {currencyConverter(props.price * props.quantity)}
       </td>
       <td className="px-[20px] py-[10px] text-center">
         <button

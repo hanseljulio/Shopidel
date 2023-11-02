@@ -11,7 +11,7 @@ const CartCheckoutArea = (props: ICartCheckoutAreaProps) => {
     <div className="fixed bottom-0 left-0 right-0 bg-[#29374e]">
       <div className="flex justify-between items-center lg:max-w-7xl mx-auto mobile:justify-around">
         <h1 className="text-[25px] text-white mobile:text-[16px]">
-          Total Price: Rp. {currencyConverter(props.totalPrice)}
+          Total Price: {currencyConverter(props.totalPrice)}
         </h1>
         <Button
           text="Checkout"
