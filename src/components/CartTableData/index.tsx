@@ -3,16 +3,34 @@ import CartProduct from "../CartProduct";
 import QuantityButton from "../QuantityButton";
 import { BsTrash } from "react-icons/bs";
 
-const CartTableData = () => {
+interface ICartTableDataProps {
+  id: number;
+  price: number;
+  quantity: number;
+  addQuantity: () => void;
+  subtractQuantity: () => void;
+}
+
+const CartTableData = (props: ICartTableDataProps) => {
   return (
     <tr className="border-2">
       <td className="px-[20px] py-[10px] text-center">
         <input type="checkbox" />
       </td>
       <td className="px-[20px] py-[10px] text-center">{<CartProduct />}</td>
-      <td className="px-[20px] py-[10px] text-center">Rp. 30000000</td>
-      <td className="px-[20px]">{<QuantityButton />}</td>
-      <td className="px-[20px] py-[10px] text-center">Rp. 30000000</td>
+      <td className="px-[20px] py-[10px] text-center">Rp. {props.price}</td>
+      <td className="px-[20px]">
+        {
+          <QuantityButton
+            quantity={props.quantity}
+            addQuantity={props.addQuantity}
+            subtractQuantity={props.subtractQuantity}
+          />
+        }
+      </td>
+      <td className="px-[20px] py-[10px] text-center">
+        Rp. {props.price * props.quantity}
+      </td>
       <td className="px-[20px] py-[10px] text-center">
         <button className="text-[25px]">
           <BsTrash className="text-[#D84727] hover:text-amber-500" />
