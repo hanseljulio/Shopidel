@@ -7,6 +7,7 @@ import Button from "@/components/Button";
 import CheckoutVoucherSelect from "@/components/CheckoutVoucherSelect";
 import CheckoutShippingSelect from "@/components/CheckoutShippingSelect";
 import Footer from "@/components/Footer";
+import CheckoutGrandTotal from "@/components/CheckoutGrandTotal";
 
 interface IDataTest {
   id: number;
@@ -61,23 +62,11 @@ const CheckoutPage = () => {
           </div>
           <br />
           <CheckoutVoucherSelect />
-          <div className="bg-[#29374e] text-right px-[20px] p-6 text-white flex items-center justify-end gap-10">
-            <div className="text-left h-[150px]">
-              <h1>Merchandise Total: </h1>
-              <h1>Shipping Total: </h1>
-              <h1>Voucher Total: </h1>
-              <br />
-              <h1 className="pt-3">Total payment: </h1>
-            </div>
-
-            <div className="text-right h-[150px]">
-              <h1>{currencyConverter(130000)}</h1>
-              <h1>{currencyConverter(9000)}</h1>
-              <h1>{currencyConverter(1)}</h1>
-              <br />
-              <h1 className="text-[30px]">{currencyConverter(139001)}</h1>
-            </div>
-          </div>
+          <CheckoutGrandTotal
+            merchandise={130000}
+            shipping={9000}
+            voucher={1000}
+          />
           <div className="border-2 text-right text-[18px] mb-20 pr-4">
             <Button
               text="Place order"
