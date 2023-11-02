@@ -30,7 +30,7 @@ const Login = () => {
                     <form className='w-96 px-5 py-10 rounded-md flex flex-col gap-y-5' onSubmit={handleSubmit(loginHandler)}>
                         <h1 className='text-xl font-bold'>Login</h1>
                         <div className='flex flex-col'>
-                            <label htmlFor="email" className='text-sm'>Username</label>
+                            <label htmlFor="email" className='text-sm'>Email</label>
                             <input {...register("email", { required: "Email is required" })} type="email" name="email" id="email" className='rounded-md border p-2' />
                             {errors.email && <p role='alert' className='text-xs text-red-500 mt-1'>{errors.email.message}</p>}
                         </div>
