@@ -1,17 +1,23 @@
 import React from "react";
+import CartProduct from "../CartProduct";
+import QuantityButton from "../QuantityButton";
+import { BsTrash } from "react-icons/bs";
 
 const CartTableData = () => {
   return (
-    <tr>
-      <td>
+    <tr className="border-2">
+      <td className="px-[20px] py-[10px] text-center">
         <input type="checkbox" />
       </td>
-      <td>Product stuff</td>
-      <td>Variations: Peeling Gel</td>
-      <td>Rp. 30000</td>
-      <td>[- 1 +]</td>
-      <td>Rp. 30000</td>
-      <td>DELETE</td>
+      <td className="px-[20px] py-[10px] text-center">{<CartProduct />}</td>
+      <td className="px-[20px] py-[10px] text-center">Rp. 30000000</td>
+      <td className="px-[20px]">{<QuantityButton />}</td>
+      <td className="px-[20px] py-[10px] text-center">Rp. 30000000</td>
+      <td className="px-[20px] py-[10px] text-center">
+        <button className="text-[25px]">
+          <BsTrash className="text-[#D84727] hover:text-amber-500" />
+        </button>
+      </td>
     </tr>
   );
 };

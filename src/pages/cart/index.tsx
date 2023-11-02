@@ -15,10 +15,12 @@ const CartPage = () => {
         <div className="titles-section mt-[30px]">
           <h1 className="text-[30px] mobile:text-center">My Cart</h1>
         </div>
-        <div className="cart-table-div pt-8">
-          <table className="w-full">
+        <div className="pt-8 ">
+          <table className="w-full border-2">
             <tbody>
               <CartTableHead />
+              <CartTableData />
+              <CartTableData />
               <CartTableData />
               <CartTableData />
             </tbody>
