@@ -5,6 +5,19 @@ import { BsStarFill } from "react-icons/bs";
 import { FaLocationDot, FaTruckFast } from "react-icons/fa6";
 
 const ProductDetail = () => {
+  const [count, setCount] = useState<number>(0);
+
+  const inc = () => {
+    if (count >= 0) {
+      setCount(count + 1);
+    }
+  };
+
+  const dec = () => {
+    if (count > 0) {
+      setCount(count - 1);
+    }
+  };
   return (
     <>
       <Navbar />
@@ -46,6 +59,23 @@ const ProductDetail = () => {
           </div>
 
           <div className="grid-cols-2 text-center">
+            <div className="quantity flex">
+              <button className="minus w-5" onClick={dec}>
+                -
+              </button>
+              <input
+                className="inputQuantity text-center"
+                min={0}
+                type="number"
+                value={count}
+                onChange={(e: any) => {
+                  setCount(parseInt(e.target.value)), e.preventDefault();
+                }}
+              />
+              <button className="plus w-5" onClick={inc}>
+                +
+              </button>
+            </div>
             <div className="stock">
               <p>stock</p>
             </div>
