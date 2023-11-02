@@ -2,6 +2,7 @@ import CarouselHome from "@/components/Carousel";
 import Navbar from "../components/Navbar";
 import Card from "../components/ProductCard";
 import Footer from "@/components/Footer";
+import { useRouter } from "next/router";
 
 export default function Home() {
   return (
