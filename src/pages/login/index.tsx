@@ -1,21 +1,18 @@
 import Button from '@/components/Button'
+import { ILoginForm } from '@/interfaces/auth_interface'
 import Image from 'next/image'
 import { useRouter } from 'next/router'
 import React from 'react'
 import { SubmitHandler, useForm } from 'react-hook-form'
 import { FcGoogle } from "react-icons/fc"
 
-interface ILogin {
-    email: string
-    password: string
-}
 
 const Login = () => {
 
-    const { register, handleSubmit, formState: { errors } } = useForm<ILogin>()
+    const { register, handleSubmit, formState: { errors } } = useForm<ILoginForm>()
     const router = useRouter()
 
-    const loginHandler: SubmitHandler<ILogin> = (data) => {
+    const loginHandler: SubmitHandler<ILoginForm> = (data) => {
         console.log(data)
     }
 
