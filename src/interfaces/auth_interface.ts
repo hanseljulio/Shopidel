@@ -2,7 +2,7 @@ export interface IRegisterForm {
     email: string
     password: string
     username: string
-    fullname: string
+    full_name: string
     confirmPassword: string
 }
 
