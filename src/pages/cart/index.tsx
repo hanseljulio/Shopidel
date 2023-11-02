@@ -5,10 +5,11 @@ import { useRouter } from "next/router";
 import EmptyCart from "@/components/EmptyCart";
 import CartTableHead from "@/components/CartTableHead";
 import CartTableData from "@/components/CartTableData";
-import { currencyConverter } from "@/utils/utils";
 import CartCheckoutArea from "@/components/CartCheckoutArea";
 import CartTableHeadMobile from "@/components/CartTableHeadMobile";
 import CartTableDataMobile from "@/components/CartTableDataMobile";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 interface IDataTest {
   id: number;
@@ -19,6 +20,7 @@ interface IDataTest {
 }
 
 const CartPage = () => {
+  const router = useRouter();
   const [totalPrice, setTotalPrice] = useState<number>(0);
   const [dataTest, setDataTest] = useState<IDataTest[]>([
     {
@@ -141,9 +143,39 @@ const CartPage = () => {
     getTotal(updatedData);
   };
 
+  const checkEmptySelection = () => {
+    for (let i = 0; i < dataTest.length; i++) {
+      if (dataTest[i].isChecked) {
+        return false;
+      }
+    }
+
+    return true;
+  };
+
+  const goToCheckout = async (e: any) => {
+    e.preventDefault();
+    const emptySelectionMessage = () =>
+      toast.error("Please select an item before checking out.");
+
+    const movingToCheckout = () => toast.success("Redirecting to checkout...");
+
+    if (checkEmptySelection()) {
+      emptySelectionMessage();
+      return;
+    }
+
+    setTimeout(() => {
+      router.push("/checkout");
+    }, 3000);
+
+    movingToCheckout();
+  };
+
   return (
     <div>
       <Navbar />
+      <ToastContainer />
       <div className="lg:max-w-7xl mx-auto">
         <div className="flex mt-[30px] justify-between mobile:block">
           <h1 className="text-[30px] mobile:text-center">My Cart</h1>
@@ -210,7 +242,10 @@ const CartPage = () => {
                 )}
               </div>
             </div>
-            <CartCheckoutArea totalPrice={totalPrice} />
+            <CartCheckoutArea
+              totalPrice={totalPrice}
+              checkoutFunction={goToCheckout}
+            />
           </div>
         )}
       </div>
