@@ -2,7 +2,6 @@ import React from "react";
 import CartProduct from "../CartProduct";
 import { currencyConverter } from "@/utils/utils";
 import QuantityButton from "../QuantityButton";
-import { BsTrash } from "react-icons/bs";
 import Button from "../Button";
 
 interface ICartTableDataProps {
