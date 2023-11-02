@@ -3,6 +3,7 @@ import CartProduct from "../CartProduct";
 import { currencyConverter } from "@/utils/utils";
 import QuantityButton from "../QuantityButton";
 import { BsTrash } from "react-icons/bs";
+import Button from "../Button";
 
 interface ICartTableDataProps {
   id: number;
@@ -43,13 +44,12 @@ const CartTableDataMobile = (props: ICartTableDataProps) => {
                   subtractQuantity={() => props.subtractQuantity(props.id)}
                 />
               </div>
-              <div className="right mr-[50px]">
-                <button
-                  className="text-[25px]"
+              <div className="right mr-[30px]">
+                <Button
+                  text="Delete"
                   onClick={() => props.deleteFunction(props.id)}
-                >
-                  <BsTrash className="text-[#D84727] hover:text-amber-500" />
-                </button>
+                  styling="bg-red-500 px-4 py-2 text-white rounded-[8px]"
+                />
               </div>
             </div>
           </div>
