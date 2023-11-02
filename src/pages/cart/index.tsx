@@ -31,7 +31,7 @@ const CartPage = () => {
             styling="bg-red-500 px-6 text-white rounded-[8px]"
           />
         </div>
-        <div className="pt-8 ">
+        <div className="pt-8 pb-[150px]">
           <table className="w-full border-2">
             <tbody>
               <CartTableHead />
@@ -44,6 +44,17 @@ const CartPage = () => {
               />
             </tbody>
           </table>
+        </div>
+        <div className="fixed bottom-0 left-0 right-0 bg-[#364968]">
+          <div className="flex justify-between items-center lg:max-w-7xl mx-auto">
+            <h1 className="text-[25px] text-white">
+              Total Price: Rp. 30000000
+            </h1>
+            <Button
+              text="Checkout"
+              styling="bg-[#fddf97] p-3 rounded-[8px] w-[250px] my-4"
+            />
+          </div>
         </div>
       </div>
     </div>
