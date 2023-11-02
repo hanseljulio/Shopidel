@@ -8,7 +8,7 @@ interface IQuantityButtonProps {
 
 const QuantityButton = (props: IQuantityButtonProps) => {
   return (
-    <div className="flex items-center justify-center">
+    <div className="flex items-center justify-center mobile:justify-start">
       <input
         type="button"
         value="-"

@@ -6,6 +6,9 @@ import EmptyCart from "@/components/EmptyCart";
 import CartTableHead from "@/components/CartTableHead";
 import CartTableData from "@/components/CartTableData";
 import { currencyConverter } from "@/utils/utils";
+import CartCheckoutArea from "@/components/CartCheckoutArea";
+import CartTableHeadMobile from "@/components/CartTableHeadMobile";
+import CartTableDataMobile from "@/components/CartTableDataMobile";
 
 interface IDataTest {
   id: number;
@@ -141,14 +144,14 @@ const CartPage = () => {
   return (
     <div>
       <Navbar />
-      <div className="cart-content-div lg:max-w-7xl mx-auto">
-        <div className="flex mt-[30px] justify-between">
+      <div className="lg:max-w-7xl mx-auto">
+        <div className="flex mt-[30px] justify-between mobile:block">
           <h1 className="text-[30px] mobile:text-center">My Cart</h1>
           {dataTest.length !== 0 && (
             <Button
               text="Delete All"
               onClick={deleteCart}
-              styling="bg-red-500 px-6 text-white rounded-[8px]"
+              styling="bg-red-500 px-6 text-white rounded-[8px] mobile:hidden mobile:invisible"
             />
           )}
         </div>
@@ -157,36 +160,57 @@ const CartPage = () => {
         ) : (
           <div>
             <div className="pt-8 pb-[150px]">
-              <table className="w-full border-2">
-                <tbody>
-                  <CartTableHead handleCheckAll={handleCheckAll} />
-                  {dataTest.map((data, index) => (
-                    <CartTableData
-                      key={index}
-                      id={data.id}
-                      price={data.price}
-                      quantity={data.quantity}
-                      isChecked={data.isChecked}
-                      addQuantity={addQuantity}
-                      subtractQuantity={subtractQuantity}
-                      checkboxChange={handleCheck}
-                      deleteFunction={deleteItem}
-                    />
-                  ))}
-                </tbody>
-              </table>
-            </div>
-            <div className="fixed bottom-0 left-0 right-0 bg-[#29374e]">
-              <div className="flex justify-between items-center lg:max-w-7xl mx-auto">
-                <h1 className="text-[25px] text-white">
-                  Total Price: Rp. {currencyConverter(totalPrice)}
-                </h1>
-                <Button
-                  text="Checkout"
-                  styling="bg-[#fddf97] p-3 rounded-[8px] w-[250px] my-4"
-                />
+              <div className="hidden invisible mobile:visible mobile:block">
+                <table className="mx-auto">
+                  <tbody>
+                    <CartTableHeadMobile handleCheckAll={handleCheckAll} />
+                    {dataTest.map((data, index) => (
+                      <CartTableDataMobile
+                        key={index}
+                        id={data.id}
+                        price={data.price}
+                        quantity={data.quantity}
+                        isChecked={data.isChecked}
+                        addQuantity={addQuantity}
+                        subtractQuantity={subtractQuantity}
+                        checkboxChange={handleCheck}
+                        deleteFunction={deleteItem}
+                      />
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              <div className="mobile:hidden mobile:invisible">
+                <table className="w-full border-2">
+                  <tbody>
+                    <CartTableHead handleCheckAll={handleCheckAll} />
+                    {dataTest.map((data, index) => (
+                      <CartTableData
+                        key={index}
+                        id={data.id}
+                        price={data.price}
+                        quantity={data.quantity}
+                        isChecked={data.isChecked}
+                        addQuantity={addQuantity}
+                        subtractQuantity={subtractQuantity}
+                        checkboxChange={handleCheck}
+                        deleteFunction={deleteItem}
+                      />
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              <div className="hidden invisible mobile:visible mobile:flex mobile:justify-center py-4">
+                {dataTest.length !== 0 && (
+                  <Button
+                    text="Delete All"
+                    onClick={deleteCart}
+                    styling="bg-red-500 px-6 text-white rounded-[8px] mobile:py-2 mobile:mt-3"
+                  />
+                )}
               </div>
             </div>
+            <CartCheckoutArea totalPrice={totalPrice} />
           </div>
         )}
       </div>

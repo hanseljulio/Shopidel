@@ -3,7 +3,7 @@ import Image from "next/image";
 
 const CartProduct = () => {
   return (
-    <div className="flex items-center justify-center">
+    <div className="flex items-center justify-center mobile:gap-2">
       <Image
         alt="productpic"
         src={"/images/emptycart.png"}
@@ -12,7 +12,7 @@ const CartProduct = () => {
         objectFit="cover"
         className="w-[60px] h-[60px]"
       />
-      <h1 className="w-[300px]">
+      <h1 className="w-[300px] mobile:w-[250px] mobile:text-[12px]">
         Whitelab Gentle Peeling Gel - Gel Pengangkat Sel Kulit Mati Untu...
       </h1>
     </div>
