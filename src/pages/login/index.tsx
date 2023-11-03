@@ -1,11 +1,16 @@
 import Button from '@/components/Button'
 import { ILoginForm } from '@/interfaces/auth_interface'
+import { API } from '@/network'
 import Image from 'next/image'
 import { useRouter } from 'next/router'
-import React from 'react'
+import React, { useEffect } from 'react'
 import { SubmitHandler, useForm } from 'react-hook-form'
 import { FcGoogle } from "react-icons/fc"
-
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import axios from "axios"
+import { IAPILoginResponse, IAPIResponse } from '@/interfaces/api_interface'
+import { setCookie } from 'cookies-next';
 
 const Login = () => {
 
@@ -13,17 +18,54 @@ const Login = () => {
     const router = useRouter()
 
     const loginHandler: SubmitHandler<ILoginForm> = (data) => {
-        console.log(data)
+        try {
+            toast.promise(
+                API.post("/auth/login", data),
+                {
+                    pending: "Loading",
+                    success: {
+                        render({ data }) {
+                            const res = data?.data as IAPIResponse<IAPILoginResponse>
+                            setCookie("accessToken", res.data?.access_token)
+                            return res.message
+                        }
+                    },
+                    error: {
+                        render({ data }) {
+                            if (axios.isAxiosError(data)) {
+                                return data.response?.statusText
+                            }
+                        }
+                    }
+                },
+                {
+                    autoClose: 1500
+                }
+            )
+
+        } catch (e) {
+            if (axios.isAxiosError(e)) {
+                toast.error(e.message, { autoClose: 1500 })
+            }
+        }
     }
+
+    useEffect(() => {
+        toast.onChange(data => {
+            if (data.type === "success" && data.status === "removed") {
+                router.push("/")
+            }
+        })
+    }, [])
 
     return (
         <div className=' h-screen flex justify-between items-center'>
+            <ToastContainer />
             <div className='max-w-7xl w-full mx-auto flex justify-around items-center'>
                 <div className='hidden md:flex'>
                     <Image src={"/images/auth_hero.png"} width={400} height={400} alt='auth_hero' />
                 </div>
                 <div className=''>
-
                     <form className='w-96 px-5 py-10 rounded-md flex flex-col gap-y-5' onSubmit={handleSubmit(loginHandler)}>
                         <h1 className='text-xl font-bold'>Login</h1>
                         <div className='flex flex-col'>

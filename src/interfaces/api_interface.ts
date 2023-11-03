@@ -9,3 +9,7 @@ export interface IAPIWalletResponse {
     isActive: boolean
 }
 
+export interface IAPILoginResponse {
+    access_token: string
+}
+
