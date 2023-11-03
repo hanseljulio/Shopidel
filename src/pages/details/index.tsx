@@ -12,31 +12,40 @@ interface IProductDetail {
 }
 const imgDummy: IProductDetail[] = [
   {
-    images: "/images/auth_hero.png",
+    images:
+      "https://down-id.img.susercontent.com/file/826639af5f9af89adae9a1700f073242",
   },
   {
-    images: "/images/applestore.png",
+    images:
+      "https://down-id.img.susercontent.com/file/65fe327802a4e2386cd19d6001e363ee",
   },
   {
-    images: "/images/googleplay.png",
+    images:
+      "https://down-id.img.susercontent.com/file/e4e359076303b2a2688506898fdb8793",
   },
   {
-    images: "/images/auth_hero.png",
+    images:
+      "https://down-id.img.susercontent.com/file/ff0a9d6bbc26dfaa93fb20a8e3f85a29",
   },
   {
-    images: "/images/applestore.png",
+    images:
+      "https://down-id.img.susercontent.com/file/826639af5f9af89adae9a1700f073242",
   },
   {
-    images: "/images/googleplay.png",
+    images:
+      "https://down-id.img.susercontent.com/file/3926ab1d88624e7e9feb42c76a830d93",
   },
   {
-    images: "/images/auth_hero.png",
+    images:
+      "https://down-id.img.susercontent.com/file/5676ea16c2a424a8285e806bb8b42616",
   },
   {
-    images: "/images/applestore.png",
+    images:
+      "https://down-id.img.susercontent.com/file/50044a0096334c145d8560b7a085170c",
   },
   {
-    images: "/images/googleplay.png",
+    images:
+      "https://down-id.img.susercontent.com/file/bc3b634e8b2beb1f09f59671102800a7",
   },
 ];
 
@@ -44,7 +53,9 @@ const ProductDetail = () => {
   const [count, setCount] = useState<number>(1);
   const [variationType, setVariationType] = useState<IProductDetail[]>([]);
   const [isHovering, setIsHovering] = useState(false);
-  const [variation, setVariation] = useState("");
+  const [variation, setVariation] = useState(
+    "https://down-id.img.susercontent.com/file/826639af5f9af89adae9a1700f073242"
+  );
 
   const handleMouseOver = (src: string) => {
     setIsHovering(true);
@@ -80,7 +91,7 @@ const ProductDetail = () => {
                 height={100}
                 src={variation}
                 alt=""
-                className="bigImage w-full"
+                className="bigImage w-full cursor-pointer"
               />
             ) : (
               <Image
@@ -88,7 +99,7 @@ const ProductDetail = () => {
                 height={100}
                 src={variation}
                 alt=""
-                className="bigImage w-full"
+                className="bigImage w-full cursor-pointer"
               />
             )}
             <div className="variation flex overflow-x-scroll [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none']">
@@ -96,7 +107,7 @@ const ProductDetail = () => {
                 return (
                   <Image
                     key={product.images}
-                    className="cursor-pointer w-[200px] h-full"
+                    className="cursor-pointer w-[200px] h-full r"
                     width={100}
                     height={100}
                     src={product.images}
@@ -213,61 +224,32 @@ const ProductDetail = () => {
             <div className="desc pt-5 ">
               <p className="text-lg font-medium border-b my-4">Description</p>
               <p>
-                Lorem ipsum dolor sit amet consectetur adipisicing elit. Iste ab
-                pariatur suscipit, porro rerum vero ven. Lorem ipsum, dolor sit
-                amet consectetur adipisicing elit. Deleniti explicabo
-                dignissimos veritatis sapiente quibusdam possimus labore unde?
-                Fugit, vitae reprehenderit? Lorem ipsum dolor sit amet
-                consectetur adipisicing elit. Dolorum nesciunt voluptates
-                obcaecati quaerat aspernatur molestias necessitatibus
-                praesentium animi maxime magnam quasi vitae hic exercitationem
-                error, sequi eos ullam illo repellat sunt debitis laudantium
-                quibusdam. Quod aperiam sed nam fugit corporis maxime sunt
-                architecto aliquam distinctio quis exercitationem reprehenderit
-                soluta dolores suscipit praesentium, voluptate ad molestiae
-                placeat quam. Quod incidunt corporis consequatur neque hic
-                harum, nam sequi tempore, nostrum at aperiam a magni ab
-                perspiciatis impedit nulla modi error ut animi odio aliquid
-                porro. Fugiat error sapiente dicta doloremque quia fugit earum
-                ducimus nam tenetur similique ipsum, harum dolorem ipsam enim?
-                Lorem ipsum dolor sit amet consectetur adipisicing elit.
-                Deleniti beatae officiis at esse placeat quis laboriosam,
-                repellat sed iure et saepe unde atque ex odio labore tempora
-                molestias, quasi quas quos deserunt quidem ipsam totam? Animi
-                neque deserunt nostrum quod architecto! Asperiores cum facere
-                consequatur rerum voluptatum quae dicta. Sit delectus, eius
-                possimus repellendus maiores veritatis, consequatur voluptates
-                fugit consectetur doloribus quis repudiandae ratione impedit
-                alias? Repellat quibusdam at quis consequatur sed blanditiis
-                aliquam reprehenderit laudantium. Quia ab molestiae, quibusdam,
-                dolores quisquam, nulla neque maxime alias harum nemo eaque
-                omnis! Obcaecati ipsa esse itaque consequatur molestiae, numquam
-                excepturi. Magnam exercitationem iusto accusantium voluptatum
-                quaerat id saepe, debitis maxime, reiciendis obcaecati unde
-                excepturi numquam est, inventore autem deleniti suscipit dolores
-                natus odit. Dolores dicta adipisci veniam illum repellendus
-                quaerat magni distinctio alias magnam? Laborum iure est saepe
-                doloribus culpa numquam, eos asperiores repellendus eaque!
-                Earum, omnis sed. Neque natus quidem nulla. Magni porro tenetur
-                culpa sint explicabo ducimus quos magnam, eos eveniet dolorum
-                nam consectetur voluptatibus consequuntur animi inventore ut.
-                Rerum quae maxime accusantium est quas architecto excepturi
-                voluptates atque? Illum atque rem numquam, reiciendis
-                reprehenderit possimus cum blanditiis ad minima animi eos esse
-                repudiandae, commodi hic itaque mollitia expedita, in harum
-                fugit modi dolores! Officiis ut veniam id tenetur nemo
-                repudiandae deserunt labore ipsam. Eos accusantium adipisci
-                nobis sit necessitatibus nemo odio quos, consectetur voluptatum
-                libero mollitia nisi expedita animi molestiae pariatur quam
-                voluptatibus in. Voluptatibus natus reiciendis asperiores
-                quaerat odit! Nihil optio eveniet laboriosam, dolorum distinctio
-                deserunt dignissimos. Possimus, eligendi provident. Sunt quam
-                repellendus corporis porro dolorum expedita voluptates, officiis
-                accusantium odio! Amet earum quam, quisquam odio distinctio
-                mollitia, quis nobis vel eligendi debitis facere vero recusandae
-                accusamus non provident deserunt, adipisci optio soluta libero
-                illo aspernatur beatae. Animi id eveniet possimus quis
-                consequatur, laudantium reprehenderit rerum incidunt aliquam.
+                <br />
+                SOFTWARE - OS: Windows 10 Home 64, English - Bundled Software:
+                Office Home and Student 2019
+                <br />
+                SECURITY & PRIVACY - Security Chip: Firmware TPM 2.0 -
+                Fingerprint Reader: None - Physical Locks: Kensington Nano
+                Security Slot - Other Security: Camera privacy shutter
+                <br />
+                WARRANTY Lenovo Indonesia 2-year, Depot
+                <br />
+                CERTIFICATIONS - Green Certifications: ENERGY STAR 8.0, ErP Lot
+                3, RoHS compliant - Other Certifications: TÜV Rheinland Low Blue
+                Light
+                <br />
+                Isi: • Laptop • Adaptor • Panduan • Tas Laptop
+                <br />
+                CATATAN: - Windows terinstall dari pabrik & lisensi digital akan
+                teraktivasi otomatis saat terkoneksi internet stabil. Proses
+                Windows update butuh proses cukup lama & laptop akan restart
+                beberapa kali - Lisensi Office Home & Student sudah
+                pre-installed dari pabrik & berupa digital - Tambah catatan:
+                videokan unboxing, update Windows & driver jika ingin dibantu
+                update & cek fisik sebelum dikirim. Video akan disimpan di dalam
+                laptopnya. - Driver laptop sudah ada dari pabrik & dapat
+                diupdate melalui aplikasi Lenovo Vantage. Driver tersedia di
+                web:
               </p>
             </div>
           </div>
