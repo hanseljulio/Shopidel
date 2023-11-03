@@ -1,7 +1,7 @@
 import Button from '@/components/Button'
 import ProfileLayout from '@/components/ProfileLayout'
 import Image from 'next/image'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import axios from "axios"
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -128,6 +128,7 @@ const TopupWalletModal = ({ onBalanceChange }: ITopupWalletProps) => {
 }
 
 const ChangePinModal = () => {
+    const router = useRouter()
     const [isValid, setIsValid] = useState<boolean>(false)
     const [password, setPassword] = useState<string>("")
     const passwordValidation = () => {
@@ -169,7 +170,48 @@ const ChangePinModal = () => {
     }
 
     const updatePinHandler = (pin: string) => {
+        toast.onChange(data => {
+            if (data.type === "success" && data.status === "removed") {
+                router.reload()
+            }
+        })
 
+        try {
+            toast.promise(
+                API.put("/accounts/wallets/change-pin", {
+                    wallet_new_pin: pin
+                }, {
+                    headers: {
+                        Authorization: `Bearer ${getCookie("accessToken")}`
+                    }
+                }),
+                {
+                    pending: "Loading",
+                    success: {
+                        render({ data }) {
+                            console.log(data)
+                            return (data?.data as IAPIResponse).message
+                        }
+                    },
+                    error: {
+                        render({ data }) {
+                            if (axios.isAxiosError(data)) {
+                                return (data.response?.data as IAPIResponse).message
+                            }
+                        }
+                    }
+                },
+                {
+                    autoClose: 1500
+                }
+            )
+        } catch (e) {
+            if (axios.isAxiosError(e)) {
+                return toast.error(e.message, {
+                    autoClose: 1500
+                })
+            }
+        }
     }
 
     return (
