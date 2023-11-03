@@ -341,7 +341,6 @@ const ProductDetail = () => {
                       {"2023-06-05"}| {"Variasi: S"}
                     </p>
                     <p className="theReview">
-                      {/* {title.length > 20 ? `${title.substring(0, 23)}...` : title} */}
                       {" terlalu mahal dengan kwalitas kain yg nerawang"}
                     </p>
                   </div>
