@@ -46,6 +46,14 @@ const IndividualVoucher = (props: IVoucherProps) => {
 };
 
 const CheckoutVoucherModal = (props: IVoucherModalProps) => {
+  const [selectedVoucher, setSelectedVoucher] = useState<number>(
+    props.selectedVoucher
+  );
+
+  const changeSelectedVoucherLocal = (id: number) => {
+    setSelectedVoucher(id);
+  };
+
   const [voucherData, setVoucherData] = useState([
     {
       id: 1,
@@ -90,8 +98,8 @@ const CheckoutVoucherModal = (props: IVoucherModalProps) => {
             id={data.id}
             name={data.name}
             description={data.description}
-            currentSelectedVoucher={props.selectedVoucher}
-            selectVoucher={props.updateVoucher}
+            currentSelectedVoucher={selectedVoucher}
+            selectVoucher={changeSelectedVoucherLocal}
           />
         ))}
       </div>
@@ -99,8 +107,11 @@ const CheckoutVoucherModal = (props: IVoucherModalProps) => {
         <Button
           text="Select Voucher"
           styling="bg-[#364968] p-3 rounded-[8px] w-[200px] text-white my-4"
-          disabled={props.selectedVoucher === 0}
-          onClick={props.submitVoucherFunction}
+          disabled={selectedVoucher === 0}
+          onClick={() => {
+            props.updateVoucher(selectedVoucher);
+            props.submitVoucherFunction();
+          }}
         />
       </div>
     </div>
