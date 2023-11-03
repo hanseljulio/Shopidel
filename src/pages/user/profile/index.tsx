@@ -11,6 +11,9 @@ import {
 } from "@/interfaces/api_interface";
 import { GetServerSidePropsContext } from "next";
 import { InferGetServerSidePropsType } from "next";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import { getCookie } from "cookies-next";
 
 const UserProfile = ({
   userData,
@@ -53,6 +56,49 @@ const UserProfile = ({
 
   const submit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+
+    const updatedData = {
+      full_name: userData?.full_name,
+      username: userData?.username,
+      email: userData?.email,
+      phone_number: userData?.phone_number,
+      gender: userData?.gender,
+      birthdate: userData?.birthdate,
+      profile_picture: userData?.profile_picture,
+    };
+
+    console.log(updatedData);
+
+    try {
+      toast.promise(
+        API.put("/accounts", updatedData, {
+          headers: {
+            Authorization: `Bearer ${getCookie("accessToken")}`,
+            "Content-Type": "application/json",
+          },
+        }),
+        {
+          pending: "Updating...",
+          success: "Profile update success!",
+          error: {
+            render({ data }) {
+              if (axios.isAxiosError(data)) {
+                return `${(data.response?.data as IAPIResponse).message}`;
+              }
+            },
+          },
+        },
+        {
+          autoClose: 1500,
+        }
+      );
+    } catch (e) {
+      if (axios.isAxiosError(e)) {
+        toast.error(e.message, {
+          autoClose: 1500,
+        });
+      }
+    }
   };
 
   // Function for getting image from cloudinary
@@ -74,8 +120,6 @@ const UserProfile = ({
     let result = await urlToLink(typeof link === "string" ? link : "");
     return result;
   };
-
-  console.log(imageFile);
 
   return (
     <div>
@@ -148,14 +192,21 @@ const UserProfile = ({
                     })
                   }
                 />
-                {/* <Input
-                label="Shop Name"
-                labelStyle="mt-2"
-                styling="flex items-center gap-12 pb-[30px] mobile:flex-col mobile:gap-2 mobile:items-start"
-                width="w-[250px]"
-                type="text"
-                name="shopName"
-              /> */}
+                <Input
+                  label="Full Name"
+                  labelStyle="mt-2"
+                  styling="flex items-center gap-[58px] pb-[30px] mobile:flex-col mobile:gap-2 mobile:items-start"
+                  width="w-[250px]"
+                  type="text"
+                  value={userData?.full_name}
+                  name="fullName"
+                  onChange={(e) =>
+                    setUserDetails({
+                      ...userDetails!,
+                      full_name: e.target.value,
+                    })
+                  }
+                />
                 <Input
                   label="Gender"
                   labelStyle="mt-2"
@@ -227,6 +278,7 @@ const UserProfile = ({
             <div className="submit-btn mobile:text-center mobile:py-[50px] ml-[250px] mobile:mx-auto">
               <Button
                 text="Save Changes"
+                onClick={submit}
                 styling="bg-[#364968] text-white p-3 rounded-[8px] w-[300px] my-4"
               />
             </div>
