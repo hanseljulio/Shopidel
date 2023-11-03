@@ -7,7 +7,7 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { API } from '@/network'
 import { IAPIResponse, IAPIWalletResponse } from '@/interfaces/api_interface'
-import Dialog from '@/components/Modal'
+import Modal from '@/components/Modal'
 import PinCode from '@/components/PinCode'
 import { GetServerSidePropsContext, InferGetServerSidePropsType } from 'next'
 import { currencyConverter } from '@/utils/utils'
@@ -42,7 +42,7 @@ const Wallet = ({ wallet }: InferGetServerSidePropsType<typeof getServerSideProp
         <>
             <ToastContainer />
             {
-                isDialog && <Dialog content={<ActivateWalletModal onClose={() => setIsDialog(false)} />} />
+                isDialog && <Modal content={<ActivateWalletModal onClose={() => setIsDialog(false)} />} />
             }
             <ProfileLayout>
                 {
