@@ -14,21 +14,19 @@ import { currencyConverter } from '@/utils/utils'
 import { useRouter } from 'next/router'
 import { getCookie } from "cookies-next"
 
-
 interface IActivateWalletProps {
-    onOpenDialog: () => void
-}
-
-interface IActivateWalletModalProps {
-    onClose: () => void
+    onOpenDialog: (content: JSX.Element) => void
 }
 
 interface IWalletDetailProps {
     wallet: IAPIWalletResponse
+    onOpenDialog: (content: JSX.Element) => void
+    onCloseDialog: () => void
 }
 
 const Wallet = ({ wallet }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
-    const [isDialog, setIsDialog] = useState<boolean>(false)
+    const [isModal, setIsModal] = useState<boolean>(false)
+    const [modalContent, setModalContent] = useState<JSX.Element>()
 
     if (wallet === undefined) {
         <ProfileLayout>
@@ -43,18 +41,93 @@ const Wallet = ({ wallet }: InferGetServerSidePropsType<typeof getServerSideProp
         <>
             <ToastContainer />
             {
-                isDialog && <Modal content={<ActivateWalletModal onClose={() => setIsDialog(false)} />} />
+                isModal && <Modal content={modalContent!} onClose={() => setIsModal(false)} />
             }
             <ProfileLayout>
                 {
-                    wallet!.isActive ? <WalletDetail wallet={wallet!} /> : <ActivateWallet onOpenDialog={() => setIsDialog(true)} />
+                    wallet!.isActive ? <WalletDetail onOpenDialog={(data) => {
+                        setIsModal(true)
+                        setModalContent(data)
+                    }} onCloseDialog={() => setIsModal(false)} wallet={wallet!} />
+                        : <ActivateWallet onOpenDialog={(data) => {
+                            setIsModal(true)
+                            setModalContent(data)
+                        }} />
                 }
             </ProfileLayout>
         </>
     )
 }
 
-const ActivateWalletModal = ({ onClose }: IActivateWalletModalProps) => {
+interface ITopupWalletProps {
+    onBalanceChange: (amount: number) => void
+}
+
+const TopupWalletModal = ({ onBalanceChange }: ITopupWalletProps) => {
+    const [amount, setAmount] = useState<string>("")
+
+    const topupHandler = () => {
+        try {
+            toast.promise(
+                API.post("/accounts/wallets/topup", {
+                    amount: amount
+                }, {
+                    headers: {
+                        Authorization: `Bearer ${getCookie("accessToken")}`
+                    }
+                }),
+                {
+                    pending: "Loading",
+                    success: {
+                        render({ data }) {
+                            const res = (data?.data as IAPIResponse)
+                            onBalanceChange(parseInt(amount))
+                            return res.message
+                        }
+                    },
+                    error: {
+                        render({ data }) {
+                            if (axios.isAxiosError(data)) {
+                                return (data.response?.data as IAPIResponse).message
+                            }
+                        }
+                    }
+                },
+                {
+                    autoClose: 1500
+                }
+            )
+        } catch (e) {
+            if (axios.isAxiosError(e)) {
+                return toast.error(e.message, {
+                    autoClose: 1500
+                })
+            }
+        }
+    }
+
+    return (
+        <>
+            <h1 className='font-bold text-xl'>Topup</h1>
+            <form action="#" onSubmit={(e) => {
+                e.preventDefault()
+                topupHandler()
+            }} className='flex flex-col mt-5'>
+                <input onChange={(e) => {
+                    if (!/[0-9]/g.test(e.target.value) && e.target.value !== "") return e.preventDefault()
+                    setAmount(e.target.value)
+                }} value={amount} type="text" name="amount" id="amount" placeholder='Amount...' className='rounded-md' />
+                <div className='text-xs mt-2 text-slate-500'>
+                    <p>min {currencyConverter(50000)}</p>
+                    <p>max {currencyConverter(10000000)}</p>
+                </div>
+                <Button text='Submit' styling='py-2 px-5 bg-[#364968] w-full rounded-md text-white mt-2' />
+            </form>
+        </>
+    )
+}
+
+const ActivateWalletModal = () => {
     const router = useRouter()
 
     const activateWalletHandler = (pin: string) => {
@@ -118,23 +191,28 @@ const ActivateWallet = ({ onOpenDialog }: IActivateWalletProps) => {
             <div className='flex flex-col items-center'>
                 <Image src={"/images/no_wallet.png"} width={250} height={250} alt='no_wallet' />
                 <p >You don&apos;t have wallet</p>
-                <Button text='Activate Wallet' styling='py-2 px-5 bg-[#364968] w-fit rounded-md text-white mt-2' onClick={onOpenDialog} />
+                <Button text='Activate Wallet' styling='py-2 px-5 bg-[#364968] w-fit rounded-md text-white mt-2' onClick={() => onOpenDialog(<ActivateWalletModal />)} />
             </div>
         </div>
     )
 }
 
-const WalletDetail = ({ wallet }: IWalletDetailProps) => {
+
+const WalletDetail = ({ wallet, onOpenDialog }: IWalletDetailProps) => {
+    const [data, setData] = useState<IAPIWalletResponse>(wallet)
     return (
         <div className='p-5'>
             <div className='flex justify-between items-end'>
                 <div>
-                    <p className='text-slate-500 text-sm'>Wallet id: {wallet.wallet_number}</p>
+                    <p className='text-slate-500 text-sm'>Wallet id: {data.wallet_number}</p>
                     <p>Balance</p>
-                    <p className='text-4xl font-bold'>{currencyConverter(parseInt(wallet.balance))}</p>
+                    <p className='text-4xl font-bold'>{currencyConverter(parseInt(data.balance))}</p>
                 </div>
                 <div className='flex gap-x-2  w-48'>
-                    <Button text='Top up' styling='p-2 bg-[#364968] w-full h-fit rounded-md text-white text-sm' />
+                    <Button onClick={() => onOpenDialog(<TopupWalletModal onBalanceChange={(amount) => {
+                        const newBalance = parseInt(data.balance) + amount
+                        return setData({ ...data, balance: newBalance.toString() })
+                    }} />)} text='Top up' styling='p-2 bg-[#364968] w-full h-fit rounded-md text-white text-sm' />
                     <Button text='Change PIN' styling='p-2 bg-[#364968] w-full h-fit  rounded-md text-white text-sm' />
                 </div>
             </div>
