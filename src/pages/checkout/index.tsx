@@ -70,12 +70,12 @@ const CheckoutPage = () => {
         <Modal
           content={
             <CheckoutVoucherModal
-              closeFunction={() => setShowVoucherModal(false)}
               updateVoucher={changeSelectedVoucher}
               selectedVoucher={selectedVoucher}
               submitVoucherFunction={useVoucher}
             />
           }
+          onClose={() => setShowVoucherModal(false)}
         />
       )}
 
@@ -83,12 +83,12 @@ const CheckoutPage = () => {
         <Modal
           content={
             <CheckoutAddressModal
-              closeFunction={() => setShowAddressModal(false)}
               updateAddress={changeSelectedAddress}
               selectedAddress={selectedAddress}
               submitAddressFunction={useAddress}
             />
           }
+          onClose={() => setShowAddressModal(false)}
         />
       )}
 
