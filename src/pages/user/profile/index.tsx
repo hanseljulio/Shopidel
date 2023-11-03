@@ -75,6 +75,8 @@ const UserProfile = ({
     return result;
   };
 
+  console.log(imageFile);
+
   return (
     <div>
       <ProfileLayout currentPage="My Profile">
@@ -216,7 +218,9 @@ const UserProfile = ({
                       }
                     }}
                   />
-                  {"Upload profile photo"}
+                  {!userDetails?.profile_picture
+                    ? "Upload profile photo"
+                    : "Replace profile photo"}
                 </label>
               </div>
             </div>
