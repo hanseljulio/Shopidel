@@ -13,6 +13,7 @@ import CheckoutTableDataMobile from "@/components/CheckoutTableDataMobile";
 import { FaMapMarkerAlt } from "react-icons/fa";
 import Modal from "@/components/Modal";
 import CheckoutVoucherModal from "@/components/CheckoutVoucherModal";
+import CheckoutAddressModal from "@/components/CheckoutAddressModal";
 
 interface IDataTest {
   id: number;
@@ -41,7 +42,9 @@ const CheckoutPage = () => {
   ]);
 
   const [showVoucherModal, setShowVoucherModal] = useState<boolean>(false);
+  const [showAddressModal, setShowAddressModal] = useState<boolean>(false);
   const [selectedVoucher, setSelectedVoucher] = useState<number>(0);
+  const [selectedAddress, setSelectedAddress] = useState<number>(0);
 
   const useVoucher = () => {
     setShowVoucherModal(false);
@@ -50,6 +53,15 @@ const CheckoutPage = () => {
 
   const changeSelectedVoucher = (id: number) => {
     setSelectedVoucher(id);
+  };
+
+  const useAddress = () => {
+    setShowAddressModal(false);
+    console.log(selectedAddress);
+  };
+
+  const changeSelectedAddress = (id: number) => {
+    setSelectedAddress(id);
   };
 
   return (
@@ -67,9 +79,21 @@ const CheckoutPage = () => {
         />
       )}
 
+      {showAddressModal && (
+        <Modal
+          content={
+            <CheckoutAddressModal
+              closeFunction={() => setShowAddressModal(false)}
+              updateAddress={changeSelectedAddress}
+              selectedAddress={selectedAddress}
+              submitAddressFunction={useAddress}
+            />
+          }
+        />
+      )}
+
       <div>
         <Navbar />
-
         <div className="lg:max-w-7xl mx-auto">
           <div className="flex mt-[30px] justify-between mobile:block pb-8">
             <h1 className="text-[30px] mobile:text-center">Checkout</h1>
@@ -90,7 +114,10 @@ const CheckoutPage = () => {
                 DKI JAKARTA, ID 12950{" "}
                 <span className="text-orange-500 text-[14px]">[DEFAULT]</span>
               </h1>
-              <h1 className="text-blue-600 text-right hover:cursor-pointer hover:underline basis-[7%]">
+              <h1
+                onClick={() => setShowAddressModal(true)}
+                className="text-blue-600 text-right hover:cursor-pointer hover:underline basis-[7%]"
+              >
                 Change
               </h1>
             </div>
