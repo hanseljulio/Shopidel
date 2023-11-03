@@ -1,16 +1,45 @@
 import Input from "@/components/Input";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import Button from "@/components/Button";
 import ProfileLayout from "@/components/ProfileLayout";
+import { API } from "@/network";
+import axios from "axios";
+import {
+  IAPIResponse,
+  IAPIUserProfileResponse,
+} from "@/interfaces/api_interface";
+import { GetServerSidePropsContext } from "next";
+import { InferGetServerSidePropsType } from "next";
 
-const UserProfile = () => {
+const UserProfile = ({
+  userData,
+}: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   const [showEditEmail, setShowEditEmail] = useState<boolean>(false);
   const [imageFile, setImageFile] = useState<File | null>(null);
+  const [userDetails, setUserDetails] = useState<
+    IAPIUserProfileResponse | undefined
+  >({
+    id: "",
+    full_name: "",
+    username: "",
+    email: "",
+    phone_number: "",
+    gender: "",
+    birthdate: "",
+    profile_picture: "",
+    wallet_number: "",
+    balance: "",
+    forget_password_expired_at: "",
+  });
 
   const toggleEditEmail = () => {
     setShowEditEmail((prevBool) => !prevBool);
   };
+
+  useEffect(() => {
+    setUserDetails(userData);
+  }, []);
 
   const emailConverter = (email: string) => {
     let emailArray = email.split("@");
@@ -65,6 +94,13 @@ const UserProfile = () => {
                   width="w-[250px]"
                   type="text"
                   name="username"
+                  value={userDetails!.username}
+                  onChange={(e) => {
+                    setUserDetails({
+                      ...userDetails!,
+                      username: e.target.value,
+                    });
+                  }}
                 />
                 <div className="email-section flex items-center pb-[30px] mobile:flex-col mobile:items-start">
                   <p className="">Email</p>
@@ -75,10 +111,17 @@ const UserProfile = () => {
                       width="w-[250px]"
                       type="email"
                       name="emailEdit"
+                      value={userDetails!.email}
+                      onChange={(e) =>
+                        setUserDetails({
+                          ...userDetails!,
+                          email: e.target.value,
+                        })
+                      }
                     />
                   ) : (
                     <p className="ml-[91px] mobile:m-0 mobile:py-4">
-                      {emailConverter("hanseljulio@yahoo.com")}
+                      {emailConverter(userDetails?.email!)}
                     </p>
                   )}
                   <p
@@ -95,6 +138,13 @@ const UserProfile = () => {
                   width="w-[250px]"
                   type="text"
                   name="phoneNumber"
+                  value={userDetails!.phone_number}
+                  onChange={(e) =>
+                    setUserDetails({
+                      ...userDetails!,
+                      phone_number: e.target.value,
+                    })
+                  }
                 />
                 {/* <Input
                 label="Shop Name"
@@ -111,14 +161,27 @@ const UserProfile = () => {
                   width="w-[250px]"
                   type="text"
                   name="username"
+                  value={userDetails!.gender}
+                  onChange={(e) =>
+                    setUserDetails({
+                      ...userDetails!,
+                      gender: e.target.value,
+                    })
+                  }
                 />
                 <Input
                   label="Date of Birth"
                   type="date"
                   name="dateOfBirth"
-                  value={""}
+                  value={userDetails!.birthdate.substring(0, 10)}
                   styling="flex items-center gap-[36px] pb-[30px] mobile:flex-col mobile:gap-2 mobile:items-start"
                   width="w-[250px]"
+                  onChange={(e) =>
+                    setUserDetails({
+                      ...userDetails!,
+                      birthdate: new Date(e.target.value).toISOString(),
+                    })
+                  }
                 />
               </div>
 
@@ -171,3 +234,30 @@ const UserProfile = () => {
 };
 
 export default UserProfile;
+
+export const getServerSideProps = async (
+  context: GetServerSidePropsContext
+) => {
+  let data: IAPIUserProfileResponse | undefined;
+  let accessToken = context.req.cookies["accessToken"];
+
+  try {
+    const res = await API.get("/accounts", {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        "Content-Type": "application/json",
+      },
+    });
+    data = (res.data as IAPIResponse<IAPIUserProfileResponse>).data;
+  } catch (e) {
+    if (axios.isAxiosError(e)) {
+      console.log(e.response?.data);
+    }
+  }
+
+  return {
+    props: {
+      userData: data,
+    },
+  };
+};
