@@ -1,22 +1,16 @@
 import Link from "next/link";
-import { useRouter } from "next/router";
 import { useState } from "react";
-import {
-  AiFillFacebook,
-  AiOutlineInstagram,
-  AiOutlineShoppingCart,
-} from "react-icons/ai";
+import { AiOutlineShoppingCart } from "react-icons/ai";
 
 const Navbar = () => {
   const [navbar, setNavbar] = useState(false);
-  const router = useRouter();
 
   return (
     <nav className="w-full bg-[#29374e] shadow px-4 md:px-0">
       <div className="justify-between mx-auto lg:max-w-7xl md:items-center md:flex text-white text-sm ">
         <div className="justify-between md:items-center md:flex  pt-3">
           <p>
-            <a href="#">Seller Centre</a>
+            <Link href="#">Seller Centre</Link>
           </p>
         </div>
       </div>
@@ -84,18 +78,18 @@ const Navbar = () => {
               >
                 <AiOutlineShoppingCart size={23} />
               </Link>
-              <a
+              <Link
                 href="javascript:void(0)"
                 className="inline-block w-full px-3 py-1 text-center text-[#6c4343] bg-[#fddf97] rounded-md shadow hover:bg-gray-800"
               >
                 Sign in
-              </a>
-              <a
+              </Link>
+              <Link
                 href="javascript:void(0)"
                 className="inline-block w-full px-3 py-1 text-center text-[#364968] bg-white rounded-md shadow hover:bg-gray-100"
               >
                 Sign up
-              </a>
+              </Link>
             </div>
           </div>
         </div>
