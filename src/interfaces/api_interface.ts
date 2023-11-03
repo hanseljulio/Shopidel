@@ -1,15 +1,28 @@
 export interface IAPIResponse<T = Object> {
-    data?: T
-    message: string
+  data?: T;
+  message: string;
 }
 
 export interface IAPIWalletResponse {
-    balance: string
-    wallet_number: string
-    isActive: boolean
+  balance: string;
+  wallet_number: string;
+  isActive: boolean;
+}
+
+export interface IAPIUserProfileResponse {
+  id: string;
+  full_name: string;
+  username: string;
+  email: string;
+  phone_number: string;
+  gender: string;
+  birthdate: string;
+  profile_picture: string;
+  wallet_number: string;
+  balance: string;
+  forget_password_expired_at: string;
 }
 
 export interface IAPILoginResponse {
-    access_token: string
+  access_token: string;
 }
-
