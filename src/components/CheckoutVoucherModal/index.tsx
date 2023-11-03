@@ -12,7 +12,6 @@ interface IVoucherProps {
 }
 
 interface IVoucherModalProps {
-  closeFunction: () => void;
   updateVoucher: (id: number) => void;
   selectedVoucher: number;
   submitVoucherFunction: () => void;
@@ -84,12 +83,8 @@ const CheckoutVoucherModal = (props: IVoucherModalProps) => {
 
   return (
     <div className="bg-white p-5 rounded-md  w-[500px] h-[600px] mobile:w-[90%]">
-      <div className="flex items-center justify-between pb-3">
+      <div className=" pb-3">
         <h1 className="text-[20px] ml-1">Voucher Select</h1>
-        <AiFillCloseSquare
-          onClick={props.closeFunction}
-          className=" text-[30px] text-red-500 hover:cursor-pointer"
-        />
       </div>
       <div className="flex flex-col gap-6 pt-6 overflow-y-scroll h-[80%] pb-8">
         {voucherData.map((data, index) => (
