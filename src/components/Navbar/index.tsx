@@ -1,3 +1,5 @@
+import Link from "next/link";
+import { useRouter } from "next/router";
 import { useState } from "react";
 import {
   AiFillFacebook,
@@ -7,6 +9,7 @@ import {
 
 const Navbar = () => {
   const [navbar, setNavbar] = useState(false);
+  const router = useRouter();
 
   return (
     <nav className="w-full bg-[#29374e] shadow px-4 md:px-0">
@@ -20,9 +23,9 @@ const Navbar = () => {
       <div className="justify-between mx-auto lg:max-w-7xl md:items-center md:flex ">
         <div>
           <div className="flex items-center justify-between py-3 md:py-5 md:block">
-            <a href="javascript:void(0)">
+            <Link href="/">
               <h2 className="text-3xl font-bold text-white">LOGO</h2>
-            </a>
+            </Link>
             <div className="md:hidden">
               <button
                 className="p-2 text-gray-700 rounded-md outline-none focus:border-gray-400 focus:border"
@@ -75,12 +78,12 @@ const Navbar = () => {
               placeholder="Search"
             />
             <div className="mt-3 space-y-2 lg:hidden md:inline-block">
-              <a
-                href="javascript:void(0)"
+              <Link
+                href="/cart"
                 className=" w-full  px-3 py-1 justify-center text-white bg-[#e09664] rounded-md shadow hover:bg-gray-800 flex align-middle"
               >
                 <AiOutlineShoppingCart size={23} />
-              </a>
+              </Link>
               <a
                 href="javascript:void(0)"
                 className="inline-block w-full px-3 py-1 text-center text-[#6c4343] bg-[#fddf97] rounded-md shadow hover:bg-gray-800"
