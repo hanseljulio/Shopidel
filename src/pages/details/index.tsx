@@ -1,4 +1,5 @@
 import Navbar from "@/components/Navbar";
+import ProductCard from "@/components/ProductCard";
 import Image from "next/image";
 import React, { useState } from "react";
 import { AiOutlineShoppingCart } from "react-icons/ai";
@@ -7,36 +8,53 @@ import { FaStar, FaStore } from "react-icons/fa";
 import { FaLocationDot, FaTruckFast } from "react-icons/fa6";
 
 interface IProductDetail {
-  images: {
-    image1: string;
-    image2: string;
-    image3: string;
-    image4: string;
-    image5: string;
-    image6: string;
-    image7: string;
-    image8: string;
-  };
+  images: string;
 }
 const imgDummy: IProductDetail[] = [
   {
-    images: {
-      image1: "/images/applestore.png",
-      image2: "/images/defaultuser.png",
-      image3: "/images/auth_hero.png",
-      image4: "/images/applestore.png",
-      image5: "/images/defaultuser.png",
-      image6: "/images/auth_hero.png",
-      image7: "/images/applestore.png",
-      image8: "/images/defaultuser.png",
-    },
+    images: "/images/auth_hero.png",
+  },
+  {
+    images: "/images/applestore.png",
+  },
+  {
+    images: "/images/googleplay.png",
+  },
+  {
+    images: "/images/auth_hero.png",
+  },
+  {
+    images: "/images/applestore.png",
+  },
+  {
+    images: "/images/googleplay.png",
+  },
+  {
+    images: "/images/auth_hero.png",
+  },
+  {
+    images: "/images/applestore.png",
+  },
+  {
+    images: "/images/googleplay.png",
   },
 ];
 
 const ProductDetail = () => {
   const [count, setCount] = useState<number>(1);
-  const [variationType, setVariationType] = useState<[]>([]);
-  const [variation, setVariation] = useState<[]>([]);
+  const [variationType, setVariationType] = useState<IProductDetail[]>([]);
+  const [isHovering, setIsHovering] = useState(false);
+  const [variation, setVariation] = useState("");
+
+  const handleMouseOver = (src: string) => {
+    setIsHovering(true);
+    setVariation(src);
+  };
+
+  const handleMouseOut = () => {
+    setIsHovering(false);
+  };
+
   let stock = 10;
 
   const inc = () => {
@@ -56,57 +74,43 @@ const ProductDetail = () => {
       <div className="mx-auto lg:max-w-7xl px-4 md:px-0">
         <div className="flex-col md:flex-row justify-between md:flex gap-10 py-5 px-5 md:px-0">
           <div className="order-1 md:order-1 imageProduct w-full md:w-1/4">
-            <Image
-              width={100}
-              height={100}
-              src="https://images.unsplash.com/photo-1697482036303-4c0cf56a38c3?auto=format&fit=crop&q=80&w=1973&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
-              alt=""
-              className="bigImage w-full"
-            />
-            <div className="variation flex overflow-x-scroll [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none']">
-              {imgDummy.map((product) => {
-                return (
-                  <>
+            {isHovering == true ? (
+              <Image
+                width={100}
+                height={100}
+                src={variation}
+                alt=""
+                className="bigImage w-full"
+              />
+            ) : (
+              <Image
+                width={100}
+                height={100}
+                src={variation}
+                alt=""
+                className="bigImage w-full"
+              />
+            )}
+            <div className="flex">
+              <div className="variation flex overflow-x-scroll [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none']">
+                {imgDummy.map((product) => {
+                  return (
                     <Image
-                      className="cursor-pointer"
+                      key={product.images}
+                      className="cursor-pointer w-[200px] h-full"
                       width={100}
                       height={100}
-                      src={product.images.image1}
+                      src={product.images}
                       alt=""
+                      onMouseOver={() => handleMouseOver(product.images)}
+                      onMouseOut={handleMouseOut}
                     />
-                    <Image
-                      className="cursor-pointer"
-                      width={100}
-                      height={100}
-                      src={product.images.image2}
-                      alt=""
-                    />
-                    <Image
-                      className="cursor-pointer"
-                      width={100}
-                      height={100}
-                      src={product.images.image3}
-                      alt=""
-                    />
-                    <Image
-                      className="cursor-pointer"
-                      width={100}
-                      height={100}
-                      src={product.images.image4}
-                      alt=""
-                    />
-                    <Image
-                      className="cursor-pointer"
-                      width={100}
-                      height={100}
-                      src={product.images.image5}
-                      alt=""
-                    />
-                  </>
-                );
-              })}
+                  );
+                })}
+              </div>
             </div>
           </div>
+
           <div className="order-2 md:order-3 purchaseBox border shadow-inner rounded-sm p-5 h-fit md:w-1/4 md:sticky md:top-0">
             <p className="productTitle text-lg font-medium pb-3">
               Lorem ipsum dolor sit amet
@@ -135,13 +139,10 @@ const ProductDetail = () => {
             {variationType !== null ? (
               <div>
                 {variationType.map((n) => (
-                  <div key={n}>
+                  <div key={n.images}>
                     <p>{"Variation Type (color/size)"}</p>
-                    {variation.map((n) => (
-                      <button key={n} type="submit">
-                        {"varian"}
-                      </button>
-                    ))}
+
+                    <button type="submit">{"varian"}</button>
                   </div>
                 ))}
               </div>
@@ -299,16 +300,16 @@ const ProductDetail = () => {
                     <FaStar /> 4.8
                   </span>
                 </p>
-                <p className="flex gap-5 md:gap-14">
+                <p className="flex gap-5 md:gap-14 mt-3">
                   Product <span>30</span>
                 </p>
               </div>
             </div>
             <div className="reviews">
-              <p className="reviewsProduct text-lg font-semibold">
-                Product Reviews
-              </p>
-              <div>
+              <div className="">
+                <p className="reviewsProduct text-lg font-semibold">
+                  Product Reviews
+                </p>
                 <div>
                   <p>{"4.8 dari 5"}</p>
                   <div className="star flex">
@@ -319,36 +320,57 @@ const ProductDetail = () => {
                     <FaStar />
                   </div>
                 </div>
-                <div className="buyerReviews flex mt-5">
-                  <div className="imageCust pr-4 rounded-full overflow-hidden">
-                    <Image
-                      width={100}
-                      height={100}
-                      src={"/images/auth_hero.png"}
-                      alt=".."
-                    />
-                  </div>
-                  <div className="bodyReview flex-row gap-y-5">
-                    <p className="custName">{"cust name"}</p>
-                    <p className="flex">
-                      <FaStar />
-                      <FaStar />
-                      <FaStar />
-                      <FaStar />
-                      <FaStar />
-                    </p>
-                    <p className="dateReview text-sm text-neutral-500">
-                      {"2023-06-05"}| {"Variasi: S"}
-                    </p>
-                    <p className="theReview">
-                      {" terlalu mahal dengan kwalitas kain yg nerawang"}
-                    </p>
-                  </div>
+              </div>
+              <div className="buyerReviews flex mt-5  border-y">
+                <div className="imageCust pr-4 rounded-full overflow-hidden">
+                  <Image
+                    width={100}
+                    height={100}
+                    src={"/images/auth_hero.png"}
+                    alt=".."
+                  />
+                </div>
+                <div className="bodyReview flex-row gap-y-5">
+                  <p className="custName">{"cust name"}</p>
+                  <p className="flex">
+                    <FaStar />
+                    <FaStar />
+                    <FaStar />
+                    <FaStar />
+                    <FaStar />
+                  </p>
+                  <p className="dateReview text-sm text-neutral-500 pb-3">
+                    {"2023-06-05"}| {"Variasi: S"}
+                  </p>
+                  <p className="theReview">
+                    {" terlalu mahal dengan kwalitas kain yg nerawang"}
+                  </p>
                 </div>
               </div>
             </div>
           </div>
-          <div className="order-2 w-1/4"></div>
+          <div className="order-2 w-1/4 items-center flex justify-end mt-5">
+            <div className="w-3/4 content-center">
+              <ProductCard
+                image="/images/auth_hero.png"
+                title="Sepatu Neki"
+                price={1000000}
+                showStar={false}
+              />
+              <ProductCard
+                image="/images/auth_hero.png"
+                title="Sepatu Neki"
+                price={1000000}
+                showStar={false}
+              />
+              <ProductCard
+                image="/images/auth_hero.png"
+                title="Sepatu Neki"
+                price={1000000}
+                showStar={false}
+              />
+            </div>
+          </div>
         </div>
       </div>
     </div>
