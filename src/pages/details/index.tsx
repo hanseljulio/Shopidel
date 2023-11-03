@@ -54,15 +54,15 @@ const ProductDetail = () => {
     <div>
       <Navbar />
       <div className="mx-auto lg:max-w-7xl px-4 md:px-0">
-        <div className="flex-col md:flex-row justify-between md:flex gap-10 py-5 px-5">
+        <div className="flex-col md:flex-row justify-between md:flex gap-10 py-5 px-5 md:px-0">
           <div className="order-1 md:order-1 imageProduct w-full md:w-1/4">
-            {/* <Image
+            <Image
               width={100}
               height={100}
               src="https://images.unsplash.com/photo-1697482036303-4c0cf56a38c3?auto=format&fit=crop&q=80&w=1973&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
               alt=""
               className="bigImage w-full"
-            /> */}
+            />
             <div className="variation flex overflow-x-scroll [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none']">
               {imgDummy.map((product) => {
                 return (
@@ -107,7 +107,7 @@ const ProductDetail = () => {
               })}
             </div>
           </div>
-          <div className="order-2 md:order-3 purchaseBox border shadow-inner rounded-sm p-5 h-fit md:w-1/4 md:sticky">
+          <div className="order-2 md:order-3 purchaseBox border shadow-inner rounded-sm p-5 h-fit md:w-1/4 md:sticky md:top-0">
             <p className="productTitle text-lg font-medium pb-3">
               Lorem ipsum dolor sit amet
             </p>
@@ -271,6 +271,10 @@ const ProductDetail = () => {
                 consequatur, laudantium reprehenderit rerum incidunt aliquam.
               </p>
             </div>
+          </div>
+        </div>
+        <div className="seller flex-col md:flex-row justify-between md:flex gap-10 py-5 px-5 md:px-0">
+          <div className="order-1  w-3/4">
             <div className="sellerShop bg-[#364968] flex flex-row gap-y-5 text-white py-3 my-10 gap-10 px-5 ">
               <Image
                 width={90}
@@ -285,6 +289,18 @@ const ProductDetail = () => {
                   <button className="flex gap-1 md:gap-2 mt-3 text-sm items-center w-full border border-[#fddf97] hover:shadow-lg   p-1 md:w-36 text-[#fddf97] hover:bg-[#1c2637]  transition-all duration-300">
                     <FaStore /> <p>Visit the store</p>
                   </button>
+                </p>
+              </div>
+
+              <div className="aboutSeller justify-between w-1/2 md:w-full">
+                <p className="flex gap-5 md:gap-12">
+                  Rating
+                  <span className="flex items-center ">
+                    <FaStar /> 4.8
+                  </span>
+                </p>
+                <p className="flex gap-5 md:gap-14">
+                  Product <span>30</span>
                 </p>
               </div>
             </div>
@@ -333,6 +349,7 @@ const ProductDetail = () => {
               </div>
             </div>
           </div>
+          <div className="order-2 w-1/4"></div>
         </div>
       </div>
     </div>
