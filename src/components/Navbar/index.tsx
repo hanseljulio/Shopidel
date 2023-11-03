@@ -1,9 +1,11 @@
 import Link from "next/link";
+import { useRouter } from "next/router";
 import { useState } from "react";
 import { AiOutlineShoppingCart } from "react-icons/ai";
 
 const Navbar = () => {
   const [navbar, setNavbar] = useState(false);
+  const router = useRouter();
 
   return (
     <nav className="w-full bg-[#29374e] shadow px-4 md:px-0">
@@ -94,7 +96,10 @@ const Navbar = () => {
           </div>
         </div>
         <div className="hidden space-x-4 md:inline-block align-middle">
-          <button className=" text-white rounded-md shadow align-middle">
+          <button
+            className=" text-white rounded-md shadow align-middle"
+            onClick={() => router.push("/cart")}
+          >
             <AiOutlineShoppingCart size={30} />
           </button>
           <button className="px-3 py-2 text-[#6c4343] bg-[#fddf97] rounded-md shadow transition-all duration-300 hover:bg-[#e09664] hover:text-[#fddf97]">

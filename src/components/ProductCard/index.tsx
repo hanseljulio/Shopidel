@@ -63,11 +63,13 @@ const ProductCard = ({
         <p className=" tracking-wider text-black text-sm md:text-base pt-2">
           {title.length > 20 ? `${title.substring(0, 23)}...` : title}{" "}
         </p>
-        <p className=" tracking-wider text-[#f57b29] text-sm md:text-base">{`Rp. ${price}`}</p>{" "}
-        <div className="flex justify-between text-xs md:text-sm pt-2">
-          <p> {place} </p>
-          <p className="text-gray-500 "> {`${order} sold`}</p>
-        </div>
+        <p className=" tracking-wider text-[#f57b29] text-sm md:text-base">{`Rp. ${price}`}</p>
+        {showStar === true && (
+          <div className="flex justify-between text-xs md:text-sm pt-2">
+            <p> {place} </p>
+            <p className="text-gray-500 "> {`${order} sold`}</p>
+          </div>
+        )}
       </div>
     </div>
   );
