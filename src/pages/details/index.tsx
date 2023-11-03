@@ -91,23 +91,21 @@ const ProductDetail = () => {
                 className="bigImage w-full"
               />
             )}
-            <div className="flex">
-              <div className="variation flex overflow-x-scroll [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none']">
-                {imgDummy.map((product) => {
-                  return (
-                    <Image
-                      key={product.images}
-                      className="cursor-pointer w-[200px] h-full"
-                      width={100}
-                      height={100}
-                      src={product.images}
-                      alt=""
-                      onMouseOver={() => handleMouseOver(product.images)}
-                      onMouseOut={handleMouseOut}
-                    />
-                  );
-                })}
-              </div>
+            <div className="variation flex overflow-x-scroll [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none']">
+              {imgDummy.map((product) => {
+                return (
+                  <Image
+                    key={product.images}
+                    className="cursor-pointer w-[200px] h-full"
+                    width={100}
+                    height={100}
+                    src={product.images}
+                    alt=""
+                    onMouseOver={() => handleMouseOver(product.images)}
+                    onMouseOut={handleMouseOut}
+                  />
+                );
+              })}
             </div>
           </div>
 
