@@ -6,6 +6,33 @@ import { BsStarFill } from "react-icons/bs";
 import { FaStar, FaStore } from "react-icons/fa";
 import { FaLocationDot, FaTruckFast } from "react-icons/fa6";
 
+interface IProductDetail {
+  images: {
+    image1: string;
+    image2: string;
+    image3: string;
+    image4: string;
+    image5: string;
+    image6: string;
+    image7: string;
+    image8: string;
+  };
+}
+const imgDummy: IProductDetail[] = [
+  {
+    images: {
+      image1: "/images/applestore.png",
+      image2: "/images/defaultuser.png",
+      image3: "/images/auth_hero.png",
+      image4: "/images/applestore.png",
+      image5: "/images/defaultuser.png",
+      image6: "/images/auth_hero.png",
+      image7: "/images/applestore.png",
+      image8: "/images/defaultuser.png",
+    },
+  },
+];
+
 const ProductDetail = () => {
   const [count, setCount] = useState<number>(1);
   const [variationType, setVariationType] = useState<[]>([]);
@@ -36,6 +63,49 @@ const ProductDetail = () => {
               alt=""
               className="bigImage w-full"
             /> */}
+            <div className="variation flex overflow-x-scroll cur">
+              {imgDummy.map((product) => {
+                return (
+                  <>
+                    <Image
+                      className="cursor-pointer"
+                      width={100}
+                      height={100}
+                      src={product.images.image1}
+                      alt=""
+                    />
+                    <Image
+                      className="cursor-pointer"
+                      width={100}
+                      height={100}
+                      src={product.images.image2}
+                      alt=""
+                    />
+                    <Image
+                      className="cursor-pointer"
+                      width={100}
+                      height={100}
+                      src={product.images.image3}
+                      alt=""
+                    />
+                    <Image
+                      className="cursor-pointer"
+                      width={100}
+                      height={100}
+                      src={product.images.image4}
+                      alt=""
+                    />
+                    <Image
+                      className="cursor-pointer"
+                      width={100}
+                      height={100}
+                      src={product.images.image5}
+                      alt=""
+                    />
+                  </>
+                );
+              })}
+            </div>
           </div>
           <div className="order-2 md:order-3 purchaseBox border shadow-inner rounded-sm p-5 h-fit md:w-1/4 md:sticky">
             <p className="productTitle text-lg font-medium pb-3">
