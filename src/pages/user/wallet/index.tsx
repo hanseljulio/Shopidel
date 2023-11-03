@@ -2,53 +2,138 @@ import Button from '@/components/Button'
 import ProfileLayout from '@/components/ProfileLayout'
 import Image from 'next/image'
 import React, { useState } from 'react'
+import axios from "axios"
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import { API } from '@/network'
+import { IAPIResponse, IAPIWalletResponse } from '@/interfaces/api_interface'
+import Modal from '@/components/Modal'
+import PinCode from '@/components/PinCode'
+import { GetServerSidePropsContext, InferGetServerSidePropsType } from 'next'
+import { currencyConverter } from '@/utils/utils'
+import { useRouter } from 'next/router'
 
-const Wallet = () => {
+
+interface IActivateWalletProps {
+    onOpenDialog: () => void
+}
+
+interface IActivateWalletModalProps {
+    onClose: () => void
+}
+
+interface IWalletDetailProps {
+    wallet: IAPIWalletResponse
+}
+
+const Wallet = ({ wallet }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
+    const [isDialog, setIsDialog] = useState<boolean>(false)
+
+    if (wallet === undefined) {
+        <ProfileLayout>
+            <div className='flex justify-center items-center h-screen'>
+                <h1>An error occurred...</h1>
+            </div>
+        </ProfileLayout>
+    }
+
 
     return (
         <>
-            <dialog open className='h-screen w-screen bg-black/50 flex justify-center items-center'>
-                <div className='bg-white p-5 rounded-md flex flex-col items-center'>
-                    <Image src={"/images/activate_wallet_pin.png"} width={150} height={150} alt='activate_wallet_pin' />
-                    <h1 className='mt-5'>Input 6 digit PIN</h1>
-                    <div className='mt-3'>
-                        <OtpCode />
-                    </div>
-                    <Button text='Confirm PIN' styling='py-2 px-5 bg-[#364968] rounded-md text-white self-stretch mt-5' />
-                </div>
-            </dialog>
+            <ToastContainer />
+            {
+                isDialog && <Modal content={<ActivateWalletModal onClose={() => setIsDialog(false)} />} />
+            }
             <ProfileLayout>
-                <ActivateWallet />
+                {
+                    wallet!.isActive ? <WalletDetail wallet={wallet!} /> : <ActivateWallet onOpenDialog={() => setIsDialog(true)} />
+                }
             </ProfileLayout>
         </>
     )
 }
 
+const ActivateWalletModal = ({ onClose }: IActivateWalletModalProps) => {
+    const router = useRouter()
 
-const ActivateWallet = () => {
+    const activateWalletHandler = (pin: string) => {
+        try {
+            toast.promise(
+                API.post("/accounts/wallets/activate", {
+                    wallet_pin: pin.toString()
+                }, {
+                    headers: {
+                        "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoyLCJyb2xlIjoiIiwiaXNzIjoiRS1XQUxMRVQgTEFCUyBBUEkiLCJleHAiOjE3MTY4MDk2MzEsImlhdCI6MTY5ODgwOTYzMX0.AOwlMFVlOmuBnIm6vXR7EllekQZj4ZdJYuYccSZRS1U",
+                    }
+                }),
+                {
+                    pending: "Loading",
+                    error: {
+                        render({ data }) {
+                            if (axios.isAxiosError(data)) {
+                                return (data.response?.data as IAPIResponse).message
+                            }
+                        }
+                    },
+                    success: {
+                        render({ data }) {
+                            return (data?.data as IAPIResponse).message
+                        }
+                    }
+                },
+                {
+                    autoClose: 1500
+                }
+            )
+            toast.onChange(data => {
+                if (data.type === "success" || data.type === "error") {
+                    router.reload()
+                }
+            })
+        } catch (e) {
+            if (axios.isAxiosError(e)) {
+                toast.error(e.message, {
+                    autoClose: 1500
+                })
+            }
+        }
+    }
+
     return (
-        <div className='flex justify-center items-center h-full'>
-            <div className='flex flex-col items-center'>
-                <Image src={"/images/no_wallet.png"} width={250} height={250} alt='no_wallet' />
-                <p >You don&apos;t have wallet</p>
-                <Button text='Activate Wallet' styling='py-2 px-5 bg-[#364968] w-full rounded-md text-white mt-2' />
+        <div className='bg-white p-5 rounded-md flex flex-col items-center'>
+            <Image src={"/images/activate_wallet_pin.png"} width={150} height={150} alt='activate_wallet_pin' />
+            <h1 className='mt-5 font-bold'>Create 6 digit PIN</h1>
+            <div className='mt-3'>
+                <PinCode onSubmit={(pin) => activateWalletHandler(pin)} />
             </div>
         </div>
     )
 }
 
-const WalletDetail = () => {
+const ActivateWallet = ({ onOpenDialog }: IActivateWalletProps) => {
+    return (
+        <div className='flex justify-center items-center h-full'>
+            <div className='flex flex-col items-center'>
+                <Image src={"/images/no_wallet.png"} width={250} height={250} alt='no_wallet' />
+                <p >You don&apos;t have wallet</p>
+                <Button text='Activate Wallet' styling='py-2 px-5 bg-[#364968] w-fit rounded-md text-white mt-2' onClick={onOpenDialog} />
+            </div>
+        </div>
+    )
+}
+
+const WalletDetail = ({ wallet }: IWalletDetailProps) => {
     return (
         <div className='p-5'>
             <div className='flex justify-between items-end'>
                 <div>
-                    <p className='text-slate-500 text-sm'>Wallet id: 73e2c4a4a41eff924744dde1fd12850a</p>
+                    <p className='text-slate-500 text-sm'>Wallet id: {wallet.wallet_number}</p>
                     <p>Balance</p>
-                    <p className='text-4xl font-bold'>Rp 1.000.000,00</p>
+                    <p className='text-4xl font-bold'>{currencyConverter(parseInt(wallet.balance))}</p>
                 </div>
-                <div className='flex gap-x-2'>
-                    <Button text='Top up' styling='p-2 bg-[#364968] w-full rounded-md text-white text-sm' />
-                    <Button text='Change PIN' styling='p-2 bg-[#364968] w-full rounded-md text-white text-sm' />
+                <div className='flex gap-x-2  w-48'>
+                    <Button text='Top up' styling='p-2 bg-[#364968] w-full h-fit rounded-md text-white text-sm' />
+                    <Button text='Change PIN' styling='p-2 bg-[#364968] w-full h-fit  rounded-md text-white text-sm' />
                 </div>
             </div>
             <div className='mt-5'>
@@ -72,45 +157,29 @@ const WalletDetail = () => {
     )
 }
 
-const OtpCode = () => {
-    const [otp, setOtp] = useState({
-        otp1: "",
-        otp2: "",
-        otp3: "",
-        otp4: "",
-        otp5: "",
-        otp6: "",
-    });
-
-    return (
-        <div className='flex gap-x-2'>
-            <input type="text" name="input1" id="input1" className='w-10 rounded-md' value={otp.otp1} maxLength={1} onChange={(e) => {
-                if (!/[0-9]/g.test(e.target.value) && e.target.value !== "") return e.preventDefault()
-                setOtp({ ...otp, otp1: e.target.value })
-            }} />
-            <input type="text" name="input2" id="input2" className='w-10 rounded-md' value={otp.otp2} maxLength={1} onChange={(e) => {
-                if (!/[0-9]/g.test(e.target.value) && e.target.value !== "") return e.preventDefault()
-                setOtp({ ...otp, otp2: e.target.value })
-            }} />
-            <input type="text" name="input3" id="input3" className='w-10 rounded-md' value={otp.otp3} maxLength={1} onChange={(e) => {
-                if (!/[0-9]/g.test(e.target.value) && e.target.value !== "") return e.preventDefault()
-                setOtp({ ...otp, otp3: e.target.value })
-            }} />
-            <input type="text" name="input4" id="input4" className='w-10 rounded-md' value={otp.otp4} maxLength={1} onChange={(e) => {
-                if (!/[0-9]/g.test(e.target.value) && e.target.value !== "") return e.preventDefault()
-                setOtp({ ...otp, otp4: e.target.value })
-            }} />
-            <input type="text" name="input4" id="input4" className='w-10 rounded-md' value={otp.otp5} maxLength={1} onChange={(e) => {
-                if (!/[0-9]/g.test(e.target.value) && e.target.value !== "") return e.preventDefault()
-                setOtp({ ...otp, otp5: e.target.value })
-            }} />
-            <input type="text" name="input4" id="input4" className='w-10 rounded-md' value={otp.otp6} maxLength={1} onChange={(e) => {
-                if (!/[0-9]/g.test(e.target.value) && e.target.value !== "") return e.preventDefault()
-                setOtp({ ...otp, otp6: e.target.value })
-            }} />
-        </div>
-    )
-}
-
-
 export default Wallet
+
+
+export const getServerSideProps = async (context: GetServerSidePropsContext) => {
+    let data: IAPIWalletResponse | undefined
+
+    try {
+        const res = await API.get("/accounts/wallets", {
+            headers: {
+                "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoyLCJyb2xlIjoiIiwiaXNzIjoiRS1XQUxMRVQgTEFCUyBBUEkiLCJleHAiOjE3MTY4MDk2MzEsImlhdCI6MTY5ODgwOTYzMX0.AOwlMFVlOmuBnIm6vXR7EllekQZj4ZdJYuYccSZRS1U",
+                "Content-Type": "application/json"
+            }
+        })
+        data = (res.data as IAPIResponse<IAPIWalletResponse>).data
+    } catch (e) {
+        if (axios.isAxiosError(e)) {
+            console.log(e.response?.data)
+        }
+    }
+
+    return {
+        props: {
+            wallet: data
+        }
+    }
+}
