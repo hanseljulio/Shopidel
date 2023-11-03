@@ -14,6 +14,7 @@ import { InferGetServerSidePropsType } from "next";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { getCookie } from "cookies-next";
+import { emailConverter } from "@/utils/utils";
 
 const UserProfile = ({
   userData,
@@ -43,16 +44,6 @@ const UserProfile = ({
   useEffect(() => {
     setUserDetails(userData);
   }, []);
-
-  const emailConverter = (email: string) => {
-    let emailArray = email.split("@");
-    let censoredUserName =
-      emailArray[0].substring(0, 2) + emailArray[0].slice(3).replace(/./g, "*");
-
-    emailArray[0] = censoredUserName;
-
-    return emailArray.join("@");
-  };
 
   const submit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -123,6 +114,7 @@ const UserProfile = ({
 
   return (
     <div>
+      <ToastContainer />
       <ProfileLayout currentPage="My Profile">
         <div className="w-fit mx-auto mt-10">
           <div className="edit-profile-header pb-3 mobile:text-center">
