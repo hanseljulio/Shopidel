@@ -6,11 +6,12 @@ import Image from "next/image";
 interface IProductCard {
   image: string;
   price: number;
-  order: number;
+  order?: number;
   title: string;
-  place: string;
+  place?: string;
   star?: number;
   onClick?: MouseEventHandler;
+  showStar: boolean;
 }
 const ProductCard = ({
   image,
@@ -20,6 +21,7 @@ const ProductCard = ({
   place,
   star,
   onClick,
+  showStar,
 }: IProductCard) => {
   return (
     <div
@@ -38,22 +40,24 @@ const ProductCard = ({
             alt=""
           />
         </div>
-        <div className={"absolute bottom-0 left-0 -mb-4 ml-3 flex flex-row"}>
-          <div
-            className={classNames(
-              "h-10 w-fit px-2 flex items-center justify-center text-sm bg-white hover:shadow-none text-[#f57b29]  rounded-2xl shadow-xl"
-            )}
-          >
-            <BsStarFill />
-            <span
+        {showStar === true && (
+          <div className={"absolute bottom-0 left-0 -mb-4 ml-3 flex flex-row"}>
+            <div
               className={classNames(
-                "text-gray-500 ml-2 group-hover:text-white"
+                "h-10 w-fit px-2 flex items-center justify-center text-sm bg-white hover:shadow-none text-[#f57b29]  rounded-2xl shadow-xl"
               )}
             >
-              {star}
-            </span>
+              <BsStarFill />
+              <span
+                className={classNames(
+                  "text-gray-500 ml-2 group-hover:text-white"
+                )}
+              >
+                {star}
+              </span>
+            </div>
           </div>
-        </div>
+        )}
       </div>
       <div className="pt-3 pb-3 md:pt-5  md:pb-6 w-full px-4 ">
         <p className=" tracking-wider text-black text-sm md:text-base pt-2">
