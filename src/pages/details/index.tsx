@@ -63,7 +63,7 @@ const ProductDetail = () => {
               alt=""
               className="bigImage w-full"
             /> */}
-            <div className="variation flex overflow-x-scroll cur">
+            <div className="variation flex overflow-x-scroll [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none']">
               {imgDummy.map((product) => {
                 return (
                   <>
