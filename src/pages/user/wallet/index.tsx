@@ -12,6 +12,7 @@ import PinCode from '@/components/PinCode'
 import { GetServerSidePropsContext, InferGetServerSidePropsType } from 'next'
 import { currencyConverter } from '@/utils/utils'
 import { useRouter } from 'next/router'
+import { getCookie } from "cookies-next"
 
 
 interface IActivateWalletProps {
@@ -63,7 +64,7 @@ const ActivateWalletModal = ({ onClose }: IActivateWalletModalProps) => {
                     wallet_pin: pin.toString()
                 }, {
                     headers: {
-                        "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoyLCJyb2xlIjoiIiwiaXNzIjoiRS1XQUxMRVQgTEFCUyBBUEkiLCJleHAiOjE3MTY4MDk2MzEsImlhdCI6MTY5ODgwOTYzMX0.AOwlMFVlOmuBnIm6vXR7EllekQZj4ZdJYuYccSZRS1U",
+                        "Authorization": `Bearer ${getCookie("accessToken")}`,
                     }
                 }),
                 {
@@ -71,6 +72,7 @@ const ActivateWalletModal = ({ onClose }: IActivateWalletModalProps) => {
                     error: {
                         render({ data }) {
                             if (axios.isAxiosError(data)) {
+                                console.log(data)
                                 return (data.response?.data as IAPIResponse).message
                             }
                         }
@@ -163,10 +165,12 @@ export default Wallet
 export const getServerSideProps = async (context: GetServerSidePropsContext) => {
     let data: IAPIWalletResponse | undefined
 
+    let accessToken = context.req.cookies['accessToken']
+
     try {
         const res = await API.get("/accounts/wallets", {
             headers: {
-                "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoyLCJyb2xlIjoiIiwiaXNzIjoiRS1XQUxMRVQgTEFCUyBBUEkiLCJleHAiOjE3MTY4MDk2MzEsImlhdCI6MTY5ODgwOTYzMX0.AOwlMFVlOmuBnIm6vXR7EllekQZj4ZdJYuYccSZRS1U",
+                "Authorization": `Bearer ${accessToken}`,
                 "Content-Type": "application/json"
             }
         })
