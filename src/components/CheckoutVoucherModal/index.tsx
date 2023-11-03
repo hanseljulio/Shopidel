@@ -34,12 +34,12 @@ const IndividualVoucher = (props: IVoucherProps) => {
         props.currentSelectedVoucher === props.id ? "bg-[#fddf97]" : color
       } w-full border-2 shadow-lg rounded-[8px] px-14 py-8 flex items-center gap-10 hover:cursor-pointer hover:bg-[#fddf97] mobile:py-4`}
     >
-      <div className="">
+      <div>
         <FaTicketAlt className="text-[30px] text-[#e09664]" />
       </div>
-      <div className="mobile:text-[14px]">
-        <h1>{props.name}</h1>
-        <h1>{props.description}</h1>
+      <div>
+        <h1 className="mobile:text-[14px]">{props.name}</h1>
+        <h1 className="mobile:text-[12px]">{props.description}</h1>
       </div>
     </div>
   );
