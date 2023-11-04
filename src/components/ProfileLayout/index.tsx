@@ -6,10 +6,9 @@ import Navbar from "../Navbar";
 interface IProfileLayout {
   children: ReactNode;
   currentPage?: string;
-  username?: string;
 }
 
-const ProfileLayout = ({ children, currentPage, username }: IProfileLayout) => {
+const ProfileLayout = ({ children, currentPage }: IProfileLayout) => {
   return (
     <div className="flex flex-col h-screen">
       <div>
@@ -18,7 +17,7 @@ const ProfileLayout = ({ children, currentPage, username }: IProfileLayout) => {
       <div className="flex-1">
         <div className="flex mobile:flex-col h-full">
           <div className="mobile:hidden">
-            <UserProfileSidebar username={username} />
+            <UserProfileSidebar />
           </div>
           <div className="invisible hidden mobile:visible mobile:block">
             <MobileUserProfileSidebar currentPage={currentPage} />

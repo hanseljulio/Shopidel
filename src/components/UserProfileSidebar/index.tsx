@@ -3,11 +3,7 @@ import Image from "next/image";
 import { FaUser, FaTag, FaDollarSign, FaWallet } from "react-icons/fa";
 import { useRouter } from "next/router";
 
-interface IUserProfileSidebarProps {
-  username?: string;
-}
-
-const UserProfileSidebar = (props: IUserProfileSidebarProps) => {
+const UserProfileSidebar = () => {
   const router = useRouter();
 
   const redirectMyProfile = () => {
@@ -33,9 +29,7 @@ const UserProfileSidebar = (props: IUserProfileSidebarProps) => {
               borderRadius: "100%",
             }}
           />
-          <h1 className="text-white text-[20px]">
-            {!props.username ? "undefined" : props.username}
-          </h1>
+          <h1 className="text-white text-[20px]">Username</h1>
         </div>
       </div>
       <div className="options-section text-white mt-[30px] mx-[50px] pl-[24px] border-slate-300 border-b-2 pb-8">
