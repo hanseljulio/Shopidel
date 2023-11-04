@@ -115,7 +115,7 @@ const UserProfile = ({
   return (
     <div>
       <ToastContainer />
-      <ProfileLayout currentPage="My Profile">
+      <ProfileLayout currentPage="My Profile" username={userData?.username}>
         <div className="w-fit mx-auto mt-10">
           <div className="edit-profile-header pb-3 mobile:text-center">
             <h1 className="text-[30px]">My Profile</h1>
