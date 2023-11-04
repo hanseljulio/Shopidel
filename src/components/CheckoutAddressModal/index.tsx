@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { FaHome } from "react-icons/fa";
 import Button from "../Button";
-import { AiFillCloseSquare } from "react-icons/ai";
 
 interface IAddressProps {
   id: number;
@@ -35,7 +34,7 @@ const IndividualAddress = (props: IAddressProps) => {
       }}
       className={`${
         props.currentSelectedAddress === props.id ? "bg-[#fddf97]" : color
-      } w-full border-2 shadow-lg rounded-[8px] px-14 py-8 flex items-center gap-10 hover:cursor-pointer hover:bg-[#fddf97] mobile:py-4`}
+      } w-full border-2 shadow-lg rounded-[8px] px-14 py-8 flex items-center gap-10 hover:cursor-pointer hover:bg-[#fddf97] mobile:py-4 mobile:px-8`}
     >
       <div>
         <FaHome className="text-[30px] text-[#e09664]" />
@@ -111,7 +110,7 @@ const CheckoutAddressModal = (props: IAddressModalProps) => {
   ]);
 
   return (
-    <div className="bg-white p-5 rounded-md  w-[500px] h-[600px] mobile:w-[90%]">
+    <div className="bg-white p-5 rounded-md  w-[500px] h-[600px] mobile:w-[99%]">
       <div className="pb-3">
         <h1 className="text-[20px] ml-1">Address Select</h1>
       </div>
