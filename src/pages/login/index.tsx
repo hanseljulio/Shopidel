@@ -11,6 +11,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import axios from "axios"
 import { IAPILoginResponse, IAPIResponse } from '@/interfaces/api_interface'
 import { setCookie } from 'cookies-next';
+import { jwtDecode } from 'jwt-decode'
 
 const Login = () => {
 
@@ -26,7 +27,10 @@ const Login = () => {
                     success: {
                         render({ data }) {
                             const res = data?.data as IAPIResponse<IAPILoginResponse>
-                            setCookie("accessToken", res.data?.access_token)
+                            const decoded = jwtDecode(res.data!.access_token)
+                            setCookie("accessToken", res.data?.access_token, {
+                                expires: new Date(decoded.exp! * 1000)
+                            })
                             return res.message
                         }
                     },
