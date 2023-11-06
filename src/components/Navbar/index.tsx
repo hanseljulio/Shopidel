@@ -1,11 +1,29 @@
+import { useUserStore } from "@/store/userStore";
+import { deleteCookie } from "cookies-next";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { AiOutlineShoppingCart } from "react-icons/ai";
+import Button from "../Button";
+import { BiLogOut } from "react-icons/bi"
+import { IoSettingsSharp } from "react-icons/io5"
+import { IAPIUserProfileResponse } from "@/interfaces/api_interface";
 
 const Navbar = () => {
   const [navbar, setNavbar] = useState(false);
   const router = useRouter();
+  const { user, updateUser } = useUserStore()
+  const [logged, setLogged] = useState<IAPIUserProfileResponse | undefined>(undefined)
+
+  const logoutHandler = () => {
+    deleteCookie("accessToken")
+    updateUser(undefined)
+    router.push("/")
+  }
+
+  useEffect(() => {
+    setLogged(user!)
+  }, [user])
 
   return (
     <nav className="w-full bg-[#29374e] shadow px-4 md:px-0">
@@ -62,9 +80,8 @@ const Navbar = () => {
         </div>
         <div>
           <div
-            className={`flex-1 justify-self-center pb-3 mt-8 md:block md:pb-0 md:mt-0 ${
-              navbar ? "block" : "hidden"
-            }`}
+            className={`flex-1 justify-self-center pb-3 mt-8 md:block md:pb-0 md:mt-0 ${navbar ? "block" : "hidden"
+              }`}
           >
             <input
               className="items-center justify-center w-full md:w-[20rem] lg:w-[50rem] px-3 py-1"
@@ -95,19 +112,48 @@ const Navbar = () => {
             </div>
           </div>
         </div>
-        <div className="hidden space-x-4 md:inline-block align-middle">
+        <div className="hidden space-x-4 md:flex align-middle">
           <button
             className=" text-white rounded-md shadow align-middle"
             onClick={() => router.push("/cart")}
           >
             <AiOutlineShoppingCart size={30} />
           </button>
-          <button className="px-3 py-2 text-[#6c4343] bg-[#fddf97] rounded-md shadow transition-all duration-300 hover:bg-[#e09664] hover:text-[#fddf97]">
-            Sign in
-          </button>
-          <button className="px-3 py-2 text[#364968] bg-white rounded-md shadow transition-all duration-300 hover:bg-[#6c4343]  hover:text-white">
-            Sign up
-          </button>
+          <div className="flex gap-x-2 justify-center items-center">
+            {
+              logged ? <div className="flex gap-x-2 group hover:cursor-pointer relative">
+                <div className="w-5">
+                  <img src="https://cdn4.iconfinder.com/data/icons/web-ui-color/128/Account-512.png" alt="/images" />
+                </div>
+                <p className="text-white text-sm w-16 truncate">{user?.full_name}</p>
+                <div className="invisible opacity-0 group-hover:opacity-100 group-hover:visible transition-all duration-150 w-72 bg-white absolute top-12 right-0 z-50 rounded-bl-md rounded-br-md overflow-hidden">
+                  <div className="px-5 pt-5 flex items-center justify-between">
+                    <p>Hi, <span className="font-bold">{user?.full_name}</span></p>
+                    <div className="w-10">
+                      <img src="https://cdn4.iconfinder.com/data/icons/web-ui-color/128/Account-512.png" alt="profile_picture" />
+                    </div>
+                  </div>
+                  <div className="mt-2">
+                    <div className="px-5 py-3 flex gap-x-2 items-center hover:bg-slate-100 transition">
+                      <IoSettingsSharp />
+                      <Button text="Account settings" styling="w-full text-start text-sm" onClick={() => router.push("/user/profile")} />
+                    </div>
+                    <div className="px-5 py-3 flex gap-x-2 items-center hover:bg-slate-100 transition ">
+                      <BiLogOut />
+                      <Button text="Logout" styling="w-full text-start text-sm" onClick={logoutHandler} />
+                    </div>
+                  </div>
+                </div>
+              </div> : <div className="flex gap-x-2">
+                <button onClick={() => router.push("/login")} className="px-3 py-2 text-[#6c4343] bg-[#fddf97] rounded-md shadow transition-all duration-300 hover:bg-[#e09664] hover:text-[#fddf97]">
+                  Sign in
+                </button>
+                <button onClick={() => router.push("/register")} className="px-3 py-2 text[#364968] bg-white rounded-md shadow transition-all duration-300 hover:bg-[#6c4343]  hover:text-white">
+                  Sign up
+                </button>
+              </div>
+            }
+          </div>
         </div>
       </div>
     </nav>
