@@ -1,8 +1,12 @@
-import Button from "@/components/Button";
 import Footer from "@/components/Footer";
 import Modal from "@/components/Modal";
 import Navbar from "@/components/Navbar";
 import ProductCard from "@/components/ProductCard";
+import { IAPIProductDetail, IAPIResponse } from "@/interfaces/api_interface";
+import { API } from "@/network";
+import { currencyConverter } from "@/utils/utils";
+import axios from "axios";
+import { GetServerSidePropsContext } from "next";
 import Image from "next/image";
 import React, { useState } from "react";
 import { AiOutlineShoppingCart } from "react-icons/ai";
@@ -18,7 +22,7 @@ interface IProductDetail {
   };
 }
 interface IProductDetailProps {
-  product: IProductDetail;
+  product: IAPIProductDetail;
 }
 const imgDummy: IProductDetail[] = [
   {
@@ -71,6 +75,36 @@ const imgDummy: IProductDetail[] = [
   },
 ];
 
+export const getServerSideProps = async (
+  context: GetServerSidePropsContext
+) => {
+  let data: IAPIProductDetail | undefined;
+
+  let accessToken = context.req.cookies["accessToken"];
+
+  try {
+    const res = await API.get("/products/2", {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        "Content-Type": "application/json",
+      },
+    });
+    data = (res.data as IAPIResponse<IAPIProductDetail>).data;
+    console.log(data, "dataa");
+  } catch (e) {
+    if (axios.isAxiosError(e)) {
+      console.log(e.response?.data);
+      console.log("errrorrrrr");
+    }
+  }
+
+  return {
+    props: {
+      product: data,
+    },
+  };
+};
+
 const ProductDetail = ({ product }: IProductDetailProps) => {
   const [count, setCount] = useState<number>(1);
   const [isHovering, setIsHovering] = useState(false);
@@ -105,6 +139,7 @@ const ProductDetail = ({ product }: IProductDetailProps) => {
       setCount(count - 1);
     }
   };
+
   return (
     <>
       {isModal && (
@@ -161,16 +196,16 @@ const ProductDetail = ({ product }: IProductDetailProps) => {
             </div>
             <div className="order-2 md:order-3 purchaseBox border shadow-inner rounded-sm p-5 h-fit md:w-1/4 md:sticky md:top-0">
               <p className="productTitle text-lg font-medium pb-3">
-                Lorem ipsum dolor sit amet
+                {product.name}
               </p>
               <div className="historyProduct flex align-middle text-xs pb-3">
-                <span className="pr-3"> Sold 2000 </span>
+                <span className="pr-3">{`Sold ${product.sold}`} </span>
                 <span className="px-3 border-l border-slate-600 flex-row  md:flex flex gap-1 items-center">
                   <BsStarFill style={{ color: "#f57b29" }} />5
                 </span>
               </div>
               <p className="productPrice text-xl font-semibold text-[#f57b29] py-3">
-                Rp.10.000
+                {currencyConverter(parseInt(product.variants[0].price))}
               </p>
               <div className="flex gap-3 md:gap-2 text-sm text-neutral-600 py-3 justify-between">
                 <p className="">Pengiriman</p>
@@ -183,23 +218,19 @@ const ProductDetail = ({ product }: IProductDetailProps) => {
                   </div>
                 </div>
               </div>
-
+              {}
               <div className="flex gap-x-3 my-4 mb-8">
-                <p className="text-sm  text-neutral-600">Color</p>
-                {imgDummy.map((n) => {
-                  if (n.varian?.color !== null) {
-                    return (
-                      <div key={n.varian?.color}>
-                        <button
-                          type="submit"
-                          className="border border-[#364968] text-sm py-1 px-2 hover:bg-[#d6e4f8]"
-                        >
-                          {n.varian?.color}
-                        </button>
-                      </div>
-                    );
-                  }
-                })}
+                <div>
+                  <p className="text-sm  text-neutral-600">
+                    {/* {item.variant_name} */}
+                  </p>
+                  <button
+                    type="submit"
+                    className="border border-[#364968] text-sm py-1 px-2 hover:bg-[#d6e4f8]"
+                  >
+                    {}
+                  </button>
+                </div>
               </div>
               <></>
 
@@ -267,34 +298,7 @@ const ProductDetail = ({ product }: IProductDetailProps) => {
               </div>
               <div className="desc pt-5 ">
                 <p className="text-lg font-medium border-b my-4">Description</p>
-                <p>
-                  <br />
-                  SOFTWARE - OS: Windows 10 Home 64, English - Bundled Software:
-                  Office Home and Student 2019
-                  <br />
-                  SECURITY & PRIVACY - Security Chip: Firmware TPM 2.0 -
-                  Fingerprint Reader: None - Physical Locks: Kensington Nano
-                  Security Slot - Other Security: Camera privacy shutter
-                  <br />
-                  WARRANTY Lenovo Indonesia 2-year, Depot
-                  <br />
-                  CERTIFICATIONS - Green Certifications: ENERGY STAR 8.0, ErP
-                  Lot 3, RoHS compliant - Other Certifications: TÜV Rheinland
-                  Low Blue Light
-                  <br />
-                  Isi: • Laptop • Adaptor • Panduan • Tas Laptop
-                  <br />
-                  CATATAN: - Windows terinstall dari pabrik & lisensi digital
-                  akan teraktivasi otomatis saat terkoneksi internet stabil.
-                  Proses Windows update butuh proses cukup lama & laptop akan
-                  restart beberapa kali - Lisensi Office Home & Student sudah
-                  pre-installed dari pabrik & berupa digital - Tambah catatan:
-                  videokan unboxing, update Windows & driver jika ingin dibantu
-                  update & cek fisik sebelum dikirim. Video akan disimpan di
-                  dalam laptopnya. - Driver laptop sudah ada dari pabrik & dapat
-                  diupdate melalui aplikasi Lenovo Vantage. Driver tersedia di
-                  web:
-                </p>
+                <p>{product.description}</p>
               </div>
             </div>
           </div>

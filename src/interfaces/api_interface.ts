@@ -26,3 +26,27 @@ export interface IAPIUserProfileResponse {
 export interface IAPILoginResponse {
   access_token: string;
 }
+
+export interface IAPIProductDetail{
+    id: 2
+    name: string
+    description: string
+    stars: string
+    sold: 0
+    available: 0
+    images: null
+    variants: [
+      {
+        variant_id: 2,
+        variant_name: string,
+        selections: [
+          {
+            selection_variant_name: string,
+            selection_name: string
+          }
+        ],
+        stock: 2,
+        price: string
+      },
+    ]
+}
