@@ -6,8 +6,11 @@ const nextConfig = {
       {
         protocol: "https",
         hostname: "images.unsplash.com",
-        hostname: "down-id.img.susercontent.com",
       },
+      {
+        protocol: "https",
+        hostname: "down-id.img.susercontent.com",
+      }
     ],
   },
 };

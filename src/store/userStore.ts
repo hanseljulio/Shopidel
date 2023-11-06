@@ -4,7 +4,7 @@ import { persist } from "zustand/middleware";
 
 interface IUserStore {
     user: IAPIUserProfileResponse | undefined
-    updateUser: (data: IAPIUserProfileResponse) => void
+    updateUser: (data: IAPIUserProfileResponse | undefined) => void
 }
 
 export const useUserStore = create(
