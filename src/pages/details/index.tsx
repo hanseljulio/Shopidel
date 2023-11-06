@@ -9,10 +9,12 @@ import axios from "axios";
 import { GetServerSidePropsContext } from "next";
 import Image from "next/image";
 import React, { useState } from "react";
+import { SubmitHandler } from "react-hook-form";
 import { AiOutlineShoppingCart } from "react-icons/ai";
 import { BsStarFill } from "react-icons/bs";
 import { FaStar, FaStore } from "react-icons/fa";
 import { FaLocationDot, FaTruckFast } from "react-icons/fa6";
+import { toast } from "react-toastify";
 
 interface IProductDetail {
   images: string;
@@ -106,6 +108,8 @@ export const getServerSideProps = async (
 };
 
 const ProductDetail = ({ product }: IProductDetailProps) => {
+  const [selectionVariant, setSelectionVariant] = useState("");
+  const [selection, setSelection] = useState("");
   const [count, setCount] = useState<number>(1);
   const [isHovering, setIsHovering] = useState(false);
   const [isModal, setIsModal] = useState<boolean>(false);
@@ -139,6 +143,30 @@ const ProductDetail = ({ product }: IProductDetailProps) => {
   const dec = () => {
     if (count > 1) {
       setCount(count - 1);
+    }
+  };
+
+  const handleToCart: SubmitHandler<IAPIProductDetail> = async (data, id) => {
+    try {
+      const res = await toast.promise(
+        API.post(`/products/${id}`, data),
+        {
+          pending: "Loading",
+          success: "Register success",
+          error: {
+            render({ data }) {
+              if (axios.isAxiosError(data)) {
+                return `${(data.response?.data as IAPIResponse).message}`;
+              }
+            },
+          },
+        },
+        {
+          autoClose: 1500,
+        }
+      );
+    } catch (error) {
+      console.log(error);
     }
   };
 
@@ -187,7 +215,7 @@ const ProductDetail = ({ product }: IProductDetailProps) => {
                       width={100}
                       height={100}
                       src={product.images}
-                      alt=""
+                      alt="..."
                       onMouseOver={() => handleMouseOver(product.images)}
                       onMouseOut={handleMouseOut}
                       onClick={handleZoomImage}
@@ -224,16 +252,28 @@ const ProductDetail = ({ product }: IProductDetailProps) => {
                 {product.variant_options.map((item, i) => {
                   return (
                     <div key={i} className="flex gap-x-5 items-center">
-                      <p>{item.variant_option_name}</p>
+                      <p
+                        onChange={(e: any) => {
+                          setSelectionVariant(e.target.value),
+                            e.preventDefault();
+                        }}
+                      >
+                        {item.variant_option_name}
+                      </p>
                       <div className="flex gap-x-2">
                         {item.childs.map((variant, k) => {
                           return (
-                            <div
+                            <button
                               key={k}
-                              className="px-2 py-1 border rounded-md cursor-pointer hover:text-[#364968] hover:border-[#364968]  "
+                              className="px-2 py-1 border rounded-md cursor-pointer hover:text-[#364968] hover:border-[#364968]"
+                              value={variant}
+                              onChange={(e: any) => {
+                                setSelection(e.target.value),
+                                  e.preventDefault();
+                              }}
                             >
-                              <p>{variant}</p>
-                            </div>
+                              {variant}
+                            </button>
                           );
                         })}
                       </div>
@@ -268,6 +308,7 @@ const ProductDetail = ({ product }: IProductDetailProps) => {
               <div className="btn flex gap-5 mt-10">
                 <button
                   type="submit"
+                  // onClick={() => handleToCart(product.id)}
                   className="flex items-center justify-center gap-1 border border-[#364968] hover:shadow-md bg-[#d6e4f8] p-2 w-36 hover:bg-[#eff6fd]  transition-all duration-300"
                 >
                   <AiOutlineShoppingCart /> <span>Add to cart</span>
@@ -282,7 +323,7 @@ const ProductDetail = ({ product }: IProductDetailProps) => {
             </div>
 
             <div className="order-3 md:order-2 description mt-10 md:mt-0 md:w-2/4">
-              <div className="spesification">
+              {/* <div className="spesification">
                 <p className="text-lg font-medium border-b my-4">
                   Product Specifications
                 </p>
@@ -303,10 +344,10 @@ const ProductDetail = ({ product }: IProductDetailProps) => {
                     </tr>
                   </tbody>
                 </table>
-              </div>
+              </div> */}
               <div className="desc pt-5 ">
                 <p className="text-lg font-medium border-b my-4">Description</p>
-                <p>{product.description}</p>
+                <p className="">{product.description}</p>
               </div>
             </div>
           </div>
