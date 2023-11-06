@@ -1,4 +1,5 @@
 export interface ICartData {
+  shop_id: number;
   shop_name: string;
   cart_items: ICartItems[];
 }

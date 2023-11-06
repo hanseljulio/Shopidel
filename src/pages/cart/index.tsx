@@ -3,14 +3,16 @@ import React, { useState, useEffect } from "react";
 import Button from "@/components/Button";
 import { useRouter } from "next/router";
 import EmptyCart from "@/components/EmptyCart";
-import CartTableHead from "@/components/CartTableHead";
-import CartTableData from "@/components/CartTableData";
 import CartCheckoutArea from "@/components/CartCheckoutArea";
-import CartTableHeadMobile from "@/components/CartTableHeadMobile";
-import CartTableDataMobile from "@/components/CartTableDataMobile";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import CartTable from "@/components/CartTable";
+import { API } from "@/network";
+import axios from "axios";
+import { useUserStore } from "@/store/userStore";
+import { getCookie } from "cookies-next";
+import { set } from "react-hook-form";
+import { ICartData } from "@/interfaces/cart_interface";
 
 interface IDataTest {
   id: number;
@@ -23,6 +25,7 @@ interface IDataTest {
 const CartPage = () => {
   const router = useRouter();
   const [totalPrice, setTotalPrice] = useState<number>(0);
+  const [productIdList, setProductIdList] = useState<number[]>([]);
   const [dataTest, setDataTest] = useState<IDataTest[]>([
     {
       id: 1,
@@ -54,48 +57,64 @@ const CartPage = () => {
     },
   ]);
 
-  const [dataTest2, setDataTest2] = useState([
+  // {
+  //   shop_id: 1,
+  //   shop_name: "XYZ SHOP",
+  //   cart_items: [
+  //     {
+  //       product_id: 1,
+  //       product_image_url:
+  //         "https://down-id.img.susercontent.com/file/68171f9daf6be781832415086d2c18e2",
+  //       product_name: "Minyak Goreng Refill Rose Brand 2L",
+  //       product_unit_price: "5000000",
+  //       product_quantity: 2,
+  //       product_total_price: "10000000",
+  //       isChecked: false,
+  //     },
+  //     {
+  //       product_id: 3,
+  //       id: 2,
+  //       product_image_url:
+  //         "https://down-id.img.susercontent.com/file/68171f9daf6be781832415086d2c18e2",
+  //       product_name:
+  //         "Schneider Electric Leona Saklar Lampu - 2 Gang 2 Arah - LNA0600321",
+  //       product_unit_price: "2500000",
+  //       product_quantity: 1,
+  //       product_total_price: "2500000",
+  //       isChecked: false,
+  //     },
+  //   ],
+  // },
+  // {
+  //   shop_id: 3,
+  //   shop_name: "Satria Shop",
+  //   cart_items: [
+  //     {
+  //       product_id: 7,
+  //       id: 1,
+  //       product_image_url:
+  //         "https://down-id.img.susercontent.com/file/68171f9daf6be781832415086d2c18e2",
+  //       product_name: "Magsafe 2 Charger macbook 45w l 60w AIR l PRO - 45W",
+  //       product_unit_price: "5000000",
+  //       product_quantity: 1,
+  //       product_total_price: "5000000",
+  //       isChecked: false,
+  //     },
+  //   ],
+  // },
+
+  const [dataTest2, setDataTest2] = useState<ICartData[]>([
     {
-      shop_id: 1,
-      shop_name: "XYZ SHOP",
+      shop_id: 0,
+      shop_name: "",
       cart_items: [
         {
-          product_id: 1,
-          product_image_url:
-            "https://down-id.img.susercontent.com/file/68171f9daf6be781832415086d2c18e2",
-          product_name: "Minyak Goreng Refill Rose Brand 2L",
-          product_unit_price: "5000000",
-          product_quantity: 2,
-          product_total_price: "10000000",
-          isChecked: false,
-        },
-        {
-          product_id: 3,
-          id: 2,
-          product_image_url:
-            "https://down-id.img.susercontent.com/file/68171f9daf6be781832415086d2c18e2",
-          product_name:
-            "Schneider Electric Leona Saklar Lampu - 2 Gang 2 Arah - LNA0600321",
-          product_unit_price: "2500000",
-          product_quantity: 1,
-          product_total_price: "2500000",
-          isChecked: false,
-        },
-      ],
-    },
-    {
-      shop_id: 3,
-      shop_name: "Satria Shop",
-      cart_items: [
-        {
-          product_id: 7,
-          id: 1,
-          product_image_url:
-            "https://down-id.img.susercontent.com/file/68171f9daf6be781832415086d2c18e2",
-          product_name: "Magsafe 2 Charger macbook 45w l 60w AIR l PRO - 45W",
-          product_unit_price: "5000000",
-          product_quantity: 1,
-          product_total_price: "5000000",
+          product_id: 0,
+          product_image_url: "",
+          product_name: "",
+          product_unit_price: "",
+          product_quantity: 0,
+          product_total_price: "",
           isChecked: false,
         },
       ],
@@ -165,7 +184,6 @@ const CartPage = () => {
   const handleCheckAll = (e: any, index: number) => {
     const { checked } = e.target;
     const currentData = [...dataTest2];
-    console.log(currentData[index]);
 
     currentData[index].cart_items = currentData[index].cart_items.map(
       (data) => {
@@ -228,9 +246,11 @@ const CartPage = () => {
   };
 
   const checkEmptySelection = () => {
-    for (let i = 0; i < dataTest.length; i++) {
-      if (dataTest[i].isChecked) {
-        return false;
+    for (let i = 0; i < dataTest2.length; i++) {
+      for (let j = 0; j < dataTest2[i].cart_items.length; j++) {
+        if (dataTest2[i].cart_items[j].isChecked) {
+          return false;
+        }
       }
     }
 
@@ -249,12 +269,62 @@ const CartPage = () => {
       return;
     }
 
+    let count = 0;
+    const multipleStoreError = () => toast.error("Only one store at a time!");
+    let prevShopSelected = false;
+
+    const selectedItems = [];
+
+    for (let i = 0; i < dataTest2.length; i++) {
+      for (let j = 0; j < dataTest2[i].cart_items.length; j++) {
+        if (dataTest2[i].cart_items[j].isChecked && prevShopSelected) {
+          multipleStoreError();
+          return;
+        }
+
+        if (dataTest2[i].cart_items[j].isChecked) {
+          selectedItems.push(dataTest2[i].cart_items[j]);
+          count++;
+        }
+      }
+
+      if (count > 0) {
+        prevShopSelected = true;
+      }
+
+      count = 0;
+    }
+
     setTimeout(() => {
       router.push("/checkout");
     }, 3000);
 
     movingToCheckout();
+    localStorage.setItem("selectedCart", JSON.stringify(selectedItems));
   };
+
+  const getCartData = async () => {
+    const token = getCookie("accessToken");
+    try {
+      const res = await API.get("/accounts/carts", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+      setDataTest2(res.data.data.cart_shops);
+    } catch (e) {
+      if (axios.isAxiosError(e)) {
+        toast.error(e.message, {
+          autoClose: 1500,
+        });
+      }
+    }
+  };
+
+  useEffect(() => {
+    getCartData();
+  }, []);
 
   return (
     <div>
