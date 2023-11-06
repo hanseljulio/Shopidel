@@ -141,7 +141,7 @@ const Navbar = () => {
                   <img src="https://cdn4.iconfinder.com/data/icons/web-ui-color/128/Account-512.png" alt="/images" />
                 </div>
                 <p className="text-white text-sm w-16 truncate">{user?.full_name}</p>
-                <div className="invisible opacity-0 group-hover:opacity-100 group-hover:visible transition-all duration-150 w-72 bg-white absolute top-12 right-0 z-50 rounded-bl-md rounded-br-md overflow-hidden">
+                <div className="invisible opacity-0 group-hover:opacity-100 group-hover:visible transition-all duration-150 w-72 bg-white absolute top-12 right-0 z-50 rounded-bl-md rounded-br-md overflow-hidden shadow-lg">
                   <div className="px-5 pt-5 flex items-center gap-x-5 justify-between">
                     <p className="w-full truncate">Hi, <span className="font-bold">{user?.full_name}</span></p>
                     <div className="w-10">
