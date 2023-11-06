@@ -185,7 +185,7 @@ const ProductDetail = ({ product }: IProductDetailProps) => {
               </div>
 
               <div className="flex gap-x-3 my-4 mb-8">
-                <p className="text-sm">Color</p>
+                <p className="text-sm  text-neutral-600">Color</p>
                 {imgDummy.map((n) => {
                   if (n.varian?.color !== null) {
                     return (
