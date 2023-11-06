@@ -40,7 +40,13 @@ const Navbar = () => {
             <Link href="/">
               <h2 className="text-3xl font-bold text-white">LOGO</h2>
             </Link>
-            <div className="md:hidden">
+            <div className="md:hidden flex items-center">
+              <Link
+                href="/cart"
+                className=" w-full  px-3 py-1 "
+              >
+                <AiOutlineShoppingCart size={23} color={"white"} />
+              </Link>
               <button
                 className="p-2 text-gray-700 rounded-md outline-none focus:border-gray-400 focus:border"
                 onClick={() => setNavbar(!navbar)}
@@ -91,24 +97,33 @@ const Navbar = () => {
               placeholder="Search"
             />
             <div className="mt-3 space-y-2 lg:hidden md:inline-block">
-              <Link
-                href="/cart"
-                className=" w-full  px-3 py-1 justify-center text-white bg-[#e09664] rounded-md shadow hover:bg-gray-800 flex align-middle"
-              >
-                <AiOutlineShoppingCart size={23} />
-              </Link>
-              <Link
-                href="javascript:void(0)"
-                className="inline-block w-full px-3 py-1 text-center text-[#6c4343] bg-[#fddf97] rounded-md shadow hover:bg-gray-800"
-              >
-                Sign in
-              </Link>
-              <Link
-                href="javascript:void(0)"
-                className="inline-block w-full px-3 py-1 text-center text-[#364968] bg-white rounded-md shadow hover:bg-gray-100"
-              >
-                Sign up
-              </Link>
+              <div className="flex flex-col gap-y-2">
+                {
+                  logged ? <>
+                    <div className="py-2 flex gap-x-2 items-center hover:bg-slate-100 transition text-white">
+                      <IoSettingsSharp />
+                      <Button text="Account settings" styling="w-full text-start text-sm" onClick={() => router.push("/user/profile")} />
+                    </div>
+                    <div className="py-2 flex gap-x-2 items-center hover:bg-slate-100 transition text-white">
+                      <BiLogOut />
+                      <Button text="Logout" styling="w-full text-start text-sm" onClick={logoutHandler} />
+                    </div>
+                  </> : <>
+                    <Link
+                      href="javascript:void(0)"
+                      className="inline-block w-full px-3 py-1 text-center text-[#6c4343] bg-[#fddf97] rounded-md shadow hover:bg-gray-800"
+                    >
+                      Sign in
+                    </Link>
+                    <Link
+                      href="javascript:void(0)"
+                      className="inline-block w-full px-3 py-1 text-center text-[#364968] bg-white rounded-md shadow hover:bg-gray-100"
+                    >
+                      Sign up
+                    </Link>
+                  </>
+                }
+              </div>
             </div>
           </div>
         </div>
@@ -128,7 +143,7 @@ const Navbar = () => {
                 <p className="text-white text-sm w-16 truncate">{user?.full_name}</p>
                 <div className="invisible opacity-0 group-hover:opacity-100 group-hover:visible transition-all duration-150 w-72 bg-white absolute top-12 right-0 z-50 rounded-bl-md rounded-br-md overflow-hidden">
                   <div className="px-5 pt-5 flex items-center gap-x-5 justify-between">
-                    <p className="w-full truncate">Hi, <span className="font-bold">{user?.full_name} Pulung dsadsads</span></p>
+                    <p className="w-full truncate">Hi, <span className="font-bold">{user?.full_name}</span></p>
                     <div className="w-10">
                       <img src="https://cdn4.iconfinder.com/data/icons/web-ui-color/128/Account-512.png" alt="profile_picture" />
                     </div>
