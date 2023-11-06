@@ -8,6 +8,11 @@ export default function Home() {
     <div className="bg-gray-100">
       <Navbar />
       <CarouselHome />
+      <div>
+        <p className="text-lg mt-10 py-2 font-semibold text-center text-[#29374e]">
+          RECOMMENDATION
+        </p>
+      </div>
       <div className="justify-between  mx-auto lg:max-w-7xl md:items-center px-4 md:px-0 gap-x-4 gap-y-1 grid grid-cols-2 md:grid-cols-4">
         <ProductCard
           showStar={true}
