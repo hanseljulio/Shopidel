@@ -11,12 +11,18 @@ interface IRegisterMerchant {
 }
 
 const MyShop = () => {
+    return (
+        <RegisterShop />
+    )
+}
+
+
+const RegisterShop = () => {
     const { register, handleSubmit, formState: { errors } } = useForm<IRegisterMerchant>()
 
     const registerMerchantHandler: SubmitHandler<IRegisterMerchant> = (data) => {
         console.log(data)
     }
-
     return (
         <>
             <Navbar />
