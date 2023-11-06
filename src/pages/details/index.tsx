@@ -218,21 +218,39 @@ const ProductDetail = ({ product }: IProductDetailProps) => {
                   </div>
                 </div>
               </div>
-              {}
+
               <div className="flex gap-x-3 my-4 mb-8">
-                <div>
-                  <p className="text-sm  text-neutral-600">
-                    {/* {item.variant_name} */}
-                  </p>
-                  <button
-                    type="submit"
-                    className="border border-[#364968] text-sm py-1 px-2 hover:bg-[#d6e4f8]"
-                  >
-                    {}
-                  </button>
-                </div>
+                <p className="text-sm  text-neutral-600">
+                  {product.variants[0].selections[0].selection_variant_name}
+                </p>
+                {product.variants.map((item, index) => (
+                  <div key={index}>
+                    <button
+                      type="submit"
+                      className="border border-[#364968] text-sm py-1 px-2 hover:bg-[#d6e4f8]"
+                    >
+                      {item.selections[0].selection_name}
+                    </button>
+                  </div>
+                ))}
               </div>
-              <></>
+              {product.variants.length > 1 && (
+                <div className="flex gap-x-3 my-4 mb-8">
+                  <p className="text-sm  text-neutral-600">
+                    {product.variants[1].selections[1].selection_variant_name}
+                  </p>
+                  {product.variants.map((item, index) => (
+                    <div key={index}>
+                      <button
+                        type="submit"
+                        className="border border-[#364968] text-sm py-1 px-2 hover:bg-[#d6e4f8]"
+                      >
+                        {item.selections[1].selection_name}
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
 
               <div className="flex text-center items-center">
                 <div className="quantity flex border border-zinc-600">
@@ -303,17 +321,17 @@ const ProductDetail = ({ product }: IProductDetailProps) => {
             </div>
           </div>
           <div className="seller flex-col md:flex-row justify-between md:flex gap-10 py-5 px-5 md:px-0">
-            <div className="order-1  w-3/4">
-              <div className="sellerShop bg-[#364968] flex flex-row gap-y-5 text-white py-3 my-10 gap-10 px-5 ">
+            <div className="order-1 w-full md:w-3/4">
+              <div className="sellerShop bg-[#364968]  flex flex-row gap-y-5 text-white py-3 my-10 gap-10 px-5 ">
                 <Image
                   width={90}
                   height={0}
                   src={"/images/defaultuser.png"}
                   alt="seller"
-                  className="imgSeller w-20 h-full"
+                  className="imgSeller w-20 h-full place-self-center"
                 />
-                <div className="flex flex-col md:flex-row gap-y-4 gap-x-48">
-                  <div className="aboutSeller justify-between w-1/2 md:w-full">
+                <div className="flex flex-col md:flex-row gap-y-4 md:gap-x-48">
+                  <div className="aboutSeller justify-between w-full md:w-1/2 ">
                     <p>Nama Toko</p>
                     <p>
                       <button className="flex gap-1 md:gap-2 mt-3 text-sm justify-center items-center w-full border border-[#fddf97] hover:shadow-lg   p-1 md:w-36 text-[#fddf97] hover:bg-[#1c2637]  transition-all duration-300">
@@ -537,8 +555,9 @@ const ProductDetail = ({ product }: IProductDetailProps) => {
                 </div>
               </div>
             </div>
-            <div className="order-2 w-full md:w-1/4 items-center flex flex-col md:flex-row md:justify-end mt-5">
-              <div className="md:w-3/4 content-center">
+            <div className="order-2 w-full md:w-1/4 items-center flex flex-col md:justify-end mt-5">
+              <p>Other products from this store</p>
+              <div className="md:w-3/4 content-center flex flex-row justify-between md:flex-col">
                 <ProductCard
                   image="https://down-id.img.susercontent.com/file/bc3b634e8b2beb1f09f59671102800a7"
                   title="Sepatu Neki"
