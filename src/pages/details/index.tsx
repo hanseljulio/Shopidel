@@ -113,6 +113,8 @@ const ProductDetail = ({ product }: IProductDetailProps) => {
     "https://down-id.img.susercontent.com/file/826639af5f9af89adae9a1700f073242"
   );
 
+  console.log(product.variant_options[1]);
+
   const handleMouseOver = (src: string) => {
     setIsHovering(true);
     setVariation(src);
@@ -207,7 +209,7 @@ const ProductDetail = ({ product }: IProductDetailProps) => {
               <p className="productPrice text-xl font-semibold text-[#f57b29] py-3">
                 {currencyConverter(parseInt(product.variants[0].price))}
               </p>
-              <div className="flex gap-3 md:gap-2 text-sm text-neutral-600 py-3 justify-between">
+              <div className="flex gap-3 md:gap-2 mb-2 text-sm text-neutral-600 py-3 justify-between">
                 <p className="">Pengiriman</p>
                 <div>
                   <div className="flex items-center gap-1">
@@ -218,41 +220,29 @@ const ProductDetail = ({ product }: IProductDetailProps) => {
                   </div>
                 </div>
               </div>
-
-              <div className="flex gap-x-3 my-4 mb-8">
-                <p className="text-sm  text-neutral-600">
-                  {product.variants[0].selections[0].selection_variant_name}
-                </p>
-                {product.variants.map((item, index) => (
-                  <div key={index}>
-                    <button
-                      type="submit"
-                      className="border border-[#364968] text-sm py-1 px-2 hover:bg-[#d6e4f8]"
-                    >
-                      {item.selections[0].selection_name}
-                    </button>
-                  </div>
-                ))}
-              </div>
-              {product.variants.length > 1 && (
-                <div className="flex gap-x-3 my-4 mb-8">
-                  <p className="text-sm  text-neutral-600">
-                    {product.variants[1].selections[1].selection_variant_name}
-                  </p>
-                  {product.variants.map((item, index) => (
-                    <div key={index}>
-                      <button
-                        type="submit"
-                        className="border border-[#364968] text-sm py-1 px-2 hover:bg-[#d6e4f8]"
-                      >
-                        {item.selections[1].selection_name}
-                      </button>
+              <div className="flex flex-col gap-y-3 text-sm text-neutral-600">
+                {product.variant_options.map((item, i) => {
+                  return (
+                    <div key={i} className="flex gap-x-5 items-center">
+                      <p>{item.variant_option_name}</p>
+                      <div className="flex gap-x-2">
+                        {item.childs.map((variant, k) => {
+                          return (
+                            <div
+                              key={k}
+                              className="px-2 py-1 border rounded-md cursor-pointer hover:text-[#364968] hover:border-[#364968]  "
+                            >
+                              <p>{variant}</p>
+                            </div>
+                          );
+                        })}
+                      </div>
                     </div>
-                  ))}
-                </div>
-              )}
+                  );
+                })}
+              </div>
 
-              <div className="flex text-center items-center">
+              <div className="flex text-center items-center mt-5">
                 <div className="quantity flex border border-zinc-600">
                   <button className="minus w-5" onClick={dec}>
                     -
@@ -555,9 +545,9 @@ const ProductDetail = ({ product }: IProductDetailProps) => {
                 </div>
               </div>
             </div>
-            <div className="order-2 w-full md:w-1/4 items-center flex flex-col md:justify-end mt-5">
+            <div className="order-2 w-full md:w-1/4 items-center flex flex-col  md:justify-end mt-5">
               <p>Other products from this store</p>
-              <div className="md:w-3/4 content-center flex flex-row justify-between md:flex-col">
+              <div className="md:w-3/4 content-center flex flex-row gap-x-4 justify-between md:flex-col">
                 <ProductCard
                   image="https://down-id.img.susercontent.com/file/bc3b634e8b2beb1f09f59671102800a7"
                   title="Sepatu Neki"

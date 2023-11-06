@@ -27,6 +27,11 @@ export interface IAPILoginResponse {
   access_token: string;
 }
 
+interface ProductVariantOptions {
+  variant_option_name: string
+  childs: string[]
+}
+
 export interface IAPIProductDetail{
     id: 2
     name: string
@@ -35,6 +40,7 @@ export interface IAPIProductDetail{
     sold: 0
     available: 0
     images: null
+    variant_options: ProductVariantOptions[],
     variants: [
       {
         variant_id: 2,
