@@ -324,7 +324,7 @@ const ProductDetail = ({ product }: IProductDetailProps) => {
 
             <div className="order-3 md:order-2 description mt-10 md:mt-0 md:w-2/4">
               <div className="spesification">
-                <p className="productTitle text-xl font-medium pb-3">
+                <p className="productTitle text-2xl font-medium pb-3">
                   {product.name}
                 </p>
                 <div className="historyProduct flex align-middle text-xs pb-3">
@@ -579,7 +579,7 @@ const ProductDetail = ({ product }: IProductDetailProps) => {
               </div>
             </div>
             <div className="order-2 w-full md:w-1/4 items-center flex flex-col  md:justify-end mt-5">
-              <p>Other products from this store</p>
+              <p className="py-3">Other products from this store</p>
               <div className="md:w-3/4 content-center flex flex-row gap-x-4 justify-between md:flex-col">
                 <ProductCard
                   image="https://down-id.img.susercontent.com/file/bc3b634e8b2beb1f09f59671102800a7"
