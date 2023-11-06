@@ -6,12 +6,13 @@ import { currencyConverter } from "@/utils/utils";
 
 interface ICartTableDataProps {
   id: number;
+  index: number;
   price: number;
   quantity: number;
   isChecked: boolean;
   addQuantity: (id: number) => void;
   subtractQuantity: (id: number) => void;
-  checkboxChange: (e: any, id: number) => void;
+  checkboxChange: (e: any, id: number, index: number) => void;
   deleteFunction: (id: number) => void;
 }
 
@@ -23,7 +24,7 @@ const CartTableData = (props: ICartTableDataProps) => {
           type="checkbox"
           className="hover:cursor-pointer"
           checked={props.isChecked}
-          onChange={(e) => props.checkboxChange(e, props.id)}
+          onChange={(e) => props.checkboxChange(e, props.id, props.index)}
         />
       </td>
       <td className="px-[20px] py-[10px] text-center">{<CartProduct />}</td>
