@@ -1,6 +1,4 @@
 import React from "react";
-import CartTableHead from "../CartTableHead";
-import CartTableData from "../CartTableData";
 import { ICartItems } from "@/interfaces/cart_interface";
 import CartTableHeadMobile from "../CartTableHeadMobile";
 import CartTableDataMobile from "../CartTableDataMobile";
