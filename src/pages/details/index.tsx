@@ -225,18 +225,10 @@ const ProductDetail = ({ product }: IProductDetailProps) => {
               </div>
             </div>
             <div className="order-2 md:order-3 purchaseBox border shadow-inner rounded-sm p-5 h-fit md:w-1/4 md:sticky md:top-0">
-              <p className="productTitle text-lg font-medium pb-3">
-                {product.name}
+              <p className="productTitle text-md font-medium pb-3">
+                Set Amounts
               </p>
-              <div className="historyProduct flex align-middle text-xs pb-3">
-                <span className="pr-3">{`Sold ${product.sold}`} </span>
-                <span className="px-3 border-l border-slate-600 flex-row  md:flex flex gap-1 items-center">
-                  <BsStarFill style={{ color: "#f57b29" }} />5
-                </span>
-              </div>
-              <p className="productPrice text-xl font-semibold text-[#f57b29] py-3">
-                {currencyConverter(parseInt(product.variants[0].price))}
-              </p>
+
               <div className="flex gap-3 md:gap-2 mb-2 text-sm text-neutral-600 py-3 justify-between">
                 <p className="">Pengiriman</p>
                 <div>
@@ -305,6 +297,14 @@ const ProductDetail = ({ product }: IProductDetailProps) => {
                   <p>stock</p>
                 </div>
               </div>
+              <div className="flex  text-sm text-neutral-600 py-3 justify-between">
+                <p className="">Subtotal</p>
+                <p className="subTotal text-lg font-semibold text-neutral-800 ">
+                  {currencyConverter(
+                    parseInt(product.variants[0].price) * count
+                  )}
+                </p>
+              </div>
               <div className="btn flex gap-5 mt-10">
                 <button
                   type="submit"
@@ -323,28 +323,20 @@ const ProductDetail = ({ product }: IProductDetailProps) => {
             </div>
 
             <div className="order-3 md:order-2 description mt-10 md:mt-0 md:w-2/4">
-              {/* <div className="spesification">
-                <p className="text-lg font-medium border-b my-4">
-                  Product Specifications
+              <div className="spesification">
+                <p className="productTitle text-xl font-medium pb-3">
+                  {product.name}
                 </p>
-                <table>
-                  <thead></thead>
-                  <tbody>
-                    <tr>
-                      <td className="brand text-stone-600">{"Brand"}</td>
-                      <td className="pl-10">lorem</td>
-                    </tr>
-                    <tr>
-                      <td className="brand text-stone-600">{"Stock"}</td>
-                      <td className="pl-10">ipsum</td>
-                    </tr>
-                    <tr>
-                      <td className="brand text-stone-600">{"Shipped from"}</td>
-                      <td className="pl-10">Malang</td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div> */}
+                <div className="historyProduct flex align-middle text-xs pb-3">
+                  <span className="pr-3">{`Sold ${product.sold}`} </span>
+                  <span className="px-3 border-l border-slate-600 flex-row  md:flex flex gap-1 items-center">
+                    <BsStarFill style={{ color: "#f57b29" }} />5
+                  </span>
+                </div>
+                <p className="productPrice text-2xl font-semibold text-[#f57b29] py-3">
+                  {currencyConverter(parseInt(product.variants[0].price))}
+                </p>
+              </div>
               <div className="desc pt-5 ">
                 <p className="text-lg font-medium border-b my-4">Description</p>
                 <p className="">{product.description}</p>
