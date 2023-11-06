@@ -125,7 +125,7 @@ const CheckoutPage = () => {
           </div>
           <br />
 
-          <div className="hidden invisible mobile:visible mobile:block">
+          {/* <div className="hidden invisible mobile:visible mobile:block">
             <table className="mx-auto">
               <tbody>
                 <CheckoutTableHeadMobile />
@@ -135,11 +135,12 @@ const CheckoutPage = () => {
                     id={data.id}
                     quantity={data.quantity}
                     price={data.price}
+                    
                   />
                 ))}
               </tbody>
             </table>
-          </div>
+          </div> */}
 
           <div className="mobile:hidden mobile:invisible">
             <table className="w-full border-2">
@@ -151,6 +152,7 @@ const CheckoutPage = () => {
                     id={data.id}
                     quantity={data.quantity}
                     price={data.price}
+                    productName="Test"
                   />
                 ))}
               </tbody>
