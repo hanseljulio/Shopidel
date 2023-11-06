@@ -29,7 +29,7 @@ const UserProfileSidebar = () => {
               borderRadius: "100%",
             }}
           />
-          <h1 className="text-white text-[20px]">username</h1>
+          <h1 className="text-white text-[20px]">Username</h1>
         </div>
       </div>
       <div className="options-section text-white mt-[30px] mx-[50px] pl-[24px] border-slate-300 border-b-2 pb-8">
@@ -59,7 +59,10 @@ const UserProfileSidebar = () => {
       </div>
       <div className="remaining-section text-white mt-[20px] mx-[50px] ">
         <div className="pl-[24px] border-slate-300 border-b-2 pb-[20px]">
-          <h1 className="text-[20px] flex items-center gap-4 hover:cursor-pointer w-[250px] hover:text-[#92bcff]" onClick={() => router.push("/user/wallet")}>
+          <h1
+            className="text-[20px] flex items-center gap-4 hover:cursor-pointer w-[250px] hover:text-[#92bcff]"
+            onClick={() => router.push("/user/wallet")}
+          >
             <FaWallet />
             My Wallet
           </h1>

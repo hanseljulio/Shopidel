@@ -14,6 +14,7 @@ import { FaMapMarkerAlt } from "react-icons/fa";
 import Modal from "@/components/Modal";
 import CheckoutVoucherModal from "@/components/CheckoutVoucherModal";
 import CheckoutAddressModal from "@/components/CheckoutAddressModal";
+import CheckoutPayment from "@/components/CheckoutPayment";
 
 interface IDataTest {
   id: number;
@@ -160,7 +161,12 @@ const CheckoutPage = () => {
             <h1>Order Total: {currencyConverter(130000)}</h1>
           </div>
           <br />
-          <CheckoutVoucherSelect modalOn={() => setShowVoucherModal(true)} />
+          <CheckoutVoucherSelect
+            usedVoucher={selectedVoucher}
+            modalOn={() => setShowVoucherModal(true)}
+          />
+          <br />
+          <CheckoutPayment money={20000000} canPay={true} />
           <CheckoutGrandTotal
             merchandise={130000}
             shipping={9000}
