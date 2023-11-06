@@ -13,6 +13,7 @@ import { useUserStore } from "@/store/userStore";
 import { getCookie } from "cookies-next";
 import { set } from "react-hook-form";
 import { ICartData } from "@/interfaces/cart_interface";
+import { useCartStore } from "@/store/cartStore";
 
 interface IDataTest {
   id: number;
@@ -25,83 +26,6 @@ interface IDataTest {
 const CartPage = () => {
   const router = useRouter();
   const [totalPrice, setTotalPrice] = useState<number>(0);
-  const [productIdList, setProductIdList] = useState<number[]>([]);
-  const [dataTest, setDataTest] = useState<IDataTest[]>([
-    {
-      id: 1,
-      productId: 1,
-      price: 50000,
-      quantity: 1,
-      isChecked: false,
-    },
-    {
-      id: 2,
-      productId: 2,
-      price: 30000,
-      quantity: 2,
-      isChecked: false,
-    },
-    {
-      id: 3,
-      productId: 3,
-      price: 40000,
-      quantity: 3,
-      isChecked: false,
-    },
-    {
-      id: 4,
-      productId: 4,
-      price: 20000,
-      quantity: 4,
-      isChecked: false,
-    },
-  ]);
-
-  // {
-  //   shop_id: 1,
-  //   shop_name: "XYZ SHOP",
-  //   cart_items: [
-  //     {
-  //       product_id: 1,
-  //       product_image_url:
-  //         "https://down-id.img.susercontent.com/file/68171f9daf6be781832415086d2c18e2",
-  //       product_name: "Minyak Goreng Refill Rose Brand 2L",
-  //       product_unit_price: "5000000",
-  //       product_quantity: 2,
-  //       product_total_price: "10000000",
-  //       isChecked: false,
-  //     },
-  //     {
-  //       product_id: 3,
-  //       id: 2,
-  //       product_image_url:
-  //         "https://down-id.img.susercontent.com/file/68171f9daf6be781832415086d2c18e2",
-  //       product_name:
-  //         "Schneider Electric Leona Saklar Lampu - 2 Gang 2 Arah - LNA0600321",
-  //       product_unit_price: "2500000",
-  //       product_quantity: 1,
-  //       product_total_price: "2500000",
-  //       isChecked: false,
-  //     },
-  //   ],
-  // },
-  // {
-  //   shop_id: 3,
-  //   shop_name: "Satria Shop",
-  //   cart_items: [
-  //     {
-  //       product_id: 7,
-  //       id: 1,
-  //       product_image_url:
-  //         "https://down-id.img.susercontent.com/file/68171f9daf6be781832415086d2c18e2",
-  //       product_name: "Magsafe 2 Charger macbook 45w l 60w AIR l PRO - 45W",
-  //       product_unit_price: "5000000",
-  //       product_quantity: 1,
-  //       product_total_price: "5000000",
-  //       isChecked: false,
-  //     },
-  //   ],
-  // },
 
   const [dataTest2, setDataTest2] = useState<ICartData[]>([
     {
@@ -257,6 +181,8 @@ const CartPage = () => {
     return true;
   };
 
+  const cartStore = useCartStore();
+
   const goToCheckout = async (e: any) => {
     e.preventDefault();
     const emptySelectionMessage = () =>
@@ -300,7 +226,7 @@ const CartPage = () => {
     }, 3000);
 
     movingToCheckout();
-    localStorage.setItem("selectedCart", JSON.stringify(selectedItems));
+    cartStore.updateCart(selectedItems);
   };
 
   const getCartData = async () => {
@@ -312,7 +238,30 @@ const CartPage = () => {
           "Content-Type": "application/json",
         },
       });
-      setDataTest2(res.data.data.cart_shops);
+
+      const currentData = res.data.data.cart_shops;
+
+      if (cartStore.cart !== undefined) {
+        for (let k = 0; k < cartStore.cart!.length; k++) {
+          for (let i = 0; i < currentData.length; i++) {
+            for (let j = 0; j < currentData[i].cart_items.length; j++) {
+              if (
+                cartStore.cart![k].product_id ===
+                currentData[i].cart_items[j].product_id
+              ) {
+                currentData[i].cart_items[j].isChecked = true;
+                currentData[i].cart_items[j].product_quantity =
+                  cartStore.cart![k].product_quantity;
+              }
+            }
+          }
+        }
+
+        setDataTest2(currentData);
+        getTotal(currentData);
+      } else {
+        setDataTest2(res.data.data.cart_shops);
+      }
     } catch (e) {
       if (axios.isAxiosError(e)) {
         toast.error(e.message, {
@@ -385,7 +334,7 @@ const CartPage = () => {
                 })}
               </div>
               <div className="hidden invisible mobile:visible mobile:flex mobile:justify-center py-4">
-                {dataTest.length !== 0 && (
+                {dataTest2.length !== 0 && (
                   <Button
                     text="Delete All"
                     onClick={deleteCart}
