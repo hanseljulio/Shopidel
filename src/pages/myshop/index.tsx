@@ -23,6 +23,7 @@ const RegisterShop = () => {
     const registerMerchantHandler: SubmitHandler<IRegisterMerchant> = (data) => {
         console.log(data)
     }
+
     return (
         <>
             <Navbar />
@@ -45,7 +46,7 @@ const RegisterShop = () => {
                             </div>
                             <div className='flex flex-col'>
                                 <label htmlFor="addressId" className='text-sm'>Shop address</label>
-                                <select {...register("addressId")} name="addressId" id='addressId' className='rounded-md border p-2'>
+                                <select {...register("addressId")} name="addressId" id='addressId' className='rounded-md border p-2 border-slate-200'>
                                     <option value="1">test1</option>
                                     <option value="1">test2</option>
                                     <option value="1">test3</option>
