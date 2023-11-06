@@ -1,7 +1,7 @@
 import Button from '@/components/Button'
 import ProfileLayout from '@/components/ProfileLayout'
 import Image from 'next/image'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import axios from "axios"
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -127,6 +127,119 @@ const TopupWalletModal = ({ onBalanceChange }: ITopupWalletProps) => {
     )
 }
 
+const ChangePinModal = () => {
+    const router = useRouter()
+    const [isValid, setIsValid] = useState<boolean>(false)
+    const [password, setPassword] = useState<string>("")
+    const passwordValidation = () => {
+        try {
+            toast.promise(
+                API.post("/accounts/check-password", {
+                    password: "123"
+                }, {
+                    headers: {
+                        Authorization: `Bearer ${getCookie("accessToken")}`
+                    }
+                }),
+                {
+                    pending: "Loading",
+                    success: {
+                        render() {
+                            setIsValid(true)
+                            return "Validation success"
+                        }
+                    },
+                    error: {
+                        render({ data }) {
+                            console.log(data)
+                            return "Invalid password"
+                        }
+                    }
+                },
+                {
+                    autoClose: 1500
+                }
+            )
+        } catch (e) {
+            if (axios.isAxiosError(e)) {
+                return toast.error(e.message, {
+                    autoClose: 1500
+                })
+            }
+        }
+    }
+
+    const updatePinHandler = (pin: string) => {
+        toast.onChange(data => {
+            if (data.type === "success" && data.status === "removed") {
+                router.reload()
+            }
+        })
+
+        try {
+            toast.promise(
+                API.put("/accounts/wallets/change-pin", {
+                    wallet_new_pin: pin
+                }, {
+                    headers: {
+                        Authorization: `Bearer ${getCookie("accessToken")}`
+                    }
+                }),
+                {
+                    pending: "Loading",
+                    success: {
+                        render({ data }) {
+                            console.log(data)
+                            return (data?.data as IAPIResponse).message
+                        }
+                    },
+                    error: {
+                        render({ data }) {
+                            if (axios.isAxiosError(data)) {
+                                return (data.response?.data as IAPIResponse).message
+                            }
+                        }
+                    }
+                },
+                {
+                    autoClose: 1500
+                }
+            )
+        } catch (e) {
+            if (axios.isAxiosError(e)) {
+                return toast.error(e.message, {
+                    autoClose: 1500
+                })
+            }
+        }
+    }
+
+    return (
+        <>
+            <div>
+                {
+                    isValid ? <div className='flex flex-col justify-center items-center'>
+                        <img src='/images/activate_wallet_pin.png' className='w-36' />
+                        <p>Input your new PIN</p>
+                        <div className='mt-3'>
+                            <PinCode onSubmit={(pin) => updatePinHandler(pin)} />
+                        </div>
+                    </div> : <div>
+                        <h1>Input your password</h1>
+                        <form action="" onSubmit={(e) => {
+                            e.preventDefault()
+                            passwordValidation()
+                        }} className='flex flex-col'>
+                            <input value={password} onChange={(e) => setPassword(e.target.value)} type="password" name="password" id="password" className='rounded-md mt-1' />
+                            <Button text='Submit' styling='py-2 px-5 bg-[#364968] w-full rounded-md text-white mt-2' />
+                        </form>
+                    </div>
+                }
+            </div>
+        </>
+    )
+}
+
 const ActivateWalletModal = () => {
     const router = useRouter()
 
@@ -213,7 +326,7 @@ const WalletDetail = ({ wallet, onOpenDialog }: IWalletDetailProps) => {
                         const newBalance = parseInt(data.balance) + amount
                         return setData({ ...data, balance: newBalance.toString() })
                     }} />)} text='Top up' styling='p-2 bg-[#364968] w-full h-fit rounded-md text-white text-sm' />
-                    <Button text='Change PIN' styling='p-2 bg-[#364968] w-full h-fit  rounded-md text-white text-sm' />
+                    <Button onClick={() => onOpenDialog(<ChangePinModal />)} text='Change PIN' styling='p-2 bg-[#364968] w-full h-fit  rounded-md text-white text-sm' />
                 </div>
             </div>
             <div className='mt-5'>
