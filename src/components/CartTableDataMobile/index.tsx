@@ -9,6 +9,7 @@ interface ICartTableDataProps {
   price: number;
   quantity: number;
   isChecked: boolean;
+  productName: string;
   addQuantity: (id: number) => void;
   subtractQuantity: (id: number) => void;
   checkboxChange: (e: any, id: number) => void;
@@ -30,7 +31,7 @@ const CartTableDataMobile = (props: ICartTableDataProps) => {
         {
           <div>
             <div className="pb-4">
-              <CartProduct />
+              <CartProduct productName={props.productName} />
             </div>
             <div className="flex justify-between">
               <div className="left">

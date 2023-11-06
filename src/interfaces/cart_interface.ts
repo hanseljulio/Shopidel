@@ -4,7 +4,7 @@ export interface ICartData {
 }
 
 export interface ICartItems {
-  id: number;
+  product_id: number;
   product_image_url: string;
   product_name: string;
   product_unit_price: string;

@@ -60,7 +60,7 @@ const CartPage = () => {
       shop_name: "XYZ SHOP",
       cart_items: [
         {
-          id: 1,
+          product_id: 1,
           product_image_url:
             "https://down-id.img.susercontent.com/file/68171f9daf6be781832415086d2c18e2",
           product_name: "Minyak Goreng Refill Rose Brand 2L",
@@ -70,6 +70,7 @@ const CartPage = () => {
           isChecked: false,
         },
         {
+          product_id: 3,
           id: 2,
           product_image_url:
             "https://down-id.img.susercontent.com/file/68171f9daf6be781832415086d2c18e2",
@@ -87,6 +88,7 @@ const CartPage = () => {
       shop_name: "Satria Shop",
       cart_items: [
         {
+          product_id: 7,
           id: 1,
           product_image_url:
             "https://down-id.img.susercontent.com/file/68171f9daf6be781832415086d2c18e2",
@@ -100,40 +102,64 @@ const CartPage = () => {
     },
   ]);
 
-  const addQuantity = (id: number) => {
-    const currentData = [...dataTest];
+  const cartIsEmpty = () => {
+    if (dataTest2.length === 0) {
+      return true;
+    }
 
-    const updatedData = currentData.map((data) => {
-      if (data.id === id) {
-        return {
-          ...data,
-          quantity: data.quantity < 99 ? data.quantity + 1 : data.quantity,
-        };
-      } else {
-        return data;
+    for (let i = 0; i < dataTest2.length; i++) {
+      if (dataTest2[i].cart_items.length !== 0) {
+        return false;
       }
-    });
+    }
 
-    setDataTest(updatedData);
-    getTotal(updatedData);
+    return true;
   };
 
-  const subtractQuantity = (id: number) => {
-    const currentData = [...dataTest];
+  const addQuantity = (id: number, index: number) => {
+    const currentData = [...dataTest2];
 
-    const updatedData = currentData.map((data) => {
-      if (data.id === id) {
-        return {
-          ...data,
-          quantity: data.quantity > 1 ? data.quantity - 1 : data.quantity,
-        };
-      } else {
-        return data;
+    currentData[index].cart_items = currentData[index].cart_items.map(
+      (data) => {
+        if (data.product_id === id) {
+          return {
+            ...data,
+            product_quantity:
+              data.product_quantity < 99
+                ? data.product_quantity + 1
+                : data.product_quantity,
+          };
+        } else {
+          return data;
+        }
       }
-    });
+    );
 
-    setDataTest(updatedData);
-    getTotal(updatedData);
+    setDataTest2(currentData);
+    getTotal(currentData);
+  };
+
+  const subtractQuantity = (id: number, index: number) => {
+    const currentData = [...dataTest2];
+
+    currentData[index].cart_items = currentData[index].cart_items.map(
+      (data) => {
+        if (data.product_id === id) {
+          return {
+            ...data,
+            product_quantity:
+              data.product_quantity > 1
+                ? data.product_quantity - 1
+                : data.product_quantity,
+          };
+        } else {
+          return data;
+        }
+      }
+    );
+
+    setDataTest2(currentData);
+    getTotal(currentData);
   };
 
   const handleCheckAll = (e: any, index: number) => {
@@ -148,7 +174,7 @@ const CartPage = () => {
     );
 
     setDataTest2(currentData);
-    // getTotal(updatedData);
+    getTotal(currentData);
   };
 
   const handleCheck = (e: any, id: number, index: number) => {
@@ -157,7 +183,7 @@ const CartPage = () => {
 
     currentData[index].cart_items = currentData[index].cart_items.map(
       (data) => {
-        if (data.id === id) {
+        if (data.product_id === id) {
           return { ...data, isChecked: checked };
         } else {
           return data;
@@ -166,14 +192,18 @@ const CartPage = () => {
     );
 
     setDataTest2(currentData);
-    //getTotal(updatedData);
+    getTotal(currentData);
   };
 
-  const getTotal = (updatedData: IDataTest[]) => {
+  const getTotal = (updatedData: any) => {
     let newTotal = 0;
     for (let i = 0; i < updatedData.length; i++) {
-      if (updatedData[i].isChecked) {
-        newTotal += updatedData[i].price * updatedData[i].quantity;
+      for (let j = 0; j < updatedData[i].cart_items.length; j++) {
+        if (updatedData[i].cart_items[j].isChecked) {
+          newTotal +=
+            updatedData[i].cart_items[j].product_unit_price *
+            updatedData[i].cart_items[j].product_quantity;
+        }
       }
     }
 
@@ -181,18 +211,20 @@ const CartPage = () => {
   };
 
   const deleteCart = () => {
-    setDataTest([]);
+    setDataTest2([]);
   };
 
-  const deleteItem = (id: number) => {
-    const currentData = [...dataTest];
+  const deleteItem = (id: number, index: number) => {
+    const currentData = [...dataTest2];
 
-    const updatedData = currentData.filter((data) => {
-      return data.id !== id;
-    });
+    currentData[index].cart_items = currentData[index].cart_items.filter(
+      (data) => {
+        return data.product_id !== id;
+      }
+    );
 
-    setDataTest(updatedData);
-    getTotal(updatedData);
+    setDataTest2(currentData);
+    getTotal(currentData);
   };
 
   const checkEmptySelection = () => {
@@ -231,7 +263,7 @@ const CartPage = () => {
       <div className="lg:max-w-7xl mx-auto">
         <div className="flex mt-[30px] justify-between mobile:block">
           <h1 className="text-[30px] mobile:text-center">My Cart</h1>
-          {dataTest.length !== 0 && (
+          {!cartIsEmpty() && (
             <Button
               text="Delete All"
               onClick={deleteCart}
@@ -239,12 +271,12 @@ const CartPage = () => {
             />
           )}
         </div>
-        {dataTest.length === 0 ? (
+        {cartIsEmpty() ? (
           <EmptyCart />
         ) : (
           <div>
             <div className="pt-8 pb-[150px]">
-              <div className="hidden invisible mobile:visible mobile:block">
+              {/* <div className="hidden invisible mobile:visible mobile:block">
                 <table className="mx-auto">
                   <tbody>
                     <CartTableHeadMobile handleCheckAll={() => {}} />
@@ -263,7 +295,7 @@ const CartPage = () => {
                     ))}
                   </tbody>
                 </table>
-              </div>
+              </div> */}
               <div className="mobile:hidden mobile:invisible">
                 {dataTest2.map((data, idx) => {
                   return (

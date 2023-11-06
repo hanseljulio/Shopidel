@@ -10,10 +10,11 @@ interface ICartTableDataProps {
   price: number;
   quantity: number;
   isChecked: boolean;
-  addQuantity: (id: number) => void;
-  subtractQuantity: (id: number) => void;
+  productName: string;
+  addQuantity: (id: number, index: number) => void;
+  subtractQuantity: (id: number, index: number) => void;
   checkboxChange: (e: any, id: number, index: number) => void;
-  deleteFunction: (id: number) => void;
+  deleteFunction: (id: number, index: number) => void;
 }
 
 const CartTableData = (props: ICartTableDataProps) => {
@@ -27,7 +28,9 @@ const CartTableData = (props: ICartTableDataProps) => {
           onChange={(e) => props.checkboxChange(e, props.id, props.index)}
         />
       </td>
-      <td className="px-[20px] py-[10px] text-center">{<CartProduct />}</td>
+      <td className="px-[20px] py-[10px] text-center">
+        {<CartProduct productName={props.productName} />}
+      </td>
       <td className="px-[20px] py-[10px] text-center">
         {currencyConverter(props.price)}
       </td>
@@ -35,8 +38,10 @@ const CartTableData = (props: ICartTableDataProps) => {
         {
           <QuantityButton
             quantity={props.quantity}
-            addQuantity={() => props.addQuantity(props.id)}
-            subtractQuantity={() => props.subtractQuantity(props.id)}
+            addQuantity={() => props.addQuantity(props.id, props.index)}
+            subtractQuantity={() =>
+              props.subtractQuantity(props.id, props.index)
+            }
           />
         }
       </td>
@@ -46,7 +51,7 @@ const CartTableData = (props: ICartTableDataProps) => {
       <td className="px-[20px] py-[10px] text-center">
         <button
           className="text-[25px]"
-          onClick={() => props.deleteFunction(props.id)}
+          onClick={() => props.deleteFunction(props.id, props.index)}
         >
           <BsTrash className="text-[#D84727] hover:text-amber-500" />
         </button>
