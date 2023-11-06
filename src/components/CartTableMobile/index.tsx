@@ -2,6 +2,8 @@ import React from "react";
 import CartTableHead from "../CartTableHead";
 import CartTableData from "../CartTableData";
 import { ICartItems } from "@/interfaces/cart_interface";
+import CartTableHeadMobile from "../CartTableHeadMobile";
+import CartTableDataMobile from "../CartTableDataMobile";
 
 interface ICartTableProps {
   index: number;
@@ -15,27 +17,27 @@ interface ICartTableProps {
   handleCheckAll: (e: any, idx: number) => void;
 }
 
-const CartTable = (props: ICartTableProps) => {
+const CartTableMobile = (props: ICartTableProps) => {
   return (
     <>
       <h1
-        className={`text-[20px] pb-5 ${
+        className={`text-[20px] pb-5 text-center ${
           props.cartItems.length === 0 ? "hidden invisible" : ""
         }`}
       >
         {props.shopName}
       </h1>
       <table
-        className={`w-full border-2 ${
+        className={`mx-auto ${
           props.cartItems.length === 0 ? "hidden invisible" : ""
         }`}
       >
         <tbody>
-          <CartTableHead
+          <CartTableHeadMobile
             handleCheckAll={(e) => props.handleCheckAll(e, props.index)}
           />
           {props.cartItems.map((data, index) => (
-            <CartTableData
+            <CartTableDataMobile
               key={index}
               index={props.index}
               id={data.product_id}
@@ -52,8 +54,9 @@ const CartTable = (props: ICartTableProps) => {
         </tbody>
       </table>
       <br />
+      <br />
     </>
   );
 };
 
-export default CartTable;
+export default CartTableMobile;

@@ -9,11 +9,10 @@ import "react-toastify/dist/ReactToastify.css";
 import CartTable from "@/components/CartTable";
 import { API } from "@/network";
 import axios from "axios";
-import { useUserStore } from "@/store/userStore";
 import { getCookie } from "cookies-next";
-import { set } from "react-hook-form";
 import { ICartData } from "@/interfaces/cart_interface";
 import { useCartStore } from "@/store/cartStore";
+import CartTableMobile from "@/components/CartTableMobile";
 
 interface IDataTest {
   id: number;
@@ -295,26 +294,24 @@ const CartPage = () => {
         ) : (
           <div>
             <div className="pt-8 pb-[150px]">
-              {/* <div className="hidden invisible mobile:visible mobile:block">
-                <table className="mx-auto">
-                  <tbody>
-                    <CartTableHeadMobile handleCheckAll={() => {}} />
-                    {dataTest.map((data, index) => (
-                      <CartTableDataMobile
-                        key={index}
-                        id={data.id}
-                        price={data.price}
-                        quantity={data.quantity}
-                        isChecked={data.isChecked}
-                        addQuantity={addQuantity}
-                        subtractQuantity={subtractQuantity}
-                        checkboxChange={() => {}}
-                        deleteFunction={deleteItem}
-                      />
-                    ))}
-                  </tbody>
-                </table>
-              </div> */}
+              <div className="hidden invisible mobile:visible mobile:block">
+                {dataTest2.map((data, idx) => {
+                  return (
+                    <CartTableMobile
+                      key={idx}
+                      index={idx}
+                      id={data.shop_id}
+                      shopName={data.shop_name}
+                      cartItems={data.cart_items}
+                      addQuantity={addQuantity}
+                      subtractQuantity={subtractQuantity}
+                      handleCheckAll={handleCheckAll}
+                      checkboxChange={handleCheck}
+                      deleteFunction={deleteItem}
+                    />
+                  );
+                })}
+              </div>
               <div className="mobile:hidden mobile:invisible">
                 {dataTest2.map((data, idx) => {
                   return (
@@ -334,7 +331,7 @@ const CartPage = () => {
                 })}
               </div>
               <div className="hidden invisible mobile:visible mobile:flex mobile:justify-center py-4">
-                {dataTest2.length !== 0 && (
+                {cartIsEmpty() && (
                   <Button
                     text="Delete All"
                     onClick={deleteCart}
