@@ -6,13 +6,14 @@ interface ICartTableDataProps {
   id: number;
   price: number;
   quantity: number;
+  productName: string;
 }
 
 const CheckoutTableData = (props: ICartTableDataProps) => {
   return (
     <tr className="border-2">
       <td className="px-[20px] py-[10px] text-center flex items-start">
-        {<CartProduct />}
+        {<CartProduct productName={props.productName} />}
       </td>
       <td className="px-[20px] py-[10px] text-center">
         {currencyConverter(props.price)}
