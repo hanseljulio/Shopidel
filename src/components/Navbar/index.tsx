@@ -30,7 +30,7 @@ const Navbar = () => {
       <div className="justify-between mx-auto lg:max-w-7xl md:items-center md:flex text-white text-sm ">
         <div className="justify-between md:items-center md:flex  pt-3">
           <p>
-            <Link href="#">Seller Centre</Link>
+            <Link href="/myshop">Seller Centre</Link>
           </p>
         </div>
       </div>
