@@ -13,6 +13,7 @@ import { GetServerSidePropsContext, InferGetServerSidePropsType } from "next";
 import { currencyConverter } from "@/utils/utils";
 import { useRouter } from "next/router";
 import { getCookie } from "cookies-next";
+import { IWalletTransaction } from "@/interfaces/wallet_interface";
 
 interface IActivateWalletProps {
   onOpenDialog: (content: JSX.Element) => void;
@@ -382,6 +383,52 @@ const ActivateWallet = ({ onOpenDialog }: IActivateWalletProps) => {
 
 const WalletDetail = ({ wallet, onOpenDialog }: IWalletDetailProps) => {
   const [data, setData] = useState<IAPIWalletResponse>(wallet);
+  const [transactionHistoryRes, setTransactionHistoryRes] =
+    useState<IAPIResponse<IWalletTransaction[]>>();
+  const [paginationNumber, setPaginationNumber] = useState<number[]>([]);
+  const [page, setPage] = useState<number>(1);
+
+  const getWalletTransactionHistory = async () => {
+    try {
+      const res = await toast.promise(
+        API.get("/accounts/wallets/histories", {
+          params: {
+            page: page,
+          },
+          headers: {
+            Authorization: `Bearer ${getCookie("accessToken")}`,
+          },
+        }),
+        {
+          error: "Error fetching data",
+        }
+      );
+
+      const data = res.data as IAPIResponse<IWalletTransaction[]>;
+      setTransactionHistoryRes(data);
+
+      if (data.pagination?.total_page! <= 5) {
+        return setPaginationNumber(
+          Array.from(Array(data.pagination?.total_page).keys())
+        );
+      }
+
+      if (paginationNumber.length === 0) {
+        return setPaginationNumber(Array.from(Array(5).keys()));
+      }
+    } catch (e) {
+      if (axios.isAxiosError(e)) {
+        return toast.error(e.message, {
+          autoClose: 1500,
+        });
+      }
+    }
+  };
+
+  useEffect(() => {
+    getWalletTransactionHistory();
+  }, [data, page]);
+
   return (
     <div className="p-5">
       <div className="flex justify-between items-end">
@@ -394,7 +441,7 @@ const WalletDetail = ({ wallet, onOpenDialog }: IWalletDetailProps) => {
             {currencyConverter(parseInt(data.balance))}
           </p>
         </div>
-        <div className="flex gap-x-2  w-48">
+        <div className="flex gap-x-2  w-52">
           <Button
             onClick={() =>
               onOpenDialog(
@@ -412,24 +459,125 @@ const WalletDetail = ({ wallet, onOpenDialog }: IWalletDetailProps) => {
           <Button
             onClick={() => onOpenDialog(<ChangePinModal />)}
             text="Change PIN"
-            styling="p-2 bg-[#364968] w-full h-fit  rounded-md text-white text-sm"
+            styling="p-2 bg-[#364968] w-full h-fit rounded-md text-white text-sm"
           />
         </div>
       </div>
       <div className="mt-5">
         <h1 className="text-2xl">Transaction history</h1>
-        <table className="w-full mt-2">
-          <thead>
-            <tr>
-              <th className="text-start">No</th>
-              <th className="text-start">Title</th>
-              <th className="text-start">From/To</th>
-              <th className="text-start">Date</th>
-              <th className="text-start">Amount</th>
-            </tr>
-          </thead>
-          <tbody></tbody>
-        </table>
+        {transactionHistoryRes?.data?.length === 0 ? (
+          <p>You dont have any transactions</p>
+        ) : (
+          <div className="flex flex-col  h-[550px]">
+            <div className="flex-1">
+              <table className="w-full mt-2 border">
+                <thead>
+                  <tr className="border-2">
+                    <th className="p-2 text-start">No</th>
+                    <th className="p-2 text-start">Title</th>
+                    <th className="p-2 text-start">From/To</th>
+                    <th className="p-2 text-start">Date</th>
+                    <th className="p-2 text-start">Amount</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {transactionHistoryRes?.data?.map((item, i) => {
+                    return (
+                      <tr
+                        key={i}
+                        className={`border-2 ${
+                          (i + 1) % 2 === 0 && "bg-slate-100"
+                        }`}
+                      >
+                        <td className="p-2">
+                          {transactionHistoryRes.pagination?.current_page! *
+                            transactionHistoryRes.pagination?.limit! -
+                            transactionHistoryRes.pagination?.limit! +
+                            i +
+                            1}
+                        </td>
+                        <td className="p-2">{item.type}</td>
+                        <td className="p-2">
+                          {item.from !== "" ? item.from : item.to}
+                        </td>
+                        <td className="p-2">
+                          {new Date(item.created_at).toLocaleString()}
+                        </td>
+                        <td
+                          className={`p-2 font-bold ${
+                            item.amount.includes("-")
+                              ? "text-red-500"
+                              : "text-green-500"
+                          }`}
+                        >
+                          {currencyConverter(parseInt(item.amount))}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+            <div className="flex self-end mt-2">
+              {transactionHistoryRes?.pagination?.current_page !== 1 && (
+                <button
+                  onClick={() => {
+                    if (
+                      transactionHistoryRes?.pagination?.current_page ===
+                      paginationNumber[0] + 1
+                    ) {
+                      setPaginationNumber(
+                        Array.from(paginationNumber, (x) => x - 1)
+                      );
+                    }
+                    setPage(
+                      transactionHistoryRes?.pagination?.current_page! - 1
+                    );
+                  }}
+                  className="px-2 py-1 border text-sm rounded-bl-md rounded-tl-md "
+                >
+                  Prev
+                </button>
+              )}
+              {paginationNumber.map((i, _) => {
+                return (
+                  <Button
+                    key={i}
+                    text={(i + 1).toString()}
+                    styling={`px-3 py-1 border ${
+                      transactionHistoryRes?.pagination?.current_page ===
+                        i + 1 && "bg-slate-200 "
+                    }`}
+                    onClick={() => setPage(i + 1)}
+                  />
+                );
+              })}
+              {transactionHistoryRes?.pagination?.current_page !==
+                transactionHistoryRes?.pagination?.total_page && (
+                <button
+                  onClick={() => {
+                    if (
+                      paginationNumber[paginationNumber.length - 1] <
+                      transactionHistoryRes?.pagination?.current_page!
+                    ) {
+                      paginationNumber.shift();
+                      paginationNumber.push(
+                        paginationNumber[paginationNumber.length - 1] + 1
+                      );
+                      setPaginationNumber(paginationNumber);
+                    }
+                    setPage(
+                      transactionHistoryRes?.pagination?.current_page! + 1
+                    );
+                  }}
+                  className="px-2 py-1 border text-sm rounded-br-md rounded-tr-md "
+                >
+                  Next
+                </button>
+              )}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
