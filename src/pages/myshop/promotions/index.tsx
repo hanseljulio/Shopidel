@@ -141,14 +141,14 @@ const SellerAdminHome = () => {
       const updatedData = currentData.filter((data) => {
         let currentTime = new Date().getTime();
         let startTime = new Date(data.startDate).getTime();
-        return currentTime < startTime;
+        return currentTime <= startTime;
       });
       setPromotionData(updatedData);
     } else if (currentPage === "ended") {
       const updatedData = currentData.filter((data) => {
         let currentTime = new Date().getTime();
         let endTime = new Date(data.endDate).getTime();
-        return endTime < currentTime;
+        return endTime <= currentTime;
       });
       setPromotionData(updatedData);
     } else {

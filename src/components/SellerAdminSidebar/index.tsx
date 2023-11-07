@@ -14,7 +14,10 @@ const SellerAdminSidebar = () => {
       </div>
       <div className="remaining-section text-white mt-[20px] pt-4">
         <div className="pl-[26px] border-slate-300 border-b-2 pb-[20px]">
-          <h1 className="text-[20px] flex items-center gap-4 mt-[20px] hover:cursor-pointer transition w-[200px] hover:text-[#92bcff]">
+          <h1
+            onClick={() => router.push("/myshop/promotions")}
+            className="text-[20px] flex items-center gap-4 mt-[20px] hover:cursor-pointer transition w-[200px] hover:text-[#92bcff]"
+          >
             <FaTag />
             Promotions
           </h1>
