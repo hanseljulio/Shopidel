@@ -22,7 +22,7 @@ const Login = () => {
 
     const getUserData = async (token: string) => {
         try {
-            const res = await API.get("/accounts", {
+            const res = await API.get("/accounts/profile", {
                 headers: {
                     Authorization: `Bearer ${token}`,
                     "Content-Type": "application/json"
