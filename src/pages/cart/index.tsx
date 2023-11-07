@@ -183,12 +183,50 @@ const CartPage = () => {
     cartStore.updateCart([]);
 
     const token = getCookie("accessToken");
+    try {
+      toast.promise(
+        API.delete("/accounts/carts"),
+        {
+          pending: "Deleting",
+          success: "Cart is now empty!",
+          error: {
+            render({ data }) {
+              if (axios.isAxiosError(data)) {
+                return `${(data.response?.data as IAPIResponse).message}`;
+              }
+            },
+          },
+        },
+        {
+          autoClose: 1500,
+        }
+      );
+    } catch (e) {
+      if (axios.isAxiosError(e)) {
+        toast.error(e.message, {
+          autoClose: 1500,
+        });
+      }
+    }
+
+    setShowDeleteAllModal(false);
+  };
+
+  const deleteItem = (id: number, index: number) => {
+    const currentData = [...cartData];
+
+    currentData[index].cart_items = currentData[index].cart_items.filter(
+      (data) => {
+        return data.product_id !== id;
+      }
+    );
+
     // try {
     //   toast.promise(
-    //     API.delete("/accounts/carts"),
+    //     API.patch("/accounts/carts", currentData),
     //     {
-    //       pending: "Deleting",
-    //       success: "Cart is now empty!",
+    //       pending: "Updating cart",
+    //       success: "Cart has been updated",
     //       error: {
     //         render({ data }) {
     //           if (axios.isAxiosError(data)) {
@@ -206,26 +244,6 @@ const CartPage = () => {
     //     toast.error(e.message, {
     //       autoClose: 1500,
     //     });
-    //   }
-    // }
-
-    setShowDeleteAllModal(false);
-  };
-
-  const deleteItem = (id: number, index: number) => {
-    const currentData = [...cartData];
-
-    currentData[index].cart_items = currentData[index].cart_items.filter(
-      (data) => {
-        return data.product_id !== id;
-      }
-    );
-
-    // const storeData = [];
-
-    // for (let i = 0; i < currentData.length; i++) {
-    //   for (let j = 0; j < currentData[i].cart_items.length; j++) {
-    //     storeData.push(currentData[i].cart_items[j]);
     //   }
     // }
 
@@ -258,7 +276,6 @@ const CartPage = () => {
 
         if (cartData[i].cart_items[j].isChecked) {
           count++;
-          // selectedItems.push(cartData[i].cart_items[j]);
         }
       }
 
@@ -407,10 +424,10 @@ const CartPage = () => {
                   })}
                 </div>
                 <div className="hidden invisible mobile:visible mobile:flex mobile:justify-center py-4">
-                  {cartIsEmpty() && (
+                  {!cartIsEmpty() && (
                     <Button
                       text="Delete All"
-                      onClick={deleteCart}
+                      onClick={() => setShowDeleteAllModal(true)}
                       styling="bg-red-500 px-6 text-white rounded-[8px] mobile:py-2 mobile:mt-3"
                     />
                   )}
