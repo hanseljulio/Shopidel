@@ -53,7 +53,7 @@ const CartPage = () => {
   const [showDeleteAllModal, setShowDeleteAllModal] = useState<boolean>(false);
   const cartStore = useCartStore();
 
-  const [dataTest2, setDataTest2] = useState<ICartData[]>([
+  const [cartData, setCartData] = useState<ICartData[]>([
     {
       shop_id: 0,
       shop_name: "",
@@ -72,12 +72,12 @@ const CartPage = () => {
   ]);
 
   const cartIsEmpty = () => {
-    if (dataTest2.length === 0) {
+    if (cartData.length === 0) {
       return true;
     }
 
-    for (let i = 0; i < dataTest2.length; i++) {
-      if (dataTest2[i].cart_items.length !== 0) {
+    for (let i = 0; i < cartData.length; i++) {
+      if (cartData[i].cart_items.length !== 0) {
         return false;
       }
     }
@@ -85,18 +85,59 @@ const CartPage = () => {
     return true;
   };
 
+  const updateQuantity = (productId: number, quantity: number) => {
+    const sendData = {
+      product_id: productId,
+      quantity: quantity,
+    };
+
+    try {
+      toast.promise(
+        API.put("/accounts/carts", sendData, {
+          headers: {
+            Authorization: `Bearer ${getCookie("accessToken")}`,
+          },
+        }),
+        {
+          pending: "Updating cart",
+          success: "Cart has been updated",
+          error: {
+            render({ data }) {
+              if (axios.isAxiosError(data)) {
+                return `${(data.response?.data as IAPIResponse).message}`;
+              }
+            },
+          },
+        },
+        {
+          autoClose: 1500,
+        }
+      );
+    } catch (e) {
+      if (axios.isAxiosError(e)) {
+        toast.error(e.message, {
+          autoClose: 1500,
+        });
+      }
+    }
+  };
+
   const addQuantity = (id: number, index: number) => {
-    const currentData = [...dataTest2];
+    const currentData = [...cartData];
 
     currentData[index].cart_items = currentData[index].cart_items.map(
       (data) => {
         if (data.product_id === id) {
+          let newQuantity =
+            data.product_quantity < 99
+              ? data.product_quantity + 1
+              : data.product_quantity;
+
+          updateQuantity(data.product_id, newQuantity);
+
           return {
             ...data,
-            product_quantity:
-              data.product_quantity < 99
-                ? data.product_quantity + 1
-                : data.product_quantity,
+            product_quantity: newQuantity,
           };
         } else {
           return data;
@@ -104,22 +145,26 @@ const CartPage = () => {
       }
     );
 
-    setDataTest2(currentData);
+    setCartData(currentData);
     getTotal(currentData);
   };
 
   const subtractQuantity = (id: number, index: number) => {
-    const currentData = [...dataTest2];
+    const currentData = [...cartData];
 
     currentData[index].cart_items = currentData[index].cart_items.map(
       (data) => {
         if (data.product_id === id) {
+          let newQuantity =
+            data.product_quantity > 1
+              ? data.product_quantity - 1
+              : data.product_quantity;
+
+          updateQuantity(data.product_id, newQuantity);
+
           return {
             ...data,
-            product_quantity:
-              data.product_quantity > 1
-                ? data.product_quantity - 1
-                : data.product_quantity,
+            product_quantity: newQuantity,
           };
         } else {
           return data;
@@ -127,13 +172,13 @@ const CartPage = () => {
       }
     );
 
-    setDataTest2(currentData);
+    setCartData(currentData);
     getTotal(currentData);
   };
 
   const handleCheckAll = (e: any, index: number) => {
     const { checked } = e.target;
-    const currentData = [...dataTest2];
+    const currentData = [...cartData];
 
     currentData[index].cart_items = currentData[index].cart_items.map(
       (data) => {
@@ -141,13 +186,13 @@ const CartPage = () => {
       }
     );
 
-    setDataTest2(currentData);
+    setCartData(currentData);
     getTotal(currentData);
   };
 
   const handleCheck = (e: any, id: number, index: number) => {
     const { checked } = e.target;
-    const currentData = [...dataTest2];
+    const currentData = [...cartData];
 
     currentData[index].cart_items = currentData[index].cart_items.map(
       (data) => {
@@ -159,7 +204,7 @@ const CartPage = () => {
       }
     );
 
-    setDataTest2(currentData);
+    setCartData(currentData);
     getTotal(currentData);
   };
 
@@ -179,41 +224,71 @@ const CartPage = () => {
   };
 
   const deleteCart = async () => {
-    setDataTest2([]);
-    cartStore.updateCart([]);
+    setCartData([]);
 
-    const token = getCookie("accessToken");
-    // try {
-    //   toast.promise(
-    //     API.delete("/accounts/carts"),
-    //     {
-    //       pending: "Deleting",
-    //       success: "Cart is now empty!",
-    //       error: {
-    //         render({ data }) {
-    //           if (axios.isAxiosError(data)) {
-    //             return `${(data.response?.data as IAPIResponse).message}`;
-    //           }
-    //         },
-    //       },
-    //     },
-    //     {
-    //       autoClose: 1500,
-    //     }
-    //   );
-    // } catch (e) {
-    //   if (axios.isAxiosError(e)) {
-    //     toast.error(e.message, {
-    //       autoClose: 1500,
-    //     });
-    //   }
-    // }
+    const allProductId = [];
+
+    for (let i = 0; i < cartData.length; i++) {
+      for (let j = 0; j < cartData[i].cart_items.length; j++) {
+        allProductId.push(cartData[i].cart_items[j].product_id);
+      }
+    }
+
+    const sendData = {
+      list_product_id: allProductId,
+    };
+
+    try {
+      toast.promise(
+        API.post("/accounts/carts/delete", sendData, {
+          headers: {
+            Authorization: `Bearer ${getCookie("accessToken")}`,
+          },
+        }),
+        {
+          pending: "Deleting",
+          success: "Cart is now empty!",
+          error: {
+            render({ data }) {
+              if (axios.isAxiosError(data)) {
+                return `${(data.response?.data as IAPIResponse).message}`;
+              }
+            },
+          },
+        },
+        {
+          autoClose: 1500,
+        }
+      );
+      cartStore.updateCart(undefined);
+    } catch (e) {
+      if (axios.isAxiosError(e)) {
+        toast.error(e.message, {
+          autoClose: 1500,
+        });
+      }
+    }
 
     setShowDeleteAllModal(false);
   };
 
   const deleteItem = (id: number, index: number) => {
-    const currentData = [...dataTest2];
+    const currentData = [...cartData];
+
+    const productIdToDelete = [];
+
+    for (let i = 0; i < cartData.length; i++) {
+      for (let j = 0; j < cartData[i].cart_items.length; j++) {
+        if (cartData[i].cart_items[j].product_id === id) {
+          productIdToDelete.push(cartData[i].cart_items[j].product_id);
+          break;
+        }
+      }
+    }
+
+    const sendData = {
+      list_product_id: productIdToDelete,
+    };
 
     currentData[index].cart_items = currentData[index].cart_items.filter(
       (data) => {
@@ -221,23 +296,45 @@ const CartPage = () => {
       }
     );
 
-    // const storeData = [];
+    try {
+      toast.promise(
+        API.post("/accounts/carts/delete", sendData, {
+          headers: {
+            Authorization: `Bearer ${getCookie("accessToken")}`,
+          },
+        }),
+        {
+          pending: "Deleting",
+          success: "Cart has been updated!",
+          error: {
+            render({ data }) {
+              if (axios.isAxiosError(data)) {
+                return `${(data.response?.data as IAPIResponse).message}`;
+              }
+            },
+          },
+        },
+        {
+          autoClose: 1500,
+        }
+      );
+      cartStore.updateCart(currentData);
+    } catch (e) {
+      if (axios.isAxiosError(e)) {
+        toast.error(e.message, {
+          autoClose: 1500,
+        });
+      }
+    }
 
-    // for (let i = 0; i < currentData.length; i++) {
-    //   for (let j = 0; j < currentData[i].cart_items.length; j++) {
-    //     storeData.push(currentData[i].cart_items[j]);
-    //   }
-    // }
-
-    setDataTest2(currentData);
-    cartStore.updateCart(currentData);
+    setCartData(currentData);
     getTotal(currentData);
   };
 
   const checkEmptySelection = () => {
-    for (let i = 0; i < dataTest2.length; i++) {
-      for (let j = 0; j < dataTest2[i].cart_items.length; j++) {
-        if (dataTest2[i].cart_items[j].isChecked) {
+    for (let i = 0; i < cartData.length; i++) {
+      for (let j = 0; j < cartData[i].cart_items.length; j++) {
+        if (cartData[i].cart_items[j].isChecked) {
           return false;
         }
       }
@@ -250,15 +347,14 @@ const CartPage = () => {
     let prevShopSelected = false;
     let count = 0;
 
-    for (let i = 0; i < dataTest2.length; i++) {
-      for (let j = 0; j < dataTest2[i].cart_items.length; j++) {
-        if (dataTest2[i].cart_items[j].isChecked && prevShopSelected) {
+    for (let i = 0; i < cartData.length; i++) {
+      for (let j = 0; j < cartData[i].cart_items.length; j++) {
+        if (cartData[i].cart_items[j].isChecked && prevShopSelected) {
           return true;
         }
 
-        if (dataTest2[i].cart_items[j].isChecked) {
+        if (cartData[i].cart_items[j].isChecked) {
           count++;
-          // selectedItems.push(dataTest2[i].cart_items[j]);
         }
       }
 
@@ -291,20 +387,12 @@ const CartPage = () => {
       return;
     }
 
-    // const selectedItems = [];
-
-    // for (let i = 0; i < dataTest2.length; i++) {
-    //   for (let j = 0; j < dataTest2[i].cart_items.length; j++) {
-    //     selectedItems.push(dataTest2[i].cart_items[j]);
-    //   }
-    // }
-
     setTimeout(() => {
       router.push("/checkout");
     }, 3000);
 
     movingToCheckout();
-    cartStore.updateCart(dataTest2);
+    cartStore.updateCart(cartData);
   };
 
   const getCartData = async () => {
@@ -317,13 +405,11 @@ const CartPage = () => {
         },
       });
 
-      const currentData = res.data.data.cart_shops;
-
       if (cartStore.cart !== undefined) {
-        setDataTest2(cartStore.cart);
-        getTotal(currentData);
+        setCartData(cartStore.cart);
+        getTotal(cartStore.cart);
       } else {
-        setDataTest2(res.data.data.cart_shops);
+        setCartData(res.data.data.cart_shops);
       }
     } catch (e) {
       if (axios.isAxiosError(e)) {
@@ -371,7 +457,7 @@ const CartPage = () => {
             <div>
               <div className="pt-8 pb-[150px]">
                 <div className="hidden invisible mobile:visible mobile:block">
-                  {dataTest2.map((data, idx) => {
+                  {cartData.map((data, idx) => {
                     return (
                       <CartTableMobile
                         key={idx}
@@ -389,7 +475,7 @@ const CartPage = () => {
                   })}
                 </div>
                 <div className="mobile:hidden mobile:invisible">
-                  {dataTest2.map((data, idx) => {
+                  {cartData.map((data, idx) => {
                     return (
                       <CartTable
                         key={idx}
@@ -407,10 +493,10 @@ const CartPage = () => {
                   })}
                 </div>
                 <div className="hidden invisible mobile:visible mobile:flex mobile:justify-center py-4">
-                  {cartIsEmpty() && (
+                  {!cartIsEmpty() && (
                     <Button
                       text="Delete All"
-                      onClick={deleteCart}
+                      onClick={() => setShowDeleteAllModal(true)}
                       styling="bg-red-500 px-6 text-white rounded-[8px] mobile:py-2 mobile:mt-3"
                     />
                   )}
