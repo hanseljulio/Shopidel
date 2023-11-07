@@ -139,22 +139,34 @@ const CheckoutPage = () => {
           </div>
           <br />
 
-          {/* <div className="hidden invisible mobile:visible mobile:block">
+          <div className="hidden invisible mobile:visible mobile:block">
             <table className="mx-auto">
               <tbody>
                 <CheckoutTableHeadMobile />
-                {dataTest.map((data, index) => (
-                  <CheckoutTableDataMobile
-                    key={index}
-                    id={data.id}
-                    quantity={data.quantity}
-                    price={data.price}
-                    
-                  />
-                ))}
+                {dataTest!.map((data, index) => {
+                  if (data.cart_items.length !== 0) {
+                    return (
+                      <>
+                        {data.cart_items.map((item) => {
+                          if (item.isChecked) {
+                            return (
+                              <CheckoutTableDataMobile
+                                key={index}
+                                id={item.product_id}
+                                quantity={item.product_quantity}
+                                price={parseInt(item.product_unit_price)}
+                                productName={item.product_name}
+                              />
+                            );
+                          }
+                        })}
+                      </>
+                    );
+                  }
+                })}
               </tbody>
             </table>
-          </div> */}
+          </div>
 
           <div className="mobile:hidden mobile:invisible">
             <table className="w-full border-2">
