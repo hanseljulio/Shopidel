@@ -233,14 +233,13 @@ const UserProfile = ({
               <div
                 className={`flex-col justify-center items-center admin-edit-photo p-4 mobile:mx-auto`}
               >
-                <Image
-                  src={`${
-                    imageFile === null
-                      ? "/images/defaultuser.png"
-                      : imageFile === undefined
+                <img
+                  src={`${imageFile === null
+                    ? "/images/defaultuser.png"
+                    : imageFile === undefined
                       ? "/images/defaultuser.png"
                       : URL.createObjectURL(imageFile)
-                  }`}
+                    }`}
                   alt="Nothing"
                   width={200}
                   height={200}
