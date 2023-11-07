@@ -27,7 +27,7 @@ const ProductCard = ({
     <div
       onClick={onClick}
       className={classNames([
-        "w-full h-auto] md:w-full md:h-auto bg-white overflow-hidden my-3 shadow-md hover:shadow-none cursor-pointer rounded-md flex flex-col items-center align-middle justify-center transition-all duration-500 ease-in-out text-left",
+        "w-full h-auto] md:w-full md:h-auto bg-white overflow-hidden shadow-md hover:shadow-none cursor-pointer rounded-md flex flex-col items-center align-middle justify-center transition-all duration-500 ease-in-out text-left",
       ])}
     >
       <div className={"relative w-full md "}>
