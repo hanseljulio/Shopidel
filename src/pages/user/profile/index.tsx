@@ -289,7 +289,7 @@ export const getServerSideProps = async (
   let accessToken = context.req.cookies["accessToken"];
 
   try {
-    const res = await API.get("/accounts", {
+    const res = await API.get("/accounts/profile", {
       headers: {
         Authorization: `Bearer ${accessToken}`,
         "Content-Type": "application/json",
