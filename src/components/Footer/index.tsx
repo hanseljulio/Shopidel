@@ -20,7 +20,7 @@ const Footer = () => {
             <div className="justify-center my-10 flex  items-center gap-5">
               <div className="flex flex-col gap-y-3 md:flex-row w-[50%] max-w-[450px]">
                 <div className="flex items-center border w-full  rounded-lg px-4 py-2 mx-2 transition-all duration-300 hover:bg-slate-900 cursor-pointer">
-                  <Image
+                  <img
                     width={10}
                     height={10}
                     src="/images/googleplay.png"
@@ -33,7 +33,7 @@ const Footer = () => {
                   </div>
                 </div>
                 <div className="flex items-center border  w-full rounded-lg px-4 py-2 mx-2 transition-all duration-300 hover:bg-slate-900 cursor-pointer">
-                  <Image
+                  <img
                     width={10}
                     height={10}
                     src="/images/applestore.png"

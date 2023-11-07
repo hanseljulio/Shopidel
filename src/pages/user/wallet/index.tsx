@@ -289,7 +289,7 @@ const ActivateWalletModal = () => {
 
     return (
         <div className='bg-white p-5 rounded-md flex flex-col items-center'>
-            <Image src={"/images/activate_wallet_pin.png"} width={150} height={150} alt='activate_wallet_pin' />
+            <img src={"/images/activate_wallet_pin.png"} width={150} height={150} alt='activate_wallet_pin' />
             <h1 className='mt-5 font-bold'>Create 6 digit PIN</h1>
             <div className='mt-3'>
                 <PinCode onSubmit={(pin) => activateWalletHandler(pin)} />
@@ -302,7 +302,7 @@ const ActivateWallet = ({ onOpenDialog }: IActivateWalletProps) => {
     return (
         <div className='flex justify-center items-center h-full'>
             <div className='flex flex-col items-center'>
-                <Image src={"/images/no_wallet.png"} width={250} height={250} alt='no_wallet' />
+                <img src={"/images/no_wallet.png"} width={250} height={250} alt='no_wallet' />
                 <p >You don&apos;t have wallet</p>
                 <Button text='Activate Wallet' styling='py-2 px-5 bg-[#364968] w-fit rounded-md text-white mt-2' onClick={() => onOpenDialog(<ActivateWalletModal />)} />
             </div>

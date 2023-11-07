@@ -14,11 +14,21 @@ const Navbar = () => {
   const router = useRouter();
   const { user, updateUser } = useUserStore()
   const [logged, setLogged] = useState<IAPIUserProfileResponse | undefined>(undefined)
+  const [query, setQuery] = useState<string>()
 
   const logoutHandler = () => {
     deleteCookie("accessToken")
     updateUser(undefined)
     router.push("/")
+  }
+
+  const searchQueryHandler = () => {
+    router.push({
+      pathname: "/search",
+      query: {
+        q: query
+      }
+    })
   }
 
   useEffect(() => {
@@ -89,13 +99,19 @@ const Navbar = () => {
             className={`flex-1 justify-self-center pb-3 mt-8 md:block md:pb-0 md:mt-0 ${navbar ? "block" : "hidden"
               }`}
           >
-            <input
-              className="items-center justify-center w-full md:w-[20rem] lg:w-[50rem] px-3 py-1"
-              type="text"
-              name="search"
-              id="search"
-              placeholder="Search"
-            />
+            <form onSubmit={(e) => {
+              e.preventDefault()
+              searchQueryHandler()
+            }}>
+              <input
+                className="items-center justify-center w-full md:w-[20rem] lg:w-[50rem] px-3 py-1"
+                type="text"
+                onChange={(e) => setQuery(e.target.value)}
+                name="search"
+                id="search"
+                placeholder="Search"
+              />
+            </form>
             <div className="mt-3 space-y-2 lg:hidden md:inline-block">
               <div className="flex flex-col gap-y-2">
                 {
