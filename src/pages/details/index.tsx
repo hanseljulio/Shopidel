@@ -110,9 +110,7 @@ const ProductDetail = ({ product }: IProductDetailProps) => {
       {isModal && (
         <div className="z-50 fixed">
           <Modal
-            content={
-              <img width={800} height={800} src={variation} alt="..." />
-            }
+            content={<img width={800} height={800} src={variation} alt="..." />}
             onClose={() => setIsModal(false)}
           />
         </div>

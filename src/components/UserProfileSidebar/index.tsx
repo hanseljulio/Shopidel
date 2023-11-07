@@ -7,9 +7,9 @@ import { IAPIUserProfileResponse } from "@/interfaces/api_interface";
 
 const UserProfileSidebar = () => {
   const router = useRouter();
-  const { user, updateUser } = useUserStore()
+  const { user, updateUser } = useUserStore();
 
-  const [logged, setLogged] = useState<IAPIUserProfileResponse | undefined>()
+  const [logged, setLogged] = useState<IAPIUserProfileResponse | undefined>();
 
   const redirectMyProfile = () => {
     router.push("/user/profile");
@@ -20,8 +20,8 @@ const UserProfileSidebar = () => {
   };
 
   useEffect(() => {
-    setLogged(user)
-  }, [])
+    setLogged(user);
+  }, []);
 
   return (
     <div className="bg-[#364968] h-full px-5">
