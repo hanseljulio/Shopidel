@@ -32,8 +32,13 @@ interface ProductVariantOptions {
   childs: string[]
 }
 
+export interface IAPIProductCart{
+  product_id: number
+  quantity: number
+}
+
 export interface IAPIProductDetail{
-    id: 2
+    id: number
     name: string
     description: string
     stars: string
