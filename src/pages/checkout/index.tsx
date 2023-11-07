@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Navbar from "@/components/Navbar";
 import CheckoutTableHead from "@/components/CheckoutTableHead";
 import CheckoutTableData from "@/components/CheckoutTableData";
@@ -15,6 +15,8 @@ import Modal from "@/components/Modal";
 import CheckoutVoucherModal from "@/components/CheckoutVoucherModal";
 import CheckoutAddressModal from "@/components/CheckoutAddressModal";
 import CheckoutPayment from "@/components/CheckoutPayment";
+import { ICartData } from "@/interfaces/cart_interface";
+import { useCartStore } from "@/store/cartStore";
 
 interface IDataTest {
   id: number;
@@ -25,20 +27,11 @@ interface IDataTest {
 }
 
 const CheckoutPage = () => {
-  const [dataTest, setDataTest] = useState<IDataTest[]>([
+  const [dataTest, setDataTest] = useState<ICartData[] | undefined>([
     {
-      id: 1,
-      productId: 1,
-      price: 50000,
-      quantity: 1,
-      isChecked: false,
-    },
-    {
-      id: 4,
-      productId: 4,
-      price: 20000,
-      quantity: 4,
-      isChecked: false,
+      shop_id: 0,
+      shop_name: "",
+      cart_items: [],
     },
   ]);
 
@@ -46,6 +39,7 @@ const CheckoutPage = () => {
   const [showAddressModal, setShowAddressModal] = useState<boolean>(false);
   const [selectedVoucher, setSelectedVoucher] = useState<number>(0);
   const [selectedAddress, setSelectedAddress] = useState<number>(0);
+  const cartStore = useCartStore();
 
   const useVoucher = () => {
     setShowVoucherModal(false);
@@ -64,6 +58,10 @@ const CheckoutPage = () => {
   const changeSelectedAddress = (id: number) => {
     setSelectedAddress(id);
   };
+
+  useEffect(() => {
+    setDataTest(cartStore.cart);
+  }, []);
 
   return (
     <>
@@ -146,15 +144,27 @@ const CheckoutPage = () => {
             <table className="w-full border-2">
               <tbody>
                 <CheckoutTableHead />
-                {dataTest.map((data, index) => (
-                  <CheckoutTableData
-                    key={index}
-                    id={data.id}
-                    quantity={data.quantity}
-                    price={data.price}
-                    productName="Test"
-                  />
-                ))}
+                {dataTest!.map((data, index) => {
+                  if (data.cart_items.length !== 0) {
+                    return (
+                      <>
+                        {data.cart_items.map((item) => {
+                          if (item.isChecked) {
+                            return (
+                              <CheckoutTableData
+                                key={index}
+                                id={item.product_id}
+                                quantity={item.product_quantity}
+                                price={parseInt(item.product_unit_price)}
+                                productName={item.product_name}
+                              />
+                            );
+                          }
+                        })}
+                      </>
+                    );
+                  }
+                })}
               </tbody>
             </table>
           </div>
