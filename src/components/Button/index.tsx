@@ -10,11 +10,12 @@ interface ButtonProps {
 const Button = (props: ButtonProps) => {
   return (
     <button
-      className={`${props.styling ? props.styling : ""} ${props.disabled
-        ? "hover:cursor-default hover:bg-slate-500 bg-slate-500 text-white"
-        : ""
-        }`}
-      onClick={!props.disabled ? props.onClick : () => { }}
+      className={`${props.styling ? props.styling : ""} ${
+        props.disabled
+          ? "hover:cursor-default hover:bg-slate-500 bg-slate-500 text-white"
+          : ""
+      }`}
+      onClick={!props.disabled ? props.onClick : () => {}}
       disabled={props.disabled}
     >
       {props.text}
