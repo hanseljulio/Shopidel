@@ -225,12 +225,26 @@ const CartPage = () => {
 
   const deleteCart = async () => {
     setCartData([]);
-    cartStore.updateCart([]);
 
-    const token = getCookie("accessToken");
+    const allProductId = [];
+
+    for (let i = 0; i < cartData.length; i++) {
+      for (let j = 0; j < cartData[i].cart_items.length; j++) {
+        allProductId.push(cartData[i].cart_items[j].product_id);
+      }
+    }
+
+    const sendData = {
+      list_product_id: allProductId,
+    };
+
     try {
       toast.promise(
-        API.delete("/accounts/carts"),
+        API.post("/accounts/carts/delete", sendData, {
+          headers: {
+            Authorization: `Bearer ${getCookie("accessToken")}`,
+          },
+        }),
         {
           pending: "Deleting",
           success: "Cart is now empty!",
@@ -246,6 +260,7 @@ const CartPage = () => {
           autoClose: 1500,
         }
       );
+      cartStore.updateCart(undefined);
     } catch (e) {
       if (axios.isAxiosError(e)) {
         toast.error(e.message, {
@@ -260,44 +275,59 @@ const CartPage = () => {
   const deleteItem = (id: number, index: number) => {
     const currentData = [...cartData];
 
+    const productIdToDelete = [];
+
+    for (let i = 0; i < cartData.length; i++) {
+      for (let j = 0; j < cartData[i].cart_items.length; j++) {
+        if (cartData[i].cart_items[j].product_id === id) {
+          productIdToDelete.push(cartData[i].cart_items[j].product_id);
+          break;
+        }
+      }
+    }
+
+    const sendData = {
+      list_product_id: productIdToDelete,
+    };
+
     currentData[index].cart_items = currentData[index].cart_items.filter(
       (data) => {
         return data.product_id !== id;
       }
     );
 
-    // try {
-    //   toast.promise(
-    //     API.put("/accounts/carts", currentData, {
-    //       headers: {
-    //         Authorization: `Bearer ${getCookie("accessToken")}`,
-    //       },
-    //     }),
-    //     {
-    //       pending: "Updating cart",
-    //       success: "Cart has been updated",
-    //       error: {
-    //         render({ data }) {
-    //           if (axios.isAxiosError(data)) {
-    //             return `${(data.response?.data as IAPIResponse).message}`;
-    //           }
-    //         },
-    //       },
-    //     },
-    //     {
-    //       autoClose: 1500,
-    //     }
-    //   );
-    // } catch (e) {
-    //   if (axios.isAxiosError(e)) {
-    //     toast.error(e.message, {
-    //       autoClose: 1500,
-    //     });
-    //   }
-    // }
+    try {
+      toast.promise(
+        API.post("/accounts/carts/delete", sendData, {
+          headers: {
+            Authorization: `Bearer ${getCookie("accessToken")}`,
+          },
+        }),
+        {
+          pending: "Deleting",
+          success: "Cart has been updated!",
+          error: {
+            render({ data }) {
+              if (axios.isAxiosError(data)) {
+                return `${(data.response?.data as IAPIResponse).message}`;
+              }
+            },
+          },
+        },
+        {
+          autoClose: 1500,
+        }
+      );
+      cartStore.updateCart(currentData);
+    } catch (e) {
+      if (axios.isAxiosError(e)) {
+        toast.error(e.message, {
+          autoClose: 1500,
+        });
+      }
+    }
 
     setCartData(currentData);
-    cartStore.updateCart(currentData);
     getTotal(currentData);
   };
 

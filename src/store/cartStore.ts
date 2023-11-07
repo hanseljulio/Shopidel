@@ -5,7 +5,7 @@ import { persist } from "zustand/middleware";
 
 interface ICartStore {
   cart: ICartData[] | undefined;
-  updateCart: (data: ICartData[]) => void;
+  updateCart: (data: ICartData[] | undefined) => void;
 }
 
 export const useCartStore = create(
