@@ -8,13 +8,12 @@ const EmptyCart = () => {
   return (
     <div>
       <div className="empty-card-div flex items-center justify-center mt-[30px]">
-        <Image
+        <img
           alt="cart pic"
           src={"/images/emptycart.png"}
           width={250}
           height={250}
-          objectFit="cover"
-          className="w-[250px] h-[250px]"
+          className="w-[250px] h-[250px] object-cover"
         />
       </div>
       <h1 className="text-center">Your shopping cart looks empty!</h1>
