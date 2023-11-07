@@ -14,6 +14,7 @@ import { FaMapMarkerAlt } from "react-icons/fa";
 import Modal from "@/components/Modal";
 import CheckoutVoucherModal from "@/components/CheckoutVoucherModal";
 import CheckoutAddressModal from "@/components/CheckoutAddressModal";
+import CheckoutPayment from "@/components/CheckoutPayment";
 
 interface IDataTest {
   id: number;
@@ -124,7 +125,7 @@ const CheckoutPage = () => {
           </div>
           <br />
 
-          <div className="hidden invisible mobile:visible mobile:block">
+          {/* <div className="hidden invisible mobile:visible mobile:block">
             <table className="mx-auto">
               <tbody>
                 <CheckoutTableHeadMobile />
@@ -134,11 +135,12 @@ const CheckoutPage = () => {
                     id={data.id}
                     quantity={data.quantity}
                     price={data.price}
+                    
                   />
                 ))}
               </tbody>
             </table>
-          </div>
+          </div> */}
 
           <div className="mobile:hidden mobile:invisible">
             <table className="w-full border-2">
@@ -150,6 +152,7 @@ const CheckoutPage = () => {
                     id={data.id}
                     quantity={data.quantity}
                     price={data.price}
+                    productName="Test"
                   />
                 ))}
               </tbody>
@@ -160,7 +163,12 @@ const CheckoutPage = () => {
             <h1>Order Total: {currencyConverter(130000)}</h1>
           </div>
           <br />
-          <CheckoutVoucherSelect modalOn={() => setShowVoucherModal(true)} />
+          <CheckoutVoucherSelect
+            usedVoucher={selectedVoucher}
+            modalOn={() => setShowVoucherModal(true)}
+          />
+          <br />
+          <CheckoutPayment money={20000000} canPay={true} />
           <CheckoutGrandTotal
             merchandise={130000}
             shipping={9000}

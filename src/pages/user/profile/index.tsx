@@ -1,29 +1,95 @@
 import Input from "@/components/Input";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import Button from "@/components/Button";
 import ProfileLayout from "@/components/ProfileLayout";
+import { API } from "@/network";
+import axios from "axios";
+import {
+  IAPIResponse,
+  IAPIUserProfileResponse,
+} from "@/interfaces/api_interface";
+import { GetServerSidePropsContext } from "next";
+import { InferGetServerSidePropsType } from "next";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import { getCookie } from "cookies-next";
+import { emailConverter } from "@/utils/utils";
 
-const UserProfile = () => {
+const UserProfile = ({
+  userData,
+}: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   const [showEditEmail, setShowEditEmail] = useState<boolean>(false);
   const [imageFile, setImageFile] = useState<File | null>(null);
+  const [userDetails, setUserDetails] = useState<
+    IAPIUserProfileResponse | undefined
+  >({
+    id: "",
+    full_name: "",
+    username: "",
+    email: "",
+    phone_number: "",
+    gender: "",
+    birthdate: "",
+    profile_picture: "",
+    wallet_number: "",
+    balance: "",
+    forget_password_expired_at: "",
+  });
 
   const toggleEditEmail = () => {
     setShowEditEmail((prevBool) => !prevBool);
   };
 
-  const emailConverter = (email: string) => {
-    let emailArray = email.split("@");
-    let censoredUserName =
-      emailArray[0].substring(0, 2) + emailArray[0].slice(3).replace(/./g, "*");
-
-    emailArray[0] = censoredUserName;
-
-    return emailArray.join("@");
-  };
+  useEffect(() => {
+    setUserDetails(userData);
+  }, []);
 
   const submit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+
+    const updatedData = {
+      full_name: userData?.full_name,
+      username: userData?.username,
+      email: userData?.email,
+      phone_number: userData?.phone_number,
+      gender: userData?.gender,
+      birthdate: userData?.birthdate,
+      profile_picture: userData?.profile_picture,
+    };
+
+    console.log(updatedData);
+
+    try {
+      toast.promise(
+        API.put("/accounts", updatedData, {
+          headers: {
+            Authorization: `Bearer ${getCookie("accessToken")}`,
+            "Content-Type": "application/json",
+          },
+        }),
+        {
+          pending: "Updating...",
+          success: "Profile update success!",
+          error: {
+            render({ data }) {
+              if (axios.isAxiosError(data)) {
+                return `${(data.response?.data as IAPIResponse).message}`;
+              }
+            },
+          },
+        },
+        {
+          autoClose: 1500,
+        }
+      );
+    } catch (e) {
+      if (axios.isAxiosError(e)) {
+        toast.error(e.message, {
+          autoClose: 1500,
+        });
+      }
+    }
   };
 
   // Function for getting image from cloudinary
@@ -48,6 +114,7 @@ const UserProfile = () => {
 
   return (
     <div>
+      <ToastContainer />
       <ProfileLayout currentPage="My Profile">
         <div className="w-fit mx-auto mt-10">
           <div className="edit-profile-header pb-3 mobile:text-center">
@@ -65,6 +132,13 @@ const UserProfile = () => {
                   width="w-[250px]"
                   type="text"
                   name="username"
+                  value={userDetails!.username}
+                  onChange={(e) => {
+                    setUserDetails({
+                      ...userDetails!,
+                      username: e.target.value,
+                    });
+                  }}
                 />
                 <div className="email-section flex items-center pb-[30px] mobile:flex-col mobile:items-start">
                   <p className="">Email</p>
@@ -75,10 +149,17 @@ const UserProfile = () => {
                       width="w-[250px]"
                       type="email"
                       name="emailEdit"
+                      value={userDetails!.email}
+                      onChange={(e) =>
+                        setUserDetails({
+                          ...userDetails!,
+                          email: e.target.value,
+                        })
+                      }
                     />
                   ) : (
                     <p className="ml-[91px] mobile:m-0 mobile:py-4">
-                      {emailConverter("hanseljulio@yahoo.com")}
+                      {emailConverter(userDetails?.email!)}
                     </p>
                   )}
                   <p
@@ -95,15 +176,29 @@ const UserProfile = () => {
                   width="w-[250px]"
                   type="text"
                   name="phoneNumber"
+                  value={userDetails!.phone_number}
+                  onChange={(e) =>
+                    setUserDetails({
+                      ...userDetails!,
+                      phone_number: e.target.value,
+                    })
+                  }
                 />
-                {/* <Input
-                label="Shop Name"
-                labelStyle="mt-2"
-                styling="flex items-center gap-12 pb-[30px] mobile:flex-col mobile:gap-2 mobile:items-start"
-                width="w-[250px]"
-                type="text"
-                name="shopName"
-              /> */}
+                <Input
+                  label="Full Name"
+                  labelStyle="mt-2"
+                  styling="flex items-center gap-[58px] pb-[30px] mobile:flex-col mobile:gap-2 mobile:items-start"
+                  width="w-[250px]"
+                  type="text"
+                  value={userData?.full_name}
+                  name="fullName"
+                  onChange={(e) =>
+                    setUserDetails({
+                      ...userDetails!,
+                      full_name: e.target.value,
+                    })
+                  }
+                />
                 <Input
                   label="Gender"
                   labelStyle="mt-2"
@@ -111,14 +206,27 @@ const UserProfile = () => {
                   width="w-[250px]"
                   type="text"
                   name="username"
+                  value={userDetails!.gender}
+                  onChange={(e) =>
+                    setUserDetails({
+                      ...userDetails!,
+                      gender: e.target.value,
+                    })
+                  }
                 />
                 <Input
                   label="Date of Birth"
                   type="date"
                   name="dateOfBirth"
-                  value={""}
+                  value={userDetails!.birthdate.substring(0, 10)}
                   styling="flex items-center gap-[36px] pb-[30px] mobile:flex-col mobile:gap-2 mobile:items-start"
                   width="w-[250px]"
+                  onChange={(e) =>
+                    setUserDetails({
+                      ...userDetails!,
+                      birthdate: new Date(e.target.value).toISOString(),
+                    })
+                  }
                 />
               </div>
 
@@ -126,13 +234,12 @@ const UserProfile = () => {
                 className={`flex-col justify-center items-center admin-edit-photo p-4 mobile:mx-auto`}
               >
                 <Image
-                  src={`${
-                    imageFile === null
-                      ? "/images/defaultuser.png"
-                      : imageFile === undefined
+                  src={`${imageFile === null
+                    ? "/images/defaultuser.png"
+                    : imageFile === undefined
                       ? "/images/defaultuser.png"
                       : URL.createObjectURL(imageFile)
-                  }`}
+                    }`}
                   alt="Nothing"
                   width={200}
                   height={200}
@@ -153,13 +260,16 @@ const UserProfile = () => {
                       }
                     }}
                   />
-                  {"Upload profile photo"}
+                  {!userDetails?.profile_picture
+                    ? "Upload profile photo"
+                    : "Replace profile photo"}
                 </label>
               </div>
             </div>
             <div className="submit-btn mobile:text-center mobile:py-[50px] ml-[250px] mobile:mx-auto">
               <Button
                 text="Save Changes"
+                onClick={submit}
                 styling="bg-[#364968] text-white p-3 rounded-[8px] w-[300px] my-4"
               />
             </div>
@@ -171,3 +281,30 @@ const UserProfile = () => {
 };
 
 export default UserProfile;
+
+export const getServerSideProps = async (
+  context: GetServerSidePropsContext
+) => {
+  let data: IAPIUserProfileResponse | undefined;
+  let accessToken = context.req.cookies["accessToken"];
+
+  try {
+    const res = await API.get("/accounts", {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        "Content-Type": "application/json",
+      },
+    });
+    data = (res.data as IAPIResponse<IAPIUserProfileResponse>).data;
+  } catch (e) {
+    if (axios.isAxiosError(e)) {
+      console.log(e.response?.data);
+    }
+  }
+
+  return {
+    props: {
+      userData: data,
+    },
+  };
+};

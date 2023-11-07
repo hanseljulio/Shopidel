@@ -6,13 +6,15 @@ import Button from "../Button";
 
 interface ICartTableDataProps {
   id: number;
+  index: number;
   price: number;
   quantity: number;
   isChecked: boolean;
-  addQuantity: (id: number) => void;
-  subtractQuantity: (id: number) => void;
-  checkboxChange: (e: any, id: number) => void;
-  deleteFunction: (id: number) => void;
+  productName: string;
+  addQuantity: (id: number, index: number) => void;
+  subtractQuantity: (id: number, index: number) => void;
+  checkboxChange: (e: any, id: number, index: number) => void;
+  deleteFunction: (id: number, index: number) => void;
 }
 
 const CartTableDataMobile = (props: ICartTableDataProps) => {
@@ -23,14 +25,14 @@ const CartTableDataMobile = (props: ICartTableDataProps) => {
           type="checkbox"
           className="hover:cursor-pointer"
           checked={props.isChecked}
-          onChange={(e) => props.checkboxChange(e, props.id)}
+          onChange={(e) => props.checkboxChange(e, props.id, props.index)}
         />
       </td>
       <td className="px-[20px] py-[10px] text-left">
         {
           <div>
             <div className="pb-4">
-              <CartProduct />
+              <CartProduct productName={props.productName} />
             </div>
             <div className="flex justify-between">
               <div className="left">
@@ -39,14 +41,16 @@ const CartTableDataMobile = (props: ICartTableDataProps) => {
                 </h1>
                 <QuantityButton
                   quantity={props.quantity}
-                  addQuantity={() => props.addQuantity(props.id)}
-                  subtractQuantity={() => props.subtractQuantity(props.id)}
+                  addQuantity={() => props.addQuantity(props.id, props.index)}
+                  subtractQuantity={() =>
+                    props.subtractQuantity(props.id, props.index)
+                  }
                 />
               </div>
               <div className="right mr-[30px]">
                 <Button
                   text="Delete"
-                  onClick={() => props.deleteFunction(props.id)}
+                  onClick={() => props.deleteFunction(props.id, props.index)}
                   styling="bg-red-500 px-4 py-2 text-white rounded-[8px]"
                 />
               </div>

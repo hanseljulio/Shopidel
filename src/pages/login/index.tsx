@@ -3,30 +3,55 @@ import { ILoginForm } from '@/interfaces/auth_interface'
 import { API } from '@/network'
 import Image from 'next/image'
 import { useRouter } from 'next/router'
-import React, { useEffect } from 'react'
+import React from 'react'
 import { SubmitHandler, useForm } from 'react-hook-form'
 import { FcGoogle } from "react-icons/fc"
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import axios from "axios"
-import { IAPILoginResponse, IAPIResponse } from '@/interfaces/api_interface'
+import { IAPILoginResponse, IAPIResponse, IAPIUserProfileResponse } from '@/interfaces/api_interface'
 import { setCookie } from 'cookies-next';
+import { jwtDecode } from 'jwt-decode'
+import { useUserStore } from '@/store/userStore'
 
 const Login = () => {
 
     const { register, handleSubmit, formState: { errors } } = useForm<ILoginForm>()
+    const { updateUser } = useUserStore()
     const router = useRouter()
 
-    const loginHandler: SubmitHandler<ILoginForm> = (data) => {
+    const getUserData = async (token: string) => {
         try {
-            toast.promise(
+            const res = await API.get("/accounts", {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    "Content-Type": "application/json"
+                }
+            })
+            updateUser((res.data as IAPIResponse<IAPIUserProfileResponse>).data!)
+            router.push("/")
+        } catch (e) {
+            if (axios.isAxiosError(e)) {
+                toast.error(e.message, {
+                    autoClose: 1500
+                })
+            }
+        }
+    }
+
+    const loginHandler: SubmitHandler<ILoginForm> = async (data) => {
+        try {
+            const res = await toast.promise(
                 API.post("/auth/login", data),
                 {
                     pending: "Loading",
                     success: {
                         render({ data }) {
                             const res = data?.data as IAPIResponse<IAPILoginResponse>
-                            setCookie("accessToken", res.data?.access_token)
+                            const decoded = jwtDecode(res.data!.access_token)
+                            setCookie("accessToken", res.data?.access_token, {
+                                expires: new Date(decoded.exp! * 1000)
+                            })
                             return res.message
                         }
                     },
@@ -42,21 +67,13 @@ const Login = () => {
                     autoClose: 1500
                 }
             )
-
+            await getUserData((res.data as IAPIResponse<IAPILoginResponse>).data!.access_token)
         } catch (e) {
             if (axios.isAxiosError(e)) {
                 toast.error(e.message, { autoClose: 1500 })
             }
         }
     }
-
-    useEffect(() => {
-        toast.onChange(data => {
-            if (data.type === "success" && data.status === "removed") {
-                router.push("/")
-            }
-        })
-    }, [])
 
     return (
         <div className=' h-screen flex justify-between items-center'>

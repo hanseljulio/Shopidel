@@ -1,7 +1,7 @@
 import CarouselHome from "@/components/Carousel";
 import Navbar from "../components/Navbar";
 import Footer from "@/components/Footer";
-import ProductCard from "../components/ProductCard";
+import ProductCard from "@/components/ProductCard";
 
 export default function Home() {
   return (
