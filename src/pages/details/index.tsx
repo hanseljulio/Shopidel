@@ -1,14 +1,20 @@
-import Button from "@/components/Button";
 import Footer from "@/components/Footer";
 import Modal from "@/components/Modal";
 import Navbar from "@/components/Navbar";
 import ProductCard from "@/components/ProductCard";
+import { IAPIProductDetail, IAPIResponse } from "@/interfaces/api_interface";
+import { API } from "@/network";
+import { currencyConverter } from "@/utils/utils";
+import axios from "axios";
+import { GetServerSidePropsContext } from "next";
 import img from "next/image";
 import React, { useState } from "react";
+import { SubmitHandler } from "react-hook-form";
 import { AiOutlineShoppingCart } from "react-icons/ai";
 import { BsStarFill } from "react-icons/bs";
 import { FaStar, FaStore } from "react-icons/fa";
 import { FaLocationDot, FaTruckFast } from "react-icons/fa6";
+import { toast } from "react-toastify";
 
 interface IProductDetail {
   images: string;
@@ -18,7 +24,7 @@ interface IProductDetail {
   };
 }
 interface IProductDetailProps {
-  product: IProductDetail;
+  product: IAPIProductDetail;
 }
 const imgDummy: IProductDetail[] = [
   {
@@ -71,13 +77,53 @@ const imgDummy: IProductDetail[] = [
   },
 ];
 
+export const getServerSideProps = async (
+  context: GetServerSidePropsContext
+) => {
+  let data: IAPIProductDetail | undefined;
+
+  let accessToken = context.req.cookies["accessToken"];
+
+  try {
+    const res = await API.get("/products/2", {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        "Content-Type": "application/json",
+      },
+    });
+    data = (res.data as IAPIResponse<IAPIProductDetail>).data;
+    console.log(data, "dataa");
+  } catch (e) {
+    if (axios.isAxiosError(e)) {
+      console.log(e.response?.data);
+      console.log("errrorrrrr");
+    }
+  }
+
+  return {
+    props: {
+      product: data,
+    },
+  };
+};
+
 const ProductDetail = ({ product }: IProductDetailProps) => {
+  const [selectionVariant, setSelectionVariant] = useState("");
+  const [selection, setSelection] = useState("");
   const [count, setCount] = useState<number>(1);
   const [isHovering, setIsHovering] = useState(false);
+
   const [isModal, setIsModal] = useState<boolean>(false);
   const [variation, setVariation] = useState(
     "https://down-id.img.susercontent.com/file/826639af5f9af89adae9a1700f073242"
   );
+  const [isActive, setIsActive] = useState(false);
+
+  const handleClick = () => {
+    setIsActive(!isActive); // Toggle the active state when the button is clicked
+  };
+
+  console.log(product.variant_options[1]);
 
   const handleMouseOver = (src: string) => {
     setIsHovering(true);
@@ -105,14 +151,37 @@ const ProductDetail = ({ product }: IProductDetailProps) => {
       setCount(count - 1);
     }
   };
+
+  const handleToCart: SubmitHandler<IAPIProductDetail> = async (data, id) => {
+    try {
+      const res = await toast.promise(
+        API.post(`/products/${id}`, data),
+        {
+          pending: "Loading",
+          success: "Register success",
+          error: {
+            render({ data }) {
+              if (axios.isAxiosError(data)) {
+                return `${(data.response?.data as IAPIResponse).message}`;
+              }
+            },
+          },
+        },
+        {
+          autoClose: 1500,
+        }
+      );
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   return (
     <>
       {isModal && (
         <div className="z-50 fixed">
           <Modal
-            content={
-              <img width={800} height={800} src={variation} alt="..." />
-            }
+            content={<img width={800} height={800} src={variation} alt="..." />}
             onClose={() => setIsModal(false)}
           />
         </div>
@@ -150,7 +219,7 @@ const ProductDetail = ({ product }: IProductDetailProps) => {
                       width={100}
                       height={100}
                       src={product.images}
-                      alt=""
+                      alt="..."
                       onMouseOver={() => handleMouseOver(product.images)}
                       onMouseOut={handleMouseOut}
                       onClick={handleZoomImage}
@@ -160,19 +229,11 @@ const ProductDetail = ({ product }: IProductDetailProps) => {
               </div>
             </div>
             <div className="order-2 md:order-3 purchaseBox border shadow-inner rounded-sm p-5 h-fit md:w-1/4 md:sticky md:top-0">
-              <p className="productTitle text-lg font-medium pb-3">
-                Lorem ipsum dolor sit amet
+              <p className="productTitle text-md font-medium pb-3">
+                Set Amounts
               </p>
-              <div className="historyProduct flex align-middle text-xs pb-3">
-                <span className="pr-3"> Sold 2000 </span>
-                <span className="px-3 border-l border-slate-600 flex-row  md:flex flex gap-1 items-center">
-                  <BsStarFill style={{ color: "#f57b29" }} />5
-                </span>
-              </div>
-              <p className="productPrice text-xl font-semibold text-[#f57b29] py-3">
-                Rp.10.000
-              </p>
-              <div className="flex gap-3 md:gap-2 text-sm text-neutral-600 py-3 justify-between">
+
+              <div className="flex gap-3 md:gap-2 mb-2 text-sm text-neutral-600 py-3 justify-between">
                 <p className="">Pengiriman</p>
                 <div>
                   <div className="flex items-center gap-1">
@@ -183,27 +244,40 @@ const ProductDetail = ({ product }: IProductDetailProps) => {
                   </div>
                 </div>
               </div>
-
-              <div className="flex gap-x-3 my-4 mb-8">
-                <p className="text-sm  text-neutral-600">Color</p>
-                {imgDummy.map((n) => {
-                  if (n.varian?.color !== null) {
-                    return (
-                      <div key={n.varian?.color}>
-                        <button
-                          type="submit"
-                          className="border border-[#364968] text-sm py-1 px-2 hover:bg-[#d6e4f8]"
-                        >
-                          {n.varian?.color}
-                        </button>
+              <div className="flex flex-col gap-y-3 text-sm text-neutral-600">
+                {product.variant_options.map((item, i) => {
+                  return (
+                    <div key={i} className="flex gap-x-5 items-center">
+                      <p
+                        onChange={(e: any) => {
+                          setSelectionVariant(e.target.value),
+                            e.preventDefault();
+                        }}
+                      >
+                        {item.variant_option_name}
+                      </p>
+                      <div className="flex gap-x-2">
+                        {item.childs.map((variant, k) => {
+                          return (
+                            <button
+                              key={k}
+                              className={`btn ${
+                                isActive ? "active" : ""
+                              }  px-2 py-1 border rounded-md cursor-pointer hover:text-[#364968] hover:border-[#364968]`}
+                              value={variant}
+                              onChange={handleClick}
+                            >
+                              {variant}
+                            </button>
+                          );
+                        })}
                       </div>
-                    );
-                  }
+                    </div>
+                  );
                 })}
               </div>
-              <></>
 
-              <div className="flex text-center items-center">
+              <div className="flex text-center items-center mt-5">
                 <div className="quantity flex border border-zinc-600">
                   <button className="minus w-5" onClick={dec}>
                     -
@@ -226,9 +300,18 @@ const ProductDetail = ({ product }: IProductDetailProps) => {
                   <p>stock</p>
                 </div>
               </div>
+              <div className="flex  text-sm text-neutral-600 py-3 justify-between">
+                <p className="">Subtotal</p>
+                <p className="subTotal text-lg font-semibold text-neutral-800 ">
+                  {currencyConverter(
+                    parseInt(product.variants[0].price) * count
+                  )}
+                </p>
+              </div>
               <div className="btn flex gap-5 mt-10">
                 <button
                   type="submit"
+                  // onClick={() => handleToCart(product.id)}
                   className="flex items-center justify-center gap-1 border border-[#364968] hover:shadow-md bg-[#d6e4f8] p-2 w-36 hover:bg-[#eff6fd]  transition-all duration-300"
                 >
                   <AiOutlineShoppingCart /> <span>Add to cart</span>
@@ -244,57 +327,22 @@ const ProductDetail = ({ product }: IProductDetailProps) => {
 
             <div className="order-3 md:order-2 description mt-10 md:mt-0 md:w-2/4">
               <div className="spesification">
-                <p className="text-lg font-medium border-b my-4">
-                  Product Specifications
+                <p className="productTitle text-2xl font-medium pb-3">
+                  {product.name}
                 </p>
-                <table>
-                  <thead></thead>
-                  <tbody>
-                    <tr>
-                      <td className="brand text-stone-600">{"Brand"}</td>
-                      <td className="pl-10">lorem</td>
-                    </tr>
-                    <tr>
-                      <td className="brand text-stone-600">{"Stock"}</td>
-                      <td className="pl-10">ipsum</td>
-                    </tr>
-                    <tr>
-                      <td className="brand text-stone-600">{"Shipped from"}</td>
-                      <td className="pl-10">Malang</td>
-                    </tr>
-                  </tbody>
-                </table>
+                <div className="historyProduct flex align-middle text-xs pb-3">
+                  <span className="pr-3">{`Sold ${product.sold}`} </span>
+                  <span className="px-3 border-l border-slate-600 flex-row  md:flex flex gap-1 items-center">
+                    <BsStarFill style={{ color: "#f57b29" }} />5
+                  </span>
+                </div>
+                <p className="productPrice text-2xl font-semibold text-[#f57b29] py-3">
+                  {currencyConverter(parseInt(product.variants[0].price))}
+                </p>
               </div>
               <div className="desc pt-5 ">
                 <p className="text-lg font-medium border-b my-4">Description</p>
-                <p>
-                  <br />
-                  SOFTWARE - OS: Windows 10 Home 64, English - Bundled Software:
-                  Office Home and Student 2019
-                  <br />
-                  SECURITY & PRIVACY - Security Chip: Firmware TPM 2.0 -
-                  Fingerprint Reader: None - Physical Locks: Kensington Nano
-                  Security Slot - Other Security: Camera privacy shutter
-                  <br />
-                  WARRANTY Lenovo Indonesia 2-year, Depot
-                  <br />
-                  CERTIFICATIONS - Green Certifications: ENERGY STAR 8.0, ErP
-                  Lot 3, RoHS compliant - Other Certifications: TÜV Rheinland
-                  Low Blue Light
-                  <br />
-                  Isi: • Laptop • Adaptor • Panduan • Tas Laptop
-                  <br />
-                  CATATAN: - Windows terinstall dari pabrik & lisensi digital
-                  akan teraktivasi otomatis saat terkoneksi internet stabil.
-                  Proses Windows update butuh proses cukup lama & laptop akan
-                  restart beberapa kali - Lisensi Office Home & Student sudah
-                  pre-installed dari pabrik & berupa digital - Tambah catatan:
-                  videokan unboxing, update Windows & driver jika ingin dibantu
-                  update & cek fisik sebelum dikirim. Video akan disimpan di
-                  dalam laptopnya. - Driver laptop sudah ada dari pabrik & dapat
-                  diupdate melalui aplikasi Lenovo Vantage. Driver tersedia di
-                  web:
-                </p>
+                <p className="">{product.description}</p>
               </div>
             </div>
           </div>
@@ -306,10 +354,10 @@ const ProductDetail = ({ product }: IProductDetailProps) => {
                   height={0}
                   src={"/images/defaultuser.png"}
                   alt="seller"
-                  className="imgSeller w-20 h-full"
+                  className="imgSeller w-20 h-full place-self-center"
                 />
-                <div className="flex flex-col md:flex-row gap-y-4 gap-x-48">
-                  <div className="aboutSeller justify-between w-1/2 md:w-full">
+                <div className="flex flex-col md:flex-row gap-y-4 md:gap-x-48">
+                  <div className="aboutSeller justify-between w-full md:w-1/2 ">
                     <p>Nama Toko</p>
                     <p>
                       <button className="flex gap-1 md:gap-2 mt-3 text-sm justify-center items-center w-full border border-[#fddf97] hover:shadow-lg   p-1 md:w-36 text-[#fddf97] hover:bg-[#1c2637]  transition-all duration-300">
@@ -533,8 +581,9 @@ const ProductDetail = ({ product }: IProductDetailProps) => {
                 </div>
               </div>
             </div>
-            <div className="order-2 w-full md:w-1/4 items-center flex flex-col md:flex-row md:justify-end mt-5">
-              <div className="md:w-3/4 content-center">
+            <div className="order-2 w-full md:w-1/4 items-center flex flex-col  md:justify-end mt-5">
+              <p className="py-3">Other products from this store</p>
+              <div className="md:w-3/4 content-center flex flex-row gap-x-4 justify-between md:flex-col">
                 <ProductCard
                   image="https://down-id.img.susercontent.com/file/bc3b634e8b2beb1f09f59671102800a7"
                   title="Sepatu Neki"
