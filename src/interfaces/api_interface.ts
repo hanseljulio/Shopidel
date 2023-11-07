@@ -26,38 +26,3 @@ export interface IAPIUserProfileResponse {
 export interface IAPILoginResponse {
   access_token: string;
 }
-
-interface ProductVariantOptions {
-  variant_option_name: string
-  childs: string[]
-}
-
-export interface IAPIProductCart{
-  product_id: number
-  quantity: number
-}
-
-export interface IAPIProductDetail{
-    id: number
-    name: string
-    description: string
-    stars: string
-    sold: 0
-    available: 0
-    images: null
-    variant_options: ProductVariantOptions[],
-    variants: [
-      {
-        variant_id: 2,
-        variant_name: string,
-        selections: [
-          {
-            selection_variant_name: string,
-            selection_name: string
-          }
-        ],
-        stock: 2,
-        price: string
-      },
-    ]
-}
