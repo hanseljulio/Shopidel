@@ -405,11 +405,9 @@ const CartPage = () => {
         },
       });
 
-      const currentData = res.data.data.cart_shops;
-
       if (cartStore.cart !== undefined) {
         setCartData(cartStore.cart);
-        getTotal(currentData);
+        getTotal(cartStore.cart);
       } else {
         setCartData(res.data.data.cart_shops);
       }
