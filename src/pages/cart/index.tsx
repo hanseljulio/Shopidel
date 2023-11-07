@@ -53,7 +53,7 @@ const CartPage = () => {
   const [showDeleteAllModal, setShowDeleteAllModal] = useState<boolean>(false);
   const cartStore = useCartStore();
 
-  const [dataTest2, setDataTest2] = useState<ICartData[]>([
+  const [cartData, setCartData] = useState<ICartData[]>([
     {
       shop_id: 0,
       shop_name: "",
@@ -72,12 +72,12 @@ const CartPage = () => {
   ]);
 
   const cartIsEmpty = () => {
-    if (dataTest2.length === 0) {
+    if (cartData.length === 0) {
       return true;
     }
 
-    for (let i = 0; i < dataTest2.length; i++) {
-      if (dataTest2[i].cart_items.length !== 0) {
+    for (let i = 0; i < cartData.length; i++) {
+      if (cartData[i].cart_items.length !== 0) {
         return false;
       }
     }
@@ -86,7 +86,7 @@ const CartPage = () => {
   };
 
   const addQuantity = (id: number, index: number) => {
-    const currentData = [...dataTest2];
+    const currentData = [...cartData];
 
     currentData[index].cart_items = currentData[index].cart_items.map(
       (data) => {
@@ -104,12 +104,12 @@ const CartPage = () => {
       }
     );
 
-    setDataTest2(currentData);
+    setCartData(currentData);
     getTotal(currentData);
   };
 
   const subtractQuantity = (id: number, index: number) => {
-    const currentData = [...dataTest2];
+    const currentData = [...cartData];
 
     currentData[index].cart_items = currentData[index].cart_items.map(
       (data) => {
@@ -127,13 +127,13 @@ const CartPage = () => {
       }
     );
 
-    setDataTest2(currentData);
+    setCartData(currentData);
     getTotal(currentData);
   };
 
   const handleCheckAll = (e: any, index: number) => {
     const { checked } = e.target;
-    const currentData = [...dataTest2];
+    const currentData = [...cartData];
 
     currentData[index].cart_items = currentData[index].cart_items.map(
       (data) => {
@@ -141,13 +141,13 @@ const CartPage = () => {
       }
     );
 
-    setDataTest2(currentData);
+    setCartData(currentData);
     getTotal(currentData);
   };
 
   const handleCheck = (e: any, id: number, index: number) => {
     const { checked } = e.target;
-    const currentData = [...dataTest2];
+    const currentData = [...cartData];
 
     currentData[index].cart_items = currentData[index].cart_items.map(
       (data) => {
@@ -159,7 +159,7 @@ const CartPage = () => {
       }
     );
 
-    setDataTest2(currentData);
+    setCartData(currentData);
     getTotal(currentData);
   };
 
@@ -179,7 +179,7 @@ const CartPage = () => {
   };
 
   const deleteCart = async () => {
-    setDataTest2([]);
+    setCartData([]);
     cartStore.updateCart([]);
 
     const token = getCookie("accessToken");
@@ -213,7 +213,7 @@ const CartPage = () => {
   };
 
   const deleteItem = (id: number, index: number) => {
-    const currentData = [...dataTest2];
+    const currentData = [...cartData];
 
     currentData[index].cart_items = currentData[index].cart_items.filter(
       (data) => {
@@ -229,15 +229,15 @@ const CartPage = () => {
     //   }
     // }
 
-    setDataTest2(currentData);
+    setCartData(currentData);
     cartStore.updateCart(currentData);
     getTotal(currentData);
   };
 
   const checkEmptySelection = () => {
-    for (let i = 0; i < dataTest2.length; i++) {
-      for (let j = 0; j < dataTest2[i].cart_items.length; j++) {
-        if (dataTest2[i].cart_items[j].isChecked) {
+    for (let i = 0; i < cartData.length; i++) {
+      for (let j = 0; j < cartData[i].cart_items.length; j++) {
+        if (cartData[i].cart_items[j].isChecked) {
           return false;
         }
       }
@@ -250,15 +250,15 @@ const CartPage = () => {
     let prevShopSelected = false;
     let count = 0;
 
-    for (let i = 0; i < dataTest2.length; i++) {
-      for (let j = 0; j < dataTest2[i].cart_items.length; j++) {
-        if (dataTest2[i].cart_items[j].isChecked && prevShopSelected) {
+    for (let i = 0; i < cartData.length; i++) {
+      for (let j = 0; j < cartData[i].cart_items.length; j++) {
+        if (cartData[i].cart_items[j].isChecked && prevShopSelected) {
           return true;
         }
 
-        if (dataTest2[i].cart_items[j].isChecked) {
+        if (cartData[i].cart_items[j].isChecked) {
           count++;
-          // selectedItems.push(dataTest2[i].cart_items[j]);
+          // selectedItems.push(cartData[i].cart_items[j]);
         }
       }
 
@@ -293,9 +293,9 @@ const CartPage = () => {
 
     // const selectedItems = [];
 
-    // for (let i = 0; i < dataTest2.length; i++) {
-    //   for (let j = 0; j < dataTest2[i].cart_items.length; j++) {
-    //     selectedItems.push(dataTest2[i].cart_items[j]);
+    // for (let i = 0; i < cartData.length; i++) {
+    //   for (let j = 0; j < cartData[i].cart_items.length; j++) {
+    //     selectedItems.push(cartData[i].cart_items[j]);
     //   }
     // }
 
@@ -304,7 +304,7 @@ const CartPage = () => {
     }, 3000);
 
     movingToCheckout();
-    cartStore.updateCart(dataTest2);
+    cartStore.updateCart(cartData);
   };
 
   const getCartData = async () => {
@@ -320,10 +320,10 @@ const CartPage = () => {
       const currentData = res.data.data.cart_shops;
 
       if (cartStore.cart !== undefined) {
-        setDataTest2(cartStore.cart);
+        setCartData(cartStore.cart);
         getTotal(currentData);
       } else {
-        setDataTest2(res.data.data.cart_shops);
+        setCartData(res.data.data.cart_shops);
       }
     } catch (e) {
       if (axios.isAxiosError(e)) {
@@ -371,7 +371,7 @@ const CartPage = () => {
             <div>
               <div className="pt-8 pb-[150px]">
                 <div className="hidden invisible mobile:visible mobile:block">
-                  {dataTest2.map((data, idx) => {
+                  {cartData.map((data, idx) => {
                     return (
                       <CartTableMobile
                         key={idx}
@@ -389,7 +389,7 @@ const CartPage = () => {
                   })}
                 </div>
                 <div className="mobile:hidden mobile:invisible">
-                  {dataTest2.map((data, idx) => {
+                  {cartData.map((data, idx) => {
                     return (
                       <CartTable
                         key={idx}
