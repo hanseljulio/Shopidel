@@ -112,10 +112,16 @@ const ProductDetail = ({ product }: IProductDetailProps) => {
   const [selection, setSelection] = useState("");
   const [count, setCount] = useState<number>(1);
   const [isHovering, setIsHovering] = useState(false);
+
   const [isModal, setIsModal] = useState<boolean>(false);
   const [variation, setVariation] = useState(
     "https://down-id.img.susercontent.com/file/826639af5f9af89adae9a1700f073242"
   );
+  const [isActive, setIsActive] = useState(false);
+
+  const handleClick = () => {
+    setIsActive(!isActive); // Toggle the active state when the button is clicked
+  };
 
   console.log(product.variant_options[1]);
 
@@ -257,12 +263,11 @@ const ProductDetail = ({ product }: IProductDetailProps) => {
                           return (
                             <button
                               key={k}
-                              className="px-2 py-1 border rounded-md cursor-pointer hover:text-[#364968] hover:border-[#364968]"
+                              className={`btn ${
+                                isActive ? "active" : ""
+                              }  px-2 py-1 border rounded-md cursor-pointer hover:text-[#364968] hover:border-[#364968]`}
                               value={variant}
-                              onChange={(e: any) => {
-                                setSelection(e.target.value),
-                                  e.preventDefault();
-                              }}
+                              onChange={handleClick}
                             >
                               {variant}
                             </button>
