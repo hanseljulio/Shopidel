@@ -85,18 +85,59 @@ const CartPage = () => {
     return true;
   };
 
+  const updateQuantity = (productId: number, quantity: number) => {
+    const sendData = {
+      product_id: productId,
+      quantity: quantity,
+    };
+
+    try {
+      toast.promise(
+        API.put("/accounts/carts", sendData, {
+          headers: {
+            Authorization: `Bearer ${getCookie("accessToken")}`,
+          },
+        }),
+        {
+          pending: "Updating cart",
+          success: "Cart has been updated",
+          error: {
+            render({ data }) {
+              if (axios.isAxiosError(data)) {
+                return `${(data.response?.data as IAPIResponse).message}`;
+              }
+            },
+          },
+        },
+        {
+          autoClose: 1500,
+        }
+      );
+    } catch (e) {
+      if (axios.isAxiosError(e)) {
+        toast.error(e.message, {
+          autoClose: 1500,
+        });
+      }
+    }
+  };
+
   const addQuantity = (id: number, index: number) => {
     const currentData = [...cartData];
 
     currentData[index].cart_items = currentData[index].cart_items.map(
       (data) => {
         if (data.product_id === id) {
+          let newQuantity =
+            data.product_quantity < 99
+              ? data.product_quantity + 1
+              : data.product_quantity;
+
+          updateQuantity(data.product_id, newQuantity);
+
           return {
             ...data,
-            product_quantity:
-              data.product_quantity < 99
-                ? data.product_quantity + 1
-                : data.product_quantity,
+            product_quantity: newQuantity,
           };
         } else {
           return data;
@@ -114,12 +155,16 @@ const CartPage = () => {
     currentData[index].cart_items = currentData[index].cart_items.map(
       (data) => {
         if (data.product_id === id) {
+          let newQuantity =
+            data.product_quantity > 1
+              ? data.product_quantity - 1
+              : data.product_quantity;
+
+          updateQuantity(data.product_id, newQuantity);
+
           return {
             ...data,
-            product_quantity:
-              data.product_quantity > 1
-                ? data.product_quantity - 1
-                : data.product_quantity,
+            product_quantity: newQuantity,
           };
         } else {
           return data;
@@ -223,7 +268,11 @@ const CartPage = () => {
 
     // try {
     //   toast.promise(
-    //     API.patch("/accounts/carts", currentData),
+    //     API.put("/accounts/carts", currentData, {
+    //       headers: {
+    //         Authorization: `Bearer ${getCookie("accessToken")}`,
+    //       },
+    //     }),
     //     {
     //       pending: "Updating cart",
     //       success: "Cart has been updated",
@@ -307,14 +356,6 @@ const CartPage = () => {
       multipleStoreError();
       return;
     }
-
-    // const selectedItems = [];
-
-    // for (let i = 0; i < cartData.length; i++) {
-    //   for (let j = 0; j < cartData[i].cart_items.length; j++) {
-    //     selectedItems.push(cartData[i].cart_items[j]);
-    //   }
-    // }
 
     setTimeout(() => {
       router.push("/checkout");
