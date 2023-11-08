@@ -127,7 +127,7 @@ const RegisterShop = () => {
       <div className="flex h-screen justify-center items-center">
         <ToastContainer />
         <div className="flex max-w-7xl w-full justify-around">
-          <div>
+          <div className="hidden md:inline">
             <img
               src="/images/seller_regis.png"
               width={400}
@@ -135,7 +135,7 @@ const RegisterShop = () => {
               alt="seller_regis_logo"
             />
           </div>
-          <div className=" flex flex-col justify-center w-96">
+          <div className=" flex flex-col justify-center w-full px-5 md:px-0 md:w-96">
             <h1>
               Hi, <span className="font-bold">{logged?.full_name}</span>
             </h1>
