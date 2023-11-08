@@ -234,7 +234,7 @@ const ProductDetail = ({ product }: IProductDetailProps) => {
     };
 
     try {
-      const response = await API.post(`/accounts/cart`, data, {
+      const response = await API.post(`/accounts/carts`, data, {
         headers: {
           Authorization: `Bearer ${getCookie("accessToken")}`,
         },
