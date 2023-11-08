@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { FaHome } from "react-icons/fa";
 import Button from "../Button";
+import { IAddress } from "@/interfaces/address_interface";
+import { API } from "@/network";
+import { getCookie } from "cookies-next";
 
 interface IAddressProps {
   id: number;
@@ -12,12 +15,14 @@ interface IAddressProps {
   default: boolean;
   currentSelectedAddress: number;
   selectAddress: (id: number) => void;
+  updateNewAddress: (newAddress: string) => void;
 }
 
 interface IAddressModalProps {
-  updateAddress: (id: number) => void;
+  updateAddress: (id: number, newAddress: string) => void;
   selectedAddress: number;
   submitAddressFunction: () => void;
+  addressData: IAddress[];
 }
 
 const IndividualAddress = (props: IAddressProps) => {
@@ -26,6 +31,10 @@ const IndividualAddress = (props: IAddressProps) => {
     <div
       onClick={() => {
         props.selectAddress(props.id);
+
+        props.updateNewAddress(
+          `${props.address}\n${props.city} - ${props.district}, ${props.province}, ID ${props.postalCode}`
+        );
         if (props.currentSelectedAddress === props.id) {
           setColor("bg-[#fddf97]");
         } else {
@@ -59,55 +68,30 @@ const CheckoutAddressModal = (props: IAddressModalProps) => {
     setSelectedAddress(id);
   };
 
-  const [addressData, setAddressData] = useState([
-    {
-      id: 1,
-      address:
-        "Sopo Del Tower, Jalan Mega Kuningan Barat III Lot 10.1-6, RT.3/RW.3",
-      province: "DKI Jakarta",
-      city: "Jakarta Selatan",
-      district: "Setia Budi",
-      postalCode: "12950",
-      default: true,
-    },
-    {
-      id: 2,
-      address:
-        "Pakuwon Tower, Jl. Menteng Atas Sel. Gg. 2, Menteng Dalam, Kec. Menteng",
-      province: "DKI Jakarta",
-      city: "Jakarta Selatan",
-      district: "Menteng",
-      postalCode: "12870",
-      default: false,
-    },
-    {
-      id: 3,
-      address: "Kota Kasablanka, Jl. Raya Casablanca No.88, Menteng Dalam",
-      province: "DKI Jakarta",
-      city: "Jakarta Selatan",
-      district: "Tebet",
-      postalCode: "12870",
-      default: false,
-    },
-    {
-      id: 4,
-      address: "Senayan City, Jl. Asia Afrika, Gelora",
-      province: "DKI Jakarta",
-      city: "Jakarta Pusat",
-      district: "Tanah Abang",
-      postalCode: "10270",
-      default: false,
-    },
-    {
-      id: 5,
-      address: "Grand Indonesia, Jl. Tlk. Betung I No.45A, Kb. Melati",
-      province: "DKI Jakarta",
-      city: "Jakarta Pusat",
-      district: "Tanah Abang",
-      postalCode: "10230",
-      default: false,
-    },
-  ]);
+  const [addressData, setAddressData] = useState<IAddress[]>(props.addressData);
+  const [newAddress, setNewAddress] = useState<string>("");
+
+  const updateNewAddress = (newAddress: string) => {
+    setNewAddress(newAddress);
+  };
+
+  const getAddressData = async () => {
+    try {
+      const response = await API.get("/accounts/address", {
+        headers: {
+          Authorization: `Bearer ${getCookie("accessToken")}`,
+        },
+      });
+
+      setAddressData(response.data.data);
+    } catch (e) {
+      console.log(e);
+    }
+  };
+
+  useEffect(() => {
+    // getAddressData();
+  }, []);
 
   return (
     <div className="bg-white p-5 rounded-md  w-[500px] h-[600px] mobile:w-[99%]">
@@ -119,14 +103,15 @@ const CheckoutAddressModal = (props: IAddressModalProps) => {
           <IndividualAddress
             key={index}
             id={data.id}
-            address={data.address}
+            address={data.detail}
             province={data.province}
-            city={data.city}
+            city={data.sub_district}
             district={data.district}
-            postalCode={data.postalCode}
-            default={data.default}
+            postalCode={data.zip_code}
+            default={data.is_buyer_default}
             currentSelectedAddress={selectedAddress}
             selectAddress={changeSelectedAddressLocal}
+            updateNewAddress={updateNewAddress}
           />
         ))}
       </div>
@@ -136,7 +121,7 @@ const CheckoutAddressModal = (props: IAddressModalProps) => {
           styling="bg-[#364968] p-3 rounded-[8px] w-[200px] text-white my-4"
           disabled={selectedAddress === 0}
           onClick={() => {
-            props.updateAddress(selectedAddress);
+            props.updateAddress(selectedAddress, newAddress);
             props.submitAddressFunction();
           }}
         />

@@ -23,6 +23,8 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { getCookie } from "cookies-next";
 import { IAPIResponse } from "@/interfaces/api_interface";
+import { IAddress } from "@/interfaces/address_interface";
+import { useRouter } from "next/router";
 
 interface IProductVariant {
   id: number;
@@ -39,6 +41,29 @@ interface ISendData {
   voucher_id?: number;
 }
 
+const NoAddressModal = () => {
+  const router = useRouter();
+
+  return (
+    <div className="bg-white p-5 rounded-md  w-[500px] h-[290px] mobile:w-[99%]">
+      <div className="pb-3">
+        <h1 className="text-[20px]">No Address Found</h1>
+      </div>
+      <div className="flex flex-col gap-6 pt-6  pb-8">
+        <h1>It appears you have no address!</h1>
+        <h1>Click the button to go and add one!</h1>
+      </div>
+      <div className="flex justify-center mt-3">
+        <Button
+          text="Select Address"
+          onClick={() => router.push("/user/address")}
+          styling="bg-[#364968] p-3 rounded-[8px] w-[200px] text-white my-4"
+        />
+      </div>
+    </div>
+  );
+};
+
 const CheckoutPage = () => {
   const [dataTest, setDataTest] = useState<ICartData[] | undefined>([
     {
@@ -52,6 +77,9 @@ const CheckoutPage = () => {
   const [showAddressModal, setShowAddressModal] = useState<boolean>(false);
   const [selectedVoucher, setSelectedVoucher] = useState<number>(0);
   const [selectedAddress, setSelectedAddress] = useState<number>(0);
+  const [currentAddress, setCurrentAddress] = useState<string>("");
+  const [addressData, setAddressData] = useState<IAddress[]>([]);
+  const [defaultAddressId, setDefaultAddressId] = useState<number>(0);
 
   const [orderTotal, setOrderTotal] = useState<number>(0);
   const [shippingTotal, setShippingTotal] = useState<number>(10000);
@@ -59,6 +87,8 @@ const CheckoutPage = () => {
   const [voucherTotal, setVoucherTotal] = useState<number>(50000);
   const [walletMoney, setWalletMoney] = useState<number>(20000000);
   const [additionalNotes, setAdditionalNotes] = useState<string>("");
+
+  const [showNoAddress, setShowNoAddress] = useState<boolean>(false);
 
   const cartStore = useCartStore();
 
@@ -74,8 +104,9 @@ const CheckoutPage = () => {
     setShowAddressModal(false);
   };
 
-  const changeSelectedAddress = (id: number) => {
+  const changeSelectedAddress = (id: number, newAddress: string) => {
     setSelectedAddress(id);
+    setCurrentAddress(newAddress);
   };
 
   const getCheckoutData = () => {
@@ -102,9 +133,20 @@ const CheckoutPage = () => {
         },
       });
 
+      if (addressData.length === 0) {
+        setShowNoAddress(true);
+        return;
+      }
+
+      setAddressData(response.data.data);
+
       for (let i = 0; i < response.data.data.length; i++) {
         if (response.data.data[i].is_buyer_default) {
           setSelectedAddress(response.data.data[i].id);
+          setDefaultAddressId(response.data.data[i].id);
+          setCurrentAddress(
+            `${response.data.data[i].detail}\n${response.data.data[i].sub_district} - ${response.data.data[i].district}, ${response.data.data[i].province}, ID ${response.data.data[i].zip_code}`
+          );
           return;
         }
       }
@@ -127,7 +169,7 @@ const CheckoutPage = () => {
     const sendData: ISendData = {
       seller_id: 0,
       product_variant: [],
-      destination_address_id: "1",
+      destination_address_id: selectedAddress.toString(),
       courier_id: 1,
       notes: additionalNotes,
       weight: "200",
@@ -179,6 +221,10 @@ const CheckoutPage = () => {
 
   return (
     <>
+      {showNoAddress && (
+        <Modal content={<NoAddressModal />} onClose={() => {}} />
+      )}
+
       {showVoucherModal && (
         <Modal
           content={
@@ -199,6 +245,7 @@ const CheckoutPage = () => {
               updateAddress={changeSelectedAddress}
               selectedAddress={selectedAddress}
               submitAddressFunction={useAddress}
+              addressData={addressData}
             />
           }
           onClose={() => setShowAddressModal(false)}
@@ -223,10 +270,16 @@ const CheckoutPage = () => {
                 Hansel Julio (+62) 81519799999
               </h1>
               <h1 className="basis-[70%]">
-                Jalan Mega Kuningan Barat III Lot 10.1-6, RT.3/RW.3, Kuningan
-                Timur, Kecamatan Setiabudi, KOTA JAKARTA SELATAN - SETIA BUDI,
-                DKI JAKARTA, ID 12950{" "}
-                <span className="text-orange-500 text-[14px]">[DEFAULT]</span>
+                {currentAddress}{" "}
+                <span
+                  className={`${
+                    defaultAddressId !== selectedAddress
+                      ? "hidden invisible"
+                      : ""
+                  } text-orange-500 text-[14px]`}
+                >
+                  [DEFAULT]
+                </span>
               </h1>
               <h1
                 onClick={() => setShowAddressModal(true)}
