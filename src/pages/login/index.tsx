@@ -55,9 +55,13 @@ const Login = () => {
           success: {
             render({ data }) {
               const res = data?.data as IAPIResponse<IAPILoginResponse>;
-              const decoded = jwtDecode(res.data!.access_token);
+              const decodedAccessToken = jwtDecode(res.data!.access_token);
+              const decodedRefreshToken = jwtDecode(res.data!.refresh_token);
               setCookie("accessToken", res.data?.access_token, {
-                expires: new Date(decoded.exp! * 1000),
+                expires: new Date(decodedAccessToken.exp! * 1000),
+              });
+              setCookie("refreshToken", res.data?.refresh_token, {
+                expires: new Date(decodedRefreshToken.exp! * 1000),
               });
               return res.message;
             },
@@ -65,6 +69,7 @@ const Login = () => {
           error: {
             render({ data }) {
               if (axios.isAxiosError(data)) {
+                console.log(data);
                 return data.response?.statusText;
               }
             },
