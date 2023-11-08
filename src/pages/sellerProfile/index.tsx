@@ -3,7 +3,7 @@ import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar";
 import ProductCard from "@/components/ProductCard";
 import { currencyConverter } from "@/utils/utils";
-import React from "react";
+import React, { useState } from "react";
 import { FaListUl, FaStar, FaStore } from "react-icons/fa";
 import { FaLocationDot } from "react-icons/fa6";
 
@@ -68,7 +68,10 @@ const imgDummy: IProductDetail[] = [
   },
 ];
 
-function index() {
+function Index() {
+  const [showAllProducts, setShowAllProducts] = useState(false);
+
+  const imgDummyToShow = showAllProducts ? imgDummy : imgDummy.slice(0, 6);
   return (
     <div>
       <Navbar />
@@ -89,7 +92,7 @@ function index() {
               </p>
             </div>
 
-            <div className="flex flex-col md:flex-row justify-start items-start md:justify-between w-1/2 md:w-full items-center ">
+            <div className="flex flex-col md:flex-row justify-start items-start md:justify-between w-1/2 md:w-full md:items-center ">
               <div className="text-center md:justify-center">
                 <p className="flex text-left md:text-center md:items-center font-semibold gap-x-1">
                   <FaStar style={{ color: "#f57b29" }} /> 4.8
@@ -112,7 +115,7 @@ function index() {
             Best Seller
           </p>
           <div className="grid grid-cols-2 md:grid-cols-6 gap-3">
-            {imgDummy.slice(0, 6).map((e, k) => (
+            {imgDummyToShow.map((e, k) => (
               <ProductCard
                 key={k}
                 image={e.images}
@@ -124,14 +127,24 @@ function index() {
                 order={400}
               />
             ))}
-            <div className="lg:max-w-7xl w-full absolute align-middle justify-end items-center text-right hidden md:flex mt-40">
-              <button className="p-3 bg-red-500 rounded-full absolute justify-center align-middle items-end shadow-2xl shadow-slate-600 hover:bg-slate-500 opacity-70">
-                &gt;
+            {!showAllProducts && (
+              <div className="lg:max-w-7xl w-full absolute align-middle justify-end items-center text-right hidden md:flex mt-40">
+                <button
+                  className="p-3 bg-slate-900 text-white  rounded-full absolute justify-center align-middle items-end shadow-xl shadow-slate-600 hover:bg-slate-500 opacity-50"
+                  onClick={() => setShowAllProducts(true)}
+                >
+                  <span className="text-xs">View More </span> &gt;
+                </button>
+              </div>
+            )}
+            {!showAllProducts && (
+              <button
+                className="p-3 bg-slate-900 text-white flex rounded-md shadow-md shadow-slate-600 hover-bg-slate-500 opacity-70 md:hidden justify-center items-center"
+                onClick={() => setShowAllProducts(true)}
+              >
+                View More
               </button>
-            </div>
-            <button className="p-3 bg-red-500 rounded-md shadow-2xl shadow-slate-600 hover:bg-slate-500 opacity-70 md:hidden justify-center items-center">
-              View Moressssssssssssss
-            </button>
+            )}
           </div>
         </div>
         <div className="flex flex-col md:flex-row mt-10 w-full gap-x-5">
@@ -189,4 +202,4 @@ function index() {
   );
 }
 
-export default index;
+export default Index;
