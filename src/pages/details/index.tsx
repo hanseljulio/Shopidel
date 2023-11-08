@@ -229,8 +229,8 @@ const ProductDetail = ({ product }: IProductDetailProps) => {
     }
 
     const data = {
-      product_id: variant.variant_id.toString(),
-      quantity: count.toString(),
+      product_id: variant.variant_id,
+      quantity: count,
     };
 
     try {
