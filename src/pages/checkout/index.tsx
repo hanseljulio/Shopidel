@@ -161,11 +161,11 @@ const SelectShippingModal = (props: ISelectShippingModalProps) => {
   }, [currentCourierId]);
 
   return (
-    <div className="bg-white p-5 rounded-md  w-[500px] h-[300px] mobile:w-[99%]">
+    <div className="bg-white p-5 rounded-md  w-[500px] h-[300px] mobile:w-[99%] mobile:h-[350px]">
       <div className="pb-3">
         <h1 className="text-[20px]">Select Shipping</h1>
       </div>
-      <div className="flex items-center justify-between pt-6 pb-8">
+      <div className="flex items-center justify-between pt-6 pb-8 mobile:flex-col mobile: gap-6">
         <div>
           <h1>Select courier here</h1>
           <select
@@ -185,8 +185,13 @@ const SelectShippingModal = (props: ISelectShippingModalProps) => {
             ))}
           </select>
         </div>
-        <div className="text-right">
-          <h1>Shipping cost: {shippingCostData?.cost}</h1>
+        <div className="text-right mobile:text-center">
+          <h1>
+            Shipping cost:{" "}
+            {currencyConverter(
+              shippingCostData?.cost ? shippingCostData.cost : 0
+            )}
+          </h1>
           <h1>ETD: {shippingCostData?.estimated} day(s)</h1>
         </div>
       </div>
