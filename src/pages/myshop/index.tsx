@@ -170,7 +170,9 @@ const RegisterShop = () => {
                   Shop address
                 </label>
                 <select
-                  {...register("address_id")}
+                  {...register("address_id", {
+                    setValueAs: (v) => parseInt(v),
+                  })}
                   name="address_id"
                   id="address_id"
                   className="rounded-md border p-2 border-slate-200"
