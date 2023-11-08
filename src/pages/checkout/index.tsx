@@ -26,6 +26,7 @@ import { IAPIResponse } from "@/interfaces/api_interface";
 import { IAddress } from "@/interfaces/address_interface";
 import { useRouter } from "next/router";
 import { useUserStore } from "@/store/userStore";
+import PinCode from "@/components/PinCode";
 
 interface IProductVariant {
   id: number;
@@ -202,6 +203,23 @@ const SelectShippingModal = (props: ISelectShippingModalProps) => {
   );
 };
 
+interface IEnterWalletPinModalProps {
+  submitFunction: (pin: string) => void;
+}
+
+const EnterWalletPinModal = (props: IEnterWalletPinModalProps) => {
+  return (
+    <div className="bg-white p-5 rounded-md  w-[500px] h-[180px] mobile:w-[99%]">
+      <div className="pb-5">
+        <h1 className="text-[20px] text-center">Verify your Wallet PIN</h1>
+      </div>
+      <div className="flex justify-center">
+        <PinCode onSubmit={(pin) => props.submitFunction(pin)} />
+      </div>
+    </div>
+  );
+};
+
 const CheckoutPage = () => {
   const [dataTest, setDataTest] = useState<ICartData[] | undefined>([
     {
@@ -233,6 +251,7 @@ const CheckoutPage = () => {
   const [showNoAddress, setShowNoAddress] = useState<boolean>(false);
   const [showNoWallet, setShowNoWallet] = useState<boolean>(false);
   const [showShippingModal, setShowShippingModal] = useState<boolean>(false);
+  const [showWalletPin, setShowWalletPin] = useState<boolean>(false);
 
   const cartStore = useCartStore();
 
@@ -331,15 +350,7 @@ const CheckoutPage = () => {
     getCheckoutData();
   }, []);
 
-  const submit = async (e: any) => {
-    e.preventDefault();
-    const noShipping = () => toast.error("Please select a shipping option!");
-
-    if (shippingOption === "") {
-      noShipping();
-      return;
-    }
-
+  const submit = async () => {
     const sendData: ISendData = {
       seller_id: sellerId,
       product_variant: [],
@@ -392,6 +403,36 @@ const CheckoutPage = () => {
     }
   };
 
+  const payFunction = async (pinNumber: string) => {
+    try {
+      const response = await API.post(
+        "/accounts/wallets/validate-pin",
+        {
+          wallet_pin: pinNumber,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${getCookie("accessToken")}`,
+          },
+        }
+      );
+
+      if (response.data.data.isCorrect) {
+        submit();
+      } else {
+        toast.error("Incorrect pin - please try again!");
+      }
+
+      setShowWalletPin(false);
+    } catch (e) {
+      if (axios.isAxiosError(e)) {
+        toast.error(e.message, {
+          autoClose: 1500,
+        });
+      }
+    }
+  };
+
   const confirmFunction = (id: number, name: string, shippingCost: number) => {
     setCourierId(id);
     setShippingOption(name.toUpperCase());
@@ -401,6 +442,13 @@ const CheckoutPage = () => {
 
   return (
     <>
+      {showWalletPin && (
+        <Modal
+          content={<EnterWalletPinModal submitFunction={payFunction} />}
+          onClose={() => setShowWalletPin(false)}
+        />
+      )}
+
       {showShippingModal && (
         <Modal
           content={
@@ -573,7 +621,14 @@ const CheckoutPage = () => {
             <Button
               text="Place order"
               styling="bg-[#fddf97] p-3 rounded-[8px] w-[250px]  my-4"
-              onClick={submit}
+              onClick={() => {
+                if (shippingOption === "") {
+                  toast.error("Please select a shipping option!");
+                  return;
+                }
+
+                setShowWalletPin(true);
+              }}
               disabled={
                 walletMoney - (orderTotal + shippingTotal - voucherTotal) < 0
               }
