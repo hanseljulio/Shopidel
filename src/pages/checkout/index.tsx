@@ -43,6 +43,28 @@ interface ISendData {
   voucher_id?: number;
 }
 
+interface ICourierList {
+  id: number;
+  name: string;
+  description: string;
+}
+
+interface ISelectShippingModalProps {
+  confirmFunction: (id: number, name: string, shippingCost: number) => void;
+  sellerId: number;
+  destinationAddress: string;
+}
+
+interface IShippingCostData {
+  cost: number;
+  estimated: string;
+  note: string;
+}
+
+interface IEnterWalletPinModalProps {
+  submitFunction: (pin: string) => void;
+}
+
 const NoAddressModal = () => {
   const router = useRouter();
 
@@ -88,24 +110,6 @@ const NoWalletModal = () => {
     </div>
   );
 };
-
-interface ICourierList {
-  id: number;
-  name: string;
-  description: string;
-}
-
-interface ISelectShippingModalProps {
-  confirmFunction: (id: number, name: string, shippingCost: number) => void;
-  sellerId: number;
-  destinationAddress: string;
-}
-
-interface IShippingCostData {
-  cost: number;
-  estimated: string;
-  note: string;
-}
 
 const SelectShippingModal = (props: ISelectShippingModalProps) => {
   const [courierList, setCourierList] = useState<ICourierList[]>([]);
@@ -202,10 +206,6 @@ const SelectShippingModal = (props: ISelectShippingModalProps) => {
     </div>
   );
 };
-
-interface IEnterWalletPinModalProps {
-  submitFunction: (pin: string) => void;
-}
 
 const EnterWalletPinModal = (props: IEnterWalletPinModalProps) => {
   return (
