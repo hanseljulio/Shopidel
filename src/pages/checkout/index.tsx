@@ -240,6 +240,9 @@ const CheckoutPage = () => {
   const [defaultAddressId, setDefaultAddressId] = useState<number>(0);
   const [sellerId, setSellerId] = useState<number>(0);
 
+  const [fullName, setFullName] = useState<string>("");
+  const [phoneNumber, setPhoneNumber] = useState<string | undefined>("");
+
   const [orderTotal, setOrderTotal] = useState<number>(0);
   const [shippingTotal, setShippingTotal] = useState<number>(0);
   const [shippingOption, setShippingOption] = useState<string>("");
@@ -287,6 +290,8 @@ const CheckoutPage = () => {
 
     setOrderTotal(total);
     setDataTest(cartStore.cart);
+    setFullName(userStore.user!.full_name);
+    setPhoneNumber(userStore.user!.phone_number);
   };
 
   const getDefaultAddress = async () => {
@@ -509,7 +514,13 @@ const CheckoutPage = () => {
               Delivery Address
             </h1>
             <div className="flex text-[18px] pt-6 items-center mobile:flex-col mobile:gap-5">
-              <h1 className="font-bold basis-[20%]">Ahmad Satoni</h1>
+              <h1
+                suppressHydrationWarning
+                className="flex flex-col font-bold basis-[20%]"
+              >
+                {fullName}
+                <span>{phoneNumber}</span>
+              </h1>
               <h1 className="basis-[70%]">
                 {currentAddress}{" "}
                 <span
