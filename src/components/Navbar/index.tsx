@@ -20,6 +20,7 @@ const Navbar = () => {
 
   const logoutHandler = () => {
     deleteCookie("accessToken");
+    deleteCookie("refreshToken");
     updateUser(undefined);
     router.push("/");
   };
