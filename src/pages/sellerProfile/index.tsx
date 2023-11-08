@@ -101,7 +101,7 @@ function Index() {
               </div>
               <div className="text-left md:text-center md:items-center md:justify-center">
                 <p className="font-semibold">30</p>
-                <p className=" text-neutral-600 text-sm"> Product</p>
+                <p className=" text-neutral-600 text-sm"> Products</p>
               </div>
               <div className="w-fit md:text-center text-left md:items-center md:justify-center">
                 <p className="font-semibold">08.00 - 22.00 WIB</p>
@@ -139,7 +139,7 @@ function Index() {
             )}
             {!showAllProducts && (
               <button
-                className="p-3 bg-slate-900 text-white flex rounded-md shadow-md shadow-slate-600 hover-bg-slate-500 opacity-70 md:hidden justify-center items-center"
+                className="p-3 bg-slate-900 col-span-2 text-white flex rounded-md shadow-md shadow-slate-600 hover-bg-slate-500 opacity-70 md:hidden justify-center items-center"
                 onClick={() => setShowAllProducts(true)}
               >
                 View More
