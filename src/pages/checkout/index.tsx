@@ -24,6 +24,21 @@ import "react-toastify/dist/ReactToastify.css";
 import { getCookie } from "cookies-next";
 import { IAPIResponse } from "@/interfaces/api_interface";
 
+interface IProductVariant {
+  id: number;
+  quantity: number;
+}
+
+interface ISendData {
+  seller_id: number;
+  product_variant: IProductVariant[];
+  destination_address_id: string;
+  courier_id: number;
+  notes: string;
+  weight: string;
+  voucher_id?: number;
+}
+
 const CheckoutPage = () => {
   const [dataTest, setDataTest] = useState<ICartData[] | undefined>([
     {
@@ -57,7 +72,6 @@ const CheckoutPage = () => {
 
   const useAddress = () => {
     setShowAddressModal(false);
-    console.log(selectedAddress);
   };
 
   const changeSelectedAddress = (id: number) => {
@@ -80,24 +94,32 @@ const CheckoutPage = () => {
     setDataTest(cartStore.cart);
   };
 
+  const getDefaultAddress = async () => {
+    try {
+      const response = await API.get("/accounts/address", {
+        headers: {
+          Authorization: `Bearer ${getCookie("accessToken")}`,
+        },
+      });
+
+      for (let i = 0; i < response.data.data.length; i++) {
+        if (response.data.data[i].is_buyer_default) {
+          setSelectedAddress(response.data.data[i].id);
+          return;
+        }
+      }
+    } catch (e) {
+      console.log(e);
+    }
+  };
+
+  useEffect(() => {
+    getDefaultAddress();
+  }, []);
+
   useEffect(() => {
     getCheckoutData();
   }, []);
-
-  interface IProductVariant {
-    id: number;
-    quantity: number;
-  }
-
-  interface ISendData {
-    seller_id: number;
-    product_variant: IProductVariant[];
-    destination_address_id: string;
-    courier_id: number;
-    notes: string;
-    weight: string;
-    voucher_id?: number;
-  }
 
   const submit = async (e: any) => {
     e.preventDefault();
@@ -228,7 +250,7 @@ const CheckoutPage = () => {
                           if (item.isChecked) {
                             return (
                               <CheckoutTableDataMobile
-                                key={index}
+                                key={index + Math.random()}
                                 id={item.product_id}
                                 quantity={item.product_quantity}
                                 price={parseInt(item.product_unit_price)}
@@ -257,7 +279,7 @@ const CheckoutPage = () => {
                           if (item.isChecked) {
                             return (
                               <CheckoutTableData
-                                key={index}
+                                key={index + Math.random()}
                                 id={item.product_id}
                                 quantity={item.product_quantity}
                                 price={parseInt(item.product_unit_price)}
