@@ -11,7 +11,7 @@ import { GetServerSidePropsContext } from "next";
 import React, { useEffect, useState } from "react";
 import { AiOutlineShoppingCart } from "react-icons/ai";
 import { BsStarFill } from "react-icons/bs";
-import { FaStar, FaStore } from "react-icons/fa";
+import { FaHeart, FaRegHeart, FaStar, FaStore } from "react-icons/fa";
 import { FaLocationDot, FaTruckFast } from "react-icons/fa6";
 import { toast } from "react-toastify";
 
@@ -154,6 +154,11 @@ const ProductDetail = ({ product }: IProductDetailProps) => {
   }>({});
   const [subtotal, setSubtotal] = useState<number>(0);
   const [currentStock, setCurrentStock] = useState<number>(0);
+  const [isFavorite, setIsFavorite] = useState(false);
+
+  const handleFavoriteClick = () => {
+    setIsFavorite(!isFavorite); // Toggle status favorit
+  };
 
   const calculateSubtotal = () => {
     const selectedVariant = product.variants.find((variant) => {
@@ -306,6 +311,19 @@ const ProductDetail = ({ product }: IProductDetailProps) => {
                     />
                   );
                 })}
+              </div>
+              <div className="favorite-icon mt-5 text-right">
+                <button onClick={handleFavoriteClick}>
+                  {isFavorite ? (
+                    <div className="flex items-center gap-1">
+                      <FaHeart style={{ color: "red" }} /> <p>Favorite</p>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-1">
+                      <FaRegHeart style={{ color: "red" }} /> <p>Favorite</p>
+                    </div>
+                  )}
+                </button>
               </div>
             </div>
             <div className="order-2 md:order-3 purchaseBox border shadow-inner rounded-sm p-5 h-fit md:w-1/4 md:sticky md:top-0">
