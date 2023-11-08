@@ -11,6 +11,7 @@ import { API } from "@/network";
 import { useUserStore } from "@/store/userStore";
 import axios from "axios";
 import { getCookie } from "cookies-next";
+import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { BsCheck } from "react-icons/bs";
@@ -40,6 +41,7 @@ const RegisterShop = () => {
     },
   });
   const { user } = useUserStore();
+  const router = useRouter();
   const [logged, setLogged] = useState<IAPIUserProfileResponse>();
   const [listAddress, setListAddress] = useState<IAddress[]>();
   const [listCourier, setListCourier] = useState<ICourier[]>();
@@ -124,165 +126,187 @@ const RegisterShop = () => {
   return (
     <>
       <Navbar />
+
       <div className="flex h-screen justify-center items-center">
-        <ToastContainer />
-        <div className="flex max-w-7xl w-full justify-around">
-          <div className="hidden md:inline">
-            <img
-              src="/images/seller_regis.png"
-              width={400}
-              height={400}
-              alt="seller_regis_logo"
-            />
-          </div>
-          <div className=" flex flex-col justify-center w-full px-5 md:px-0 md:w-96">
-            <h1>
-              Hi, <span className="font-bold">{logged?.full_name}</span>
+        {listAddress?.length !== 0 ? (
+          <div>
+            <h1 className="text-xl">
+              Please complete your profile and address first
             </h1>
-            <p className="text-sm">Lets start your journey as a seller</p>
-            <form
-              className="mt-5 flex flex-col gap-y-5"
-              onSubmit={handleSubmit(registerMerchantHandler)}
-            >
-              <div className="flex flex-col">
-                <label htmlFor="shop_name" className="text-sm">
-                  Shop name
-                </label>
-                <input
-                  {...register("shop_name", {
-                    validate: {
-                      required: (v) => v !== "" || "Shop name is required",
-                    },
-                  })}
-                  name="shop_name"
-                  id="shop_name"
-                  className="rounded-md border p-2"
-                />
-                {errors.shop_name?.types ===
-                  errors.shop_name?.types?.validate && (
-                  <p role="alert" className="text-xs text-red-500 mt-1">
-                    {errors.shop_name?.message}
-                  </p>
-                )}
-              </div>
-              <div className="flex flex-col">
-                <label htmlFor="address_id" className="text-sm">
-                  Shop address
-                </label>
-                <select
-                  {...register("address_id", {
-                    setValueAs: (v) => parseInt(v),
-                  })}
-                  name="address_id"
-                  id="address_id"
-                  className="rounded-md border p-2 border-slate-200"
-                >
-                  {listAddress?.map((address, i) => {
-                    return (
-                      <option key={i} value={address.id}>
-                        {address.full_address}
-                      </option>
-                    );
-                  })}
-                </select>
-              </div>
-              <div className="flex flex-col">
-                <label htmlFor="address_id" className="text-sm">
-                  Courier
-                </label>
-                <div className="relative">
-                  <input
-                    {...register("list_courier_id", {
-                      validate: {
-                        required: (v) =>
-                          v.length !== 0 || "Courier is required",
-                      },
-                    })}
-                    type="text"
-                    name="courier"
-                    id="courier"
-                    className="rounded-md w-full hover:cursor-pointer border-slate-200"
-                    onClick={() => setIsDropdownCourier(!isDropdownCourier)}
-                    readOnly
-                    value={
-                      listCourier
-                        ? selectedCourier.length !== 0
-                          ? selectedCourier
-                              ?.map((id) => {
-                                const index = listCourier.findIndex(
-                                  (v) => v.id === id
-                                );
-                                if (index !== -1) {
-                                  return listCourier![
-                                    index!
-                                  ].name.toUpperCase();
-                                }
-                              })
-                              .join(",")
-                          : "Please select at least 1 courier"
-                        : "Error fetching couriers"
-                    }
-                  />
-                  <div
-                    className={`${
-                      isDropdownCourier
-                        ? "visible opacity-100"
-                        : "invisible opacity-0 "
-                    } transition absolute w-full bg-white shadow-md rounded-bl-md rounded-br-md`}
-                  >
-                    {listCourier?.map((courier, i) => {
-                      return (
-                        <div
-                          key={i}
-                          className="p-2 flex gap-x-1 items-center hover:cursor-pointer hover:bg-slate-200 transition"
-                          onClick={() => {
-                            if (
-                              getValues("list_courier_id").includes(courier.id)
-                            ) {
-                              setValue(
-                                "list_courier_id",
-                                getValues("list_courier_id").filter(
-                                  (id) => id !== courier.id
-                                )
-                              );
-
-                              return setSelectedCourier(
-                                getValues("list_courier_id")
-                              );
-                            }
-
-                            setValue("list_courier_id", [
-                              ...getValues("list_courier_id"),
-                              courier.id,
-                            ]);
-                            return setSelectedCourier(
-                              getValues("list_courier_id")
-                            );
-                          }}
-                        >
-                          <p>{courier.name.toUpperCase()}</p>
-                          {selectedCourier.includes(courier.id) && <BsCheck />}
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-                {errors.list_courier_id?.types ===
-                  errors.list_courier_id?.types?.validate && (
-                  <p role="alert" className="text-xs text-red-500 mt-1">
-                    {errors.list_courier_id?.message}
-                  </p>
-                )}
-              </div>
-              <div className="mt-5">
-                <Button
-                  text="Register my shop"
-                  styling="p-2 bg-[#364968] w-full rounded-md text-white"
-                />
-              </div>
-            </form>
+            <div className="mt-3">
+              <Button
+                text="Go to Profile"
+                onClick={() => router.push("/user/profile")}
+                styling="p-2 bg-[#364968] w-full rounded-md text-white"
+              />
+            </div>
           </div>
-        </div>
+        ) : (
+          <>
+            <ToastContainer />
+            <div className="flex max-w-7xl w-full justify-around">
+              <div className="hidden md:inline">
+                <img
+                  src="/images/seller_regis.png"
+                  width={400}
+                  height={400}
+                  alt="seller_regis_logo"
+                />
+              </div>
+              <div className=" flex flex-col justify-center w-full px-5 md:px-0 md:w-96">
+                <h1>
+                  Hi, <span className="font-bold">{logged?.full_name}</span>
+                </h1>
+                <p className="text-sm">Lets start your journey as a seller</p>
+                <form
+                  className="mt-5 flex flex-col gap-y-5"
+                  onSubmit={handleSubmit(registerMerchantHandler)}
+                >
+                  <div className="flex flex-col">
+                    <label htmlFor="shop_name" className="text-sm">
+                      Shop name
+                    </label>
+                    <input
+                      {...register("shop_name", {
+                        validate: {
+                          required: (v) => v !== "" || "Shop name is required",
+                        },
+                      })}
+                      name="shop_name"
+                      id="shop_name"
+                      className="rounded-md border p-2"
+                    />
+                    {errors.shop_name?.types ===
+                      errors.shop_name?.types?.validate && (
+                      <p role="alert" className="text-xs text-red-500 mt-1">
+                        {errors.shop_name?.message}
+                      </p>
+                    )}
+                  </div>
+                  <div className="flex flex-col">
+                    <label htmlFor="address_id" className="text-sm">
+                      Shop address
+                    </label>
+                    <select
+                      {...register("address_id", {
+                        setValueAs: (v) => parseInt(v),
+                      })}
+                      name="address_id"
+                      id="address_id"
+                      className="rounded-md border p-2 border-slate-200"
+                    >
+                      {listAddress?.map((address, i) => {
+                        return (
+                          <option key={i} value={address.id}>
+                            {address.full_address}
+                          </option>
+                        );
+                      })}
+                    </select>
+                  </div>
+                  <div className="flex flex-col">
+                    <label htmlFor="address_id" className="text-sm">
+                      Courier
+                    </label>
+                    <div className="relative">
+                      <input
+                        {...register("list_courier_id", {
+                          validate: {
+                            required: (v) =>
+                              v.length !== 0 || "Courier is required",
+                          },
+                        })}
+                        type="text"
+                        name="courier"
+                        id="courier"
+                        className="rounded-md w-full hover:cursor-pointer border-slate-200"
+                        onClick={() => setIsDropdownCourier(!isDropdownCourier)}
+                        readOnly
+                        value={
+                          listCourier
+                            ? selectedCourier.length !== 0
+                              ? selectedCourier
+                                  ?.map((id) => {
+                                    const index = listCourier.findIndex(
+                                      (v) => v.id === id
+                                    );
+                                    if (index !== -1) {
+                                      return listCourier![
+                                        index!
+                                      ].name.toUpperCase();
+                                    }
+                                  })
+                                  .join(",")
+                              : "Please select at least 1 courier"
+                            : "Error fetching couriers"
+                        }
+                      />
+                      <div
+                        className={`${
+                          isDropdownCourier
+                            ? "visible opacity-100"
+                            : "invisible opacity-0 "
+                        } transition absolute w-full bg-white shadow-md rounded-bl-md rounded-br-md`}
+                      >
+                        {listCourier?.map((courier, i) => {
+                          return (
+                            <div
+                              key={i}
+                              className="p-2 flex gap-x-1 items-center hover:cursor-pointer hover:bg-slate-200 transition"
+                              onClick={() => {
+                                if (
+                                  getValues("list_courier_id").includes(
+                                    courier.id
+                                  )
+                                ) {
+                                  setValue(
+                                    "list_courier_id",
+                                    getValues("list_courier_id").filter(
+                                      (id) => id !== courier.id
+                                    )
+                                  );
+
+                                  return setSelectedCourier(
+                                    getValues("list_courier_id")
+                                  );
+                                }
+
+                                setValue("list_courier_id", [
+                                  ...getValues("list_courier_id"),
+                                  courier.id,
+                                ]);
+                                return setSelectedCourier(
+                                  getValues("list_courier_id")
+                                );
+                              }}
+                            >
+                              <p>{courier.name.toUpperCase()}</p>
+                              {selectedCourier.includes(courier.id) && (
+                                <BsCheck />
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                    {errors.list_courier_id?.types ===
+                      errors.list_courier_id?.types?.validate && (
+                      <p role="alert" className="text-xs text-red-500 mt-1">
+                        {errors.list_courier_id?.message}
+                      </p>
+                    )}
+                  </div>
+                  <div className="mt-5">
+                    <Button
+                      text="Register my shop"
+                      styling="p-2 bg-[#364968] w-full rounded-md text-white"
+                    />
+                  </div>
+                </form>
+              </div>
+            </div>
+          </>
+        )}
       </div>
       <Footer />
     </>
