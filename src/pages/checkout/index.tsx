@@ -17,6 +17,12 @@ import CheckoutAddressModal from "@/components/CheckoutAddressModal";
 import CheckoutPayment from "@/components/CheckoutPayment";
 import { ICartData } from "@/interfaces/cart_interface";
 import { useCartStore } from "@/store/cartStore";
+import { API } from "@/network";
+import axios from "axios";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import { getCookie } from "cookies-next";
+import { IAPIResponse } from "@/interfaces/api_interface";
 
 const CheckoutPage = () => {
   const [dataTest, setDataTest] = useState<ICartData[] | undefined>([
@@ -43,7 +49,6 @@ const CheckoutPage = () => {
 
   const useVoucher = () => {
     setShowVoucherModal(false);
-    console.log(selectedVoucher);
   };
 
   const changeSelectedVoucher = (id: number) => {
@@ -79,6 +84,77 @@ const CheckoutPage = () => {
     getCheckoutData();
   }, []);
 
+  interface IProductVariant {
+    id: number;
+    quantity: number;
+  }
+
+  interface ISendData {
+    seller_id: number;
+    product_variant: IProductVariant[];
+    destination_address_id: string;
+    courier_id: number;
+    notes: string;
+    weight: string;
+    voucher_id?: number;
+  }
+
+  const submit = async (e: any) => {
+    e.preventDefault();
+
+    const sendData: ISendData = {
+      seller_id: 0,
+      product_variant: [],
+      destination_address_id: "1",
+      courier_id: 1,
+      notes: additionalNotes,
+      weight: "200",
+      // "voucher_id": 1 // optional
+    };
+
+    for (let i = 0; i < cartStore.cart!.length; i++) {
+      for (let j = 0; j < cartStore.cart![i].cart_items.length; j++) {
+        if (cartStore.cart![i].cart_items[j].isChecked) {
+          sendData.seller_id = cartStore.cart![i].shop_id;
+          sendData.product_variant.push({
+            id: cartStore.cart![i].cart_items[j].product_id,
+            quantity: cartStore.cart![i].cart_items[j].product_quantity,
+          });
+        }
+      }
+    }
+
+    try {
+      toast.promise(
+        API.post("/orders/checkout", sendData, {
+          headers: {
+            Authorization: `Bearer ${getCookie("accessToken")}`,
+          },
+        }),
+        {
+          pending: "Loading",
+          success: "Payment success!",
+          error: {
+            render({ data }) {
+              if (axios.isAxiosError(data)) {
+                return `${(data.response?.data as IAPIResponse).message}`;
+              }
+            },
+          },
+        },
+        {
+          autoClose: 1500,
+        }
+      );
+    } catch (e) {
+      if (axios.isAxiosError(e)) {
+        toast.error(e.message, {
+          autoClose: 1500,
+        });
+      }
+    }
+  };
+
   return (
     <>
       {showVoucherModal && (
@@ -109,6 +185,7 @@ const CheckoutPage = () => {
 
       <div>
         <Navbar />
+        <ToastContainer />
         <div className="lg:max-w-7xl mx-auto">
           <div className="flex mt-[30px] justify-between mobile:block pb-8">
             <h1 className="text-[30px] mobile:text-center">Checkout</h1>
@@ -227,6 +304,7 @@ const CheckoutPage = () => {
             <Button
               text="Place order"
               styling="bg-[#fddf97] p-3 rounded-[8px] w-[250px]  my-4"
+              onClick={submit}
               disabled={
                 walletMoney - (orderTotal + shippingTotal - voucherTotal) < 0
               }
