@@ -85,14 +85,14 @@ function Index() {
             className="imgSeller w-20 h-full"
           />
           <div className="flex flex-col md:flex-row gap-y-4 gap-x-48 w-full">
-            <div className="aboutSeller w-1/2 md:w-full flex flex-col gap-y-2">
+            <div className="aboutSeller  md:w-full flex flex-col gap-y-2">
               <p className="text-lg md:text-xl font-semibold">Nama Toko</p>
               <p className="text-sm flex items-center text-neutral-600">
                 <FaLocationDot /> <span>Malang</span>
               </p>
             </div>
 
-            <div className="flex flex-col md:flex-row justify-start items-start md:justify-between w-1/2 md:w-full md:items-center ">
+            <div className="flex flex-col md:flex-row justify-start items-start md:justify-between md:w-full md:items-center ">
               <div className="text-center md:justify-center">
                 <p className="flex text-left md:text-center md:items-center font-semibold gap-x-1">
                   <FaStar style={{ color: "#f57b29" }} /> 4.8
