@@ -2,11 +2,7 @@ import Footer from "@/components/Footer";
 import Modal from "@/components/Modal";
 import Navbar from "@/components/Navbar";
 import ProductCard from "@/components/ProductCard";
-import {
-  IAPIProductCar,
-  IAPIProductDetail,
-  IAPIResponse,
-} from "@/interfaces/api_interface";
+import { IAPIResponse } from "@/interfaces/api_interface";
 import { API } from "@/network";
 import { currencyConverter } from "@/utils/utils";
 import axios from "axios";
@@ -22,12 +18,12 @@ import { FaLocationDot, FaTruckFast } from "react-icons/fa6";
 import { toast } from "react-toastify";
 
 interface IAPIProductDetail {
-  id: 2;
+  id: number;
   name: string;
   description: string;
   stars: string;
-  sold: 0;
-  available: 0;
+  sold: number;
+  available: number;
   images: null;
   variant_options: [
     {
@@ -37,7 +33,7 @@ interface IAPIProductDetail {
   ];
   variants: [
     {
-      variant_id: 2;
+      variant_id: number;
       variant_name: string;
       selections: [
         {
@@ -45,10 +41,15 @@ interface IAPIProductDetail {
           selection_name: string;
         }
       ];
-      stock: 2;
+      stock: number;
       price: string;
     }
   ];
+}
+
+interface IAPIProductCart {
+  product_id: string;
+  quantity: string;
 }
 
 interface IProductDetail {
@@ -115,7 +116,7 @@ const imgDummy: IProductDetail[] = [
 export const getServerSideProps = async (
   context: GetServerSidePropsContext
 ) => {
-  let data: IAPIProductDetail | undefined;
+  let data: IAPIProductCart | undefined;
 
   let accessToken = context.req.cookies["accessToken"];
 
@@ -126,7 +127,7 @@ export const getServerSideProps = async (
         "Content-Type": "application/json",
       },
     });
-    data = (res.data as IAPIResponse<IAPIProductDetail>).data;
+    data = (res.data as IAPIResponse<IAPIProductCart>).data;
     console.log(data, "dataa");
   } catch (e) {
     if (axios.isAxiosError(e)) {
@@ -146,13 +147,14 @@ const ProductDetail = ({ product }: IProductDetailProps) => {
   const [selection, setSelection] = useState("");
   const [count, setCount] = useState<number>(1);
   const [isHovering, setIsHovering] = useState(false);
-  const [selectionVariant, setSelectionVariant] = useState(""); // Selected variant
 
   const [isModal, setIsModal] = useState<boolean>(false);
   const [variation, setVariation] = useState(
     "https://down-id.img.susercontent.com/file/826639af5f9af89adae9a1700f073242"
   );
-  const [selectedVariants, setSelectedVariants] = useState({});
+  const [selectedVariants, setSelectedVariants] = useState<{
+    [key: string]: string;
+  }>({});
 
   const handleClick = (variant: string, optionName: string) => {
     setSelectedVariants({
@@ -160,8 +162,6 @@ const ProductDetail = ({ product }: IProductDetailProps) => {
       [optionName]: variant,
     });
   };
-
-  console.log(product.variant_options[1]);
 
   const handleMouseOver = (src: string) => {
     setIsHovering(true);
@@ -190,21 +190,28 @@ const ProductDetail = ({ product }: IProductDetailProps) => {
     }
   };
 
-  const handleToCart: SubmitHandler<IAPIProductCart> = async () => {
-    if (selectedVariants === "" || count < 1) {
+  const handleToCart = async () => {
+    if (Object.keys(selectedVariants).length === 0 || count < 1) {
       return;
     }
 
-    const dataRes = {
-      variant_id: product.variants.find(
-        (v) => v.selections[0].selection_name === selectedVariants
-      )?.variant_id,
-      quantity: count,
+    const variant = product.variants.find((v) => {
+      const variantKey = v.selections[0].selection_variant_name;
+      return selectedVariants[variantKey] === v.selections[0].selection_name;
+    });
+
+    if (!variant) {
+      return;
+    }
+
+    const data = {
+      product_id: variant.variant_id.toString(),
+      quantity: count.toString(),
     };
 
     try {
       const res = await toast.promise(
-        API.post(`/accounts/carts`, dataRes, {
+        API.post(`/accounts/carts`, data, {
           headers: {
             Authorization: `Bearer ${getCookie("accessToken")}`,
           },
@@ -224,6 +231,7 @@ const ProductDetail = ({ product }: IProductDetailProps) => {
           autoClose: 1500,
         }
       );
+      console.log("yesss");
     } catch (error) {
       console.log(error);
     }
@@ -359,7 +367,7 @@ const ProductDetail = ({ product }: IProductDetailProps) => {
               <div className="btn flex gap-5 mt-10">
                 <button
                   type="submit"
-                  onClick={() => handleToCart(product)}
+                  onClick={handleToCart}
                   className="flex items-center justify-center gap-1 border border-[#364968] hover:shadow-md bg-[#d6e4f8] p-2 w-36 hover:bg-[#eff6fd]  transition-all duration-300"
                 >
                   <AiOutlineShoppingCart /> <span>Add to cart</span>
