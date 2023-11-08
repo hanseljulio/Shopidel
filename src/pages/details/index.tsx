@@ -243,6 +243,12 @@ const ProductDetail = ({ product }: IProductDetailProps) => {
       } else {
         toast.error("Failed to add to cart", { autoClose: 1500 });
       }
+      toast("Added to cart", {
+        hideProgressBar: true,
+        autoClose: 2000,
+        type: "success",
+        position: "top-right",
+      });
       console.log("yess");
 
       console.log(response.data);
@@ -405,11 +411,12 @@ const ProductDetail = ({ product }: IProductDetailProps) => {
                 <p className="productTitle text-2xl font-medium pb-3">
                   {product.name}
                 </p>
-                <div className="historyProduct flex align-middle text-xs pb-3">
-                  <span className="pr-3">{`Sold ${product.sold}`} </span>
-                  <span className="px-3 border-l border-slate-600 flex-row  md:flex flex gap-1 items-center">
-                    <BsStarFill style={{ color: "#f57b29" }} />5
-                  </span>
+                <div className="historyProduct flex items-center text-xs pb-3">
+                  <p className="pr-3">{`Sold ${product.sold}`} </p>
+                  <p className="px-3 border-l border-slate-600 flex-row  md:flex flex gap-1 items-center justify-center ">
+                    <BsStarFill style={{ color: "#f57b29" }} />
+                    <span className="items-center">5</span>
+                  </p>
                 </div>
                 <p className="productPrice text-2xl font-semibold text-[#f57b29] py-3">
                   {currencyConverter(parseInt(product.variants[0].price))}
