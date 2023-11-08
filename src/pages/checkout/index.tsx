@@ -25,6 +25,7 @@ import { getCookie } from "cookies-next";
 import { IAPIResponse } from "@/interfaces/api_interface";
 import { IAddress } from "@/interfaces/address_interface";
 import { useRouter } from "next/router";
+import { useUserStore } from "@/store/userStore";
 
 interface IProductVariant {
   id: number;
@@ -87,6 +88,120 @@ const NoWalletModal = () => {
   );
 };
 
+interface ICourierList {
+  id: number;
+  name: string;
+  description: string;
+}
+
+interface ISelectShippingModalProps {
+  confirmFunction: (id: number, name: string, shippingCost: number) => void;
+  sellerId: number;
+  destinationAddress: string;
+}
+
+interface IShippingCostData {
+  cost: number;
+  estimated: string;
+  note: string;
+}
+
+const SelectShippingModal = (props: ISelectShippingModalProps) => {
+  const [courierList, setCourierList] = useState<ICourierList[]>([]);
+  const [currentCourierId, setCurrentCourierId] = useState<number>(1);
+  const [currentName, setCurrentName] = useState<string>("JNE");
+  const [shippingCostData, setShippingCostData] = useState<IShippingCostData>();
+
+  const getCourier = async () => {
+    try {
+      const response = await API.get("/orders/couriers/1", {
+        headers: {
+          Authorization: `Bearer ${getCookie("accessToken")}`,
+        },
+      });
+
+      setCourierList(response.data.data);
+    } catch (e) {
+      console.log(e);
+    }
+  };
+
+  const getShippingCost = async () => {
+    const sendData = {
+      seller_id: props.sellerId,
+      destination_address_id: props.destinationAddress,
+      courier_id: currentCourierId,
+      weight: "200",
+    };
+
+    try {
+      const response = await API.post("/orders/cost/check", sendData, {
+        headers: {
+          Authorization: `Bearer ${getCookie("accessToken")}`,
+        },
+      });
+
+      setShippingCostData(response.data.data);
+    } catch (e) {
+      console.log(e);
+    }
+  };
+
+  useEffect(() => {
+    getCourier();
+  }, []);
+
+  useEffect(() => {
+    getShippingCost();
+  }, [currentCourierId]);
+
+  return (
+    <div className="bg-white p-5 rounded-md  w-[500px] h-[300px] mobile:w-[99%]">
+      <div className="pb-3">
+        <h1 className="text-[20px]">Select Shipping</h1>
+      </div>
+      <div className="flex items-center justify-between pt-6 pb-8">
+        <div>
+          <h1>Select courier here</h1>
+          <select
+            onChange={(e) => {
+              setCurrentCourierId(parseInt(e.target.value));
+              setCurrentName(
+                e.target.options[parseInt(e.target.value) - 1].text
+              );
+            }}
+            className={`p-4 w-[200px] rounded`}
+            name="category-dropdown"
+          >
+            {courierList.map((option, index) => (
+              <option key={index} value={option.id}>
+                {option.name.toUpperCase()}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div className="text-right">
+          <h1>Shipping cost: {shippingCostData?.cost}</h1>
+          <h1>ETD: {shippingCostData?.estimated} day(s)</h1>
+        </div>
+      </div>
+      <div className="flex justify-center mt-3">
+        <Button
+          text="Confirm Shipping"
+          onClick={() =>
+            props.confirmFunction(
+              currentCourierId,
+              currentName,
+              shippingCostData!.cost
+            )
+          }
+          styling="bg-[#364968] p-3 rounded-[8px] w-[200px] text-white my-4"
+        />
+      </div>
+    </div>
+  );
+};
+
 const CheckoutPage = () => {
   const [dataTest, setDataTest] = useState<ICartData[] | undefined>([
     {
@@ -96,6 +211,8 @@ const CheckoutPage = () => {
     },
   ]);
 
+  const userStore = useUserStore();
+
   const [showVoucherModal, setShowVoucherModal] = useState<boolean>(false);
   const [showAddressModal, setShowAddressModal] = useState<boolean>(false);
   const [selectedVoucher, setSelectedVoucher] = useState<number>(0);
@@ -103,16 +220,19 @@ const CheckoutPage = () => {
   const [currentAddress, setCurrentAddress] = useState<string>("");
   const [addressData, setAddressData] = useState<IAddress[]>([]);
   const [defaultAddressId, setDefaultAddressId] = useState<number>(0);
+  const [sellerId, setSellerId] = useState<number>(0);
 
   const [orderTotal, setOrderTotal] = useState<number>(0);
-  const [shippingTotal, setShippingTotal] = useState<number>(10000);
-  const [shippingOption, setShippingOption] = useState<string>("REGULAR");
+  const [shippingTotal, setShippingTotal] = useState<number>(0);
+  const [shippingOption, setShippingOption] = useState<string>("");
   const [voucherTotal, setVoucherTotal] = useState<number>(50000);
   const [walletMoney, setWalletMoney] = useState<number>(0);
   const [additionalNotes, setAdditionalNotes] = useState<string>("");
+  const [courierId, setCourierId] = useState<number>(0);
 
   const [showNoAddress, setShowNoAddress] = useState<boolean>(false);
   const [showNoWallet, setShowNoWallet] = useState<boolean>(false);
+  const [showShippingModal, setShowShippingModal] = useState<boolean>(false);
 
   const cartStore = useCartStore();
 
@@ -138,6 +258,7 @@ const CheckoutPage = () => {
     for (let i = 0; i < cartStore.cart!.length; i++) {
       for (let j = 0; j < cartStore.cart![i].cart_items.length; j++) {
         if (cartStore.cart![i].cart_items[j].isChecked) {
+          setSellerId(cartStore.cart![i].shop_id);
           total +=
             parseInt(cartStore.cart![i].cart_items[j].product_unit_price) *
             cartStore.cart![i].cart_items[j].product_quantity;
@@ -212,12 +333,18 @@ const CheckoutPage = () => {
 
   const submit = async (e: any) => {
     e.preventDefault();
+    const noShipping = () => toast.error("Please select a shipping option!");
+
+    if (shippingOption === "") {
+      noShipping();
+      return;
+    }
 
     const sendData: ISendData = {
-      seller_id: 0,
+      seller_id: sellerId,
       product_variant: [],
       destination_address_id: selectedAddress.toString(),
-      courier_id: 1,
+      courier_id: courierId,
       notes: additionalNotes,
       weight: "200",
       // "voucher_id": 1 // optional
@@ -226,7 +353,6 @@ const CheckoutPage = () => {
     for (let i = 0; i < cartStore.cart!.length; i++) {
       for (let j = 0; j < cartStore.cart![i].cart_items.length; j++) {
         if (cartStore.cart![i].cart_items[j].isChecked) {
-          sendData.seller_id = cartStore.cart![i].shop_id;
           sendData.product_variant.push({
             id: cartStore.cart![i].cart_items[j].product_id,
             quantity: cartStore.cart![i].cart_items[j].product_quantity,
@@ -266,8 +392,28 @@ const CheckoutPage = () => {
     }
   };
 
+  const confirmFunction = (id: number, name: string, shippingCost: number) => {
+    setCourierId(id);
+    setShippingOption(name.toUpperCase());
+    setShippingTotal(shippingCost);
+    setShowShippingModal(false);
+  };
+
   return (
     <>
+      {showShippingModal && (
+        <Modal
+          content={
+            <SelectShippingModal
+              sellerId={sellerId}
+              destinationAddress={selectedAddress.toString()}
+              confirmFunction={confirmFunction}
+            />
+          }
+          onClose={() => setShowShippingModal(false)}
+        />
+      )}
+
       {showNoWallet && <Modal content={<NoWalletModal />} onClose={() => {}} />}
 
       {showNoAddress && (
@@ -315,9 +461,7 @@ const CheckoutPage = () => {
               Delivery Address
             </h1>
             <div className="flex text-[18px] pt-6 items-center mobile:flex-col mobile:gap-5">
-              <h1 className="font-bold basis-[20%]">
-                Hansel Julio (+62) 81519799999
-              </h1>
+              <h1 className="font-bold basis-[20%]">Ahmad Satoni</h1>
               <h1 className="basis-[70%]">
                 {currentAddress}{" "}
                 <span
@@ -401,6 +545,7 @@ const CheckoutPage = () => {
             onChange={(e) => setAdditionalNotes(e.target.value)}
             shippingOption={shippingOption}
             shippingTotal={shippingTotal}
+            openShippingModal={() => setShowShippingModal(true)}
           />
           <div className="bg-[#29374e] text-right px-[20px] text-[20px] p-6 text-white mobile:text-center">
             <h1>
