@@ -8,9 +8,7 @@ import { currencyConverter } from "@/utils/utils";
 import axios from "axios";
 import { getCookie } from "cookies-next";
 import { GetServerSidePropsContext } from "next";
-import img from "next/image";
-import React, { useState } from "react";
-import { SubmitHandler } from "react-hook-form";
+import React, { useEffect, useState } from "react";
 import { AiOutlineShoppingCart } from "react-icons/ai";
 import { BsStarFill } from "react-icons/bs";
 import { FaStar, FaStore } from "react-icons/fa";
@@ -116,7 +114,7 @@ const imgDummy: IProductDetail[] = [
 export const getServerSideProps = async (
   context: GetServerSidePropsContext
 ) => {
-  let data: IAPIProductCart | undefined;
+  let data: IAPIProductDetail | undefined;
 
   let accessToken = context.req.cookies["accessToken"];
 
@@ -127,7 +125,7 @@ export const getServerSideProps = async (
         "Content-Type": "application/json",
       },
     });
-    data = (res.data as IAPIResponse<IAPIProductCart>).data;
+    data = (res.data as IAPIResponse<IAPIProductDetail>).data;
     console.log(data, "dataa");
   } catch (e) {
     if (axios.isAxiosError(e)) {
@@ -144,7 +142,6 @@ export const getServerSideProps = async (
 };
 
 const ProductDetail = ({ product }: IProductDetailProps) => {
-  const [selection, setSelection] = useState("");
   const [count, setCount] = useState<number>(1);
   const [isHovering, setIsHovering] = useState(false);
 
@@ -155,6 +152,33 @@ const ProductDetail = ({ product }: IProductDetailProps) => {
   const [selectedVariants, setSelectedVariants] = useState<{
     [key: string]: string;
   }>({});
+  const [subtotal, setSubtotal] = useState<number>(0);
+  const [currentStock, setCurrentStock] = useState<number>(0);
+
+  // Create a function to calculate subtotal based on selected variants and count
+  const calculateSubtotal = () => {
+    const selectedVariant = product.variants.find((variant) => {
+      return Object.keys(selectedVariants).every((optionName) => {
+        return variant.selections.some((selection) => {
+          return (
+            selection.selection_variant_name === optionName &&
+            selection.selection_name === selectedVariants[optionName]
+          );
+        });
+      });
+    });
+
+    if (selectedVariant) {
+      const price = parseInt(selectedVariant.price);
+      setSubtotal(price * count);
+      setCurrentStock(selectedVariant.stock);
+    }
+  };
+
+  // Add a useEffect to call the calculateSubtotal function when selections change
+  useEffect(() => {
+    calculateSubtotal();
+  }, [selectedVariants, count]);
 
   const handleClick = (variant: string, optionName: string) => {
     setSelectedVariants({
@@ -210,30 +234,29 @@ const ProductDetail = ({ product }: IProductDetailProps) => {
     };
 
     try {
-      const res = await toast.promise(
-        API.post(`/accounts/carts`, data, {
-          headers: {
-            Authorization: `Bearer ${getCookie("accessToken")}`,
-          },
-        }),
-        {
-          pending: "Loading",
-          success: "Added to cart",
-          error: {
-            render({ data }) {
-              if (axios.isAxiosError(data)) {
-                return `${(data.response?.data as IAPIResponse).message}`;
-              }
-            },
-          },
+      const response = await API.post(`/accounts/cart`, data, {
+        headers: {
+          Authorization: `Bearer ${getCookie("accessToken")}`,
         },
-        {
-          autoClose: 1500,
-        }
-      );
-      console.log("yesss");
+      });
+
+      if (response.status === 200) {
+        toast.success("Added to cart", { autoClose: 1500 });
+      } else {
+        toast.error("Failed to add to cart", { autoClose: 1500 });
+      }
+      console.log("yess");
+
+      console.log(response.data);
     } catch (error) {
-      console.log(error);
+      if (axios.isAxiosError(error)) {
+        toast.error(error.response?.data.message, { autoClose: 1500 });
+      } else {
+        toast.error("An error occurred while adding to cart", {
+          autoClose: 1500,
+        });
+      }
+      console.log("nooooo");
     }
   };
 
@@ -356,12 +379,10 @@ const ProductDetail = ({ product }: IProductDetailProps) => {
                   <p>stock</p>
                 </div>
               </div>
-              <div className="flex  text-sm text-neutral-600 py-3 justify-between">
+              <div className="flex text-sm text-neutral-600 py-3 justify-between">
                 <p className="">Subtotal</p>
-                <p className="subTotal text-lg font-semibold text-neutral-800 ">
-                  {currencyConverter(
-                    parseInt(product.variants[0].price) * count
-                  )}
+                <p className="subTotal text-lg font-semibold text-neutral-800">
+                  {currencyConverter(subtotal)}
                 </p>
               </div>
               <div className="btn flex gap-5 mt-10">
