@@ -15,6 +15,7 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { getCookie } from "cookies-next";
 import { emailConverter } from "@/utils/utils";
+import Dropdown from "@/components/Dropdown";
 
 const UserProfile = ({
   userData,
@@ -199,14 +200,13 @@ const UserProfile = ({
                     })
                   }
                 />
-                <Input
+                <Dropdown
                   label="Gender"
                   labelStyle="mt-2"
-                  styling="flex items-center gap-[77px] pb-[30px] mobile:flex-col mobile:gap-2 mobile:items-start"
                   width="w-[250px]"
-                  type="text"
-                  name="username"
                   value={userDetails!.gender}
+                  flexLabel="flex items-center gap-[77px] pb-[30px] mobile:flex-col mobile:gap-2 mobile:items-start"
+                  options={["male", "female"]}
                   onChange={(e) =>
                     setUserDetails({
                       ...userDetails!,
@@ -233,13 +233,14 @@ const UserProfile = ({
               <div
                 className={`flex-col justify-center items-center admin-edit-photo p-4 mobile:mx-auto`}
               >
-                <Image
-                  src={`${imageFile === null
-                    ? "/images/defaultuser.png"
-                    : imageFile === undefined
+                <img
+                  src={`${
+                    imageFile === null
+                      ? "/images/defaultuser.png"
+                      : imageFile === undefined
                       ? "/images/defaultuser.png"
                       : URL.createObjectURL(imageFile)
-                    }`}
+                  }`}
                   alt="Nothing"
                   width={200}
                   height={200}
@@ -289,7 +290,7 @@ export const getServerSideProps = async (
   let accessToken = context.req.cookies["accessToken"];
 
   try {
-    const res = await API.get("/accounts", {
+    const res = await API.get("/accounts/profile", {
       headers: {
         Authorization: `Bearer ${accessToken}`,
         "Content-Type": "application/json",

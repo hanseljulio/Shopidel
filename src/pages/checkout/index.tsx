@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Navbar from "@/components/Navbar";
 import CheckoutTableHead from "@/components/CheckoutTableHead";
 import CheckoutTableData from "@/components/CheckoutTableData";
@@ -15,30 +15,15 @@ import Modal from "@/components/Modal";
 import CheckoutVoucherModal from "@/components/CheckoutVoucherModal";
 import CheckoutAddressModal from "@/components/CheckoutAddressModal";
 import CheckoutPayment from "@/components/CheckoutPayment";
-
-interface IDataTest {
-  id: number;
-  productId: number;
-  price: number;
-  quantity: number;
-  isChecked: false;
-}
+import { ICartData } from "@/interfaces/cart_interface";
+import { useCartStore } from "@/store/cartStore";
 
 const CheckoutPage = () => {
-  const [dataTest, setDataTest] = useState<IDataTest[]>([
+  const [dataTest, setDataTest] = useState<ICartData[] | undefined>([
     {
-      id: 1,
-      productId: 1,
-      price: 50000,
-      quantity: 1,
-      isChecked: false,
-    },
-    {
-      id: 4,
-      productId: 4,
-      price: 20000,
-      quantity: 4,
-      isChecked: false,
+      shop_id: 0,
+      shop_name: "",
+      cart_items: [],
     },
   ]);
 
@@ -46,6 +31,15 @@ const CheckoutPage = () => {
   const [showAddressModal, setShowAddressModal] = useState<boolean>(false);
   const [selectedVoucher, setSelectedVoucher] = useState<number>(0);
   const [selectedAddress, setSelectedAddress] = useState<number>(0);
+
+  const [orderTotal, setOrderTotal] = useState<number>(0);
+  const [shippingTotal, setShippingTotal] = useState<number>(10000);
+  const [shippingOption, setShippingOption] = useState<string>("REGULAR");
+  const [voucherTotal, setVoucherTotal] = useState<number>(50000);
+  const [walletMoney, setWalletMoney] = useState<number>(20000000);
+  const [additionalNotes, setAdditionalNotes] = useState<string>("");
+
+  const cartStore = useCartStore();
 
   const useVoucher = () => {
     setShowVoucherModal(false);
@@ -64,6 +58,26 @@ const CheckoutPage = () => {
   const changeSelectedAddress = (id: number) => {
     setSelectedAddress(id);
   };
+
+  const getCheckoutData = () => {
+    let total = 0;
+    for (let i = 0; i < cartStore.cart!.length; i++) {
+      for (let j = 0; j < cartStore.cart![i].cart_items.length; j++) {
+        if (cartStore.cart![i].cart_items[j].isChecked) {
+          total +=
+            parseInt(cartStore.cart![i].cart_items[j].product_unit_price) *
+            cartStore.cart![i].cart_items[j].product_quantity;
+        }
+      }
+    }
+
+    setOrderTotal(total);
+    setDataTest(cartStore.cart);
+  };
+
+  useEffect(() => {
+    getCheckoutData();
+  }, []);
 
   return (
     <>
@@ -129,14 +143,27 @@ const CheckoutPage = () => {
             <table className="mx-auto">
               <tbody>
                 <CheckoutTableHeadMobile />
-                {dataTest.map((data, index) => (
-                  <CheckoutTableDataMobile
-                    key={index}
-                    id={data.id}
-                    quantity={data.quantity}
-                    price={data.price}
-                  />
-                ))}
+                {dataTest!.map((data, index) => {
+                  if (data.cart_items.length !== 0) {
+                    return (
+                      <>
+                        {data.cart_items.map((item) => {
+                          if (item.isChecked) {
+                            return (
+                              <CheckoutTableDataMobile
+                                key={index}
+                                id={item.product_id}
+                                quantity={item.product_quantity}
+                                price={parseInt(item.product_unit_price)}
+                                productName={item.product_name}
+                              />
+                            );
+                          }
+                        })}
+                      </>
+                    );
+                  }
+                })}
               </tbody>
             </table>
           </div>
@@ -145,20 +172,39 @@ const CheckoutPage = () => {
             <table className="w-full border-2">
               <tbody>
                 <CheckoutTableHead />
-                {dataTest.map((data, index) => (
-                  <CheckoutTableData
-                    key={index}
-                    id={data.id}
-                    quantity={data.quantity}
-                    price={data.price}
-                  />
-                ))}
+                {dataTest!.map((data, index) => {
+                  if (data.cart_items.length !== 0) {
+                    return (
+                      <>
+                        {data.cart_items.map((item) => {
+                          if (item.isChecked) {
+                            return (
+                              <CheckoutTableData
+                                key={index}
+                                id={item.product_id}
+                                quantity={item.product_quantity}
+                                price={parseInt(item.product_unit_price)}
+                                productName={item.product_name}
+                              />
+                            );
+                          }
+                        })}
+                      </>
+                    );
+                  }
+                })}
               </tbody>
             </table>
           </div>
-          <CheckoutShippingSelect />
+          <CheckoutShippingSelect
+            onChange={(e) => setAdditionalNotes(e.target.value)}
+            shippingOption={shippingOption}
+            shippingTotal={shippingTotal}
+          />
           <div className="bg-[#29374e] text-right px-[20px] text-[20px] p-6 text-white mobile:text-center">
-            <h1>Order Total: {currencyConverter(130000)}</h1>
+            <h1>
+              Order Total: {currencyConverter(orderTotal + shippingTotal)}
+            </h1>
           </div>
           <br />
           <CheckoutVoucherSelect
@@ -166,16 +212,24 @@ const CheckoutPage = () => {
             modalOn={() => setShowVoucherModal(true)}
           />
           <br />
-          <CheckoutPayment money={20000000} canPay={true} />
+          <CheckoutPayment
+            money={walletMoney}
+            canPay={
+              walletMoney - (orderTotal + shippingTotal - voucherTotal) > 0
+            }
+          />
           <CheckoutGrandTotal
-            merchandise={130000}
-            shipping={9000}
-            voucher={1000}
+            merchandise={orderTotal}
+            shipping={shippingTotal}
+            voucher={voucherTotal}
           />
           <div className="border-2 text-right text-[18px] mb-20 pr-4 mobile:text-center">
             <Button
               text="Place order"
               styling="bg-[#fddf97] p-3 rounded-[8px] w-[250px]  my-4"
+              disabled={
+                walletMoney - (orderTotal + shippingTotal - voucherTotal) < 0
+              }
             />
           </div>
         </div>

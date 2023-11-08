@@ -8,6 +8,7 @@ interface ICartTableDataProps {
   id: number;
   price: number;
   quantity: number;
+  productName: string;
 }
 
 const CheckoutTableDataMobile = (props: ICartTableDataProps) => {
@@ -17,19 +18,16 @@ const CheckoutTableDataMobile = (props: ICartTableDataProps) => {
         {
           <div>
             <div className="pb-4">
-              <CartProduct />
+              <CartProduct productName={props.productName} />
             </div>
-            <div className="flex justify-between">
+            <div className="flex justify-between w-full items-center">
               <div className="left">
-                <h1 className="pb-4 text-[#29374e]">
-                  {currencyConverter(props.price)}
-                </h1>
+                <h1 className="pb-4">{currencyConverter(props.price)}</h1>
                 <h1>Amount: {props.quantity}</h1>
               </div>
-              <div className="right mr-[10px] flex items-center">
-                <h1>
-                  Subtotal: {currencyConverter(props.price * props.quantity)}
-                </h1>
+              <div className="flex flex-col text-right">
+                <h1>Subtotal:</h1>
+                <h1>{currencyConverter(props.price * props.quantity)}</h1>
               </div>
             </div>
           </div>

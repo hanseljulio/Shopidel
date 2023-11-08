@@ -33,7 +33,7 @@ const ProductCard = ({
     >
       <div className={"relative w-full md "}>
         <div className={" h-auto md:h-48 w-auto overflow-hidden"}>
-          <Image
+          <img
             width={100}
             height={100}
             src={image}

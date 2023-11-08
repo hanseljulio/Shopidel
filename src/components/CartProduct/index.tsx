@@ -1,19 +1,24 @@
 import React from "react";
 import Image from "next/image";
 
-const CartProduct = () => {
+interface ICartProductProps {
+  productName: string;
+}
+
+const CartProduct = (props: ICartProductProps) => {
   return (
-    <div className="flex items-center justify-center mobile:gap-2">
-      <Image
+    <div className="flex items-center gap-6 justify-center mobile:gap-2">
+      <img
         alt="productpic"
         src={"/images/emptycart.png"}
         width={250}
         height={250}
-        objectFit="cover"
-        className="w-[60px] h-[60px]"
+        className="w-[60px] h-[60px] object-cover"
       />
-      <h1 className="w-[300px] mobile:w-[250px] mobile:text-[12px]">
-        Whitelab Gentle Peeling Gel - Gel Pengangkat Sel Kulit Mati Untu...
+      <h1 className="w-[300px] text-left mobile:w-[250px] mobile:text-[12px]">
+        {props.productName.length > 80
+          ? props.productName.substring(0, 80) + "..."
+          : props.productName}
       </h1>
     </div>
   );

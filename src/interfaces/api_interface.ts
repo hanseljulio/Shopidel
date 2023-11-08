@@ -1,6 +1,14 @@
-export interface IAPIResponse<T = Object> {
+export interface IAPIResponse<T = Object | []> {
   data?: T;
-  message: string;
+  message?: string;
+  pagination?: IAPIPagination;
+}
+
+interface IAPIPagination {
+  total_page: number;
+  total_item: number;
+  current_page: number;
+  limit: number;
 }
 
 export interface IAPIWalletResponse {

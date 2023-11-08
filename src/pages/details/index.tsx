@@ -3,7 +3,7 @@ import Footer from "@/components/Footer";
 import Modal from "@/components/Modal";
 import Navbar from "@/components/Navbar";
 import ProductCard from "@/components/ProductCard";
-import Image from "next/image";
+import img from "next/image";
 import React, { useState } from "react";
 import { AiOutlineShoppingCart } from "react-icons/ai";
 import { BsStarFill } from "react-icons/bs";
@@ -110,9 +110,7 @@ const ProductDetail = ({ product }: IProductDetailProps) => {
       {isModal && (
         <div className="z-50 fixed">
           <Modal
-            content={
-              <Image width={800} height={800} src={variation} alt="..." />
-            }
+            content={<img width={800} height={800} src={variation} alt="..." />}
             onClose={() => setIsModal(false)}
           />
         </div>
@@ -123,7 +121,7 @@ const ProductDetail = ({ product }: IProductDetailProps) => {
           <div className="flex-col md:flex-row justify-between md:flex gap-10 py-5 px-5 md:px-0">
             <div className="order-1 md:order-1 imageProduct w-full md:w-1/4">
               {isHovering == true ? (
-                <Image
+                <img
                   width={200}
                   height={200}
                   src={variation}
@@ -132,7 +130,7 @@ const ProductDetail = ({ product }: IProductDetailProps) => {
                   onClick={handleZoomImage}
                 />
               ) : (
-                <Image
+                <img
                   width={100}
                   height={100}
                   src={variation}
@@ -144,7 +142,7 @@ const ProductDetail = ({ product }: IProductDetailProps) => {
               <div className="variation flex overflow-x-scroll [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none']">
                 {imgDummy.map((product) => {
                   return (
-                    <Image
+                    <img
                       key={product.images}
                       className="cursor-pointer w-[200px] h-full r"
                       width={100}
@@ -301,7 +299,7 @@ const ProductDetail = ({ product }: IProductDetailProps) => {
           <div className="seller flex-col md:flex-row justify-between md:flex gap-10 py-5 px-5 md:px-0">
             <div className="order-1  w-3/4">
               <div className="sellerShop bg-[#364968] flex flex-row gap-y-5 text-white py-3 my-10 gap-10 px-5 ">
-                <Image
+                <img
                   width={90}
                   height={0}
                   src={"/images/defaultuser.png"}
@@ -350,7 +348,7 @@ const ProductDetail = ({ product }: IProductDetailProps) => {
                 <div>
                   <div className="buyerReviews flex mt-5  border-y">
                     <div className="imageCust pr-4 rounded-full overflow-hidden">
-                      <Image
+                      <img
                         width={100}
                         height={100}
                         src={"/images/auth_hero.png"}
@@ -376,7 +374,7 @@ const ProductDetail = ({ product }: IProductDetailProps) => {
                   </div>
                   <div className="buyerReviews flex mt-5  border-y">
                     <div className="imageCust pr-4 rounded-full overflow-hidden">
-                      <Image
+                      <img
                         width={100}
                         height={100}
                         src={"/images/auth_hero.png"}
@@ -402,7 +400,7 @@ const ProductDetail = ({ product }: IProductDetailProps) => {
                   </div>
                   <div className="buyerReviews flex mt-5  border-y">
                     <div className="imageCust pr-4 rounded-full overflow-hidden">
-                      <Image
+                      <img
                         width={100}
                         height={100}
                         src={"/images/auth_hero.png"}
@@ -428,7 +426,7 @@ const ProductDetail = ({ product }: IProductDetailProps) => {
                   </div>
                   <div className="buyerReviews flex mt-5  border-y">
                     <div className="imageCust pr-4 rounded-full overflow-hidden">
-                      <Image
+                      <img
                         width={100}
                         height={100}
                         src={"/images/auth_hero.png"}
@@ -454,7 +452,7 @@ const ProductDetail = ({ product }: IProductDetailProps) => {
                   </div>
                   <div className="buyerReviews flex mt-5  border-y">
                     <div className="imageCust pr-4 rounded-full overflow-hidden">
-                      <Image
+                      <img
                         width={100}
                         height={100}
                         src={"/images/auth_hero.png"}
@@ -480,7 +478,7 @@ const ProductDetail = ({ product }: IProductDetailProps) => {
                   </div>
                   <div className="buyerReviews flex mt-5  border-y">
                     <div className="imageCust pr-4 rounded-full overflow-hidden">
-                      <Image
+                      <img
                         width={100}
                         height={100}
                         src={"/images/auth_hero.png"}
@@ -506,7 +504,7 @@ const ProductDetail = ({ product }: IProductDetailProps) => {
                   </div>
                   <div className="buyerReviews flex mt-5  border-y">
                     <div className="imageCust pr-4 rounded-full overflow-hidden">
-                      <Image
+                      <img
                         width={100}
                         height={100}
                         src={"/images/auth_hero.png"}
