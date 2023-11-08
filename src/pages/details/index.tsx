@@ -155,7 +155,6 @@ const ProductDetail = ({ product }: IProductDetailProps) => {
   const [subtotal, setSubtotal] = useState<number>(0);
   const [currentStock, setCurrentStock] = useState<number>(0);
 
-  // Create a function to calculate subtotal based on selected variants and count
   const calculateSubtotal = () => {
     const selectedVariant = product.variants.find((variant) => {
       return Object.keys(selectedVariants).every((optionName) => {
@@ -175,7 +174,6 @@ const ProductDetail = ({ product }: IProductDetailProps) => {
     }
   };
 
-  // Add a useEffect to call the calculateSubtotal function when selections change
   useEffect(() => {
     calculateSubtotal();
   }, [selectedVariants, count]);
@@ -243,12 +241,6 @@ const ProductDetail = ({ product }: IProductDetailProps) => {
       } else {
         toast.error("Failed to add to cart", { autoClose: 1500 });
       }
-      toast("Added to cart", {
-        hideProgressBar: true,
-        autoClose: 2000,
-        type: "success",
-        position: "top-right",
-      });
       console.log("yess");
 
       console.log(response.data);
@@ -303,7 +295,7 @@ const ProductDetail = ({ product }: IProductDetailProps) => {
                   return (
                     <img
                       key={product.images}
-                      className="cursor-pointer w-[100px] h-full"
+                      className="cursor-pointer w-[90px] h-full"
                       width={50}
                       height={50}
                       src={product.images}
