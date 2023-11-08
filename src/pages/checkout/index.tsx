@@ -55,8 +55,31 @@ const NoAddressModal = () => {
       </div>
       <div className="flex justify-center mt-3">
         <Button
-          text="Select Address"
+          text="Add New Address"
           onClick={() => router.push("/user/address")}
+          styling="bg-[#364968] p-3 rounded-[8px] w-[200px] text-white my-4"
+        />
+      </div>
+    </div>
+  );
+};
+
+const NoWalletModal = () => {
+  const router = useRouter();
+
+  return (
+    <div className="bg-white p-5 rounded-md  w-[500px] h-[290px] mobile:w-[99%]">
+      <div className="pb-3">
+        <h1 className="text-[20px]">Wallet has not been activated</h1>
+      </div>
+      <div className="flex flex-col gap-6 pt-6  pb-8">
+        <h1>It appears you have not activated your wallet!</h1>
+        <h1>Click the button to go and activate it!</h1>
+      </div>
+      <div className="flex justify-center mt-3">
+        <Button
+          text="Go to Wallet Menu"
+          onClick={() => router.push("/user/wallet")}
           styling="bg-[#364968] p-3 rounded-[8px] w-[200px] text-white my-4"
         />
       </div>
@@ -85,10 +108,11 @@ const CheckoutPage = () => {
   const [shippingTotal, setShippingTotal] = useState<number>(10000);
   const [shippingOption, setShippingOption] = useState<string>("REGULAR");
   const [voucherTotal, setVoucherTotal] = useState<number>(50000);
-  const [walletMoney, setWalletMoney] = useState<number>(20000000);
+  const [walletMoney, setWalletMoney] = useState<number>(0);
   const [additionalNotes, setAdditionalNotes] = useState<string>("");
 
   const [showNoAddress, setShowNoAddress] = useState<boolean>(false);
+  const [showNoWallet, setShowNoWallet] = useState<boolean>(false);
 
   const cartStore = useCartStore();
 
@@ -133,7 +157,7 @@ const CheckoutPage = () => {
         },
       });
 
-      if (addressData.length === 0) {
+      if (response.data.data === 0) {
         setShowNoAddress(true);
         return;
       }
@@ -154,6 +178,29 @@ const CheckoutPage = () => {
       console.log(e);
     }
   };
+
+  const getWalletData = async () => {
+    try {
+      const response = await API.get("/accounts/wallets", {
+        headers: {
+          Authorization: `Bearer ${getCookie("accessToken")}`,
+        },
+      });
+
+      if (!response.data.data.isActive) {
+        setShowNoWallet(true);
+        return;
+      }
+
+      setWalletMoney(response.data.data.balance);
+    } catch (e) {
+      console.log(e);
+    }
+  };
+
+  useEffect(() => {
+    getWalletData();
+  }, []);
 
   useEffect(() => {
     getDefaultAddress();
@@ -221,6 +268,8 @@ const CheckoutPage = () => {
 
   return (
     <>
+      {showNoWallet && <Modal content={<NoWalletModal />} onClose={() => {}} />}
+
       {showNoAddress && (
         <Modal content={<NoAddressModal />} onClose={() => {}} />
       )}
