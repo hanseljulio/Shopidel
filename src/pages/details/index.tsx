@@ -200,10 +200,8 @@ const ProductDetail = ({ product }: IProductDetailProps) => {
     setIsModal(true);
   };
 
-  let stock = 10;
-
   const inc = () => {
-    if (count >= 0 && count <= stock - 1) {
+    if (count >= 0 && count <= currentStock - 1) {
       setCount(count + 1);
     }
   };
@@ -299,7 +297,7 @@ const ProductDetail = ({ product }: IProductDetailProps) => {
                   return (
                     <img
                       key={product.images}
-                      className="cursor-pointer w-[200px] h-full r"
+                      className="cursor-pointer w-[100px] h-full"
                       width={50}
                       height={50}
                       src={product.images}
@@ -376,7 +374,7 @@ const ProductDetail = ({ product }: IProductDetailProps) => {
                   </button>
                 </div>
                 <div className="stock text-xs text-neutral-500 py-3 pl-5 ">
-                  <p>stock</p>
+                  <p>{`Stock ${currentStock}`}</p>
                 </div>
               </div>
               <div className="flex text-sm text-neutral-600 py-3 justify-between">
