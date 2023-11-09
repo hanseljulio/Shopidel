@@ -5,7 +5,7 @@ import Image from "next/image";
 
 interface IProductCard {
   image: string;
-  price: number;
+  price: number | string;
   order?: number;
   title: string;
   place?: string;
