@@ -2,11 +2,10 @@ import React, { MouseEventHandler } from "react";
 import classNames from "classnames";
 import { BsStarFill } from "react-icons/bs";
 import Image from "next/image";
-import { currencyConverter } from "@/utils/utils";
 
 interface IProductCard {
   image: string;
-  price: string;
+  price: number | string;
   order?: number;
   title: string;
   place?: string;
@@ -64,9 +63,7 @@ const ProductCard = ({
         <p className=" tracking-wider text-black text-sm md:text-base pt-2">
           {title.length > 20 ? `${title.substring(0, 23)}...` : title}{" "}
         </p>
-        <p className=" tracking-wider text-[#f57b29] text-sm md:text-base">
-          {currencyConverter(parseInt(price))}
-        </p>
+        <p className=" tracking-wider text-[#f57b29] text-sm md:text-base">{`Rp. ${price}`}</p>
         {showStar === true && (
           <div className="flex justify-between text-xs md:text-sm pt-2">
             <p> {place} </p>
