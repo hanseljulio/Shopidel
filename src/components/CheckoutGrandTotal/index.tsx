@@ -14,7 +14,7 @@ const CheckoutGrandTotal = (props: ICheckoutGrandTotalProps) => {
         <div className="text-left h-[150px]">
           <h1>Order Total: </h1>
           <h1>Shipping Total: </h1>
-          {props.voucher > 0 && <h1>Voucher Total: </h1>}
+          {props.voucher > 0 && <h1>Promo Total: </h1>}
           <br />
           <h1 className="pt-3">Total payment: </h1>
         </div>
@@ -44,7 +44,7 @@ const CheckoutGrandTotal = (props: ICheckoutGrandTotalProps) => {
           </div>
 
           <div className="flex justify-between">
-            {props.voucher > 0 && <h1>Voucher Total: </h1>}
+            {props.voucher > 0 && <h1>Promo Total: </h1>}
             {props.voucher > 0 && <h1>{currencyConverter(props.voucher)}</h1>}
           </div>
 
