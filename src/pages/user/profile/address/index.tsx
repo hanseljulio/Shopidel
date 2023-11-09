@@ -87,7 +87,7 @@ const AddressDropdown = (props: IDropdownProps) => {
       <p className="pb-2">{props.label}</p>
       <select
         onChange={(e) => props.onChange(e)}
-        className={`p-4 w-[450px] rounded`}
+        className={`p-4 w-[450px] mobile:w-full rounded`}
         name="category-dropdown"
       >
         {props.data.map((option, index) => (
@@ -215,20 +215,21 @@ const AddAddressModal = (props: IAddAddressModal) => {
   };
 
   return (
-    <div className="bg-white p-5 rounded-md w-[1000px] h-[600px] mobile:w-[99%]">
+    <div className="bg-white p-5 rounded-md w-[1000px] h-[600px] mobile:w-fit mobile:overflow-y-scroll">
       <div className="pb-3">
         <h1 className="text-[20px]">Add New Address</h1>
       </div>
+
       <div className="pt-6">
         <Input
           label="Address"
           type="text"
           name="address"
-          width="w-full"
+          width="w-full "
           onChange={(e) => setDetail(e.target.value)}
           required
         />
-        <div className="flex justify-between pt-6">
+        <div className="flex justify-between pt-6 mobile:flex-col mobile:gap-6">
           <AddressDropdown
             label="Province"
             data={provinceData}
@@ -243,12 +244,12 @@ const AddAddressModal = (props: IAddAddressModal) => {
             }}
           />
         </div>
-        <div className="flex justify-between pt-6">
+        <div className="flex justify-between pt-6 mobile:flex-col mobile:gap-6">
           <Input
             label="Sub-district"
             type="text"
             name="subdistrict"
-            width="basis-[33%]"
+            width="basis-[33%] mobile:w-full"
             onChange={(e) => setSubDistrict(e.target.value)}
             required
           />
@@ -256,7 +257,7 @@ const AddAddressModal = (props: IAddAddressModal) => {
             label="Kelurahan"
             type="text"
             name="kelurahan"
-            width="basis-[33%]"
+            width="basis-[33%] mobile:w-full"
             onChange={(e) => setKelurahan(e.target.value)}
             required
           />
@@ -264,13 +265,13 @@ const AddAddressModal = (props: IAddAddressModal) => {
             label="Zip Code"
             type="text"
             name="zipcode"
-            width="basis-[33%]"
+            width="basis-[33%] mobile:w-full"
             onChange={(e) => setPostalCode(e.target.value)}
             required
           />
         </div>
       </div>
-      <div className="flex justify-center mt-[100px]">
+      <div className="flex justify-center mt-[50px]">
         <Button
           text="Add new address"
           onClick={submit}
