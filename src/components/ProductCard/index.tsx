@@ -12,6 +12,8 @@ interface IProductCard {
   star?: number;
   onClick?: MouseEventHandler;
   showStar: boolean;
+  selected?: boolean;
+  onSelect?: () => void;
 }
 const ProductCard = ({
   image,
