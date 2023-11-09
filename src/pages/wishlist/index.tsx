@@ -2,8 +2,14 @@ import Footer from "@/components/Footer";
 import Input from "@/components/Input";
 import Navbar from "@/components/Navbar";
 import ProductCard from "@/components/ProductCard";
+import { IAPIResponse } from "@/interfaces/api_interface";
+import { API } from "@/network";
 import { currencyConverter } from "@/utils/utils";
-import React from "react";
+import axios from "axios";
+import { getCookie } from "cookies-next";
+import { Button } from "flowbite-react";
+import React, { useEffect, useState } from "react";
+import { toast } from "react-toastify";
 
 interface IProductDetail {
   images: string;
@@ -14,6 +20,16 @@ interface IProductDetail {
 }
 interface IProductDetailProps {
   product: IProductDetail;
+}
+interface IWishlist {
+  id: number;
+  product_id: number;
+  name: string;
+  district: string;
+  total_sold: number;
+  price: string;
+  picture_url: string;
+  created_at: string | Date;
 }
 const imgDummy: IProductDetail[] = [
   {
@@ -67,6 +83,42 @@ const imgDummy: IProductDetail[] = [
 ];
 
 function Index() {
+  const [wishlist, setWishlist] = useState<IAPIResponse<IWishlist[]>>();
+  const [paginationNumber, setPaginationNumber] = useState<number[]>([]);
+  const [page, setPage] = useState<number>(1);
+  const getWishlist = async () => {
+    try {
+      const res = await API.get("/products/favorites", {
+        headers: {
+          Authorization: `Bearer ${getCookie("accessToken")}`,
+        },
+      });
+      console.log("betul");
+      const data = res.data as IAPIResponse<IWishlist[]>;
+      setWishlist(data);
+
+      if (data.pagination?.total_page! <= 5) {
+        return setPaginationNumber(
+          Array.from(Array(data.pagination?.total_page).keys())
+        );
+      }
+
+      if (paginationNumber.length === 0) {
+        return setPaginationNumber(Array.from(Array(5).keys()));
+      }
+    } catch (e) {
+      if (axios.isAxiosError(e)) {
+        toast.error("Error fetching couriers", {
+          toastId: "errorCourier",
+          autoClose: 1500,
+        });
+      }
+    }
+  };
+
+  useEffect(() => {
+    getWishlist();
+  }, []);
   return (
     <div>
       <Navbar />
@@ -82,14 +134,14 @@ function Index() {
           />
         </div>
         <div className="gap-x-4 gap-y-1 grid grid-cols-2 md:grid-cols-6 mt-10">
-          {imgDummy.map((e, k) => (
+          {wishlist?.data?.map((e, k) => (
             <ProductCard
               key={k}
-              image={e.images}
-              price={2000}
+              image={e.picture_url}
+              price={e.price}
               showStar={false}
-              order={10}
-              title="create a merge request for"
+              order={e.total_sold}
+              title={e.name}
             />
           ))}
         </div>
