@@ -113,12 +113,12 @@ const CartPage = () => {
       );
     } catch (e) {
       if (axios.isAxiosError(e)) {
-        toast.error(e.message, {
+        if (e.response?.status === 401) {
+          return clientUnauthorizeHandler(router, updateUser);
+        }
+        return toast.error(e.message, {
           autoClose: 1500,
         });
-      }
-      if (e === 401) {
-        return clientUnauthorizeHandler(router, updateUser);
       }
     }
   };
@@ -260,12 +260,12 @@ const CartPage = () => {
       cartStore.updateCart(undefined);
     } catch (e) {
       if (axios.isAxiosError(e)) {
-        toast.error(e.message, {
+        if (e.response?.status === 401) {
+          return clientUnauthorizeHandler(router, updateUser);
+        }
+        return toast.error(e.message, {
           autoClose: 1500,
         });
-      }
-      if (e === 401) {
-        return clientUnauthorizeHandler(router, updateUser);
       }
     }
 
@@ -317,12 +317,12 @@ const CartPage = () => {
       cartStore.updateCart(currentData);
     } catch (e) {
       if (axios.isAxiosError(e)) {
-        toast.error(e.message, {
+        if (e.response?.status === 401) {
+          return clientUnauthorizeHandler(router, updateUser);
+        }
+        return toast.error(e.message, {
           autoClose: 1500,
         });
-      }
-      if (e === 401) {
-        return clientUnauthorizeHandler(router, updateUser);
       }
     }
 
@@ -407,12 +407,12 @@ const CartPage = () => {
       }
     } catch (e) {
       if (axios.isAxiosError(e)) {
-        toast.error(e.message, {
+        if (e.response?.status === 401) {
+          return clientUnauthorizeHandler(router, updateUser);
+        }
+        return toast.error(e.message, {
           autoClose: 1500,
         });
-      }
-      if (e === 401) {
-        return clientUnauthorizeHandler(router, updateUser);
       }
     }
   };

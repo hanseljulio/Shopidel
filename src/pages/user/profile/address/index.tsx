@@ -116,6 +116,8 @@ const AddAddressModal = (props: IAddAddressModal) => {
   const [subDistrict, setSubDistrict] = useState<string>("");
   const [kelurahan, setKelurahan] = useState<string>("");
   const [postalCode, setPostalCode] = useState<string>("");
+  const router = useRouter();
+  const { updateUser } = useUserStore();
 
   const getProvinceData = async () => {
     try {
@@ -197,7 +199,10 @@ const AddAddressModal = (props: IAddAddressModal) => {
       );
     } catch (e) {
       if (axios.isAxiosError(e)) {
-        toast.error(e.message, {
+        if (e.response?.status === 401) {
+          return clientUnauthorizeHandler(router, updateUser);
+        }
+        return toast.error(e.message, {
           autoClose: 1500,
         });
       }
@@ -285,10 +290,13 @@ const AddressPage = () => {
 
       setAddressData(response.data.data);
     } catch (e) {
-      console.log(e);
-
-      if (e === 401) {
-        return clientUnauthorizeHandler(router, updateUser);
+      if (axios.isAxiosError(e)) {
+        if (e.response?.status === 401) {
+          return clientUnauthorizeHandler(router, updateUser);
+        }
+        return toast.error(e.message, {
+          autoClose: 1500,
+        });
       }
     }
   };
