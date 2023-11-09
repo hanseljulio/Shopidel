@@ -150,9 +150,6 @@ const ProductDetail = ({ product }: IProductDetailProps) => {
   const router = useRouter();
   const [count, setCount] = useState<number>(1);
   const [isHovering, setIsHovering] = useState(false);
-  const [logged, setLogged] = useState<IAPIUserProfileResponse | undefined>(
-    undefined
-  );
   const [isModal, setIsModal] = useState<boolean>(false);
   const [variation, setVariation] = useState(
     "https://down-id.img.susercontent.com/file/826639af5f9af89adae9a1700f073242"
@@ -164,16 +161,42 @@ const ProductDetail = ({ product }: IProductDetailProps) => {
   const [currentStock, setCurrentStock] = useState<number>(0);
   const [isFavorite, setIsFavorite] = useState(false);
 
-  const handleFavoriteClick = () => {
-    setIsFavorite(!isFavorite); // Toggle status favorit
-  };
+  const handleFavoriteClick = async () => {
+    if (isFavorite) {
+      try {
+        await API.delete(
+          `/products/${product.id}/favorites/add-favorite
+        `,
+          {
+            headers: {
+              Authorization: `Bearer ${getCookie("accessToken")}`,
+            },
+          }
+        );
+        console.log("delete");
 
-  const handleSignInClick = () => {
-    // Check if the user is signed in (you might use authentication context or a state variable)
-    if (logged) {
-      router.push("/"); // Redirect to the product page after signing in
+        setIsFavorite(false);
+      } catch (error) {
+        console.error("Error removing from wishlist:", error);
+      }
     } else {
-      router.push("/register"); // Redirect to the sign-in page when not signed in
+      try {
+        await API.post(
+          `/products/${product.id}/favorites/add-favorite
+        `,
+          null,
+          {
+            headers: {
+              Authorization: `Bearer ${getCookie("accessToken")}`,
+            },
+          }
+        );
+        console.log("masuk");
+
+        setIsFavorite(true);
+      } catch (error) {
+        console.error("Error adding to wishlist:", error);
+      }
     }
   };
 
@@ -285,7 +308,7 @@ const ProductDetail = ({ product }: IProductDetailProps) => {
 
     try {
       const response = await API.post(
-        `products/1/favorites/add-favorite`,
+        `products/2/favorites/add-favorite`,
         favData,
         {
           headers: {
@@ -370,15 +393,12 @@ const ProductDetail = ({ product }: IProductDetailProps) => {
                   {isFavorite ? (
                     <div className="flex items-center gap-1">
                       <FaHeart style={{ color: "red" }} />
-                      <p>Wishlist</p>
+                      <p>Favorite</p>
                     </div>
                   ) : (
                     <div className="flex items-center gap-1">
-                      <FaRegHeart
-                        style={{ color: "red" }}
-                        onClick={handleWishlist}
-                      />{" "}
-                      <p>Wishlist</p>
+                      <FaRegHeart style={{ color: "red" }} />
+                      <p>Favorite</p>
                     </div>
                   )}
                 </button>
