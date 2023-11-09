@@ -88,17 +88,12 @@ function Index() {
           <p className="text-xl md:text-3xl font-bold mt-10">Wishlist</p>
         </div>
         <div className="flex justify-end mt-10">
-          <input
-            type="text"
-            placeholder="Search in wishlist"
-            className="rounded-md w-full md:w-80"
-          />
           {isSelecting ? (
             <div>
               <Button
                 text="Delete"
                 onClick={deleteSelected}
-                styling="px-2 py-1 bg-red-500 text-white mx-2"
+                styling="px-2 py-2 bg-red-500 text-white mx-2 rounded-md"
               />
               <Button
                 text="Cancel"
@@ -106,16 +101,21 @@ function Index() {
                   setIsSelecting(false);
                   setSelectedIds([]);
                 }}
-                styling="px-2 py-1 bg-gray-500 text-white"
+                styling="px-2 py-2 bg-gray-500 text-white mx-2 rounded-md"
               />
             </div>
           ) : (
             <Button
               text="Select"
               onClick={() => setIsSelecting(true)}
-              styling="px-2 py-1 bg-blue-500 text-white mx-2"
+              styling="px-2 py-1 bg-blue-500 text-white mx-2 rounded-md"
             />
           )}
+          <input
+            type="text"
+            placeholder="Search in wishlist"
+            className="rounded-md w-full md:w-80"
+          />
         </div>
         <div className="gap-x-4 gap-y-1 grid grid-cols-2 md:grid-cols-6 mt-10">
           {wishlist?.data?.map((product) => (
