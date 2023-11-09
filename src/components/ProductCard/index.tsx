@@ -60,7 +60,11 @@ const ProductCard = ({
           </div>
         )}
       </div>
+
       <div className="pt-3 pb-3 md:pt-5  md:pb-6 w-full px-4 ">
+        <p className=" tracking-wider text-black text-sm md:text-base pt-2">
+          {title.length > 20 ? `${title.substring(0, 23)}...` : title}
+        </p>
         <p className=" tracking-wider text-[#f57b29] text-sm md:text-base">
           {currencyConverter(parseInt(price))}
         </p>

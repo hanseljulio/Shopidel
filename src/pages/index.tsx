@@ -158,9 +158,8 @@ export default function Home() {
             star={5}
           />
         </div>
-
-        <Footer />
       </div>
+      <Footer />
     </div>
   );
 }
