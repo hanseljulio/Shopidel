@@ -29,6 +29,7 @@ const MobileUserProfileSidebar = (props: MobileUserProfileSidebarProps) => {
         <Button
           text="Addresses"
           styling="bg-blue-100 py-[12px] rounded-full w-[150px] px-8 hover:bg-blue-300 my-4"
+          disabled={props.currentPage === "My Address"}
         />
         <Button
           text="Change Password"
