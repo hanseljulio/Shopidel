@@ -7,7 +7,7 @@ import { API } from "@/network";
 import { currencyConverter } from "@/utils/utils";
 import axios from "axios";
 import { getCookie } from "cookies-next";
-import { Button } from "flowbite-react";
+import Button from "@/components/Button";
 import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 
@@ -145,8 +145,61 @@ function Index() {
             />
           ))}
         </div>
-        <div className="text-center my-10">
-          <p>pagination ...</p>
+        <div className="text-center my-10 justify-center flex">
+          <div className="flex self-end mt-2">
+            {wishlist?.pagination?.current_page !== 1 && (
+              <button
+                onClick={() => {
+                  if (
+                    wishlist?.pagination?.current_page ===
+                    paginationNumber[0] + 1
+                  ) {
+                    setPaginationNumber(
+                      Array.from(paginationNumber, (x) => x - 1)
+                    );
+                  }
+                  setPage(wishlist?.pagination?.current_page! - 1);
+                }}
+                className="px-2 py-1 border text-sm rounded-bl-md rounded-tl-md "
+              >
+                Prev
+              </button>
+            )}
+            {paginationNumber.map((i, _) => {
+              return (
+                <Button
+                  key={i}
+                  text={(i + 1).toString()}
+                  styling={`px-3 py-1 border ${
+                    wishlist?.pagination?.current_page === i + 1 &&
+                    "bg-slate-200 "
+                  }`}
+                  onClick={() => setPage(i + 1)}
+                />
+              );
+            })}
+            {wishlist?.pagination?.current_page !==
+              wishlist?.pagination?.total_page && (
+              <button
+                onClick={() => {
+                  if (
+                    paginationNumber[paginationNumber.length - 1] <
+                    wishlist?.pagination?.current_page!
+                  ) {
+                    paginationNumber.shift();
+                    paginationNumber.push(
+                      paginationNumber[paginationNumber.length - 1] + 1
+                    );
+                    setPaginationNumber(paginationNumber);
+                  }
+                  setPage(wishlist?.pagination?.current_page! + 1);
+                }}
+                className="px-2 py-1 border text-sm rounded-br-md rounded-tr-md "
+              >
+                Next
+              </button>
+            )}
+          </div>
         </div>
       </div>
 
