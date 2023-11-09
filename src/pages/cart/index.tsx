@@ -15,6 +15,8 @@ import { useCartStore } from "@/store/cartStore";
 import CartTableMobile from "@/components/CartTableMobile";
 import Modal from "@/components/Modal";
 import { IAPIResponse } from "@/interfaces/api_interface";
+import { clientUnauthorizeHandler } from "@/utils/utils";
+import { useUserStore } from "@/store/userStore";
 
 interface IDeleteAllModalProps {
   deleteFunction: () => void;
@@ -52,7 +54,7 @@ const CartPage = () => {
   const [totalPrice, setTotalPrice] = useState<number>(0);
   const [showDeleteAllModal, setShowDeleteAllModal] = useState<boolean>(false);
   const cartStore = useCartStore();
-
+  const { updateUser } = useUserStore();
   const [cartData, setCartData] = useState<ICartData[]>([
     {
       shop_id: 0,
@@ -93,11 +95,7 @@ const CartPage = () => {
 
     try {
       toast.promise(
-        API.put("/accounts/carts", sendData, {
-          headers: {
-            Authorization: `Bearer ${getCookie("accessToken")}`,
-          },
-        }),
+        API.put("/accounts/carts", sendData),
         {
           pending: "Updating cart",
           success: "Cart has been updated",
@@ -118,6 +116,9 @@ const CartPage = () => {
         toast.error(e.message, {
           autoClose: 1500,
         });
+      }
+      if (e === 401) {
+        return clientUnauthorizeHandler(router, updateUser);
       }
     }
   };
@@ -240,11 +241,7 @@ const CartPage = () => {
 
     try {
       toast.promise(
-        API.post("/accounts/carts/delete", sendData, {
-          headers: {
-            Authorization: `Bearer ${getCookie("accessToken")}`,
-          },
-        }),
+        API.post("/accounts/carts/delete", sendData),
         {
           pending: "Deleting",
           success: "Cart is now empty!",
@@ -266,6 +263,9 @@ const CartPage = () => {
         toast.error(e.message, {
           autoClose: 1500,
         });
+      }
+      if (e === 401) {
+        return clientUnauthorizeHandler(router, updateUser);
       }
     }
 
@@ -298,11 +298,7 @@ const CartPage = () => {
 
     try {
       toast.promise(
-        API.post("/accounts/carts/delete", sendData, {
-          headers: {
-            Authorization: `Bearer ${getCookie("accessToken")}`,
-          },
-        }),
+        API.post("/accounts/carts/delete", sendData),
         {
           pending: "Deleting",
           success: "Cart has been updated!",
@@ -324,6 +320,9 @@ const CartPage = () => {
         toast.error(e.message, {
           autoClose: 1500,
         });
+      }
+      if (e === 401) {
+        return clientUnauthorizeHandler(router, updateUser);
       }
     }
 
@@ -398,12 +397,7 @@ const CartPage = () => {
   const getCartData = async () => {
     const token = getCookie("accessToken");
     try {
-      const res = await API.get("/accounts/carts", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      });
+      const res = await API.get("/accounts/carts");
 
       if (cartStore.cart !== undefined) {
         setCartData(cartStore.cart);
@@ -416,6 +410,9 @@ const CartPage = () => {
         toast.error(e.message, {
           autoClose: 1500,
         });
+      }
+      if (e === 401) {
+        return clientUnauthorizeHandler(router, updateUser);
       }
     }
   };

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import Navbar from "@/components/Navbar";
 import CheckoutTableHead from "@/components/CheckoutTableHead";
 import CheckoutTableData from "@/components/CheckoutTableData";
-import { currencyConverter } from "@/utils/utils";
+import { clientUnauthorizeHandler, currencyConverter } from "@/utils/utils";
 import Button from "@/components/Button";
 import CheckoutVoucherSelect from "@/components/CheckoutVoucherSelect";
 import CheckoutShippingSelect from "@/components/CheckoutShippingSelect";
@@ -116,18 +116,19 @@ const SelectShippingModal = (props: ISelectShippingModalProps) => {
   const [currentCourierId, setCurrentCourierId] = useState<number>(1);
   const [currentName, setCurrentName] = useState<string>("JNE");
   const [shippingCostData, setShippingCostData] = useState<IShippingCostData>();
+  const router = useRouter();
+  const { updateUser } = useUserStore();
 
   const getCourier = async () => {
     try {
-      const response = await API.get("/orders/couriers/1", {
-        headers: {
-          Authorization: `Bearer ${getCookie("accessToken")}`,
-        },
-      });
+      const response = await API.get("/orders/couriers/1");
 
       setCourierList(response.data.data);
     } catch (e) {
       console.log(e);
+      if (e === 401) {
+        return clientUnauthorizeHandler(router, updateUser);
+      }
     }
   };
 
@@ -140,15 +141,14 @@ const SelectShippingModal = (props: ISelectShippingModalProps) => {
     };
 
     try {
-      const response = await API.post("/orders/cost/check", sendData, {
-        headers: {
-          Authorization: `Bearer ${getCookie("accessToken")}`,
-        },
-      });
+      const response = await API.post("/orders/cost/check", sendData);
 
       setShippingCostData(response.data.data);
     } catch (e) {
       console.log(e);
+      if (e === 401) {
+        return clientUnauthorizeHandler(router, updateUser);
+      }
     }
   };
 
@@ -261,6 +261,7 @@ const CheckoutPage = () => {
   const [showShippingModal, setShowShippingModal] = useState<boolean>(false);
   const [showWalletPin, setShowWalletPin] = useState<boolean>(false);
 
+  const router = useRouter();
   const cartStore = useCartStore();
 
   const useVoucher = () => {
@@ -301,11 +302,7 @@ const CheckoutPage = () => {
 
   const getDefaultAddress = async () => {
     try {
-      const response = await API.get("/accounts/address", {
-        headers: {
-          Authorization: `Bearer ${getCookie("accessToken")}`,
-        },
-      });
+      const response = await API.get("/accounts/address");
 
       if (response.data.data === 0) {
         setShowNoAddress(true);
@@ -326,16 +323,15 @@ const CheckoutPage = () => {
       }
     } catch (e) {
       console.log(e);
+      if (e === 401) {
+        return clientUnauthorizeHandler(router, userStore.updateUser);
+      }
     }
   };
 
   const getWalletData = async () => {
     try {
-      const response = await API.get("/accounts/wallets", {
-        headers: {
-          Authorization: `Bearer ${getCookie("accessToken")}`,
-        },
-      });
+      const response = await API.get("/accounts/wallets");
 
       if (!response.data.data.isActive) {
         setShowNoWallet(true);
@@ -345,6 +341,9 @@ const CheckoutPage = () => {
       setWalletMoney(response.data.data.balance);
     } catch (e) {
       console.log(e);
+      if (e === 401) {
+        return clientUnauthorizeHandler(router, userStore.updateUser);
+      }
     }
   };
 
@@ -384,11 +383,7 @@ const CheckoutPage = () => {
 
     try {
       toast.promise(
-        API.post("/orders/checkout", sendData, {
-          headers: {
-            Authorization: `Bearer ${getCookie("accessToken")}`,
-          },
-        }),
+        API.post("/orders/checkout", sendData),
         {
           pending: "Loading",
           success: "Payment success!",
@@ -415,17 +410,9 @@ const CheckoutPage = () => {
 
   const payFunction = async (pinNumber: string) => {
     try {
-      const response = await API.post(
-        "/accounts/wallets/validate-pin",
-        {
-          wallet_pin: pinNumber,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${getCookie("accessToken")}`,
-          },
-        }
-      );
+      const response = await API.post("/accounts/wallets/validate-pin", {
+        wallet_pin: pinNumber,
+      });
 
       if (response.data.data.isCorrect) {
         submit();
@@ -439,6 +426,9 @@ const CheckoutPage = () => {
         toast.error(e.message, {
           autoClose: 1500,
         });
+      }
+      if (e === 401) {
+        return clientUnauthorizeHandler(router, userStore.updateUser);
       }
     }
   };
