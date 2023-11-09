@@ -55,6 +55,7 @@ const UserProfileSidebar = () => {
           </li>
           <li
             className={`py-1 hover:cursor-pointer w-[90px] hover:text-[#92bcff] transition`}
+            onClick={() => router.push("/user/profile/address")}
           >
             Addresses
           </li>
