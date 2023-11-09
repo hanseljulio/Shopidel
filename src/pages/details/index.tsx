@@ -13,6 +13,7 @@ import { getCookie } from "cookies-next";
 import { GetServerSidePropsContext } from "next";
 import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
+import { SubmitHandler } from "react-hook-form";
 import { AiOutlineShoppingCart } from "react-icons/ai";
 import { BsStarFill } from "react-icons/bs";
 import { FaHeart, FaRegHeart, FaStar, FaStore } from "react-icons/fa";
@@ -277,6 +278,42 @@ const ProductDetail = ({ product }: IProductDetailProps) => {
     }
   };
 
+  const handleWishlist: SubmitHandler<IAPIProductDetail> = async (data) => {
+    let favData: Pick<IAPIProductDetail, "id"> = {
+      id: data.id,
+    };
+
+    try {
+      const response = await API.post(
+        `products/1/favorites/add-favorite`,
+        favData,
+        {
+          headers: {
+            Authorization: `Bearer ${getCookie("accessToken")}`,
+          },
+        }
+      );
+
+      if (response.status === 200) {
+        toast.success("Added to cart", { autoClose: 1500 });
+      } else {
+        toast.error("Failed to add to cart", { autoClose: 1500 });
+      }
+      console.log("yess");
+
+      console.log(response.data);
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        toast.error(error.response?.data.message, { autoClose: 1500 });
+      } else {
+        toast.error("An error occurred while adding to cart", {
+          autoClose: 1500,
+        });
+      }
+      console.log("nooooo");
+    }
+  };
+
   return (
     <>
       {isModal && (
@@ -332,11 +369,16 @@ const ProductDetail = ({ product }: IProductDetailProps) => {
                 <button onClick={handleFavoriteClick}>
                   {isFavorite ? (
                     <div className="flex items-center gap-1">
-                      <FaHeart style={{ color: "red" }} /> <p>Wishlist</p>
+                      <FaHeart style={{ color: "red" }} />
+                      <p>Wishlist</p>
                     </div>
                   ) : (
                     <div className="flex items-center gap-1">
-                      <FaRegHeart style={{ color: "red" }} /> <p>Wishlist</p>
+                      <FaRegHeart
+                        style={{ color: "red" }}
+                        onClick={handleWishlist}
+                      />{" "}
+                      <p>Wishlist</p>
                     </div>
                   )}
                 </button>
