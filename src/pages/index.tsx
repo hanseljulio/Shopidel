@@ -9,9 +9,9 @@ export default function Home() {
     <div className="bg-gray-100">
       <Navbar />
       <CarouselHome />
-      <div className="mx-auto lg:max-w-7xl md:items-center px-4 md:px-0">
+      <div className="mx-auto lg:max-w-7xl md:items-center px-4 md:px-0 mb-5">
         <div>
-          <p className="text-lg md:text-xl mt-10 py-2 font-semibold text-center text-[#29374e]">
+          <p className="text-lg md:text-xl mt-10 mb-3 py-2 font-semibold text-center text-[#29374e]">
             Category
           </p>
         </div>
@@ -80,7 +80,7 @@ export default function Home() {
           <Category src="tas.png" alt="Men's Bag" text="Men's Bag" />
         </div>
         <div>
-          <p className="text-lg md:text-xl mt-10 py-2 font-semibold text-center text-[#29374e]">
+          <p className="text-lg md:text-xl mt-14 mb-3 py-2 font-semibold text-center text-[#29374e]">
             Recommendation
           </p>
         </div>
