@@ -2,10 +2,7 @@ import Footer from "@/components/Footer";
 import Modal from "@/components/Modal";
 import Navbar from "@/components/Navbar";
 import ProductCard from "@/components/ProductCard";
-import {
-  IAPIResponse,
-  IAPIUserProfileResponse,
-} from "@/interfaces/api_interface";
+import { IAPIResponse } from "@/interfaces/api_interface";
 import { API } from "@/network";
 import { currencyConverter } from "@/utils/utils";
 import axios from "axios";
@@ -50,11 +47,6 @@ interface IAPIProductDetail {
   ];
 }
 
-interface IAPIProductCart {
-  product_id: string;
-  quantity: string;
-}
-
 interface IProductDetail {
   images: string;
   varian?: {
@@ -62,9 +54,11 @@ interface IProductDetail {
     color?: string;
   };
 }
+
 interface IProductDetailProps {
   product: IAPIProductDetail;
 }
+
 const imgDummy: IProductDetail[] = [
   {
     images:
@@ -124,7 +118,7 @@ export const getServerSideProps = async (
   let accessToken = context.req.cookies["accessToken"];
 
   try {
-    const res = await API.get("/products/2", {
+    const res = await API.get(`/products/2`, {
       headers: {
         Authorization: `Bearer ${accessToken}`,
         "Content-Type": "application/json",
@@ -162,6 +156,10 @@ const ProductDetail = ({ product }: IProductDetailProps) => {
   const [isFavorite, setIsFavorite] = useState(false);
 
   const handleFavoriteClick = async () => {
+    let data: Pick<IAPIProductDetail, "id"> = {
+      id: product.id,
+    };
+
     if (isFavorite) {
       try {
         await API.delete(
@@ -181,17 +179,18 @@ const ProductDetail = ({ product }: IProductDetailProps) => {
       }
     } else {
       try {
-        await API.post(
-          `/products/${product.id}/favorites/add-favorite
-        `,
-          null,
+        const response = await API.post(
+          `/products/${product.id}/favorites/add-favorite`,
+          data,
           {
             headers: {
               Authorization: `Bearer ${getCookie("accessToken")}`,
             },
           }
         );
+
         console.log("masuk");
+        console.log(response.data);
 
         setIsFavorite(true);
       } catch (error) {
@@ -757,19 +756,19 @@ const ProductDetail = ({ product }: IProductDetailProps) => {
                 <ProductCard
                   image="https://down-id.img.susercontent.com/file/bc3b634e8b2beb1f09f59671102800a7"
                   title="Sepatu Neki"
-                  price={1000000}
+                  price={"1000000"}
                   showStar={false}
                 />
                 <ProductCard
                   image="https://down-id.img.susercontent.com/file/bc3b634e8b2beb1f09f59671102800a7"
                   title="Sepatu Neki"
-                  price={1000000}
+                  price={"1000000"}
                   showStar={false}
                 />
                 <ProductCard
                   image="https://down-id.img.susercontent.com/file/bc3b634e8b2beb1f09f59671102800a7"
                   title="Sepatu Neki"
-                  price={1000000}
+                  price={"1000000"}
                   showStar={false}
                 />
               </div>
