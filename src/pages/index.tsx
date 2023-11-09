@@ -21,10 +21,10 @@ export default function Home() {
             text="Fashion Baby"
             alt="Fashion Baby"
           />
-          <Category src="elektornik.png" alt="Electronic" text="Electronic" />
+          <Category src="elektronik.png" alt="Electronic" text="Electronic" />
           <Category
             src="fashion.png"
-            alt="ElectrFashion and Accessoriesonic"
+            alt="Fashion and Accessories"
             text="Fashion and Accessories"
           />
           <Category
@@ -47,12 +47,12 @@ export default function Home() {
           <Category src="make_up.png" alt="Beauty" text="Beauty" />
           <Category src="obat.png" alt="Medicine" text="Medicine" />
           <Category
-            src="pakaian_laki.jpg"
+            src="pakaian_laki.png"
             alt="Men's Fashion"
             text="Men's Fashion"
           />
           <Category
-            src="pakaian_wanita.jpg"
+            src="pakaian_wanita.png"
             alt="Woman's Fashion"
             text="Woman's Fashion"
           />

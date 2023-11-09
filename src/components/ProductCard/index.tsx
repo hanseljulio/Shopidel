@@ -65,7 +65,6 @@ const ProductCard = ({
           {currencyConverter(parseInt(price))}
         </p>
 
-        <p className=" tracking-wider text-[#f57b29] text-sm md:text-base">{`Rp. ${price}`}</p>
         {showStar === true && (
           <div className="flex justify-between text-xs md:text-sm pt-2">
             <p> {place} </p>
