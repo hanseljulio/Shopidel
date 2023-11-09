@@ -6,7 +6,7 @@ import { currencyConverter } from "@/utils/utils";
 
 interface IProductCard {
   image: string;
-  price: number;
+  price: string;
   order?: number;
   title: string;
   place?: string;
@@ -65,7 +65,7 @@ const ProductCard = ({
           {title.length > 20 ? `${title.substring(0, 23)}...` : title}{" "}
         </p>
         <p className=" tracking-wider text-[#f57b29] text-sm md:text-base">
-          {currencyConverter(price)}
+          {currencyConverter(parseInt(price))}
         </p>
         {showStar === true && (
           <div className="flex justify-between text-xs md:text-sm pt-2">
