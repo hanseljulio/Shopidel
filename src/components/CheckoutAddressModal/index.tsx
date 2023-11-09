@@ -75,24 +75,6 @@ const CheckoutAddressModal = (props: IAddressModalProps) => {
     setNewAddress(newAddress);
   };
 
-  const getAddressData = async () => {
-    try {
-      const response = await API.get("/accounts/address", {
-        headers: {
-          Authorization: `Bearer ${getCookie("accessToken")}`,
-        },
-      });
-
-      setAddressData(response.data.data);
-    } catch (e) {
-      console.log(e);
-    }
-  };
-
-  useEffect(() => {
-    // getAddressData();
-  }, []);
-
   return (
     <div className="bg-white p-5 rounded-md  w-[500px] h-[600px] mobile:w-[99%]">
       <div className="pb-3">
