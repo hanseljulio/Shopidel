@@ -116,11 +116,7 @@ const AddAddressModal = (props: IAddAddressModal) => {
 
   const getProvinceData = async () => {
     try {
-      const response = await API.get("/address/provinces", {
-        headers: {
-          Authorization: `Bearer ${getCookie("accessToken")}`,
-        },
-      });
+      const response = await API.get("/address/provinces");
 
       setProvinceData(response.data.data.provinces);
     } catch (e) {
@@ -131,12 +127,7 @@ const AddAddressModal = (props: IAddAddressModal) => {
   const getDistrictData = async () => {
     try {
       const response = await API.get(
-        `/address/provinces/${currentSelectedProvinceId}/districts`,
-        {
-          headers: {
-            Authorization: `Bearer ${getCookie("accessToken")}`,
-          },
-        }
+        `/address/provinces/${currentSelectedProvinceId}/districts`
       );
 
       setDistrictData(response.data.data.districts);
@@ -180,11 +171,7 @@ const AddAddressModal = (props: IAddAddressModal) => {
 
     try {
       toast.promise(
-        API.post("/accounts/address", sendData, {
-          headers: {
-            Authorization: `Bearer ${getCookie("accessToken")}`,
-          },
-        }),
+        API.post("/accounts/address", sendData),
         {
           pending: "Adding address...",
           success: {
