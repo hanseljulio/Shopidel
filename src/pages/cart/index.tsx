@@ -93,11 +93,7 @@ const CartPage = () => {
 
     try {
       toast.promise(
-        API.put("/accounts/carts", sendData, {
-          headers: {
-            Authorization: `Bearer ${getCookie("accessToken")}`,
-          },
-        }),
+        API.put("/accounts/carts", sendData),
         {
           pending: "Updating cart",
           success: "Cart has been updated",
@@ -240,11 +236,7 @@ const CartPage = () => {
 
     try {
       toast.promise(
-        API.post("/accounts/carts/delete", sendData, {
-          headers: {
-            Authorization: `Bearer ${getCookie("accessToken")}`,
-          },
-        }),
+        API.post("/accounts/carts/delete", sendData),
         {
           pending: "Deleting",
           success: "Cart is now empty!",
@@ -298,11 +290,7 @@ const CartPage = () => {
 
     try {
       toast.promise(
-        API.post("/accounts/carts/delete", sendData, {
-          headers: {
-            Authorization: `Bearer ${getCookie("accessToken")}`,
-          },
-        }),
+        API.post("/accounts/carts/delete", sendData),
         {
           pending: "Deleting",
           success: "Cart has been updated!",
@@ -398,12 +386,7 @@ const CartPage = () => {
   const getCartData = async () => {
     const token = getCookie("accessToken");
     try {
-      const res = await API.get("/accounts/carts", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      });
+      const res = await API.get("/accounts/carts");
 
       if (cartStore.cart !== undefined) {
         setCartData(cartStore.cart);

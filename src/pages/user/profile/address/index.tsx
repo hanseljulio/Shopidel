@@ -74,11 +74,7 @@ const AddressPage = () => {
 
   const getAddressData = async () => {
     try {
-      const response = await API.get("/accounts/address", {
-        headers: {
-          Authorization: `Bearer ${getCookie("accessToken")}`,
-        },
-      });
+      const response = await API.get("/accounts/address");
 
       setAddressData(response.data.data);
     } catch (e) {

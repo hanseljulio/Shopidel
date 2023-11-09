@@ -119,11 +119,7 @@ const SelectShippingModal = (props: ISelectShippingModalProps) => {
 
   const getCourier = async () => {
     try {
-      const response = await API.get("/orders/couriers/1", {
-        headers: {
-          Authorization: `Bearer ${getCookie("accessToken")}`,
-        },
-      });
+      const response = await API.get("/orders/couriers/1");
 
       setCourierList(response.data.data);
     } catch (e) {
@@ -140,11 +136,7 @@ const SelectShippingModal = (props: ISelectShippingModalProps) => {
     };
 
     try {
-      const response = await API.post("/orders/cost/check", sendData, {
-        headers: {
-          Authorization: `Bearer ${getCookie("accessToken")}`,
-        },
-      });
+      const response = await API.post("/orders/cost/check", sendData);
 
       setShippingCostData(response.data.data);
     } catch (e) {
@@ -301,11 +293,7 @@ const CheckoutPage = () => {
 
   const getDefaultAddress = async () => {
     try {
-      const response = await API.get("/accounts/address", {
-        headers: {
-          Authorization: `Bearer ${getCookie("accessToken")}`,
-        },
-      });
+      const response = await API.get("/accounts/address");
 
       if (response.data.data === 0) {
         setShowNoAddress(true);
@@ -331,11 +319,7 @@ const CheckoutPage = () => {
 
   const getWalletData = async () => {
     try {
-      const response = await API.get("/accounts/wallets", {
-        headers: {
-          Authorization: `Bearer ${getCookie("accessToken")}`,
-        },
-      });
+      const response = await API.get("/accounts/wallets");
 
       if (!response.data.data.isActive) {
         setShowNoWallet(true);
@@ -384,11 +368,7 @@ const CheckoutPage = () => {
 
     try {
       toast.promise(
-        API.post("/orders/checkout", sendData, {
-          headers: {
-            Authorization: `Bearer ${getCookie("accessToken")}`,
-          },
-        }),
+        API.post("/orders/checkout", sendData),
         {
           pending: "Loading",
           success: "Payment success!",
@@ -415,17 +395,9 @@ const CheckoutPage = () => {
 
   const payFunction = async (pinNumber: string) => {
     try {
-      const response = await API.post(
-        "/accounts/wallets/validate-pin",
-        {
-          wallet_pin: pinNumber,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${getCookie("accessToken")}`,
-          },
-        }
-      );
+      const response = await API.post("/accounts/wallets/validate-pin", {
+        wallet_pin: pinNumber,
+      });
 
       if (response.data.data.isCorrect) {
         submit();
