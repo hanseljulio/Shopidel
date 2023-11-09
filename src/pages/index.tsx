@@ -37,7 +37,7 @@ export default function Home() {
             text="Handphone and Accessories"
             alt="Handphone and Accessories"
           />
-          <Category src="jam.png" text="jam" alt="jam" />
+          <Category src="jam.png" text="Watch" alt="Watch" />
           <Category
             src="laptop.png"
             alt="Computer and Accessories"
