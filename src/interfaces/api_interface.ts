@@ -33,4 +33,5 @@ export interface IAPIUserProfileResponse {
 
 export interface IAPILoginResponse {
   access_token: string;
+  refresh_token: string;
 }
