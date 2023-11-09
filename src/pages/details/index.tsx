@@ -2,12 +2,16 @@ import Footer from "@/components/Footer";
 import Modal from "@/components/Modal";
 import Navbar from "@/components/Navbar";
 import ProductCard from "@/components/ProductCard";
-import { IAPIResponse } from "@/interfaces/api_interface";
+import {
+  IAPIResponse,
+  IAPIUserProfileResponse,
+} from "@/interfaces/api_interface";
 import { API } from "@/network";
 import { currencyConverter } from "@/utils/utils";
 import axios from "axios";
 import { getCookie } from "cookies-next";
 import { GetServerSidePropsContext } from "next";
+import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
 import { AiOutlineShoppingCart } from "react-icons/ai";
 import { BsStarFill } from "react-icons/bs";
@@ -142,9 +146,12 @@ export const getServerSideProps = async (
 };
 
 const ProductDetail = ({ product }: IProductDetailProps) => {
+  const router = useRouter();
   const [count, setCount] = useState<number>(1);
   const [isHovering, setIsHovering] = useState(false);
-
+  const [logged, setLogged] = useState<IAPIUserProfileResponse | undefined>(
+    undefined
+  );
   const [isModal, setIsModal] = useState<boolean>(false);
   const [variation, setVariation] = useState(
     "https://down-id.img.susercontent.com/file/826639af5f9af89adae9a1700f073242"
@@ -158,6 +165,15 @@ const ProductDetail = ({ product }: IProductDetailProps) => {
 
   const handleFavoriteClick = () => {
     setIsFavorite(!isFavorite); // Toggle status favorit
+  };
+
+  const handleSignInClick = () => {
+    // Check if the user is signed in (you might use authentication context or a state variable)
+    if (logged) {
+      router.push("/"); // Redirect to the product page after signing in
+    } else {
+      router.push("/register"); // Redirect to the sign-in page when not signed in
+    }
   };
 
   const calculateSubtotal = () => {
@@ -316,11 +332,11 @@ const ProductDetail = ({ product }: IProductDetailProps) => {
                 <button onClick={handleFavoriteClick}>
                   {isFavorite ? (
                     <div className="flex items-center gap-1">
-                      <FaHeart style={{ color: "red" }} /> <p>Favorite</p>
+                      <FaHeart style={{ color: "red" }} /> <p>Wishlist</p>
                     </div>
                   ) : (
                     <div className="flex items-center gap-1">
-                      <FaRegHeart style={{ color: "red" }} /> <p>Favorite</p>
+                      <FaRegHeart style={{ color: "red" }} /> <p>Wishlist</p>
                     </div>
                   )}
                 </button>
