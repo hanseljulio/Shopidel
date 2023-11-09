@@ -10,6 +10,9 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { IAPIResponse } from "@/interfaces/api_interface";
 import axios from "axios";
+import { clientUnauthorizeHandler } from "@/utils/utils";
+import { useRouter } from "next/router";
+import { useUserStore } from "@/store/userStore";
 
 interface IIndividualAddressProps {
   id: number;
@@ -271,6 +274,8 @@ const AddAddressModal = (props: IAddAddressModal) => {
 
 const AddressPage = () => {
   const [addressData, setAddressData] = useState<IAddress[]>([]);
+  const router = useRouter();
+  const { updateUser } = useUserStore();
   const [showAddAddressModal, setShowAddAddressModal] =
     useState<boolean>(false);
 
@@ -281,6 +286,10 @@ const AddressPage = () => {
       setAddressData(response.data.data);
     } catch (e) {
       console.log(e);
+
+      if (e === 401) {
+        return clientUnauthorizeHandler(router, updateUser);
+      }
     }
   };
 
