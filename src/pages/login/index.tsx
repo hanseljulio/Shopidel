@@ -65,7 +65,8 @@ const Login = () => {
           error: {
             render({ data }) {
               if (axios.isAxiosError(data)) {
-                return data.response?.statusText;
+                return (data.response?.data as IAPIResponse<IAPILoginResponse>)
+                  .message;
               }
             },
           },
@@ -77,11 +78,7 @@ const Login = () => {
       await getUserData(
         (res.data as IAPIResponse<IAPILoginResponse>).data!.access_token
       );
-    } catch (e) {
-      if (axios.isAxiosError(e)) {
-        toast.error(e.message, { autoClose: 1500 });
-      }
-    }
+    } catch (e) {}
   };
 
   return (
