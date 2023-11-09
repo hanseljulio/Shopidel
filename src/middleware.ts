@@ -11,13 +11,6 @@ export const middleware = async (req: NextRequest) => {
   let accessToken = req.cookies.get("accessToken");
   let refreshToken = req.cookies.get("refreshToken");
 
-  if (req.nextUrl.pathname.startsWith("/user")) {
-    if (accessToken !== undefined) {
-      return NextResponse.next();
-    }
-    return NextResponse.redirect(new URL("/", req.url));
-  }
-
   if (req.nextUrl.pathname.startsWith("/login")) {
     if (accessToken !== undefined) {
       return NextResponse.redirect(new URL("/", req.url));

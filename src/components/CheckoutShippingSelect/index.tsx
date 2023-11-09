@@ -6,6 +6,7 @@ interface ICheckoutShippingSelect {
   onChange: (e: any) => void;
   shippingOption: string;
   shippingTotal: number;
+  openShippingModal: () => void;
 }
 
 const CheckoutShippingSelect = (props: ICheckoutShippingSelect) => {
@@ -26,7 +27,10 @@ const CheckoutShippingSelect = (props: ICheckoutShippingSelect) => {
       <div className="mobile:flex-col mobile:gap-4 flex text-[16px] items-center justify-between px-[21px] basis-[60%] mobile:py-8">
         <h1 className="text-emerald-500">Shipping option:</h1>
         <h1>{props.shippingOption}</h1>
-        <h1 className="text-blue-600 hover:cursor-pointer hover:underline">
+        <h1
+          onClick={props.openShippingModal}
+          className="text-blue-600 hover:cursor-pointer hover:underline"
+        >
           CHANGE{" "}
           <span className="hidden invisible mobile:visible mobile:inline">
             SHIPPING
