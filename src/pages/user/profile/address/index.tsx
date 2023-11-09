@@ -23,6 +23,7 @@ interface IIndividualAddressProps {
   district: string;
   province: string;
   default: boolean;
+  setNewDefault: (id: number) => void;
 }
 
 const IndividualAddress = (props: IIndividualAddressProps) => {
@@ -47,6 +48,13 @@ const IndividualAddress = (props: IIndividualAddressProps) => {
             </h1>
           </div>
           <h1
+            onClick={() => {
+              if (!props.default) {
+                props.setNewDefault(props.id);
+              } else {
+                null;
+              }
+            }}
             className={`px-3 py-1 rounded-full ${
               props.default
                 ? "bg-slate-200"
@@ -82,6 +90,23 @@ const AddressPage = () => {
     getAddressData();
   }, []);
 
+  const setNewDefault = (id: number) => {
+    const currentData = addressData;
+    currentData.forEach((data) => (data.is_buyer_default = false));
+
+    for (let i = 0; i < currentData.length; i++) {
+      if (currentData[i].id === id) {
+        currentData[i].is_buyer_default = true;
+        setAddressData(currentData);
+        break;
+      }
+    }
+
+    getAddressData();
+  };
+
+  console.log(addressData);
+
   return (
     <>
       <div className="overflow-hidden">
@@ -109,6 +134,7 @@ const AddressPage = () => {
                 district={data.district}
                 province={data.province}
                 default={data.is_buyer_default}
+                setNewDefault={setNewDefault}
               />
             ))}
           </div>
