@@ -14,9 +14,6 @@ interface IProductDetail {
     color?: string;
   };
 }
-interface IProductDetailProps {
-  product: IProductDetail;
-}
 const imgDummy: IProductDetail[] = [
   {
     images:
@@ -119,11 +116,10 @@ function Index() {
               <ProductCard
                 key={k}
                 image={e.images}
-                price={currencyConverter(3000)}
+                price="35000"
                 showStar={true}
                 title="Laptop"
                 star={4.6}
-                place="Malang"
                 order={400}
               />
             ))}
