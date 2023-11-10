@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import ProfileLayout from "@/components/ProfileLayout";
 import Button from "@/components/Button";
-import { IAddress } from "@/interfaces/address_interface";
+import { IAddress } from "@/interfaces/user_interface";
 import { API } from "@/network";
 import { getCookie } from "cookies-next";
 import Modal from "@/components/Modal";
