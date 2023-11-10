@@ -4,12 +4,15 @@ import Navbar from "@/components/Navbar";
 import ProductCard from "@/components/ProductCard";
 import { IAPIResponse } from "@/interfaces/api_interface";
 import { API } from "@/network";
-import { currencyConverter } from "@/utils/utils";
+import { clientUnauthorizeHandler, currencyConverter } from "@/utils/utils";
 import axios from "axios";
 import { getCookie } from "cookies-next";
 import Button from "@/components/Button";
 import React, { MouseEventHandler, useEffect, useState } from "react";
 import { toast } from "react-toastify";
+import { FaTrash } from "react-icons/fa";
+import { useRouter } from "next/router";
+import { useUserStore } from "@/store/userStore";
 
 interface IWishlist {
   id: number;
@@ -23,11 +26,16 @@ interface IWishlist {
 }
 
 function Index() {
+  const { updateUser } = useUserStore();
+  const router = useRouter();
   const [wishlist, setWishlist] = useState<IAPIResponse<IWishlist[]>>();
   const [paginationNumber, setPaginationNumber] = useState<number[]>([]);
   const [page, setPage] = useState<number>(1);
-  const [selectedIds, setSelectedIds] = useState<number[]>([]); // For tracking selected product IDs
-  const [isSelecting, setIsSelecting] = useState(false); // To enter selection mode
+  const [selectedIds, setSelectedIds] = useState<number[]>([]);
+  const [isSelecting, setIsSelecting] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false);
+
+  const [wishlistToDelete, setWishlistToDelete] = useState<number>(0);
 
   const toggleSelection = (productId: number) => {
     if (selectedIds.includes(productId)) {
@@ -48,14 +56,11 @@ function Index() {
 
   const getWishlist = async () => {
     try {
-      const res = await API.get("/products/favorites", {
-        headers: {
-          Authorization: `Bearer ${getCookie("accessToken")}`,
-        },
-      });
-      console.log("betul");
+      const res = await API.get("/products/favorites");
+      console.log(res);
       const data = res.data as IAPIResponse<IWishlist[]>;
       setWishlist(data);
+      console.log(data.data);
 
       if (data.pagination?.total_page! <= 5) {
         return setPaginationNumber(
@@ -66,14 +71,54 @@ function Index() {
       if (paginationNumber.length === 0) {
         return setPaginationNumber(Array.from(Array(5).keys()));
       }
+      console.log("betul");
     } catch (e) {
       if (axios.isAxiosError(e)) {
-        toast.error("Error fetching couriers", {
-          toastId: "errorCourier",
+        if (e.response?.status === 401) {
+          return clientUnauthorizeHandler(router, updateUser);
+        }
+        return toast.error("Error fetching wishlist", {
+          toastId: "errorWishlist",
+          autoClose: 1500,
+        });
+      }
+      console.log("salah");
+    }
+  };
+
+  const deleteWishlist = (id: number) => {
+    try {
+      toast.promise(
+        API.delete(`/products/favorites${id}`),
+        {
+          pending: "Deleting wishlist...",
+          success: {
+            render() {
+              setShowDeleteModal(false);
+              return "Address successfully deleted!";
+            },
+          },
+          error: {
+            render({ data }) {
+              if (axios.isAxiosError(data)) {
+                return `${(data.response?.data as IAPIResponse).message}`;
+              }
+            },
+          },
+        },
+        {
+          autoClose: 1500,
+        }
+      );
+    } catch (e) {
+      if (axios.isAxiosError(e)) {
+        toast.error(e.message, {
           autoClose: 1500,
         });
       }
     }
+
+    getWishlist();
   };
 
   useEffect(() => {
@@ -87,30 +132,7 @@ function Index() {
         <div>
           <p className="text-xl md:text-3xl font-bold mt-10">Wishlist</p>
         </div>
-        <div className="flex justify-end mt-10">
-          {isSelecting ? (
-            <div>
-              <Button
-                text="Delete"
-                onClick={deleteSelected}
-                styling="px-2 py-2 bg-red-500 text-white mx-2 rounded-md"
-              />
-              <Button
-                text="Cancel"
-                onClick={() => {
-                  setIsSelecting(false);
-                  setSelectedIds([]);
-                }}
-                styling="px-2 py-2 bg-gray-500 text-white mx-2 rounded-md"
-              />
-            </div>
-          ) : (
-            <Button
-              text="Select"
-              onClick={() => setIsSelecting(true)}
-              styling="px-2 py-1 bg-blue-500 text-white mx-2 rounded-md"
-            />
-          )}
+        <div className="flex justify-end mt-10 items-center gap-x-5">
           <input
             type="text"
             placeholder="Search in wishlist"
@@ -119,13 +141,33 @@ function Index() {
         </div>
         <div className="gap-x-4 gap-y-1 grid grid-cols-2 md:grid-cols-6 mt-10">
           {wishlist?.data?.map((product) => (
-            <div key={product.id}>
+            <div
+              key={product.id}
+              className="hover:border hover:border-blue-900 rounded-md"
+            >
+              <FaTrash
+                size={25}
+                className="s text-orange-500 absolute z-10 justify-end text-center items-end flex cursor-pointer"
+                // onClick={() => deleteWishlist(product.id)}
+                onClick={async () => {
+                  try {
+                    const res = await API.delete(
+                      `/products/favorites/${product.id}`
+                    );
+                    await getWishlist();
+                  } catch (error) {
+                    console.log(error);
+                  }
+                }}
+              />
+
               <ProductCard
                 image={product.picture_url}
-                price={product.price}
+                price={currencyConverter(parseInt(product.price))}
                 showStar={false}
                 order={product.total_sold}
                 title={product.name}
+                place={product.district}
                 selected={selectedIds.includes(product.id)}
                 onSelect={() => toggleSelection(product.id)}
               />
