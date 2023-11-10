@@ -277,6 +277,170 @@ const AddAddressModal = (props: IAddAddressModal) => {
   );
 };
 
+interface IEditAddressModal {
+  closeFunction: () => void;
+  currentAddressId: number;
+}
+
+const EditAddressModal = (props: IEditAddressModal) => {
+  const [currentAddressData, setCurrentAddressData] = useState<IAddress>({
+    id: 0,
+    full_address: "",
+    detail: "",
+    zip_code: "",
+    kelurahan: "",
+    sub_district: "",
+    district: "",
+    province: "",
+    is_buyer_default: false,
+    is_seller_default: false,
+  });
+  const [provinceData, setProvinceData] = useState<IProvinceDistrictData[]>([]);
+  const [districtData, setDistrictData] = useState<IProvinceDistrictData[]>([]);
+  const [currentSelectedProvinceId, setCurrentSelectedProvinceId] =
+    useState<number>(1);
+  const [currentSelectedDistrictId, setCurrentSelectedDistrictId] =
+    useState<number>(1);
+  const [districtIndex, setDistrictIndex] = useState<number>(0);
+
+  const router = useRouter();
+  const { updateUser } = useUserStore();
+
+  const getProvinceData = async () => {
+    try {
+      const response = await API.get("/address/provinces");
+
+      setProvinceData(response.data.data.provinces);
+    } catch (e) {
+      console.log(e);
+    }
+  };
+
+  const getDistrictData = async () => {
+    try {
+      const response = await API.get(
+        `/address/provinces/${currentSelectedProvinceId}/districts`
+      );
+
+      setDistrictData(response.data.data.districts);
+      setCurrentSelectedDistrictId(
+        response.data.data.districts[districtIndex].id
+      );
+    } catch (e) {
+      console.log(e);
+    }
+  };
+
+  useEffect(() => {
+    getProvinceData();
+  }, []);
+
+  useEffect(() => {
+    getDistrictData();
+  }, [currentSelectedProvinceId]);
+
+  const submit = async (e: any) => {
+    e.preventDefault();
+
+    try {
+      toast.promise(
+        API.put(`/accounts/address/${props.currentAddressId}`),
+        {
+          pending: "Adding address...",
+          success: {
+            render() {
+              props.closeFunction();
+              return "Address successfully updated!";
+            },
+          },
+          error: {
+            render({ data }) {
+              if (axios.isAxiosError(data)) {
+                return `${(data.response?.data as IAPIResponse).message}`;
+              }
+            },
+          },
+        },
+        {
+          autoClose: 1500,
+        }
+      );
+    } catch (e) {
+      if (axios.isAxiosError(e)) {
+        if (e.response?.status === 401) {
+          return clientUnauthorizeHandler(router, updateUser);
+        }
+        return toast.error(e.message, {
+          autoClose: 1500,
+        });
+      }
+    }
+  };
+
+  return (
+    <div className="bg-white p-5 rounded-md w-[1000px] h-[600px] mobile:w-fit mobile:overflow-y-scroll">
+      <div className="pb-3">
+        <h1 className="text-[20px]">Add New Address</h1>
+      </div>
+
+      <div className="pt-6">
+        <Input
+          label="Address"
+          type="text"
+          name="address"
+          width="w-full "
+          required
+        />
+        <div className="flex justify-between pt-6 mobile:flex-col mobile:gap-6">
+          <AddressDropdown
+            label="Province"
+            data={provinceData}
+            onChange={(e) => setCurrentSelectedProvinceId(e.target.value)}
+          />
+          <AddressDropdown
+            label="District"
+            data={districtData}
+            onChange={(e) => {
+              setCurrentSelectedDistrictId(e.target.value);
+              setDistrictIndex(e.target.selectedIndex);
+            }}
+          />
+        </div>
+        <div className="flex justify-between pt-6 mobile:flex-col mobile:gap-6">
+          <Input
+            label="Sub-district"
+            type="text"
+            name="subdistrict"
+            width="basis-[33%] mobile:w-full"
+            required
+          />
+          <Input
+            label="Kelurahan"
+            type="text"
+            name="kelurahan"
+            width="basis-[33%] mobile:w-full"
+            required
+          />
+          <Input
+            label="Zip Code"
+            type="text"
+            name="zipcode"
+            width="basis-[33%] mobile:w-full"
+            required
+          />
+        </div>
+      </div>
+      <div className="flex justify-center mt-[50px]">
+        <Button
+          text="Add new address"
+          onClick={submit}
+          styling="bg-[#364968] p-3 rounded-[8px] w-[200px] text-white my-4"
+        />
+      </div>
+    </div>
+  );
+};
+
 const AddressPage = () => {
   const [addressData, setAddressData] = useState<IAddress[]>([]);
   const router = useRouter();
@@ -305,7 +469,7 @@ const AddressPage = () => {
     getAddressData();
   }, []);
 
-  const setNewDefault = (id: number) => {
+  const setNewDefault = async (id: number) => {
     const currentData = addressData;
     currentData.forEach((data) => (data.is_buyer_default = false));
 
@@ -316,6 +480,41 @@ const AddressPage = () => {
         break;
       }
     }
+
+    // try {
+
+    //   toast.promise(
+    //     API.put(`/accounts/address/${id}`, currentData),
+    //     {
+    //       pending: "Updating default address...",
+    //       success: {
+    //         render() {
+    //           return "Default address";
+    //         },
+    //       },
+    //       error: {
+    //         render({ data }) {
+    //           if (axios.isAxiosError(data)) {
+    //             return `${(data.response?.data as IAPIResponse).message}`;
+    //           }
+    //         },
+    //       },
+    //     },
+    //     {
+    //       autoClose: 1500,
+    //     }
+    //   );
+
+    // } catch (e) {
+    //   if (axios.isAxiosError(e)) {
+    //     if (e.response?.status === 401) {
+    //       return clientUnauthorizeHandler(router, updateUser);
+    //     }
+    //     return toast.error(e.message, {
+    //       autoClose: 1500,
+    //     });
+    //   }
+    // }
 
     getAddressData();
   };
