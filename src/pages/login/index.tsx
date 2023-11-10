@@ -3,7 +3,7 @@ import { ILoginForm } from "@/interfaces/auth_interface";
 import { API } from "@/network";
 import Image from "next/image";
 import { useRouter } from "next/router";
-import React from "react";
+import React, { useEffect } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { FcGoogle } from "react-icons/fc";
 import { ToastContainer, toast } from "react-toastify";
@@ -14,9 +14,8 @@ import {
   IAPIResponse,
   IAPIUserProfileResponse,
 } from "@/interfaces/api_interface";
-import { setCookie } from "cookies-next";
-import { jwtDecode } from "jwt-decode";
 import { useUserStore } from "@/store/userStore";
+import { clientUnauthorizeHandler, setAuthCookie } from "@/utils/utils";
 
 const Login = () => {
   const {
@@ -29,17 +28,15 @@ const Login = () => {
 
   const getUserData = async (token: string) => {
     try {
-      const res = await API.get("/accounts/profile", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      });
+      const res = await API.get("/accounts/profile");
       updateUser((res.data as IAPIResponse<IAPIUserProfileResponse>).data!);
       router.push("/");
     } catch (e) {
       if (axios.isAxiosError(e)) {
-        toast.error(e.message, {
+        if (e.response?.status === 401) {
+          return clientUnauthorizeHandler(router, updateUser);
+        }
+        return toast.error(e.message, {
           autoClose: 1500,
         });
       }
@@ -55,17 +52,15 @@ const Login = () => {
           success: {
             render({ data }) {
               const res = data?.data as IAPIResponse<IAPILoginResponse>;
-              const decoded = jwtDecode(res.data!.access_token);
-              setCookie("accessToken", res.data?.access_token, {
-                expires: new Date(decoded.exp! * 1000),
-              });
+              setAuthCookie(res.data!);
               return res.message;
             },
           },
           error: {
             render({ data }) {
               if (axios.isAxiosError(data)) {
-                return data.response?.statusText;
+                return (data.response?.data as IAPIResponse<IAPILoginResponse>)
+                  .message;
               }
             },
           },
@@ -79,10 +74,17 @@ const Login = () => {
       );
     } catch (e) {
       if (axios.isAxiosError(e)) {
-        toast.error(e.message, { autoClose: 1500 });
+        if (e.response?.status === 401) {
+          return clientUnauthorizeHandler(router, updateUser);
+        }
+        return toast.error(e.message, { autoClose: 1500 });
       }
     }
   };
+
+  useEffect(() => {
+    updateUser(undefined);
+  }, []);
 
   return (
     <div className=" h-screen flex justify-between items-center">

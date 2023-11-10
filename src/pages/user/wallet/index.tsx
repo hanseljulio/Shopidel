@@ -10,10 +10,16 @@ import { IAPIResponse, IAPIWalletResponse } from "@/interfaces/api_interface";
 import Modal from "@/components/Modal";
 import PinCode from "@/components/PinCode";
 import { GetServerSidePropsContext, InferGetServerSidePropsType } from "next";
-import { currencyConverter } from "@/utils/utils";
+import {
+  checkAuthSSR,
+  clientUnauthorizeHandler,
+  currencyConverter,
+  setAuthCookie,
+} from "@/utils/utils";
 import { useRouter } from "next/router";
 import { getCookie } from "cookies-next";
 import { IWalletTransaction } from "@/interfaces/wallet_interface";
+import { useUserStore } from "@/store/userStore";
 
 interface IActivateWalletProps {
   onOpenDialog: (content: JSX.Element) => void;
@@ -27,6 +33,7 @@ interface IWalletDetailProps {
 
 const Wallet = ({
   wallet,
+  auth,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   const [isModal, setIsModal] = useState<boolean>(false);
   const [modalContent, setModalContent] = useState<JSX.Element>();
@@ -38,6 +45,12 @@ const Wallet = ({
       </div>
     </ProfileLayout>;
   }
+
+  useEffect(() => {
+    if (auth !== undefined || auth !== null) {
+      setAuthCookie(auth!);
+    }
+  }, []);
 
   return (
     <>
@@ -74,21 +87,15 @@ interface ITopupWalletProps {
 
 const TopupWalletModal = ({ onBalanceChange }: ITopupWalletProps) => {
   const [amount, setAmount] = useState<string>("");
+  const router = useRouter();
+  const { updateUser } = useUserStore();
 
   const topupHandler = () => {
     try {
       toast.promise(
-        API.post(
-          "/accounts/wallets/topup",
-          {
-            amount: amount,
-          },
-          {
-            headers: {
-              Authorization: `Bearer ${getCookie("accessToken")}`,
-            },
-          }
-        ),
+        API.post("/accounts/wallets/topup", {
+          amount: amount,
+        }),
         {
           pending: "Loading",
           success: {
@@ -112,6 +119,9 @@ const TopupWalletModal = ({ onBalanceChange }: ITopupWalletProps) => {
       );
     } catch (e) {
       if (axios.isAxiosError(e)) {
+        if (e.response?.status === 401) {
+          return clientUnauthorizeHandler(router, updateUser);
+        }
         return toast.error(e.message, {
           autoClose: 1500,
         });
@@ -158,22 +168,15 @@ const TopupWalletModal = ({ onBalanceChange }: ITopupWalletProps) => {
 
 const ChangePinModal = () => {
   const router = useRouter();
+  const { updateUser } = useUserStore();
   const [isValid, setIsValid] = useState<boolean>(false);
   const [password, setPassword] = useState<string>("");
   const passwordValidation = () => {
     try {
       toast.promise(
-        API.post(
-          "/accounts/check-password",
-          {
-            password: "123",
-          },
-          {
-            headers: {
-              Authorization: `Bearer ${getCookie("accessToken")}`,
-            },
-          }
-        ),
+        API.post("/accounts/check-password", {
+          password: "123",
+        }),
         {
           pending: "Loading",
           success: {
@@ -195,6 +198,9 @@ const ChangePinModal = () => {
       );
     } catch (e) {
       if (axios.isAxiosError(e)) {
+        if (e.response?.status === 401) {
+          return clientUnauthorizeHandler(router, updateUser);
+        }
         return toast.error(e.message, {
           autoClose: 1500,
         });
@@ -211,17 +217,9 @@ const ChangePinModal = () => {
 
     try {
       toast.promise(
-        API.put(
-          "/accounts/wallets/change-pin",
-          {
-            wallet_new_pin: pin,
-          },
-          {
-            headers: {
-              Authorization: `Bearer ${getCookie("accessToken")}`,
-            },
-          }
-        ),
+        API.put("/accounts/wallets/change-pin", {
+          wallet_new_pin: pin,
+        }),
         {
           pending: "Loading",
           success: {
@@ -244,6 +242,9 @@ const ChangePinModal = () => {
       );
     } catch (e) {
       if (axios.isAxiosError(e)) {
+        if (e.response?.status === 401) {
+          return clientUnauthorizeHandler(router, updateUser);
+        }
         return toast.error(e.message, {
           autoClose: 1500,
         });
@@ -295,21 +296,14 @@ const ChangePinModal = () => {
 
 const ActivateWalletModal = () => {
   const router = useRouter();
+  const { updateUser } = useUserStore();
 
   const activateWalletHandler = (pin: string) => {
     try {
       toast.promise(
-        API.post(
-          "/accounts/wallets/activate",
-          {
-            wallet_pin: pin.toString(),
-          },
-          {
-            headers: {
-              Authorization: `Bearer ${getCookie("accessToken")}`,
-            },
-          }
-        ),
+        API.post("/accounts/wallets/activate", {
+          wallet_pin: pin.toString(),
+        }),
         {
           pending: "Loading",
           error: {
@@ -337,7 +331,10 @@ const ActivateWalletModal = () => {
       });
     } catch (e) {
       if (axios.isAxiosError(e)) {
-        toast.error(e.message, {
+        if (e.response?.status === 401) {
+          return clientUnauthorizeHandler(router, updateUser);
+        }
+        return toast.error(e.message, {
           autoClose: 1500,
         });
       }
@@ -382,6 +379,8 @@ const ActivateWallet = ({ onOpenDialog }: IActivateWalletProps) => {
 };
 
 const WalletDetail = ({ wallet, onOpenDialog }: IWalletDetailProps) => {
+  const router = useRouter();
+  const { updateUser } = useUserStore();
   const [data, setData] = useState<IAPIWalletResponse>(wallet);
   const [transactionHistoryRes, setTransactionHistoryRes] =
     useState<IAPIResponse<IWalletTransaction[]>>();
@@ -394,9 +393,6 @@ const WalletDetail = ({ wallet, onOpenDialog }: IWalletDetailProps) => {
         API.get("/accounts/wallets/histories", {
           params: {
             page: page,
-          },
-          headers: {
-            Authorization: `Bearer ${getCookie("accessToken")}`,
           },
         }),
         {
@@ -418,6 +414,9 @@ const WalletDetail = ({ wallet, onOpenDialog }: IWalletDetailProps) => {
       }
     } catch (e) {
       if (axios.isAxiosError(e)) {
+        if (e.response?.status === 401) {
+          return clientUnauthorizeHandler(router, updateUser);
+        }
         return toast.error(e.message, {
           autoClose: 1500,
         });
@@ -431,7 +430,7 @@ const WalletDetail = ({ wallet, onOpenDialog }: IWalletDetailProps) => {
 
   return (
     <div className="p-5">
-      <div className="flex justify-between items-end">
+      <div className="flex flex-col gap-y-3 md:gap-y-0 md:flex-row justify-between md:items-end">
         <div>
           <p className="text-slate-500 text-sm">
             Wallet id: {data.wallet_number}
@@ -441,7 +440,7 @@ const WalletDetail = ({ wallet, onOpenDialog }: IWalletDetailProps) => {
             {currencyConverter(parseInt(data.balance))}
           </p>
         </div>
-        <div className="flex gap-x-2  w-52">
+        <div className="flex gap-x-2 w-52">
           <Button
             onClick={() =>
               onOpenDialog(
@@ -468,9 +467,9 @@ const WalletDetail = ({ wallet, onOpenDialog }: IWalletDetailProps) => {
         {transactionHistoryRes?.data?.length === 0 ? (
           <p>You dont have any transactions</p>
         ) : (
-          <div className="flex flex-col  h-[550px]">
+          <div className="flex flex-col h-[620px] md:h-[550px]">
             <div className="flex-1">
-              <table className="w-full mt-2 border">
+              <table className="w-full mt-2 border hidden md:inline-table">
                 <thead>
                   <tr className="border-2">
                     <th className="p-2 text-start">No</th>
@@ -517,6 +516,50 @@ const WalletDetail = ({ wallet, onOpenDialog }: IWalletDetailProps) => {
                   })}
                 </tbody>
               </table>
+              <div className="flex flex-col mt-2 md:hidden border-2">
+                {transactionHistoryRes?.data?.map((item, i) => {
+                  return (
+                    <div
+                      key={i}
+                      className={`flex items-center  ${
+                        (i + 1) % 2 === 0 && "bg-slate-100"
+                      } px-2 py-2`}
+                    >
+                      <div className="w-[12%]">
+                        <p>
+                          {transactionHistoryRes.pagination?.current_page! *
+                            transactionHistoryRes.pagination?.limit! -
+                            transactionHistoryRes.pagination?.limit! +
+                            i +
+                            1}
+                        </p>
+                      </div>
+                      <div className="flex flex-col flex-1">
+                        <div className="flex items-center justify-between">
+                          <p>{item.type}</p>
+                          <p
+                            className={`font-bold ${
+                              item.amount.includes("-")
+                                ? "text-red-500"
+                                : "text-green-500"
+                            }`}
+                          >
+                            {currencyConverter(parseInt(item.amount))}
+                          </p>
+                        </div>
+                        <div className="flex items-center justify-between text-xs">
+                          <p>
+                            {item.from !== ""
+                              ? `From: ${item.from}`
+                              : `To: ${item.to}`}
+                          </p>
+                          <p>{new Date(item.created_at).toLocaleString()}</p>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
             <div className="flex self-end mt-2">
               {transactionHistoryRes?.pagination?.current_page !== 1 && (
@@ -589,14 +632,17 @@ export const getServerSideProps = async (
   context: GetServerSidePropsContext
 ) => {
   let data: IAPIWalletResponse | undefined;
+  let auth = await checkAuthSSR(context);
 
-  let accessToken = context.req.cookies["accessToken"];
+  if (auth === null) {
+    context.res.writeHead(301, { location: "/login" });
+    context.res.end();
+  }
 
   try {
     const res = await API.get("/accounts/wallets", {
       headers: {
-        Authorization: `Bearer ${accessToken}`,
-        "Content-Type": "application/json",
+        Authorization: `Bearer ${auth?.access_token}`,
       },
     });
     data = (res.data as IAPIResponse<IAPIWalletResponse>).data;
@@ -609,6 +655,7 @@ export const getServerSideProps = async (
   return {
     props: {
       wallet: data,
+      auth: auth,
     },
   };
 };
