@@ -24,6 +24,8 @@ interface IIndividualAddressProps {
   province: string;
   default: boolean;
   setNewDefault: (id: number) => void;
+  showDeleteModal: () => void;
+  setIdToDelete: (id: number) => void;
 }
 
 const IndividualAddress = (props: IIndividualAddressProps) => {
@@ -43,7 +45,13 @@ const IndividualAddress = (props: IIndividualAddressProps) => {
               Edit
             </h1>
             <h1>|</h1>
-            <h1 className="text-blue-600 hover:cursor-pointer hover:underline">
+            <h1
+              onClick={() => {
+                props.setIdToDelete(props.id);
+                props.showDeleteModal();
+              }}
+              className="text-blue-600 hover:cursor-pointer hover:underline"
+            >
               Delete
             </h1>
           </div>
@@ -277,12 +285,49 @@ const AddAddressModal = (props: IAddAddressModal) => {
   );
 };
 
+interface IDeleteAddressModalProps {
+  addressId: number;
+  closeFunction: () => void;
+  deleteFunction: (id: number) => void;
+}
+
+const DeleteAddressModal = (props: IDeleteAddressModalProps) => {
+  return (
+    <div className="bg-white p-5 rounded-md  w-[500px] h-[180px] mobile:w-[99%]">
+      <div className="pb-3 text-center">
+        <h1 className="text-[20px] ml-1">
+          Are you sure you want to delete this address?
+        </h1>
+        <h1>This can&apos;t be undone!</h1>
+      </div>
+
+      <div className="flex justify-center mt-3 gap-6">
+        <Button
+          text="Yes"
+          onClick={() => props.deleteFunction(props.addressId)}
+          styling="bg-red-600 p-3 rounded-[8px] w-[100px] text-white my-4"
+        />
+        <Button
+          text="No"
+          onClick={props.closeFunction}
+          styling="bg-[#364968] p-3 rounded-[8px] w-[100px] text-white my-4"
+        />
+      </div>
+    </div>
+  );
+};
+
 const AddressPage = () => {
   const [addressData, setAddressData] = useState<IAddress[]>([]);
   const router = useRouter();
   const { updateUser } = useUserStore();
   const [showAddAddressModal, setShowAddAddressModal] =
     useState<boolean>(false);
+
+  const [showDeleteAddressModal, setShowDeleteAddressModal] =
+    useState<boolean>(false);
+
+  const [addressToDelete, setAddressToDelete] = useState<number>(0);
 
   const getAddressData = async () => {
     try {
@@ -325,8 +370,60 @@ const AddressPage = () => {
     getAddressData();
   };
 
+  const deleteAddress = (id: number) => {
+    try {
+      toast.promise(
+        API.delete(`accounts/address/${id}`, {
+          headers: {
+            Authorization: `Bearer ${getCookie("accessToken")}`,
+          },
+        }),
+        {
+          pending: "Deleting address...",
+          success: {
+            render() {
+              setShowDeleteAddressModal(false);
+              return "Address successfully deleted!";
+            },
+          },
+          error: {
+            render({ data }) {
+              if (axios.isAxiosError(data)) {
+                return `${(data.response?.data as IAPIResponse).message}`;
+              }
+            },
+          },
+        },
+        {
+          autoClose: 1500,
+        }
+      );
+    } catch (e) {
+      if (axios.isAxiosError(e)) {
+        toast.error(e.message, {
+          autoClose: 1500,
+        });
+      }
+    }
+
+    getAddressData();
+  };
+
   return (
     <>
+      {showDeleteAddressModal && (
+        <Modal
+          content={
+            <DeleteAddressModal
+              addressId={addressToDelete}
+              closeFunction={() => setShowDeleteAddressModal(false)}
+              deleteFunction={deleteAddress}
+            />
+          }
+          onClose={() => setShowDeleteAddressModal(false)}
+        />
+      )}
+
       {showAddAddressModal && (
         <Modal
           content={<AddAddressModal closeFunction={closeAddAddress} />}
@@ -362,6 +459,8 @@ const AddressPage = () => {
                 province={data.province}
                 default={data.is_buyer_default}
                 setNewDefault={setNewDefault}
+                showDeleteModal={() => setShowDeleteAddressModal(true)}
+                setIdToDelete={(addressId) => setAddressToDelete(addressId)}
               />
             ))}
           </div>
