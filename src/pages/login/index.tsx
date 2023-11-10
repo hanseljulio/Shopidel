@@ -59,8 +59,8 @@ const Login = () => {
           error: {
             render({ data }) {
               if (axios.isAxiosError(data)) {
-                console.log(data);
-                return data.response?.statusText;
+                return (data.response?.data as IAPIResponse<IAPILoginResponse>)
+                  .message;
               }
             },
           },
