@@ -93,6 +93,7 @@ interface IDropdownProps {
   label: string;
   data: IProvinceDistrictData[];
   onChange: (e: any) => void;
+  value?: number;
 }
 
 interface IAddAddressModal {
@@ -107,6 +108,7 @@ const AddressDropdown = (props: IDropdownProps) => {
         onChange={(e) => props.onChange(e)}
         className={`p-4 w-[450px] mobile:w-full rounded`}
         name="category-dropdown"
+        value={props.value}
       >
         {props.data.map((option, index) => (
           <option key={index} value={option.id}>
@@ -294,42 +296,24 @@ const AddAddressModal = (props: IAddAddressModal) => {
 
 interface IEditAddressModal {
   closeFunction: () => void;
+  addressData: IAddress;
   currentAddressId: number;
 }
 
 const EditAddressModal = (props: IEditAddressModal) => {
-  const [currentAddressData, setCurrentAddressData] = useState<IAddress>({
-    id: 0,
-    full_address: "",
-    detail: "",
-    zip_code: "",
-    kelurahan: "",
-    sub_district: "",
-    district: "",
-    province: "",
-    is_buyer_default: false,
-    is_seller_default: false,
-  });
+  const [currentAddressData, setCurrentAddressData] = useState<IAddress>(
+    props.addressData
+  );
   const [provinceData, setProvinceData] = useState<IProvinceDistrictData[]>([]);
   const [districtData, setDistrictData] = useState<IProvinceDistrictData[]>([]);
   const [currentSelectedProvinceId, setCurrentSelectedProvinceId] =
     useState<number>(1);
   const [currentSelectedDistrictId, setCurrentSelectedDistrictId] =
-    useState<number>(1);
+    useState<number>(-1);
   const [districtIndex, setDistrictIndex] = useState<number>(0);
 
   const router = useRouter();
   const { updateUser } = useUserStore();
-
-  const getProvinceData = async () => {
-    try {
-      const response = await API.get("/address/provinces");
-
-      setProvinceData(response.data.data.provinces);
-    } catch (e) {
-      console.log(e);
-    }
-  };
 
   const getDistrictData = async () => {
     try {
@@ -338,33 +322,47 @@ const EditAddressModal = (props: IEditAddressModal) => {
       );
 
       setDistrictData(response.data.data.districts);
-      setCurrentSelectedDistrictId(
-        response.data.data.districts[districtIndex].id
-      );
+
+      if (currentSelectedDistrictId === -1) {
+        for (let i = 0; i < response.data.data.districts.length; i++) {
+          if (
+            response.data.data.districts[i].name === currentAddressData.district
+          ) {
+            setCurrentSelectedDistrictId(response.data.data.districts[i].id);
+            break;
+          }
+        }
+      } else {
+        setCurrentSelectedDistrictId(
+          response.data.data.districts[districtIndex].id
+        );
+      }
     } catch (e) {
       console.log(e);
     }
   };
 
-  // Must receive data here
-  const getCurrentAddressData = async () => {
+  const getEditData = async () => {
     try {
-      const response = await API.get(
-        `/accounts/address/${props.currentAddressId}`
-      );
+      const response = await API.get("/address/provinces");
 
-      // Set the province and district id from here
-      setDistrictData(response.data.data.districts);
-      setCurrentSelectedDistrictId(
-        response.data.data.districts[districtIndex].id
-      );
+      setProvinceData(response.data.data.provinces);
+
+      for (let i = 0; i < response.data.data.provinces.length; i++) {
+        if (
+          response.data.data.provinces[i].name === currentAddressData.province
+        ) {
+          setCurrentSelectedProvinceId(response.data.data.provinces[i].id);
+          break;
+        }
+      }
     } catch (e) {
       console.log(e);
     }
   };
 
   useEffect(() => {
-    getProvinceData();
+    getEditData();
   }, []);
 
   useEffect(() => {
@@ -374,11 +372,22 @@ const EditAddressModal = (props: IEditAddressModal) => {
   const submit = async (e: any) => {
     e.preventDefault();
 
+    const sendData = {
+      province_id: parseInt(currentSelectedProvinceId.toString()),
+      district_id: parseInt(currentSelectedDistrictId.toString()),
+      sub_district: currentAddressData.sub_district,
+      kelurahan: currentAddressData.kelurahan,
+      zip_code: currentAddressData.zip_code,
+      detail: currentAddressData.detail,
+      is_buyer_default: currentAddressData.is_buyer_default,
+      is_seller_default: currentAddressData.is_seller_default,
+    };
+
     try {
       toast.promise(
-        API.put(`/accounts/address/${props.currentAddressId}`),
+        API.put(`/accounts/address/${props.currentAddressId}`, sendData),
         {
-          pending: "Adding address...",
+          pending: "Updating address...",
           success: {
             render() {
               props.closeFunction();
@@ -434,11 +443,13 @@ const EditAddressModal = (props: IEditAddressModal) => {
           <AddressDropdown
             label="Province"
             data={provinceData}
+            value={currentSelectedProvinceId}
             onChange={(e) => setCurrentSelectedProvinceId(e.target.value)}
           />
           <AddressDropdown
             label="District"
             data={districtData}
+            value={currentSelectedDistrictId}
             onChange={(e) => {
               setCurrentSelectedDistrictId(e.target.value);
               setDistrictIndex(e.target.selectedIndex);
@@ -548,6 +559,20 @@ const AddressPage = () => {
 
   const [addressToDelete, setAddressToDelete] = useState<number>(0);
 
+  const [currentSelectedAddress, setCurrentSelectedAddress] =
+    useState<IAddress>({
+      id: 0,
+      full_address: "",
+      detail: "",
+      zip_code: "",
+      kelurahan: "",
+      sub_district: "",
+      district: "",
+      province: "",
+      is_buyer_default: false,
+      is_seller_default: false,
+    });
+
   const getAddressData = async () => {
     try {
       const response = await API.get("/accounts/address");
@@ -637,6 +662,7 @@ const AddressPage = () => {
           success: {
             render() {
               setShowDeleteAddressModal(false);
+              getAddressData();
               return "Address successfully deleted!";
             },
           },
@@ -659,8 +685,6 @@ const AddressPage = () => {
         });
       }
     }
-
-    getAddressData();
   };
 
   return (
@@ -670,7 +694,11 @@ const AddressPage = () => {
           content={
             <EditAddressModal
               currentAddressId={addressToDelete}
-              closeFunction={() => setShowEditAddressModal(false)}
+              addressData={currentSelectedAddress}
+              closeFunction={() => {
+                setShowEditAddressModal(false);
+                getAddressData();
+              }}
             />
           }
           onClose={() => setShowEditAddressModal(false)}
@@ -726,7 +754,10 @@ const AddressPage = () => {
                 default={data.is_buyer_default}
                 setNewDefault={setNewDefault}
                 showDeleteModal={() => setShowDeleteAddressModal(true)}
-                showEditModal={() => setShowEditAddressModal(true)}
+                showEditModal={() => {
+                  setShowEditAddressModal(true);
+                  setCurrentSelectedAddress(data);
+                }}
                 setIdToDelete={(addressId) => setAddressToDelete(addressId)}
               />
             ))}
