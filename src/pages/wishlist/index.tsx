@@ -87,7 +87,7 @@ function Index() {
   const deleteWishlist = (id: number) => {
     try {
       toast.promise(
-        API.delete(`/products/favorites${id}`),
+        API.delete(`/products/favorites/${id}`),
         {
           pending: "Deleting wishlist...",
           success: {
@@ -145,7 +145,7 @@ function Index() {
             >
               <FaRegTrashAlt
                 size={25}
-                className="s text-[#e09664] absolute z-10 flex cursor-pointer opacity-70 p-1"
+                className="s text-[#f57b29] absolute z-10 flex cursor-pointer opacity-70 p-1 items-end"
                 // onClick={() => deleteWishlist(product.id)}
                 onClick={async () => {
                   try {

@@ -162,7 +162,7 @@ const ProductDetail = ({ product }: IProductDetailProps) => {
 
     if (isFavorite) {
       try {
-        await API.delete(
+        await API.post(
           `/products/${product.id}/favorites/add-favorite
         `,
           {
