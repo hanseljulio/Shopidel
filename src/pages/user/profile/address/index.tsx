@@ -10,6 +10,9 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { IAPIResponse } from "@/interfaces/api_interface";
 import axios from "axios";
+import { clientUnauthorizeHandler } from "@/utils/utils";
+import { useRouter } from "next/router";
+import { useUserStore } from "@/store/userStore";
 
 interface IIndividualAddressProps {
   id: number;
@@ -113,14 +116,12 @@ const AddAddressModal = (props: IAddAddressModal) => {
   const [subDistrict, setSubDistrict] = useState<string>("");
   const [kelurahan, setKelurahan] = useState<string>("");
   const [postalCode, setPostalCode] = useState<string>("");
+  const router = useRouter();
+  const { updateUser } = useUserStore();
 
   const getProvinceData = async () => {
     try {
-      const response = await API.get("/address/provinces", {
-        headers: {
-          Authorization: `Bearer ${getCookie("accessToken")}`,
-        },
-      });
+      const response = await API.get("/address/provinces");
 
       setProvinceData(response.data.data.provinces);
     } catch (e) {
@@ -131,12 +132,7 @@ const AddAddressModal = (props: IAddAddressModal) => {
   const getDistrictData = async () => {
     try {
       const response = await API.get(
-        `/address/provinces/${currentSelectedProvinceId}/districts`,
-        {
-          headers: {
-            Authorization: `Bearer ${getCookie("accessToken")}`,
-          },
-        }
+        `/address/provinces/${currentSelectedProvinceId}/districts`
       );
 
       setDistrictData(response.data.data.districts);
@@ -180,11 +176,7 @@ const AddAddressModal = (props: IAddAddressModal) => {
 
     try {
       toast.promise(
-        API.post("/accounts/address", sendData, {
-          headers: {
-            Authorization: `Bearer ${getCookie("accessToken")}`,
-          },
-        }),
+        API.post("/accounts/address", sendData),
         {
           pending: "Adding address...",
           success: {
@@ -207,7 +199,10 @@ const AddAddressModal = (props: IAddAddressModal) => {
       );
     } catch (e) {
       if (axios.isAxiosError(e)) {
-        toast.error(e.message, {
+        if (e.response?.status === 401) {
+          return clientUnauthorizeHandler(router, updateUser);
+        }
+        return toast.error(e.message, {
           autoClose: 1500,
         });
       }
@@ -284,20 +279,25 @@ const AddAddressModal = (props: IAddAddressModal) => {
 
 const AddressPage = () => {
   const [addressData, setAddressData] = useState<IAddress[]>([]);
+  const router = useRouter();
+  const { updateUser } = useUserStore();
   const [showAddAddressModal, setShowAddAddressModal] =
     useState<boolean>(false);
 
   const getAddressData = async () => {
     try {
-      const response = await API.get("/accounts/address", {
-        headers: {
-          Authorization: `Bearer ${getCookie("accessToken")}`,
-        },
-      });
+      const response = await API.get("/accounts/address");
 
       setAddressData(response.data.data);
     } catch (e) {
-      console.log(e);
+      if (axios.isAxiosError(e)) {
+        if (e.response?.status === 401) {
+          return clientUnauthorizeHandler(router, updateUser);
+        }
+        return toast.error(e.message, {
+          autoClose: 1500,
+        });
+      }
     }
   };
 
