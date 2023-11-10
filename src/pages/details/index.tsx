@@ -45,6 +45,7 @@ interface IAPIProductDetail {
       price: string;
     }
   ];
+  is_favorite: boolean;
 }
 
 interface IProductDetail {
@@ -162,7 +163,7 @@ const ProductDetail = ({ product }: IProductDetailProps) => {
 
     if (isFavorite) {
       try {
-        await API.delete(
+        await API.post(
           `/products/${product.id}/favorites/add-favorite
         `,
           {
@@ -389,7 +390,7 @@ const ProductDetail = ({ product }: IProductDetailProps) => {
               </div>
               <div className="favorite-icon mt-5 text-right">
                 <button onClick={handleFavoriteClick}>
-                  {isFavorite ? (
+                  {isFavorite && product.is_favorite === false ? (
                     <div className="flex items-center gap-1">
                       <FaHeart style={{ color: "red" }} />
                       <p>Favorite</p>
