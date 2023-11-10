@@ -29,7 +29,7 @@ API.interceptors.response.use(
       return axios(originalRequest);
     }
 
-    return Promise.reject(401);
+    return Promise.reject(err);
   }
 );
 

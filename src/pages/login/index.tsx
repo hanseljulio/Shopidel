@@ -15,7 +15,7 @@ import {
   IAPIUserProfileResponse,
 } from "@/interfaces/api_interface";
 import { useUserStore } from "@/store/userStore";
-import { setAuthCookie } from "@/utils/utils";
+import { clientUnauthorizeHandler, setAuthCookie } from "@/utils/utils";
 
 const Login = () => {
   const {
@@ -33,7 +33,10 @@ const Login = () => {
       router.push("/");
     } catch (e) {
       if (axios.isAxiosError(e)) {
-        toast.error(e.message, {
+        if (e.response?.status === 401) {
+          return clientUnauthorizeHandler(router, updateUser);
+        }
+        return toast.error(e.message, {
           autoClose: 1500,
         });
       }
@@ -56,8 +59,8 @@ const Login = () => {
           error: {
             render({ data }) {
               if (axios.isAxiosError(data)) {
-                console.log(data);
-                return data.response?.statusText;
+                return (data.response?.data as IAPIResponse<IAPILoginResponse>)
+                  .message;
               }
             },
           },
@@ -71,8 +74,10 @@ const Login = () => {
       );
     } catch (e) {
       if (axios.isAxiosError(e)) {
-        console.log(e);
-        toast.error(e.message, { autoClose: 1500 });
+        if (e.response?.status === 401) {
+          return clientUnauthorizeHandler(router, updateUser);
+        }
+        return toast.error(e.message, { autoClose: 1500 });
       }
     }
   };
