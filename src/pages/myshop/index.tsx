@@ -50,27 +50,40 @@ const RegisterShop = () => {
   const [selectedCourier, setSelectedCourier] = useState<number[]>([]);
 
   const registerMerchantHandler: SubmitHandler<IRegisterMerchant> = (data) => {
-    toast.promise(
-      API.post("/auth/seller/register", data),
-      {
-        pending: "Loading",
-        success: {
-          render({ data }) {
-            return (data?.data as IAPIResponse).message;
+    try {
+      toast.promise(
+        API.post("/auth/seller/register", data),
+        {
+          pending: "Loading",
+          success: {
+            render({ data }) {
+              return (data?.data as IAPIResponse).message;
+            },
+          },
+          error: {
+            render({ data }) {
+              if (axios.isAxiosError(data)) {
+                return (data?.response?.data as IAPIResponse).message;
+              }
+            },
           },
         },
-        error: {
-          render({ data }) {
-            if (axios.isAxiosError(data)) {
-              return (data?.response?.data as IAPIResponse).message;
-            }
-          },
-        },
-      },
-      {
-        autoClose: 1500,
+        {
+          autoClose: 1500,
+          toastId: "registeMerchantError",
+        }
+      );
+    } catch (e) {
+      if (axios.isAxiosError(e)) {
+        if (e.response?.status === 401) {
+          return clientUnauthorizeHandler(router, updateUser);
+        }
+        return toast.error(e.message, {
+          toastId: "registeMerchantError",
+          autoClose: 1500,
+        });
       }
-    );
+    }
   };
 
   const getListAddress = async () => {
@@ -84,13 +97,13 @@ const RegisterShop = () => {
       );
     } catch (e) {
       if (axios.isAxiosError(e)) {
+        if (e.response?.status === 401) {
+          return clientUnauthorizeHandler(router, updateUser);
+        }
         return toast.error("Error fetching address", {
           toastId: "errorAddress",
           autoClose: 1500,
         });
-      }
-      if (e === 401) {
-        return clientUnauthorizeHandler(router, updateUser);
       }
     }
   };
@@ -101,14 +114,13 @@ const RegisterShop = () => {
       setListCourier((res.data as IAPIResponse<ICourier[]>).data);
     } catch (e) {
       if (axios.isAxiosError(e)) {
-        console.log(e);
+        if (e.response?.status === 401) {
+          return clientUnauthorizeHandler(router, updateUser);
+        }
         return toast.error("Error fetching couriers", {
           toastId: "errorCourier",
           autoClose: 1500,
         });
-      }
-      if (e === 401) {
-        return clientUnauthorizeHandler(router, updateUser);
       }
     }
   };

@@ -18,7 +18,7 @@ import CheckoutPayment from "@/components/CheckoutPayment";
 import { ICartData } from "@/interfaces/cart_interface";
 import { useCartStore } from "@/store/cartStore";
 import { API } from "@/network";
-import axios from "axios";
+import axios, { isAxiosError } from "axios";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { getCookie } from "cookies-next";
@@ -122,12 +122,15 @@ const SelectShippingModal = (props: ISelectShippingModalProps) => {
   const getCourier = async () => {
     try {
       const response = await API.get("/orders/couriers/1");
-
       setCourierList(response.data.data);
     } catch (e) {
-      console.log(e);
-      if (e === 401) {
-        return clientUnauthorizeHandler(router, updateUser);
+      if (axios.isAxiosError(e)) {
+        if (e.response?.status === 401) {
+          return clientUnauthorizeHandler(router, updateUser);
+        }
+        return toast.error(e.message, {
+          autoClose: 1500,
+        });
       }
     }
   };
@@ -142,12 +145,15 @@ const SelectShippingModal = (props: ISelectShippingModalProps) => {
 
     try {
       const response = await API.post("/orders/cost/check", sendData);
-
       setShippingCostData(response.data.data);
     } catch (e) {
-      console.log(e);
-      if (e === 401) {
-        return clientUnauthorizeHandler(router, updateUser);
+      if (axios.isAxiosError(e)) {
+        if (e.response?.status === 401) {
+          return clientUnauthorizeHandler(router, updateUser);
+        }
+        return toast.error(e.message, {
+          autoClose: 1500,
+        });
       }
     }
   };
@@ -322,9 +328,13 @@ const CheckoutPage = () => {
         }
       }
     } catch (e) {
-      console.log(e);
-      if (e === 401) {
-        return clientUnauthorizeHandler(router, userStore.updateUser);
+      if (axios.isAxiosError(e)) {
+        if (e.response?.status === 401) {
+          return clientUnauthorizeHandler(router, userStore.updateUser);
+        }
+        return toast.error(e.message, {
+          autoClose: 1500,
+        });
       }
     }
   };
@@ -340,9 +350,13 @@ const CheckoutPage = () => {
 
       setWalletMoney(response.data.data.balance);
     } catch (e) {
-      console.log(e);
-      if (e === 401) {
-        return clientUnauthorizeHandler(router, userStore.updateUser);
+      if (axios.isAxiosError(e)) {
+        if (e.response?.status === 401) {
+          return clientUnauthorizeHandler(router, userStore.updateUser);
+        }
+        return toast.error(e.message, {
+          autoClose: 1500,
+        });
       }
     }
   };
@@ -401,7 +415,10 @@ const CheckoutPage = () => {
       );
     } catch (e) {
       if (axios.isAxiosError(e)) {
-        toast.error(e.message, {
+        if (e.response?.status === 401) {
+          return clientUnauthorizeHandler(router, userStore.updateUser);
+        }
+        return toast.error(e.message, {
           autoClose: 1500,
         });
       }
@@ -423,12 +440,12 @@ const CheckoutPage = () => {
       setShowWalletPin(false);
     } catch (e) {
       if (axios.isAxiosError(e)) {
-        toast.error(e.message, {
+        if (e.response?.status === 401) {
+          return clientUnauthorizeHandler(router, userStore.updateUser);
+        }
+        return toast.error(e.message, {
           autoClose: 1500,
         });
-      }
-      if (e === 401) {
-        return clientUnauthorizeHandler(router, userStore.updateUser);
       }
     }
   };

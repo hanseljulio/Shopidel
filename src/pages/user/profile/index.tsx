@@ -14,14 +14,23 @@ import { InferGetServerSidePropsType } from "next";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { getCookie, setCookie } from "cookies-next";
-import { checkAuthSSR, emailConverter, setAuthCookie } from "@/utils/utils";
+import {
+  checkAuthSSR,
+  clientUnauthorizeHandler,
+  emailConverter,
+  setAuthCookie,
+} from "@/utils/utils";
 import Dropdown from "@/components/Dropdown";
 import { jwtDecode } from "jwt-decode";
+import { useRouter } from "next/router";
+import { useUserStore } from "@/store/userStore";
 
 const UserProfile = ({
   userData,
   auth,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
+  const router = useRouter();
+  const { updateUser } = useUserStore();
   const [showEditEmail, setShowEditEmail] = useState<boolean>(false);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [userDetails, setUserDetails] = useState<
@@ -91,7 +100,10 @@ const UserProfile = ({
       );
     } catch (e) {
       if (axios.isAxiosError(e)) {
-        toast.error(e.message, {
+        if (e.response?.status === 401) {
+          return clientUnauthorizeHandler(router, updateUser);
+        }
+        return toast.error(e.message, {
           autoClose: 1500,
         });
       }
