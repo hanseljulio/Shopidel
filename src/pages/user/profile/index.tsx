@@ -1,6 +1,4 @@
-import Input from "@/components/Input";
 import React, { useEffect, useState } from "react";
-import Image from "next/image";
 import Button from "@/components/Button";
 import ProfileLayout from "@/components/ProfileLayout";
 import { API } from "@/network";
@@ -13,17 +11,14 @@ import { GetServerSidePropsContext } from "next";
 import { InferGetServerSidePropsType } from "next";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { getCookie, setCookie } from "cookies-next";
 import {
   checkAuthSSR,
   clientUnauthorizeHandler,
-  emailConverter,
   setAuthCookie,
 } from "@/utils/utils";
-import Dropdown from "@/components/Dropdown";
-import { jwtDecode } from "jwt-decode";
 import { useRouter } from "next/router";
 import { useUserStore } from "@/store/userStore";
+import { SubmitHandler, useForm } from "react-hook-form";
 
 const UserProfile = ({
   userData,
@@ -31,58 +26,45 @@ const UserProfile = ({
 }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   const router = useRouter();
   const { updateUser } = useUserStore();
-  const [showEditEmail, setShowEditEmail] = useState<boolean>(false);
   const [imageFile, setImageFile] = useState<File | null>(null);
-  const [userDetails, setUserDetails] = useState<
-    IAPIUserProfileResponse | undefined
-  >({
-    id: "",
-    full_name: "",
-    username: "",
-    email: "",
-    phone_number: "",
-    gender: "",
-    birthdate: "",
-    profile_picture: "",
-    wallet_number: "",
-    balance: "",
-    forget_password_expired_at: "",
-  });
 
-  const toggleEditEmail = () => {
-    setShowEditEmail((prevBool) => !prevBool);
-  };
+  const {
+    register,
+    handleSubmit,
+    getValues,
+    formState: { errors },
+  } = useForm<
+    Omit<
+      IAPIUserProfileResponse,
+      "id" | "wallet_number" | "balance" | "forget_password_expired_at"
+    >
+  >({
+    defaultValues: {
+      username: userData?.username,
+      birthdate: userData?.birthdate.substring(0, 10),
+      email: userData?.email,
+      full_name: userData?.full_name,
+      gender: userData?.gender,
+      phone_number: userData?.phone_number.substring(3),
+      profile_picture: userData?.profile_picture,
+    },
+  });
 
   useEffect(() => {
     if (auth !== undefined || auth !== null) {
       setAuthCookie(auth!);
     }
-
-    setUserDetails(userData);
   }, []);
 
-  const submit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-
-    const updatedData = {
-      full_name: userData?.full_name,
-      username: userData?.username,
-      email: userData?.email,
-      phone_number: userData?.phone_number,
-      gender: userData?.gender,
-      birthdate: userData?.birthdate,
-      profile_picture: userData?.profile_picture,
-    };
-
-    console.log(updatedData);
-
+  const submit: SubmitHandler<
+    Omit<
+      IAPIUserProfileResponse,
+      "id" | "wallet_number" | "balance" | "forget_password_expired_at"
+    >
+  > = async (data) => {
     try {
       toast.promise(
-        API.put("/accounts", updatedData, {
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }),
+        API.put("/accounts/profile", data),
         {
           pending: "Updating...",
           success: "Profile update success!",
@@ -134,122 +116,19 @@ const UserProfile = ({
     <div>
       <ToastContainer />
       <ProfileLayout currentPage="My Profile">
-        <div className="w-fit mx-auto mt-10">
-          <div className="edit-profile-header pb-3 mobile:text-center">
+        <div className="w-full p-5">
+          <div className="pb-3 text-center md:text-left">
             <h1 className="text-[30px]">My Profile</h1>
             <p className="text-[18px]">Manage your account</p>
           </div>
 
-          <form action="" onSubmit={submit}>
-            <div className="form-section-wrapper flex gap-[150px] mobile:gap-[20px] mobile:flex-col mobile:items-center">
-              <div className="form-section-div">
-                <Input
-                  label="Username"
-                  labelStyle="mt-2"
-                  styling="flex items-center gap-[57px] pb-[30px] mobile:flex-col mobile:gap-2 mobile:items-start"
-                  width="w-[250px]"
-                  type="text"
-                  name="username"
-                  value={userDetails!.username}
-                  onChange={(e) => {
-                    setUserDetails({
-                      ...userDetails!,
-                      username: e.target.value,
-                    });
-                  }}
-                />
-                <div className="email-section flex items-center pb-[30px] mobile:flex-col mobile:items-start">
-                  <p className="">Email</p>
-                  {showEditEmail ? (
-                    <Input
-                      label=""
-                      styling="flex items-center gap-[91px] mobile:gap-0 mobile:py-4"
-                      width="w-[250px]"
-                      type="email"
-                      name="emailEdit"
-                      value={userDetails!.email}
-                      onChange={(e) =>
-                        setUserDetails({
-                          ...userDetails!,
-                          email: e.target.value,
-                        })
-                      }
-                    />
-                  ) : (
-                    <p className="ml-[91px] mobile:m-0 mobile:py-4">
-                      {emailConverter(userDetails?.email!)}
-                    </p>
-                  )}
-                  <p
-                    onClick={toggleEditEmail}
-                    className="text-blue-600 underline hover:cursor-pointer ml-[30px] mobile:m-0"
-                  >
-                    {showEditEmail ? "Go back" : "Change email"}
-                  </p>
-                </div>
-                <Input
-                  label="Phone"
-                  labelStyle="mt-2"
-                  styling="flex items-center gap-[85px] pb-[30px] mobile:flex-col mobile:gap-2 mobile:items-start"
-                  width="w-[250px]"
-                  type="text"
-                  name="phoneNumber"
-                  value={userDetails!.phone_number}
-                  onChange={(e) =>
-                    setUserDetails({
-                      ...userDetails!,
-                      phone_number: e.target.value,
-                    })
-                  }
-                />
-                <Input
-                  label="Full Name"
-                  labelStyle="mt-2"
-                  styling="flex items-center gap-[58px] pb-[30px] mobile:flex-col mobile:gap-2 mobile:items-start"
-                  width="w-[250px]"
-                  type="text"
-                  value={userData?.full_name}
-                  name="fullName"
-                  onChange={(e) =>
-                    setUserDetails({
-                      ...userDetails!,
-                      full_name: e.target.value,
-                    })
-                  }
-                />
-                <Dropdown
-                  label="Gender"
-                  labelStyle="mt-2"
-                  width="w-[250px]"
-                  value={userDetails!.gender}
-                  flexLabel="flex items-center gap-[77px] pb-[30px] mobile:flex-col mobile:gap-2 mobile:items-start"
-                  options={["male", "female"]}
-                  onChange={(e) =>
-                    setUserDetails({
-                      ...userDetails!,
-                      gender: e.target.value,
-                    })
-                  }
-                />
-                <Input
-                  label="Date of Birth"
-                  type="date"
-                  name="dateOfBirth"
-                  value={userDetails!.birthdate.substring(0, 10)}
-                  styling="flex items-center gap-[36px] pb-[30px] mobile:flex-col mobile:gap-2 mobile:items-start"
-                  width="w-[250px]"
-                  onChange={(e) =>
-                    setUserDetails({
-                      ...userDetails!,
-                      birthdate: new Date(e.target.value).toISOString(),
-                    })
-                  }
-                />
-              </div>
-
-              <div
-                className={`flex-col justify-center items-center admin-edit-photo p-4 mobile:mx-auto`}
-              >
+          <form
+            action=""
+            onSubmit={handleSubmit(submit)}
+            className="flex flex-col md:flex-row items-center w-full"
+          >
+            <div className={`flex flex-col items-center w-96`}>
+              <div>
                 <img
                   src={`${
                     imageFile === null
@@ -267,29 +146,159 @@ const UserProfile = ({
                     borderRadius: "100%",
                   }}
                 />
-                <br />
-                <label className="custom-file-upload bg-[#364968] hover:cursor-pointer text-white p-4 rounded-[10px] ml-1.5 text-center">
-                  <input
-                    type="file"
-                    className="hidden"
-                    onChange={(e) => {
-                      if (e.target.files !== null) {
-                        setImageFile(e.target.files[0]);
-                      }
-                    }}
-                  />
-                  {!userDetails?.profile_picture
-                    ? "Upload profile photo"
-                    : "Replace profile photo"}
-                </label>
               </div>
+
+              <label className="bg-[#364968] hover:cursor-pointer text-white py-2 px-4 rounded-md text-sm mt-2">
+                <input
+                  {...register("profile_picture")}
+                  type="file"
+                  className="hidden"
+                  name="profile_picture"
+                  id="profile_picture"
+                  onChange={(e) => {
+                    if (e.target.files !== null) {
+                      setImageFile(e.target.files[0]);
+                    }
+                  }}
+                />
+                {!getValues("profile_picture")
+                  ? "Upload profile photo"
+                  : "Replace profile photo"}
+              </label>
             </div>
-            <div className="submit-btn mobile:text-center mobile:py-[50px] ml-[250px] mobile:mx-auto">
-              <Button
-                text="Save Changes"
-                onClick={submit}
-                styling="bg-[#364968] text-white p-3 rounded-[8px] w-[300px] my-4"
-              />
+            <div className="w-full">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mt-5 md:mt-0 flex-1">
+                <div className="flex flex-col">
+                  <label className="text-sm" htmlFor="username">
+                    Username
+                  </label>
+                  <input
+                    {...register("username", {
+                      required: "Username is required",
+                    })}
+                    type="text"
+                    className="rounded-md"
+                    name="username"
+                    id="username"
+                  />
+                  {errors.username?.type === "required" && (
+                    <span role="alert" className="text-sm text-red-500">
+                      {errors.username.message}
+                    </span>
+                  )}
+                </div>
+                <div className="flex flex-col">
+                  <label htmlFor="emailEdit" className="text-sm">
+                    Email
+                  </label>
+                  <input
+                    {...register("email", {
+                      required: "Email is required",
+                    })}
+                    type="email"
+                    name="email"
+                    id="email"
+                    className="rounded-md"
+                  />
+                  {errors.email?.type === "required" && (
+                    <span role="alert" className="text-sm text-red-500">
+                      {errors.email.message}
+                    </span>
+                  )}
+                </div>
+                <div className="flex flex-col">
+                  <label htmlFor="phoneNumber" className="text-sm">
+                    Phone
+                  </label>
+
+                  <div className="relative w-full">
+                    <input
+                      {...register("phone_number", {
+                        required: "Phone is required",
+                        setValueAs: (v) => `+62${v}`,
+                      })}
+                      type="text"
+                      name="phone_number"
+                      id="phone_number"
+                      className="rounded-md w-full pl-12"
+                    />
+                    <div className="absolute left-0 bg-[#F3F4F5] border border-slate-500 h-full flex items-center px-2 rounded-tl-md rounded-bl-md top-0">
+                      <span className="">+62</span>
+                    </div>
+                  </div>
+                  {errors.phone_number?.type === "required" && (
+                    <span role="alert" className="text-sm text-red-500">
+                      {errors.phone_number.message}
+                    </span>
+                  )}
+                </div>
+                <div className="flex flex-col">
+                  <label htmlFor="fullName" className="text-sm">
+                    Full Name
+                  </label>
+                  <input
+                    {...register("full_name", {
+                      required: "Full name is required",
+                    })}
+                    type="text"
+                    name="full_name"
+                    id="full_name"
+                    className="rounded-md"
+                  />
+                  {errors.full_name?.type === "required" && (
+                    <span role="alert" className="text-sm text-red-500">
+                      {errors.full_name.message}
+                    </span>
+                  )}
+                </div>
+                <div className="flex flex-col">
+                  <label htmlFor="gender" className="text-sm">
+                    Gender
+                  </label>
+                  <select
+                    {...register("gender", {
+                      required: "Gender is required",
+                    })}
+                    name="gender"
+                    id="gender"
+                    className="rounded-md w-full"
+                  >
+                    <option value="male">Male</option>
+                    <option value="female">Female</option>
+                  </select>
+                  {errors.gender?.type === "required" && (
+                    <span role="alert" className="text-sm text-red-500">
+                      {errors.gender.message}
+                    </span>
+                  )}
+                </div>
+                <div className="flex flex-col w-full">
+                  <label htmlFor="dateOfBirth" className="text-sm">
+                    Date of Birth
+                  </label>
+                  <input
+                    {...register("birthdate", {
+                      required: "Birthdate is required",
+                      setValueAs: (v) => new Date(v).toISOString(),
+                    })}
+                    type="date"
+                    name="birthdate"
+                    id="birthdate"
+                    className="rounded-md w-full"
+                  />
+                  {errors.birthdate?.type === "required" && (
+                    <span role="alert" className="text-sm text-red-500">
+                      {errors.birthdate.message}
+                    </span>
+                  )}
+                </div>
+              </div>
+              <div className="mt-5">
+                <Button
+                  text="Save Changes"
+                  styling="bg-[#364968] p-2 rounded-md text-white text-sm w-full"
+                />
+              </div>
             </div>
           </form>
         </div>
