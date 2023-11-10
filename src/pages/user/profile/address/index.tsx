@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import ProfileLayout from "@/components/ProfileLayout";
 import Button from "@/components/Button";
-import { IAddress } from "@/interfaces/user_interface";
+import { IAddress } from "@/interfaces/address_interface";
 import { API } from "@/network";
 import { getCookie } from "cookies-next";
 import Modal from "@/components/Modal";
@@ -32,7 +32,7 @@ interface IIndividualAddressProps {
 const IndividualAddress = (props: IIndividualAddressProps) => {
   return (
     <div className="border-2 p-4">
-      <div className="flex justify-between items-center mobile:flex-col mobile:gap-10">
+      <div className="flex justify-between items-center md:flex-row md:gap-0 flex-col gap-10">
         <div>
           <h1>{props.detail}</h1>
           <h1>{`${props.kelurahan.toUpperCase()}, ${props.subDistrict.toUpperCase()}, ${props.district.toUpperCase()}, ${props.province.toUpperCase()}, ID ${
@@ -40,7 +40,7 @@ const IndividualAddress = (props: IIndividualAddressProps) => {
           }`}</h1>
           {props.default && <h1 className="text-orange-500">[DEFAULT]</h1>}
         </div>
-        <div className="text-right flex flex-col gap-3 mobile:items-center mobile:gap-6">
+        <div className="text-right flex flex-col md:gap-3 items-center gap-6">
           <div className="flex justify-end gap-2 px-2">
             <h1
               onClick={() => {
@@ -106,7 +106,7 @@ const AddressDropdown = (props: IDropdownProps) => {
       <p className="pb-2">{props.label}</p>
       <select
         onChange={(e) => props.onChange(e)}
-        className={`p-4 w-[450px] mobile:w-full rounded`}
+        className={`p-4 md:w-[450px] w-full rounded`}
         name="category-dropdown"
         value={props.value}
       >
@@ -227,7 +227,7 @@ const AddAddressModal = (props: IAddAddressModal) => {
   };
 
   return (
-    <div className="bg-white p-5 rounded-md w-[1000px] h-[600px] mobile:w-fit mobile:overflow-y-scroll">
+    <div className="bg-white p-5 rounded-md md:w-[1000px] h-[600px] md:overflow-y-hidden w-fit overflow-y-scroll">
       <div className="pb-3">
         <h1 className="text-[20px]">Add New Address</h1>
       </div>
@@ -241,7 +241,7 @@ const AddAddressModal = (props: IAddAddressModal) => {
           onChange={(e) => setDetail(e.target.value)}
           required
         />
-        <div className="flex justify-between pt-6 mobile:flex-col mobile:gap-6">
+        <div className="flex justify-between pt-6 md:flex-row md:gap-0 flex-col gap-6">
           <AddressDropdown
             label="Province"
             data={provinceData}
@@ -256,12 +256,12 @@ const AddAddressModal = (props: IAddAddressModal) => {
             }}
           />
         </div>
-        <div className="flex justify-between pt-6 mobile:flex-col mobile:gap-6">
+        <div className="flex justify-between pt-6 md:flex-row md:gap-0 flex-col gap-6">
           <Input
             label="Sub-district"
             type="text"
             name="subdistrict"
-            width="basis-[33%] mobile:w-full"
+            width="md:basis-[33%] w-full"
             onChange={(e) => setSubDistrict(e.target.value)}
             required
           />
@@ -269,7 +269,7 @@ const AddAddressModal = (props: IAddAddressModal) => {
             label="Kelurahan"
             type="text"
             name="kelurahan"
-            width="basis-[33%] mobile:w-full"
+            width="md:basis-[33%] w-full"
             onChange={(e) => setKelurahan(e.target.value)}
             required
           />
@@ -277,7 +277,7 @@ const AddAddressModal = (props: IAddAddressModal) => {
             label="Zip Code"
             type="text"
             name="zipcode"
-            width="basis-[33%] mobile:w-full"
+            width="md:basis-[33%] w-full"
             onChange={(e) => setPostalCode(e.target.value)}
             required
           />
@@ -419,7 +419,7 @@ const EditAddressModal = (props: IEditAddressModal) => {
   };
 
   return (
-    <div className="bg-white p-5 rounded-md w-[1000px] h-[600px] mobile:w-fit mobile:overflow-y-scroll">
+    <div className="bg-white p-5 rounded-md md:w-[1000px] h-[600px] md:overflow-y-hidden w-fit overflow-y-scroll">
       <div className="pb-3">
         <h1 className="text-[20px]">Edit Address</h1>
       </div>
@@ -439,7 +439,7 @@ const EditAddressModal = (props: IEditAddressModal) => {
           }
           required
         />
-        <div className="flex justify-between pt-6 mobile:flex-col mobile:gap-6">
+        <div className="flex justify-between pt-6 md:gap-0 md:flex-row flex-col gap-6">
           <AddressDropdown
             label="Province"
             data={provinceData}
@@ -456,13 +456,13 @@ const EditAddressModal = (props: IEditAddressModal) => {
             }}
           />
         </div>
-        <div className="flex justify-between pt-6 mobile:flex-col mobile:gap-6">
+        <div className="flex justify-between pt-6 md:flex-row md:gap-0 flex-col gap-6">
           <Input
             label="Sub-district"
             type="text"
             value={currentAddressData.sub_district}
             name="subdistrict"
-            width="basis-[33%] mobile:w-full"
+            width="md:basis-[33%] w-full"
             onChange={(e) =>
               setCurrentAddressData({
                 ...currentAddressData,
@@ -475,7 +475,7 @@ const EditAddressModal = (props: IEditAddressModal) => {
             label="Kelurahan"
             type="text"
             name="kelurahan"
-            width="basis-[33%] mobile:w-full"
+            width="md:basis-[33%] w-full"
             value={currentAddressData.kelurahan}
             onChange={(e) =>
               setCurrentAddressData({
@@ -490,7 +490,7 @@ const EditAddressModal = (props: IEditAddressModal) => {
             type="text"
             name="zipcode"
             value={currentAddressData.zip_code}
-            width="basis-[33%] mobile:w-full"
+            width="md:basis-[33%] w-full"
             onChange={(e) =>
               setCurrentAddressData({
                 ...currentAddressData,
@@ -520,7 +520,7 @@ interface IDeleteAddressModalProps {
 
 const DeleteAddressModal = (props: IDeleteAddressModalProps) => {
   return (
-    <div className="bg-white p-5 rounded-md  w-[500px] h-[180px] mobile:w-[99%]">
+    <div className="bg-white p-5 rounded-md  md:w-[500px] h-[180px] w-[99%]">
       <div className="pb-3 text-center">
         <h1 className="text-[20px] ml-1">
           Are you sure you want to delete this address?
@@ -567,7 +567,9 @@ const AddressPage = () => {
       zip_code: "",
       kelurahan: "",
       sub_district: "",
+      district_id: 0,
       district: "",
+      province_id: 0,
       province: "",
       is_buyer_default: false,
       is_seller_default: false,
@@ -594,54 +596,105 @@ const AddressPage = () => {
     getAddressData();
   }, []);
 
+  const reset = async (id: number, sendData: any) => {
+    try {
+      toast.promise(
+        API.put(`/accounts/address/${id}`, sendData),
+        {
+          pending: "Updating default address...",
+          success: {
+            render() {
+              getAddressData();
+              return "Default address updated!";
+            },
+          },
+          error: {
+            render({ data }) {
+              if (axios.isAxiosError(data)) {
+                return `${(data.response?.data as IAPIResponse).message}`;
+              }
+            },
+          },
+        },
+        {
+          autoClose: 1500,
+        }
+      );
+    } catch (e) {
+      if (axios.isAxiosError(e)) {
+        if (e.response?.status === 401) {
+          return clientUnauthorizeHandler(router, updateUser);
+        }
+        return toast.error(e.message, {
+          autoClose: 1500,
+        });
+      }
+    }
+  };
+
   const setNewDefault = async (id: number) => {
     const currentData = addressData;
     currentData.forEach((data) => (data.is_buyer_default = false));
 
+    let sendData = {
+      province_id: 0,
+      district_id: 0,
+      sub_district: "",
+      kelurahan: "",
+      zip_code: "",
+      detail: "",
+      is_buyer_default: false,
+      is_seller_default: false,
+    };
+
     for (let i = 0; i < currentData.length; i++) {
       if (currentData[i].id === id) {
-        currentData[i].is_buyer_default = true;
-        setAddressData(currentData);
-        break;
+        sendData = {
+          province_id: currentData[i].province_id,
+          district_id: currentData[i].district_id,
+          sub_district: currentData[i].sub_district,
+          kelurahan: currentData[i].kelurahan,
+          zip_code: currentData[i].zip_code,
+          detail: currentData[i].detail,
+          is_buyer_default: false,
+          is_seller_default: currentData[i].is_seller_default,
+        };
       }
     }
 
-    // try {
-
-    //   toast.promise(
-    //     API.put(`/accounts/address/${id}`, currentData),
-    //     {
-    //       pending: "Updating default address...",
-    //       success: {
-    //         render() {
-    //           return "Default address";
-    //         },
-    //       },
-    //       error: {
-    //         render({ data }) {
-    //           if (axios.isAxiosError(data)) {
-    //             return `${(data.response?.data as IAPIResponse).message}`;
-    //           }
-    //         },
-    //       },
-    //     },
-    //     {
-    //       autoClose: 1500,
-    //     }
-    //   );
-
-    // } catch (e) {
-    //   if (axios.isAxiosError(e)) {
-    //     if (e.response?.status === 401) {
-    //       return clientUnauthorizeHandler(router, updateUser);
-    //     }
-    //     return toast.error(e.message, {
-    //       autoClose: 1500,
-    //     });
-    //   }
-    // }
-
-    getAddressData();
+    try {
+      toast.promise(
+        API.put(`/accounts/address/${id}`, sendData),
+        {
+          pending: "Updating default address...",
+          success: {
+            render() {
+              getAddressData();
+              return "Default address updated!";
+            },
+          },
+          error: {
+            render({ data }) {
+              if (axios.isAxiosError(data)) {
+                return `${(data.response?.data as IAPIResponse).message}`;
+              }
+            },
+          },
+        },
+        {
+          autoClose: 1500,
+        }
+      );
+    } catch (e) {
+      if (axios.isAxiosError(e)) {
+        if (e.response?.status === 401) {
+          return clientUnauthorizeHandler(router, updateUser);
+        }
+        return toast.error(e.message, {
+          autoClose: 1500,
+        });
+      }
+    }
   };
 
   const closeAddAddress = () => {
@@ -729,18 +782,18 @@ const AddressPage = () => {
         <ToastContainer />
         <ProfileLayout currentPage="My Address">
           <div className="w-full mx-auto mt-6 ">
-            <div className="flex items-center justify-between pl-[50px] pr-[65px] mobile:flex-col mobile:p-0">
+            <div className="flex items-center justify-between md:flex-row md:pl-[50px] md:pr-[65px] flex-col p-0">
               <h1 className="text-[30px]">Manage Address</h1>
 
               <Button
                 text="Add new address"
                 onClick={() => setShowAddAddressModal(true)}
-                styling="bg-[#fddf97] p-3 rounded-[8px] w-[200px] mobile:w-[100px] my-4 mobile:w-[250px]"
+                styling="bg-[#fddf97] p-3 rounded-[8px] md:w-[200px] my-4 w-[250px]"
               />
             </div>
           </div>
 
-          <div className="flex flex-col gap-6 overflow-y-scroll h-screen px-[50px] pt-[30px] pb-[250px] mobile:pb-[380px]">
+          <div className="flex flex-col gap-6 overflow-y-scroll h-screen px-[50px] pt-[30px] md:pb-[250px] pb-[380px]">
             {addressData.map((data, index) => (
               <IndividualAddress
                 key={index}
