@@ -138,38 +138,44 @@ function Index() {
           />
         </div>
         <div className="gap-x-4 gap-y-1 grid grid-cols-2 md:grid-cols-6 mt-10">
-          {wishlist?.data?.map((product) => (
-            <div
-              key={product.id}
-              className="hover:border hover:border-[#364968] rounded-md"
-            >
-              <FaRegTrashAlt
-                size={25}
-                className="s text-[#f57b29] absolute z-10 flex cursor-pointer opacity-70 p-1 items-end"
-                // onClick={() => deleteWishlist(product.id)}
-                onClick={async () => {
-                  try {
-                    const res = await API.delete(
-                      `/products/favorites/${product.id}`
-                    );
-                    await getWishlist();
-                  } catch (error) {
-                    console.log(error);
-                  }
-                }}
-              />
+          {wishlist?.data?.map((product) => {
+            if (wishlist.data?.length !== 0) {
+              return (
+                <div
+                  key={product.id}
+                  className="hover:border hover:border-[#364968] rounded-md"
+                >
+                  <FaRegTrashAlt
+                    size={25}
+                    className="s text-[#f57b29] absolute z-10 flex cursor-pointer opacity-50 p-1 items-end bg-[#364968] rounded-br-xl"
+                    // onClick={() => deleteWishlist(product.id)}
+                    onClick={async () => {
+                      try {
+                        const res = await API.delete(
+                          `/products/favorites/${product.id}`
+                        );
+                        await getWishlist();
+                      } catch (error) {
+                        console.log(error);
+                      }
+                    }}
+                  />
 
-              <ProductCard
-                image={product.picture_url}
-                price={product.price}
-                showStar={false}
-                order={product.total_sold}
-                title={product.name}
-                selected={selectedIds.includes(product.id)}
-                onSelect={() => toggleSelection(product.id)}
-              />
-            </div>
-          ))}
+                  <ProductCard
+                    image={product.picture_url}
+                    price={product.price}
+                    showStar={false}
+                    order={product.total_sold}
+                    title={product.name}
+                    selected={selectedIds.includes(product.id)}
+                    onSelect={() => toggleSelection(product.id)}
+                  />
+                </div>
+              );
+            } else {
+              <img src="/images/emptycart.png" alt="" />;
+            }
+          })}
         </div>
         <div className="text-center my-10 justify-center flex">
           <div className="flex self-end mt-2">
