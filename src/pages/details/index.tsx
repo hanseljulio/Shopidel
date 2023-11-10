@@ -8,7 +8,9 @@ import { currencyConverter } from "@/utils/utils";
 import axios from "axios";
 import { getCookie } from "cookies-next";
 import { GetServerSidePropsContext } from "next";
+import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
+import { SubmitHandler } from "react-hook-form";
 import { AiOutlineShoppingCart } from "react-icons/ai";
 import { BsStarFill } from "react-icons/bs";
 import { FaHeart, FaRegHeart, FaStar, FaStore } from "react-icons/fa";
@@ -45,11 +47,6 @@ interface IAPIProductDetail {
   ];
 }
 
-interface IAPIProductCart {
-  product_id: string;
-  quantity: string;
-}
-
 interface IProductDetail {
   images: string;
   varian?: {
@@ -57,9 +54,11 @@ interface IProductDetail {
     color?: string;
   };
 }
+
 interface IProductDetailProps {
   product: IAPIProductDetail;
 }
+
 const imgDummy: IProductDetail[] = [
   {
     images:
@@ -119,7 +118,7 @@ export const getServerSideProps = async (
   let accessToken = context.req.cookies["accessToken"];
 
   try {
-    const res = await API.get("/products/2", {
+    const res = await API.get(`/products/2`, {
       headers: {
         Authorization: `Bearer ${accessToken}`,
         "Content-Type": "application/json",
@@ -142,9 +141,9 @@ export const getServerSideProps = async (
 };
 
 const ProductDetail = ({ product }: IProductDetailProps) => {
+  const router = useRouter();
   const [count, setCount] = useState<number>(1);
   const [isHovering, setIsHovering] = useState(false);
-
   const [isModal, setIsModal] = useState<boolean>(false);
   const [variation, setVariation] = useState(
     "https://down-id.img.susercontent.com/file/826639af5f9af89adae9a1700f073242"
@@ -156,8 +155,48 @@ const ProductDetail = ({ product }: IProductDetailProps) => {
   const [currentStock, setCurrentStock] = useState<number>(0);
   const [isFavorite, setIsFavorite] = useState(false);
 
-  const handleFavoriteClick = () => {
-    setIsFavorite(!isFavorite); // Toggle status favorit
+  const handleFavoriteClick = async () => {
+    let data: Pick<IAPIProductDetail, "id"> = {
+      id: product.id,
+    };
+
+    if (isFavorite) {
+      try {
+        await API.delete(
+          `/products/${product.id}/favorites/add-favorite
+        `,
+          {
+            headers: {
+              Authorization: `Bearer ${getCookie("accessToken")}`,
+            },
+          }
+        );
+        console.log("delete");
+
+        setIsFavorite(false);
+      } catch (error) {
+        console.error("Error removing from wishlist:", error);
+      }
+    } else {
+      try {
+        const response = await API.post(
+          `/products/${product.id}/favorites/add-favorite`,
+          data,
+          {
+            headers: {
+              Authorization: `Bearer ${getCookie("accessToken")}`,
+            },
+          }
+        );
+
+        console.log("masuk");
+        console.log(response.data);
+
+        setIsFavorite(true);
+      } catch (error) {
+        console.error("Error adding to wishlist:", error);
+      }
+    }
   };
 
   const calculateSubtotal = () => {
@@ -261,6 +300,42 @@ const ProductDetail = ({ product }: IProductDetailProps) => {
     }
   };
 
+  const handleWishlist: SubmitHandler<IAPIProductDetail> = async (data) => {
+    let favData: Pick<IAPIProductDetail, "id"> = {
+      id: data.id,
+    };
+
+    try {
+      const response = await API.post(
+        `products/2/favorites/add-favorite`,
+        favData,
+        {
+          headers: {
+            Authorization: `Bearer ${getCookie("accessToken")}`,
+          },
+        }
+      );
+
+      if (response.status === 200) {
+        toast.success("Added to cart", { autoClose: 1500 });
+      } else {
+        toast.error("Failed to add to cart", { autoClose: 1500 });
+      }
+      console.log("yess");
+
+      console.log(response.data);
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        toast.error(error.response?.data.message, { autoClose: 1500 });
+      } else {
+        toast.error("An error occurred while adding to cart", {
+          autoClose: 1500,
+        });
+      }
+      console.log("nooooo");
+    }
+  };
+
   return (
     <>
       {isModal && (
@@ -316,11 +391,13 @@ const ProductDetail = ({ product }: IProductDetailProps) => {
                 <button onClick={handleFavoriteClick}>
                   {isFavorite ? (
                     <div className="flex items-center gap-1">
-                      <FaHeart style={{ color: "red" }} /> <p>Favorite</p>
+                      <FaHeart style={{ color: "red" }} />
+                      <p>Favorite</p>
                     </div>
                   ) : (
                     <div className="flex items-center gap-1">
-                      <FaRegHeart style={{ color: "red" }} /> <p>Favorite</p>
+                      <FaRegHeart style={{ color: "red" }} />
+                      <p>Favorite</p>
                     </div>
                   )}
                 </button>
@@ -679,19 +756,19 @@ const ProductDetail = ({ product }: IProductDetailProps) => {
                 <ProductCard
                   image="https://down-id.img.susercontent.com/file/bc3b634e8b2beb1f09f59671102800a7"
                   title="Sepatu Neki"
-                  price={1000000}
+                  price={"1000000"}
                   showStar={false}
                 />
                 <ProductCard
                   image="https://down-id.img.susercontent.com/file/bc3b634e8b2beb1f09f59671102800a7"
                   title="Sepatu Neki"
-                  price={1000000}
+                  price={"1000000"}
                   showStar={false}
                 />
                 <ProductCard
                   image="https://down-id.img.susercontent.com/file/bc3b634e8b2beb1f09f59671102800a7"
                   title="Sepatu Neki"
-                  price={1000000}
+                  price={"1000000"}
                   showStar={false}
                 />
               </div>
