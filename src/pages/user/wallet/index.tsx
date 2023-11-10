@@ -430,7 +430,7 @@ const WalletDetail = ({ wallet, onOpenDialog }: IWalletDetailProps) => {
 
   return (
     <div className="p-5">
-      <div className="flex justify-between items-end">
+      <div className="flex flex-col gap-y-3 md:gap-y-0 md:flex-row justify-between md:items-end">
         <div>
           <p className="text-slate-500 text-sm">
             Wallet id: {data.wallet_number}
@@ -440,7 +440,7 @@ const WalletDetail = ({ wallet, onOpenDialog }: IWalletDetailProps) => {
             {currencyConverter(parseInt(data.balance))}
           </p>
         </div>
-        <div className="flex gap-x-2  w-52">
+        <div className="flex gap-x-2 w-52">
           <Button
             onClick={() =>
               onOpenDialog(
@@ -467,9 +467,9 @@ const WalletDetail = ({ wallet, onOpenDialog }: IWalletDetailProps) => {
         {transactionHistoryRes?.data?.length === 0 ? (
           <p>You dont have any transactions</p>
         ) : (
-          <div className="flex flex-col  h-[550px]">
+          <div className="flex flex-col h-[620px] md:h-[550px]">
             <div className="flex-1">
-              <table className="w-full mt-2 border">
+              <table className="w-full mt-2 border hidden md:inline-table">
                 <thead>
                   <tr className="border-2">
                     <th className="p-2 text-start">No</th>
@@ -516,6 +516,50 @@ const WalletDetail = ({ wallet, onOpenDialog }: IWalletDetailProps) => {
                   })}
                 </tbody>
               </table>
+              <div className="flex flex-col mt-2 md:hidden border-2">
+                {transactionHistoryRes?.data?.map((item, i) => {
+                  return (
+                    <div
+                      key={i}
+                      className={`flex items-center  ${
+                        (i + 1) % 2 === 0 && "bg-slate-100"
+                      } px-2 py-2`}
+                    >
+                      <div className="w-[12%]">
+                        <p>
+                          {transactionHistoryRes.pagination?.current_page! *
+                            transactionHistoryRes.pagination?.limit! -
+                            transactionHistoryRes.pagination?.limit! +
+                            i +
+                            1}
+                        </p>
+                      </div>
+                      <div className="flex flex-col flex-1">
+                        <div className="flex items-center justify-between">
+                          <p>{item.type}</p>
+                          <p
+                            className={`font-bold ${
+                              item.amount.includes("-")
+                                ? "text-red-500"
+                                : "text-green-500"
+                            }`}
+                          >
+                            {currencyConverter(parseInt(item.amount))}
+                          </p>
+                        </div>
+                        <div className="flex items-center justify-between text-xs">
+                          <p>
+                            {item.from !== ""
+                              ? `From: ${item.from}`
+                              : `To: ${item.to}`}
+                          </p>
+                          <p>{new Date(item.created_at).toLocaleString()}</p>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
             <div className="flex self-end mt-2">
               {transactionHistoryRes?.pagination?.current_page !== 1 && (
