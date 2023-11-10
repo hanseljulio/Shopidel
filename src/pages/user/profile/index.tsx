@@ -13,13 +13,24 @@ import { GetServerSidePropsContext } from "next";
 import { InferGetServerSidePropsType } from "next";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { getCookie } from "cookies-next";
-import { emailConverter } from "@/utils/utils";
+import { getCookie, setCookie } from "cookies-next";
+import {
+  checkAuthSSR,
+  clientUnauthorizeHandler,
+  emailConverter,
+  setAuthCookie,
+} from "@/utils/utils";
 import Dropdown from "@/components/Dropdown";
+import { jwtDecode } from "jwt-decode";
+import { useRouter } from "next/router";
+import { useUserStore } from "@/store/userStore";
 
 const UserProfile = ({
   userData,
+  auth,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
+  const router = useRouter();
+  const { updateUser } = useUserStore();
   const [showEditEmail, setShowEditEmail] = useState<boolean>(false);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [userDetails, setUserDetails] = useState<
@@ -43,6 +54,10 @@ const UserProfile = ({
   };
 
   useEffect(() => {
+    if (auth !== undefined || auth !== null) {
+      setAuthCookie(auth!);
+    }
+
     setUserDetails(userData);
   }, []);
 
@@ -65,7 +80,6 @@ const UserProfile = ({
       toast.promise(
         API.put("/accounts", updatedData, {
           headers: {
-            Authorization: `Bearer ${getCookie("accessToken")}`,
             "Content-Type": "application/json",
           },
         }),
@@ -86,7 +100,10 @@ const UserProfile = ({
       );
     } catch (e) {
       if (axios.isAxiosError(e)) {
-        toast.error(e.message, {
+        if (e.response?.status === 401) {
+          return clientUnauthorizeHandler(router, updateUser);
+        }
+        return toast.error(e.message, {
           autoClose: 1500,
         });
       }
@@ -287,12 +304,17 @@ export const getServerSideProps = async (
   context: GetServerSidePropsContext
 ) => {
   let data: IAPIUserProfileResponse | undefined;
-  let accessToken = context.req.cookies["accessToken"];
+  let auth = await checkAuthSSR(context);
+
+  if (auth === null) {
+    context.res.writeHead(301, { location: "/login" });
+    context.res.end();
+  }
 
   try {
     const res = await API.get("/accounts/profile", {
       headers: {
-        Authorization: `Bearer ${accessToken}`,
+        Authorization: `Bearer ${auth?.access_token}`,
         "Content-Type": "application/json",
       },
     });
@@ -306,6 +328,7 @@ export const getServerSideProps = async (
   return {
     props: {
       userData: data,
+      auth: auth,
     },
   };
 };

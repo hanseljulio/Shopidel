@@ -9,8 +9,9 @@ import { ICourier } from "@/interfaces/courier_interface";
 import { IAddress } from "@/interfaces/user_interface";
 import { API } from "@/network";
 import { useUserStore } from "@/store/userStore";
+import { clientUnauthorizeHandler } from "@/utils/utils";
 import axios from "axios";
-import { getCookie } from "cookies-next";
+import { deleteCookie, getCookie } from "cookies-next";
 import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
@@ -40,7 +41,7 @@ const RegisterShop = () => {
       list_courier_id: [],
     },
   });
-  const { user } = useUserStore();
+  const { user, updateUser } = useUserStore();
   const router = useRouter();
   const [logged, setLogged] = useState<IAPIUserProfileResponse>();
   const [listAddress, setListAddress] = useState<IAddress[]>();
@@ -49,40 +50,45 @@ const RegisterShop = () => {
   const [selectedCourier, setSelectedCourier] = useState<number[]>([]);
 
   const registerMerchantHandler: SubmitHandler<IRegisterMerchant> = (data) => {
-    toast.promise(
-      API.post("/auth/seller/register", data, {
-        headers: {
-          Authorization: `Bearer ${getCookie("accessToken")}`,
-        },
-      }),
-      {
-        pending: "Loading",
-        success: {
-          render({ data }) {
-            return (data?.data as IAPIResponse).message;
+    try {
+      toast.promise(
+        API.post("/auth/seller/register", data),
+        {
+          pending: "Loading",
+          success: {
+            render({ data }) {
+              return (data?.data as IAPIResponse).message;
+            },
+          },
+          error: {
+            render({ data }) {
+              if (axios.isAxiosError(data)) {
+                return (data?.response?.data as IAPIResponse).message;
+              }
+            },
           },
         },
-        error: {
-          render({ data }) {
-            if (axios.isAxiosError(data)) {
-              return (data?.response?.data as IAPIResponse).message;
-            }
-          },
-        },
-      },
-      {
-        autoClose: 1500,
+        {
+          autoClose: 1500,
+          toastId: "registeMerchantError",
+        }
+      );
+    } catch (e) {
+      if (axios.isAxiosError(e)) {
+        if (e.response?.status === 401) {
+          return clientUnauthorizeHandler(router, updateUser);
+        }
+        return toast.error(e.message, {
+          toastId: "registeMerchantError",
+          autoClose: 1500,
+        });
       }
-    );
+    }
   };
 
   const getListAddress = async () => {
     try {
-      const res = await API.get("/accounts/address", {
-        headers: {
-          Authorization: `Bearer ${getCookie("accessToken")}`,
-        },
-      });
+      const res = await API.get("/accounts/address");
       const data = (res.data as IAPIResponse<IAddress[]>).data;
       setListAddress(data);
       setValue(
@@ -91,7 +97,10 @@ const RegisterShop = () => {
       );
     } catch (e) {
       if (axios.isAxiosError(e)) {
-        toast.error("Error fetching address", {
+        if (e.response?.status === 401) {
+          return clientUnauthorizeHandler(router, updateUser);
+        }
+        return toast.error("Error fetching address", {
           toastId: "errorAddress",
           autoClose: 1500,
         });
@@ -101,15 +110,14 @@ const RegisterShop = () => {
 
   const getListCourier = async () => {
     try {
-      const res = await API.get("/accounts/couriers", {
-        headers: {
-          Authorization: `Bearer ${getCookie("accessToken")}`,
-        },
-      });
+      const res = await API.get("/accounts/couriers");
       setListCourier((res.data as IAPIResponse<ICourier[]>).data);
     } catch (e) {
       if (axios.isAxiosError(e)) {
-        toast.error("Error fetching couriers", {
+        if (e.response?.status === 401) {
+          return clientUnauthorizeHandler(router, updateUser);
+        }
+        return toast.error("Error fetching couriers", {
           toastId: "errorCourier",
           autoClose: 1500,
         });
@@ -128,7 +136,7 @@ const RegisterShop = () => {
       <Navbar />
 
       <div className="flex h-screen justify-center items-center">
-        {listAddress?.length !== 0 ? (
+        {listAddress?.length === 0 ? (
           <div>
             <h1 className="text-xl">
               Please complete your profile and address first

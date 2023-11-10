@@ -10,10 +10,16 @@ import { IAPIResponse, IAPIWalletResponse } from "@/interfaces/api_interface";
 import Modal from "@/components/Modal";
 import PinCode from "@/components/PinCode";
 import { GetServerSidePropsContext, InferGetServerSidePropsType } from "next";
-import { currencyConverter } from "@/utils/utils";
+import {
+  checkAuthSSR,
+  clientUnauthorizeHandler,
+  currencyConverter,
+  setAuthCookie,
+} from "@/utils/utils";
 import { useRouter } from "next/router";
 import { getCookie } from "cookies-next";
 import { IWalletTransaction } from "@/interfaces/wallet_interface";
+import { useUserStore } from "@/store/userStore";
 
 interface IActivateWalletProps {
   onOpenDialog: (content: JSX.Element) => void;
@@ -27,6 +33,7 @@ interface IWalletDetailProps {
 
 const Wallet = ({
   wallet,
+  auth,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   const [isModal, setIsModal] = useState<boolean>(false);
   const [modalContent, setModalContent] = useState<JSX.Element>();
@@ -38,6 +45,12 @@ const Wallet = ({
       </div>
     </ProfileLayout>;
   }
+
+  useEffect(() => {
+    if (auth !== undefined || auth !== null) {
+      setAuthCookie(auth!);
+    }
+  }, []);
 
   return (
     <>
@@ -74,21 +87,15 @@ interface ITopupWalletProps {
 
 const TopupWalletModal = ({ onBalanceChange }: ITopupWalletProps) => {
   const [amount, setAmount] = useState<string>("");
+  const router = useRouter();
+  const { updateUser } = useUserStore();
 
   const topupHandler = () => {
     try {
       toast.promise(
-        API.post(
-          "/accounts/wallets/topup",
-          {
-            amount: amount,
-          },
-          {
-            headers: {
-              Authorization: `Bearer ${getCookie("accessToken")}`,
-            },
-          }
-        ),
+        API.post("/accounts/wallets/topup", {
+          amount: amount,
+        }),
         {
           pending: "Loading",
           success: {
@@ -112,6 +119,9 @@ const TopupWalletModal = ({ onBalanceChange }: ITopupWalletProps) => {
       );
     } catch (e) {
       if (axios.isAxiosError(e)) {
+        if (e.response?.status === 401) {
+          return clientUnauthorizeHandler(router, updateUser);
+        }
         return toast.error(e.message, {
           autoClose: 1500,
         });
@@ -158,22 +168,15 @@ const TopupWalletModal = ({ onBalanceChange }: ITopupWalletProps) => {
 
 const ChangePinModal = () => {
   const router = useRouter();
+  const { updateUser } = useUserStore();
   const [isValid, setIsValid] = useState<boolean>(false);
   const [password, setPassword] = useState<string>("");
   const passwordValidation = () => {
     try {
       toast.promise(
-        API.post(
-          "/accounts/check-password",
-          {
-            password: "123",
-          },
-          {
-            headers: {
-              Authorization: `Bearer ${getCookie("accessToken")}`,
-            },
-          }
-        ),
+        API.post("/accounts/check-password", {
+          password: "123",
+        }),
         {
           pending: "Loading",
           success: {
@@ -195,6 +198,9 @@ const ChangePinModal = () => {
       );
     } catch (e) {
       if (axios.isAxiosError(e)) {
+        if (e.response?.status === 401) {
+          return clientUnauthorizeHandler(router, updateUser);
+        }
         return toast.error(e.message, {
           autoClose: 1500,
         });
@@ -211,17 +217,9 @@ const ChangePinModal = () => {
 
     try {
       toast.promise(
-        API.put(
-          "/accounts/wallets/change-pin",
-          {
-            wallet_new_pin: pin,
-          },
-          {
-            headers: {
-              Authorization: `Bearer ${getCookie("accessToken")}`,
-            },
-          }
-        ),
+        API.put("/accounts/wallets/change-pin", {
+          wallet_new_pin: pin,
+        }),
         {
           pending: "Loading",
           success: {
@@ -244,6 +242,9 @@ const ChangePinModal = () => {
       );
     } catch (e) {
       if (axios.isAxiosError(e)) {
+        if (e.response?.status === 401) {
+          return clientUnauthorizeHandler(router, updateUser);
+        }
         return toast.error(e.message, {
           autoClose: 1500,
         });
@@ -295,21 +296,14 @@ const ChangePinModal = () => {
 
 const ActivateWalletModal = () => {
   const router = useRouter();
+  const { updateUser } = useUserStore();
 
   const activateWalletHandler = (pin: string) => {
     try {
       toast.promise(
-        API.post(
-          "/accounts/wallets/activate",
-          {
-            wallet_pin: pin.toString(),
-          },
-          {
-            headers: {
-              Authorization: `Bearer ${getCookie("accessToken")}`,
-            },
-          }
-        ),
+        API.post("/accounts/wallets/activate", {
+          wallet_pin: pin.toString(),
+        }),
         {
           pending: "Loading",
           error: {
@@ -337,7 +331,10 @@ const ActivateWalletModal = () => {
       });
     } catch (e) {
       if (axios.isAxiosError(e)) {
-        toast.error(e.message, {
+        if (e.response?.status === 401) {
+          return clientUnauthorizeHandler(router, updateUser);
+        }
+        return toast.error(e.message, {
           autoClose: 1500,
         });
       }
@@ -382,6 +379,8 @@ const ActivateWallet = ({ onOpenDialog }: IActivateWalletProps) => {
 };
 
 const WalletDetail = ({ wallet, onOpenDialog }: IWalletDetailProps) => {
+  const router = useRouter();
+  const { updateUser } = useUserStore();
   const [data, setData] = useState<IAPIWalletResponse>(wallet);
   const [transactionHistoryRes, setTransactionHistoryRes] =
     useState<IAPIResponse<IWalletTransaction[]>>();
@@ -394,9 +393,6 @@ const WalletDetail = ({ wallet, onOpenDialog }: IWalletDetailProps) => {
         API.get("/accounts/wallets/histories", {
           params: {
             page: page,
-          },
-          headers: {
-            Authorization: `Bearer ${getCookie("accessToken")}`,
           },
         }),
         {
@@ -418,6 +414,9 @@ const WalletDetail = ({ wallet, onOpenDialog }: IWalletDetailProps) => {
       }
     } catch (e) {
       if (axios.isAxiosError(e)) {
+        if (e.response?.status === 401) {
+          return clientUnauthorizeHandler(router, updateUser);
+        }
         return toast.error(e.message, {
           autoClose: 1500,
         });
@@ -589,14 +588,17 @@ export const getServerSideProps = async (
   context: GetServerSidePropsContext
 ) => {
   let data: IAPIWalletResponse | undefined;
+  let auth = await checkAuthSSR(context);
 
-  let accessToken = context.req.cookies["accessToken"];
+  if (auth === null) {
+    context.res.writeHead(301, { location: "/login" });
+    context.res.end();
+  }
 
   try {
     const res = await API.get("/accounts/wallets", {
       headers: {
-        Authorization: `Bearer ${accessToken}`,
-        "Content-Type": "application/json",
+        Authorization: `Bearer ${auth?.access_token}`,
       },
     });
     data = (res.data as IAPIResponse<IAPIWalletResponse>).data;
@@ -609,6 +611,7 @@ export const getServerSideProps = async (
   return {
     props: {
       wallet: data,
+      auth: auth,
     },
   };
 };
