@@ -1,16 +1,14 @@
 import Footer from "@/components/Footer";
-import Input from "@/components/Input";
 import Navbar from "@/components/Navbar";
 import ProductCard from "@/components/ProductCard";
 import { IAPIResponse } from "@/interfaces/api_interface";
 import { API } from "@/network";
-import { clientUnauthorizeHandler, currencyConverter } from "@/utils/utils";
+import { clientUnauthorizeHandler } from "@/utils/utils";
 import axios from "axios";
-import { getCookie } from "cookies-next";
 import Button from "@/components/Button";
-import React, { MouseEventHandler, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
-import { FaTrash } from "react-icons/fa";
+import { FaRegTrashAlt } from "react-icons/fa";
 import { useRouter } from "next/router";
 import { useUserStore } from "@/store/userStore";
 
@@ -143,11 +141,11 @@ function Index() {
           {wishlist?.data?.map((product) => (
             <div
               key={product.id}
-              className="hover:border hover:border-blue-900 rounded-md"
+              className="hover:border hover:border-[#364968] rounded-md"
             >
-              <FaTrash
+              <FaRegTrashAlt
                 size={25}
-                className="s text-orange-500 absolute z-10 justify-end text-center items-end flex cursor-pointer"
+                className="s text-[#e09664] absolute z-10 flex cursor-pointer opacity-70 p-1"
                 // onClick={() => deleteWishlist(product.id)}
                 onClick={async () => {
                   try {
@@ -163,11 +161,10 @@ function Index() {
 
               <ProductCard
                 image={product.picture_url}
-                price={currencyConverter(parseInt(product.price))}
+                price={product.price}
                 showStar={false}
                 order={product.total_sold}
                 title={product.name}
-                place={product.district}
                 selected={selectedIds.includes(product.id)}
                 onSelect={() => toggleSelection(product.id)}
               />
