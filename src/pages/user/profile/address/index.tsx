@@ -612,42 +612,6 @@ const AddressPage = () => {
     getAddressData();
   }, []);
 
-  const reset = async (id: number, sendData: any) => {
-    try {
-      toast.promise(
-        API.put(`/accounts/address/${id}`, sendData),
-        {
-          pending: "Updating default address...",
-          success: {
-            render() {
-              getAddressData();
-              return "Default address updated!";
-            },
-          },
-          error: {
-            render({ data }) {
-              if (axios.isAxiosError(data)) {
-                return `${(data.response?.data as IAPIResponse).message}`;
-              }
-            },
-          },
-        },
-        {
-          autoClose: 1500,
-        }
-      );
-    } catch (e) {
-      if (axios.isAxiosError(e)) {
-        if (e.response?.status === 401) {
-          return clientUnauthorizeHandler(router, updateUser);
-        }
-        return toast.error(e.message, {
-          autoClose: 1500,
-        });
-      }
-    }
-  };
-
   const setNewDefault = async (id: number) => {
     const currentData = addressData;
     currentData.forEach((data) => (data.is_buyer_default = false));
@@ -672,9 +636,10 @@ const AddressPage = () => {
           kelurahan: currentData[i].kelurahan,
           zip_code: currentData[i].zip_code,
           detail: currentData[i].detail,
-          is_buyer_default: false,
+          is_buyer_default: true,
           is_seller_default: currentData[i].is_seller_default,
         };
+        break;
       }
     }
 
