@@ -227,7 +227,7 @@ const AddAddressModal = (props: IAddAddressModal) => {
   };
 
   return (
-    <div className="bg-white p-5 rounded-md md:w-[1000px] h-[600px] md:overflow-y-hidden w-fit overflow-y-scroll">
+    <div className="bg-white p-5 rounded-md md:w-[1000px] h-[500px] md:overflow-y-hidden w-fit overflow-y-scroll">
       <div className="pb-3">
         <h1 className="text-[20px]">Add New Address</h1>
       </div>
@@ -419,7 +419,7 @@ const EditAddressModal = (props: IEditAddressModal) => {
   };
 
   return (
-    <div className="bg-white p-5 rounded-md md:w-[1000px] h-[600px] md:overflow-y-hidden w-fit overflow-y-scroll">
+    <div className="bg-white p-5 rounded-md md:w-[1000px] h-[500px] md:overflow-y-hidden w-fit overflow-y-scroll">
       <div className="pb-3">
         <h1 className="text-[20px]">Edit Address</h1>
       </div>
@@ -578,6 +578,22 @@ const AddressPage = () => {
   const getAddressData = async () => {
     try {
       const response = await API.get("/accounts/address");
+
+      let defaultIndex = 0;
+
+      for (let i = 0; i < response.data.data.length; i++) {
+        if (response.data.data[i].is_buyer_default) {
+          defaultIndex = i;
+          break;
+        }
+      }
+
+      if (defaultIndex !== 0) {
+        [response.data.data[0], response.data.data[defaultIndex]] = [
+          response.data.data[defaultIndex],
+          response.data.data[0],
+        ];
+      }
 
       setAddressData(response.data.data);
     } catch (e) {
