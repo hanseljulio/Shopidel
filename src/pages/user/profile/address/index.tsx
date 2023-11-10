@@ -26,6 +26,7 @@ interface IIndividualAddressProps {
   setNewDefault: (id: number) => void;
   showDeleteModal: () => void;
   setIdToDelete: (id: number) => void;
+  showEditModal: () => void;
 }
 
 const IndividualAddress = (props: IIndividualAddressProps) => {
@@ -41,7 +42,13 @@ const IndividualAddress = (props: IIndividualAddressProps) => {
         </div>
         <div className="text-right flex flex-col gap-3 mobile:items-center mobile:gap-6">
           <div className="flex justify-end gap-2 px-2">
-            <h1 className="text-blue-600 hover:cursor-pointer hover:underline">
+            <h1
+              onClick={() => {
+                props.setIdToDelete(props.id);
+                props.showEditModal();
+              }}
+              className="text-blue-600 hover:cursor-pointer hover:underline"
+            >
               Edit
             </h1>
             <h1>|</h1>
@@ -339,6 +346,23 @@ const EditAddressModal = (props: IEditAddressModal) => {
     }
   };
 
+  // Must receive data here
+  const getCurrentAddressData = async () => {
+    try {
+      const response = await API.get(
+        `/accounts/address/${props.currentAddressId}`
+      );
+
+      // Set the province and district id from here
+      setDistrictData(response.data.data.districts);
+      setCurrentSelectedDistrictId(
+        response.data.data.districts[districtIndex].id
+      );
+    } catch (e) {
+      console.log(e);
+    }
+  };
+
   useEffect(() => {
     getProvinceData();
   }, []);
@@ -388,7 +412,7 @@ const EditAddressModal = (props: IEditAddressModal) => {
   return (
     <div className="bg-white p-5 rounded-md w-[1000px] h-[600px] mobile:w-fit mobile:overflow-y-scroll">
       <div className="pb-3">
-        <h1 className="text-[20px]">Add New Address</h1>
+        <h1 className="text-[20px]">Edit Address</h1>
       </div>
 
       <div className="pt-6">
@@ -397,6 +421,13 @@ const EditAddressModal = (props: IEditAddressModal) => {
           type="text"
           name="address"
           width="w-full "
+          value={currentAddressData.detail}
+          onChange={(e) =>
+            setCurrentAddressData({
+              ...currentAddressData,
+              detail: e.target.value,
+            })
+          }
           required
         />
         <div className="flex justify-between pt-6 mobile:flex-col mobile:gap-6">
@@ -418,8 +449,15 @@ const EditAddressModal = (props: IEditAddressModal) => {
           <Input
             label="Sub-district"
             type="text"
+            value={currentAddressData.sub_district}
             name="subdistrict"
             width="basis-[33%] mobile:w-full"
+            onChange={(e) =>
+              setCurrentAddressData({
+                ...currentAddressData,
+                sub_district: e.target.value,
+              })
+            }
             required
           />
           <Input
@@ -427,20 +465,34 @@ const EditAddressModal = (props: IEditAddressModal) => {
             type="text"
             name="kelurahan"
             width="basis-[33%] mobile:w-full"
+            value={currentAddressData.kelurahan}
+            onChange={(e) =>
+              setCurrentAddressData({
+                ...currentAddressData,
+                kelurahan: e.target.value,
+              })
+            }
             required
           />
           <Input
             label="Zip Code"
             type="text"
             name="zipcode"
+            value={currentAddressData.zip_code}
             width="basis-[33%] mobile:w-full"
+            onChange={(e) =>
+              setCurrentAddressData({
+                ...currentAddressData,
+                zip_code: e.target.value,
+              })
+            }
             required
           />
         </div>
       </div>
       <div className="flex justify-center mt-[50px]">
         <Button
-          text="Add new address"
+          text="Edit address"
           onClick={submit}
           styling="bg-[#364968] p-3 rounded-[8px] w-[200px] text-white my-4"
         />
@@ -489,6 +541,9 @@ const AddressPage = () => {
     useState<boolean>(false);
 
   const [showDeleteAddressModal, setShowDeleteAddressModal] =
+    useState<boolean>(false);
+
+  const [showEditAddressModal, setShowEditAddressModal] =
     useState<boolean>(false);
 
   const [addressToDelete, setAddressToDelete] = useState<number>(0);
@@ -610,6 +665,18 @@ const AddressPage = () => {
 
   return (
     <>
+      {showEditAddressModal && (
+        <Modal
+          content={
+            <EditAddressModal
+              currentAddressId={addressToDelete}
+              closeFunction={() => setShowEditAddressModal(false)}
+            />
+          }
+          onClose={() => setShowEditAddressModal(false)}
+        />
+      )}
+
       {showDeleteAddressModal && (
         <Modal
           content={
@@ -659,6 +726,7 @@ const AddressPage = () => {
                 default={data.is_buyer_default}
                 setNewDefault={setNewDefault}
                 showDeleteModal={() => setShowDeleteAddressModal(true)}
+                showEditModal={() => setShowEditAddressModal(true)}
                 setIdToDelete={(addressId) => setAddressToDelete(addressId)}
               />
             ))}
