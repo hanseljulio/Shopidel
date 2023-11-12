@@ -69,12 +69,10 @@ const ProductCard = ({
           {currencyConverter(parseInt(price))}
         </p>
 
-        {showStar === true && (
-          <div className="flex justify-between text-xs md:text-sm pt-2">
-            <p> {place} </p>
-            <p className="text-gray-500 "> {`${order} sold`}</p>
-          </div>
-        )}
+        <div className="flex justify-between text-xs md:text-sm pt-2">
+          {showStar === true && <p> {place} </p>}
+          <p className="text-gray-500 "> {`${order} sold`}</p>
+        </div>
       </div>
     </div>
   );

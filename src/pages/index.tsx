@@ -1,43 +1,49 @@
 import Navbar from "../components/Navbar";
 import Footer from "@/components/Footer";
 import ProductCard from "@/components/ProductCard";
-import Category from "@/components/Category";
 import CarouselHome from "@/components/Carousel";
-import { GetServerSidePropsContext } from "next";
 import { IAPIProductsResponse, IAPIResponse } from "@/interfaces/api_interface";
 import { API } from "@/network";
-import axios from "axios";
+import { useEffect, useState } from "react";
+import Button from "@/components/Button";
 
 interface IProductProps {
-  products: IAPIProductsResponse[]; // Correct the prop name to match what's returned from getServerSideProps
+  products: IAPIProductsResponse[];
 }
 
-export const getServerSideProps = async (
-  context: GetServerSidePropsContext
-) => {
-  let data: IAPIProductsResponse[] | undefined;
+export default function Home() {
+  const [productList, setProductList] =
+    useState<IAPIResponse<IAPIProductsResponse[]>>();
+  const [paginationNumber, setPaginationNumber] = useState<number[]>([]);
+  const [page, setPage] = useState<number>(1);
 
-  try {
-    const res = await API.get(`/products`);
-    data = (res.data as IAPIResponse<IAPIProductsResponse[]>).data;
-    console.log(data, "dataa");
-    console.log("masu");
-    console.log("heheh");
-  } catch (e) {
-    if (axios.isAxiosError(e)) {
-      console.log(e.response?.data);
-      console.log("errrorrrrr");
+  const getProduct = async () => {
+    try {
+      const res = await API.get(`/products?page=${page}&sortBy=price&sort=asc`);
+      console.log(res);
+      const data = res.data as IAPIResponse<IAPIProductsResponse[]>;
+      setProductList(data);
+      console.log(data.data);
+
+      if (data.pagination?.total_page! <= 5) {
+        return setPaginationNumber(
+          Array.from(Array(data.pagination?.total_page).keys())
+        );
+      }
+
+      if (paginationNumber.length === 0) {
+        return setPaginationNumber(Array.from(Array(5).keys()));
+      }
+      console.log("betul");
+    } catch (e) {
+      console.log("salah");
     }
-  }
-
-  return {
-    props: {
-      products: data,
-    },
   };
-};
 
-export default function Home({ products }: IProductProps) {
+  useEffect(() => {
+    getProduct();
+  }, [page]);
+
   return (
     <div className="bg-gray-100">
       <Navbar />
@@ -55,17 +61,71 @@ export default function Home({ products }: IProductProps) {
           </p>
         </div>
         <div className="justify-between gap-x-4 gap-y-4 grid grid-cols-2 md:grid-cols-5">
-          {products.map((product) => (
+          {productList?.data?.map((product) => (
             <ProductCard
               key={product.ID}
-              image={product.PictureURL || ""}
-              price={product.Price || ""}
+              image={product.PictureURL}
+              price={product.Price}
               showStar={false}
-              title={product.Name || ""}
-              place={product.District || ""}
-              order={product.TotalSold || 0}
+              title={product.Name}
+              place={product.District}
+              order={product.TotalSold}
             />
           ))}
+        </div>
+      </div>
+      <div className="text-center my-10 justify-center flex">
+        <div className="flex self-end mt-2">
+          {productList?.pagination?.current_page !== 1 && (
+            <button
+              onClick={() => {
+                if (
+                  productList?.pagination?.current_page ===
+                  paginationNumber[0] + 1
+                ) {
+                  setPaginationNumber(
+                    Array.from(paginationNumber, (x) => x - 1)
+                  );
+                }
+                setPage(productList?.pagination?.current_page! - 1);
+              }}
+              className="px-2 py-1 border text-sm rounded-bl-md rounded-tl-md"
+            >
+              Prev
+            </button>
+          )}
+          {paginationNumber.map((i) => (
+            <Button
+              key={i}
+              text={(i + 1).toString()}
+              styling={`px-3 py-1 border ${
+                productList?.pagination?.current_page === i + 1 &&
+                "bg-slate-200 "
+              }`}
+              onClick={() => setPage(i + 1)}
+            />
+          ))}
+          {productList?.pagination?.current_page !==
+            productList?.pagination?.total_page && (
+            <button
+              onClick={() => {
+                if (
+                  paginationNumber[paginationNumber.length - 1] <
+                  productList?.pagination?.current_page!
+                ) {
+                  paginationNumber.shift();
+                  paginationNumber.push(
+                    paginationNumber[paginationNumber.length - 1] + 1
+                  );
+                  setPaginationNumber(paginationNumber);
+                }
+                setPage(productList?.pagination?.current_page! + 1);
+              }}
+              className="px-2 py-1 border text-sm rounded-br-md rounded-tr-md"
+            >
+              Next
+            </button>
+          )}
         </div>
       </div>
       <Footer />
