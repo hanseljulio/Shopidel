@@ -7,12 +7,14 @@ import { API } from "@/network";
 import { useEffect, useState } from "react";
 import Button from "@/components/Button";
 import Category from "@/components/Category";
+import { useRouter } from "next/router";
 
 interface IProductProps {
   products: IAPIProductsResponse[];
 }
 
 export default function Home() {
+  const router = useRouter();
   const [productList, setProductList] = useState<
     IAPIResponse<IAPIProductsResponse[]>
   >({});
@@ -120,6 +122,7 @@ export default function Home() {
         <div className="justify-between gap-x-4 gap-y-4 grid grid-cols-2 md:grid-cols-5">
           {productList.data?.map((product) => (
             <ProductCard
+              onClick={() => router.push(`/${product.id}`)}
               key={product.district}
               image={product.picture_url}
               price={product.price}
