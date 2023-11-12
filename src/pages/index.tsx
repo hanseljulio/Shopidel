@@ -25,9 +25,6 @@ export default function Home() {
 
       const data = res.data as IAPIResponse<IAPIProductsResponse[]>;
 
-      console.log("Received data:", data);
-      console.log("log lagi", data.data);
-
       setProductList(data!);
     } catch (e) {
       console.error("Error fetching data:", e);
@@ -37,8 +34,6 @@ export default function Home() {
   useEffect(() => {
     getProduct();
   }, []);
-
-  console.log(productList, "jajajja");
 
   return (
     <div className="bg-gray-100">
