@@ -12,37 +12,40 @@ interface IProductProps {
 }
 
 export default function Home() {
-  const [productList, setProductList] =
-    useState<IAPIResponse<IAPIProductsResponse[]>>();
+  const [productList, setProductList] = useState<
+    IAPIResponse<IAPIProductsResponse[]>
+  >({});
+
   const [paginationNumber, setPaginationNumber] = useState<number[]>([]);
   const [page, setPage] = useState<number>(1);
 
   const getProduct = async () => {
     try {
-      const res = await API.get(`/products?page=${page}&sortBy=price&sort=asc`);
-      console.log(res);
+      const res = await API.get(
+        `/products?page=${page}&sortBy=price&sort=asc&limit=18`
+      );
+
       const data = res.data as IAPIResponse<IAPIProductsResponse[]>;
+      console.log("Received data:", data);
       setProductList(data);
-      console.log(data.data);
 
       if (data.pagination?.total_page! <= 5) {
-        return setPaginationNumber(
+        setPaginationNumber(
           Array.from(Array(data.pagination?.total_page).keys())
         );
+      } else if (paginationNumber.length === 0) {
+        setPaginationNumber(Array.from(Array(5).keys()));
       }
-
-      if (paginationNumber.length === 0) {
-        return setPaginationNumber(Array.from(Array(5).keys()));
-      }
-      console.log("betul");
     } catch (e) {
-      console.log("salah");
+      console.error("Error fetching data:", e);
     }
   };
 
   useEffect(() => {
     getProduct();
   }, [page]);
+
+  console.log(productList, "jajajja");
 
   return (
     <div className="bg-gray-100">
@@ -54,14 +57,13 @@ export default function Home() {
             Category
           </p>
         </div>
-        {/* category */}
         <div>
           <p className="text-lg md:text-xl mt-14 mb-3 py-2 font-semibold text-center text-[#29374e]">
             Recommendation
           </p>
         </div>
         <div className="justify-between gap-x-4 gap-y-4 grid grid-cols-2 md:grid-cols-5">
-          {productList?.data?.map((product) => (
+          {productList.data?.map((product) => (
             <ProductCard
               key={product.ID}
               image={product.PictureURL}
@@ -79,15 +81,7 @@ export default function Home() {
           {productList?.pagination?.current_page !== 1 && (
             <button
               onClick={() => {
-                if (
-                  productList?.pagination?.current_page ===
-                  paginationNumber[0] + 1
-                ) {
-                  setPaginationNumber(
-                    Array.from(paginationNumber, (x) => x - 1)
-                  );
-                }
-                setPage(productList?.pagination?.current_page! - 1);
+                setPage((prevPage) => prevPage - 1);
               }}
               className="px-2 py-1 border text-sm rounded-bl-md rounded-tl-md"
             >
@@ -109,17 +103,7 @@ export default function Home() {
             productList?.pagination?.total_page && (
             <button
               onClick={() => {
-                if (
-                  paginationNumber[paginationNumber.length - 1] <
-                  productList?.pagination?.current_page!
-                ) {
-                  paginationNumber.shift();
-                  paginationNumber.push(
-                    paginationNumber[paginationNumber.length - 1] + 1
-                  );
-                  setPaginationNumber(paginationNumber);
-                }
-                setPage(productList?.pagination?.current_page! + 1);
+                setPage((prevPage) => prevPage + 1);
               }}
               className="px-2 py-1 border text-sm rounded-br-md rounded-tr-md"
             >
