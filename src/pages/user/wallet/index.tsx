@@ -297,12 +297,14 @@ const ChangePinModal = () => {
 const ActivateWalletModal = () => {
   const router = useRouter();
   const { updateUser } = useUserStore();
+  const [isConfirm, setIsConfirm] = useState<boolean>(false);
+  const [pin, setPin] = useState<string>("");
 
-  const activateWalletHandler = (pin: string) => {
+  const activateWalletHandler = () => {
     try {
       toast.promise(
         API.post("/accounts/wallets/activate", {
-          wallet_pin: pin.toString(),
+          wallet_pin: pin,
         }),
         {
           pending: "Loading",
@@ -349,9 +351,30 @@ const ActivateWalletModal = () => {
         height={150}
         alt="activate_wallet_pin"
       />
-      <h1 className="mt-5 font-bold">Create 6 digit PIN</h1>
+      <h1 className="mt-5 font-bold">
+        {isConfirm ? "Confirm your pin" : "Create your pin"}
+      </h1>
       <div className="mt-3">
-        <PinCode onSubmit={(pin) => activateWalletHandler(pin)} />
+        {isConfirm ? (
+          <PinCode
+            onSubmit={(confirmPin) => {
+              if (pin !== confirmPin) {
+                toast.error("Pin not match", {
+                  autoClose: 1500,
+                });
+                return setIsConfirm(false);
+              }
+              return activateWalletHandler();
+            }}
+          />
+        ) : (
+          <PinCode
+            onSubmit={(pin) => {
+              setPin(pin);
+              setIsConfirm(true);
+            }}
+          />
+        )}
       </div>
     </div>
   );
