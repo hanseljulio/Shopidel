@@ -37,13 +37,13 @@ export interface IAPILoginResponse {
 }
 
 export interface IAPIProductsResponse{
-  ID: number,
-  Name: string,
-  District: string,
-  TotalSold: number,
-  Price: string,
-  PictureURL: string,
-  CreatedAt: string,
-  UpdatedAt: string,
-  DeletedAt: string
+  id: number,
+  name: string,
+  district: string,
+  total_sold: number,
+  price: string,
+  picture_url: string,
+  created_at: string,
+  updated_at: string,
+  deleted_at: string
 }

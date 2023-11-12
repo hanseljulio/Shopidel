@@ -16,26 +16,16 @@ export default function Home() {
     IAPIResponse<IAPIProductsResponse[]>
   >({});
 
-  const [paginationNumber, setPaginationNumber] = useState<number[]>([]);
-  const [page, setPage] = useState<number>(1);
-
   const getProduct = async () => {
     try {
-      const res = await API.get(
-        `/products?page=${page}&sortBy=price&sort=asc&limit=18`
-      );
+      const res = await API.get(`/products?limit=18`);
 
       const data = res.data as IAPIResponse<IAPIProductsResponse[]>;
-      console.log("Received data:", data);
-      setProductList(data);
 
-      if (data.pagination?.total_page! <= 5) {
-        setPaginationNumber(
-          Array.from(Array(data.pagination?.total_page).keys())
-        );
-      } else if (paginationNumber.length === 0) {
-        setPaginationNumber(Array.from(Array(5).keys()));
-      }
+      console.log("Received data:", data);
+      console.log("log lagi", data.data);
+
+      setProductList(data!);
     } catch (e) {
       console.error("Error fetching data:", e);
     }
@@ -43,7 +33,7 @@ export default function Home() {
 
   useEffect(() => {
     getProduct();
-  }, [page]);
+  }, []);
 
   console.log(productList, "jajajja");
 
@@ -65,53 +55,18 @@ export default function Home() {
         <div className="justify-between gap-x-4 gap-y-4 grid grid-cols-2 md:grid-cols-5">
           {productList.data?.map((product) => (
             <ProductCard
-              key={product.ID}
-              image={product.PictureURL}
-              price={product.Price}
+              key={product.district}
+              image={product.picture_url}
+              price={product.price}
               showStar={false}
-              title={product.Name}
-              place={product.District}
-              order={product.TotalSold}
+              title={product.name}
+              place={product.district}
+              order={product.total_sold}
             />
           ))}
         </div>
       </div>
-      <div className="text-center my-10 justify-center flex">
-        <div className="flex self-end mt-2">
-          {productList?.pagination?.current_page !== 1 && (
-            <button
-              onClick={() => {
-                setPage((prevPage) => prevPage - 1);
-              }}
-              className="px-2 py-1 border text-sm rounded-bl-md rounded-tl-md"
-            >
-              Prev
-            </button>
-          )}
-          {paginationNumber.map((i) => (
-            <Button
-              key={i}
-              text={(i + 1).toString()}
-              styling={`px-3 py-1 border ${
-                productList?.pagination?.current_page === i + 1 &&
-                "bg-slate-200 "
-              }`}
-              onClick={() => setPage(i + 1)}
-            />
-          ))}
-          {productList?.pagination?.current_page !==
-            productList?.pagination?.total_page && (
-            <button
-              onClick={() => {
-                setPage((prevPage) => prevPage + 1);
-              }}
-              className="px-2 py-1 border text-sm rounded-br-md rounded-tr-md"
-            >
-              Next
-            </button>
-          )}
-        </div>
-      </div>
+
       <Footer />
     </div>
   );
