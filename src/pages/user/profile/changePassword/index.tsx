@@ -39,16 +39,16 @@ const UserChangePassword = () => {
     <div>
       <ProfileLayout currentPage="Change Password">
         <div className="w-fit mx-auto mt-12">
-          <div className="edit-profile-header pb-3 mobile:text-center">
+          <div className="edit-profile-header pb-3 md:text-left text-center">
             <h1 className="text-[30px] pb-8">Change Password</h1>
             <form action="" onSubmit={submit}>
-              <div className="form-section-wrapper flex gap-[150px] mobile:gap-[20px] mobile:flex-col mobile:items-center">
-                <div className="form-section-div  mobile:m-0">
+              <div className="form-section-wrapper flex md:gap-[150px] md:flex-row gap-[20px] flex-col md:items-baseline items-center">
+                <div className="form-section-div  m-0">
                   <div className="old-password-div pb-[30px]">
                     <Input
                       label="Old Password"
                       labelStyle="mt-2"
-                      styling="flex items-center gap-[57px] mobile:flex-col mobile:gap-2 mobile:items-start"
+                      styling="flex md:items-center md:gap-[57px] md:flex-row flex-col gap-2 items-start"
                       width="w-[250px]"
                       type="password"
                       name="oldPassword"
@@ -60,7 +60,7 @@ const UserChangePassword = () => {
                     <Input
                       label="New Password"
                       labelStyle="mt-2"
-                      styling="flex items-center gap-[50px] mobile:flex-col mobile:gap-2 mobile:items-start"
+                      styling="flex md:items-center md:gap-[50px] md:flex-row flex-col gap-2 items-start"
                       width="w-[250px]"
                       type="password"
                       name="newPassword"
@@ -72,14 +72,14 @@ const UserChangePassword = () => {
                     <Input
                       label="Confirm Password"
                       labelStyle="mt-2"
-                      styling="flex items-center gap-[24px] mobile:flex-col mobile:gap-2 mobile:items-start"
+                      styling="flex md:items-center md:gap-[24px] md:flex-row flex-col gap-2 items-start"
                       width="w-[250px]"
                       type="password"
                       name="confirmPassword"
                       onChange={(e) => setConfirmPassword(e.target.value)}
                       required
                     />
-                    <div className="error-section mobile:w-[250px]">
+                    <div className="error-section md:w-full w-[250px]">
                       {allEmpty && (
                         <p className="text-red-500 py-1 px-4 bg-red-200 my-3">
                           It&apos;s all empty! Fill in your old and new
@@ -120,10 +120,10 @@ const UserChangePassword = () => {
                   </div>
                 </div>
               </div>
-              <div className="submit-btn mobile:text-center mobile:py-[50px] ml-[50px] mobile:mx-auto">
+              <div className="submit-btn md:text-left flex justify-center text-center md:py-0 py-[50px] md:ml-[50px] md:m-0 mx-auto">
                 <Button
                   text="Update Password"
-                  styling="bg-[#364968] p-3 rounded-[8px] w-[300px] text-white my-4"
+                  styling="bg-[#364968] p-3 rounded-[8px] md:w-[300px] w-full text-white my-4"
                   disabled={
                     allEmpty ||
                     allTheSame ||

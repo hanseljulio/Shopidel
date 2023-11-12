@@ -22,7 +22,7 @@ const ProfileLayout = ({ children, currentPage }: IProfileLayout) => {
           <div className=" md:hidden">
             <MobileUserProfileSidebar currentPage={currentPage} />
           </div>
-          <div className="w-full mobile:mx-auto ">{children}</div>
+          <div className="w-full md:mx-0 mx-auto ">{children}</div>
         </div>
       </div>
     </div>
