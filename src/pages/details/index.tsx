@@ -116,22 +116,43 @@ export const getServerSideProps = async (
 ) => {
   let data: IAPIProductDetail | undefined;
 
-  let accessToken = context.req.cookies["accessToken"];
-
   try {
-    const res = await API.get(`/products/2`, {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-        "Content-Type": "application/json",
-      },
-    });
+    const res = await API.get("/products/5");
     data = (res.data as IAPIResponse<IAPIProductDetail>).data;
-    console.log(data, "dataa");
   } catch (e) {
     if (axios.isAxiosError(e)) {
-      console.log(e.response?.data);
-      console.log("errrorrrrr");
+      console.error(e.response?.data);
     }
+    data = {
+      id: 0,
+      name: "",
+      description: "",
+      stars: "",
+      sold: 0,
+      available: 0,
+      images: null,
+      variant_options: [
+        {
+          variant_option_name: "",
+          childs: [],
+        },
+      ],
+      variants: [
+        {
+          variant_id: 0,
+          variant_name: "",
+          selections: [
+            {
+              selection_variant_name: "",
+              selection_name: "",
+            },
+          ],
+          stock: 0,
+          price: "",
+        },
+      ],
+      is_favorite: false,
+    };
   }
 
   return {
@@ -156,52 +177,8 @@ const ProductDetail = ({ product }: IProductDetailProps) => {
   const [currentStock, setCurrentStock] = useState<number>(0);
   const [isFavorite, setIsFavorite] = useState(false);
 
-  const handleFavoriteClick = async () => {
-    let data: Pick<IAPIProductDetail, "id"> = {
-      id: product.id,
-    };
-
-    if (isFavorite) {
-      try {
-        await API.post(
-          `/products/${product.id}/favorites/add-favorite
-        `,
-          {
-            headers: {
-              Authorization: `Bearer ${getCookie("accessToken")}`,
-            },
-          }
-        );
-        console.log("delete");
-
-        setIsFavorite(false);
-      } catch (error) {
-        console.error("Error removing from wishlist:", error);
-      }
-    } else {
-      try {
-        const response = await API.post(
-          `/products/${product.id}/favorites/add-favorite`,
-          data,
-          {
-            headers: {
-              Authorization: `Bearer ${getCookie("accessToken")}`,
-            },
-          }
-        );
-
-        console.log("masuk");
-        console.log(response.data);
-
-        setIsFavorite(true);
-      } catch (error) {
-        console.error("Error adding to wishlist:", error);
-      }
-    }
-  };
-
   const calculateSubtotal = () => {
-    const selectedVariant = product.variants.find((variant) => {
+    const selectedVariant = product?.variants.find((variant) => {
       return Object.keys(selectedVariants).every((optionName) => {
         return variant.selections.some((selection) => {
           return (
@@ -308,7 +285,7 @@ const ProductDetail = ({ product }: IProductDetailProps) => {
 
     try {
       const response = await API.post(
-        `products/2/favorites/add-favorite`,
+        `/products/${data.id}/favorites/add-favorite`, // Fix the API endpoint
         favData,
         {
           headers: {
@@ -318,24 +295,29 @@ const ProductDetail = ({ product }: IProductDetailProps) => {
       );
 
       if (response.status === 200) {
-        toast.success("Added to cart", { autoClose: 1500 });
+        toast.success("Added to wishlist", { autoClose: 1500 });
       } else {
-        toast.error("Failed to add to cart", { autoClose: 1500 });
+        toast.error("Failed to add to wishlist", { autoClose: 1500 });
       }
-      console.log("yess");
+      console.log("yes");
 
       console.log(response.data);
     } catch (error) {
       if (axios.isAxiosError(error)) {
         toast.error(error.response?.data.message, { autoClose: 1500 });
       } else {
-        toast.error("An error occurred while adding to cart", {
+        toast.error("An error occurred while adding to wishlist", {
           autoClose: 1500,
         });
       }
-      console.log("nooooo");
+      console.log("no");
     }
   };
+
+  if (product === null) {
+    // Handle the case when product is null, for example, show a loading message or redirect
+    return <div>Loading...</div>;
+  }
 
   return (
     <>
@@ -389,7 +371,7 @@ const ProductDetail = ({ product }: IProductDetailProps) => {
                 })}
               </div>
               <div className="favorite-icon mt-5 text-right">
-                <button onClick={handleFavoriteClick}>
+                <button onClick={() => handleWishlist}>
                   {isFavorite && product.is_favorite === false ? (
                     <div className="flex items-center gap-1">
                       <FaHeart style={{ color: "red" }} />
@@ -421,7 +403,7 @@ const ProductDetail = ({ product }: IProductDetailProps) => {
                 </div>
               </div>
               <div className="flex flex-col gap-y-3 text-sm text-neutral-600">
-                {product.variant_options.map((item, i) => {
+                {product?.variant_options?.map((item, i) => {
                   return (
                     <div key={i} className="flex gap-x-5 items-center">
                       <p>{item.variant_option_name}</p>
@@ -497,22 +479,22 @@ const ProductDetail = ({ product }: IProductDetailProps) => {
             <div className="order-3 md:order-2 description mt-10 md:mt-0 md:w-2/4">
               <div className="spesification">
                 <p className="productTitle text-2xl font-medium pb-3">
-                  {product.name}
+                  {product?.name}
                 </p>
                 <div className="historyProduct flex items-center text-xs pb-3">
-                  <p className="pr-3">{`Sold ${product.sold}`} </p>
+                  <p className="pr-3">{`Sold ${product?.sold}`} </p>
                   <p className="px-3 border-l border-slate-600 flex-row  md:flex flex gap-1 items-center justify-center ">
                     <BsStarFill style={{ color: "#f57b29" }} />
                     <span className="items-center">5</span>
                   </p>
                 </div>
                 <p className="productPrice text-2xl font-semibold text-[#f57b29] py-3">
-                  {currencyConverter(parseInt(product.variants[0].price))}
+                  {currencyConverter(parseInt(product?.variants[0].price))}
                 </p>
               </div>
               <div className="desc pt-5 ">
                 <p className="text-lg font-medium border-b my-4">Description</p>
-                <p className="">{product.description}</p>
+                <p className="">{product?.description}</p>
               </div>
             </div>
           </div>
