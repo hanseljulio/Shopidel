@@ -19,6 +19,8 @@ const PinCode = ({ onSubmit }: IPinCode) => {
     <form
       onSubmit={(e) => {
         e.preventDefault();
+        setPin(Array(6).fill(""));
+        setCurrFocus(0);
         onSubmit(pin.join(""));
       }}
     >
