@@ -45,7 +45,7 @@ const UserProfile = ({
       email: userData?.email,
       full_name: userData?.full_name,
       gender: userData?.gender,
-      phone_number: userData?.phone_number.substring(3),
+      phone_number: userData?.phone_number?.substring(3),
       profile_picture: userData?.profile_picture,
     },
   });
