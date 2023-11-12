@@ -2,7 +2,11 @@ import Dropdown from "@/components/Dropdown";
 import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar";
 import ProductCard from "@/components/ProductCard";
-import { currencyConverter } from "@/utils/utils";
+import { IAPIResponse } from "@/interfaces/api_interface";
+import { API } from "@/network";
+import { checkAuthSSR, currencyConverter } from "@/utils/utils";
+import axios from "axios";
+import { GetServerSidePropsContext } from "next";
 import React, { useState } from "react";
 import { FaListUl, FaStar, FaStore } from "react-icons/fa";
 import { FaLocationDot } from "react-icons/fa6";
@@ -65,8 +69,94 @@ const imgDummy: IProductDetail[] = [
   },
 ];
 
-function Index() {
+interface IAPIProfileShopResponse {
+  seller_id: number;
+  seller_name: string;
+  seller_picture_url: string;
+  seller_district: string;
+  seller_operating_hour: {
+    start: string;
+    end: string;
+  };
+  seller_products: [
+    {
+      name: string;
+      price: string;
+      picture_url: string;
+      stars: string;
+      total_sold: number;
+      created_at: string;
+      category_level_1: string;
+      category_level_2: string;
+      category_level_3: string;
+    },
+    {
+      name: string;
+      price: string;
+      picture_url: string;
+      stars: string;
+      total_sold: number;
+      created_at: string;
+      category_level_1: string;
+      category_level_2: string;
+      category_level_3: string;
+    }
+  ];
+}
+interface IProfileShopProps {
+  shop: IAPIProfileShopResponse;
+}
+
+export const getServerSideProps = async (
+  context: GetServerSidePropsContext
+) => {
+  let data: IAPIProfileShopResponse | undefined;
+
+  let accessToken = context.req.cookies["accessToken"];
+
+  try {
+    const res = await API.get(`/sellers/profile/1`);
+    data = (res.data as IAPIResponse<IAPIProfileShopResponse>).data;
+  } catch (e) {
+    if (axios.isAxiosError(e)) {
+      console.log(e.response?.data);
+      console.log("errrorrrrr");
+    }
+  }
+
+  return {
+    props: {
+      shop: data,
+    },
+  };
+};
+
+function Index({ shop }: IProfileShopProps) {
   const [showAllProducts, setShowAllProducts] = useState(false);
+
+  const calculateAverageStars = (products: { stars: string }[]) => {
+    const validProducts = products.filter(
+      (product) => !isNaN(parseFloat(product.stars.replace(",", ".")))
+    );
+
+    if (validProducts.length === 0) {
+      return 0;
+    }
+
+    const totalStars = validProducts.reduce(
+      (accStars, product) =>
+        accStars + parseFloat(product.stars.replace(",", ".")),
+      0
+    );
+
+    const averageStars = totalStars / validProducts.length;
+    console.log(averageStars, "averageStars");
+    return averageStars;
+  };
+
+  console.log("Seller Products:", shop.seller_products);
+
+  const averageStars = calculateAverageStars(shop.seller_products || []);
 
   const imgDummyToShow = showAllProducts ? imgDummy : imgDummy.slice(0, 6);
   return (
@@ -77,22 +167,25 @@ function Index() {
           <img
             width={90}
             height={0}
-            src={"/images/defaultuser.png"}
-            alt="seller"
+            src={shop.seller_picture_url}
+            alt={shop.seller_name}
             className="imgSeller w-20 h-full"
           />
           <div className="flex flex-col md:flex-row gap-y-4 gap-x-48 w-full">
             <div className="aboutSeller  md:w-full flex flex-col gap-y-2">
-              <p className="text-lg md:text-xl font-semibold">Nama Toko</p>
+              <p className="text-lg md:text-xl font-semibold">
+                {shop.seller_name}
+              </p>
               <p className="text-sm flex items-center text-neutral-600">
-                <FaLocationDot /> <span>Malang</span>
+                <FaLocationDot /> <span>{shop.seller_district}</span>
               </p>
             </div>
 
             <div className="flex flex-col md:flex-row justify-start items-start md:justify-between md:w-full md:items-center ">
               <div className="text-center md:justify-center">
                 <p className="flex text-left md:text-center md:items-center font-semibold gap-x-1">
-                  <FaStar style={{ color: "#f57b29" }} /> 4.8
+                  <FaStar style={{ color: "#f57b29" }} />
+                  {averageStars.toFixed(1)}
                 </p>
                 <p className=" text-neutral-600 text-sm">Rating</p>
               </div>
@@ -101,7 +194,7 @@ function Index() {
                 <p className=" text-neutral-600 text-sm"> Products</p>
               </div>
               <div className="w-fit md:text-center text-left md:items-center md:justify-center">
-                <p className="font-semibold">08.00 - 22.00 WIB</p>
+                <p className="font-semibold">{`${shop.seller_operating_hour.start} - ${shop.seller_operating_hour.end} WIB`}</p>
                 <p className=" text-neutral-600 text-sm">Operating hours</p>
               </div>
             </div>
