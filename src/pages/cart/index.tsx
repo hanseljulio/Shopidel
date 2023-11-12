@@ -25,7 +25,7 @@ interface IDeleteAllModalProps {
 
 const DeleteAllModal = (props: IDeleteAllModalProps) => {
   return (
-    <div className="bg-white p-5 rounded-md  w-[500px] h-[180px] mobile:w-[99%]">
+    <div className="bg-white p-5 rounded-md md:w-[500px] h-[180px] w-[99%]">
       <div className="pb-3 text-center">
         <h1 className="text-[20px] ml-1">
           Are you sure you want to delete your whole cart?
@@ -438,13 +438,13 @@ const CartPage = () => {
         <Navbar />
         <ToastContainer />
         <div className="lg:max-w-7xl mx-auto">
-          <div className="flex mt-[30px] justify-between mobile:block">
-            <h1 className="text-[30px] mobile:text-center">My Cart</h1>
+          <div className="md:flex mt-[30px] justify-between block">
+            <h1 className="text-[30px] md:text-left text-center">My Cart</h1>
             {!cartIsEmpty() && (
               <Button
                 text="Delete All"
                 onClick={() => setShowDeleteAllModal(true)}
-                styling="bg-red-500 px-6 text-white rounded-[8px] mobile:hidden mobile:invisible"
+                styling="bg-red-500 px-6 text-white rounded-[8px] md:visible md:block hidden invisible"
               />
             )}
           </div>
@@ -453,7 +453,7 @@ const CartPage = () => {
           ) : (
             <div>
               <div className="pt-8 pb-[150px]">
-                <div className="hidden invisible mobile:visible mobile:block">
+                <div className="md:hidden md:invisible visible block">
                   {cartData.map((data, idx) => {
                     return (
                       <CartTableMobile
@@ -471,7 +471,7 @@ const CartPage = () => {
                     );
                   })}
                 </div>
-                <div className="mobile:hidden mobile:invisible">
+                <div className="md:block md:visible hidden invisible">
                   {cartData.map((data, idx) => {
                     return (
                       <CartTable
@@ -489,12 +489,12 @@ const CartPage = () => {
                     );
                   })}
                 </div>
-                <div className="hidden invisible mobile:visible mobile:flex mobile:justify-center py-4">
+                <div className="md:hidden md:invisible visible flex md:justify-normal justify-center py-4">
                   {!cartIsEmpty() && (
                     <Button
                       text="Delete All"
                       onClick={() => setShowDeleteAllModal(true)}
-                      styling="bg-red-500 px-6 text-white rounded-[8px] mobile:py-2 mobile:mt-3"
+                      styling="bg-red-500 px-6 md:py-0 text-white rounded-[8px] md:mt-0 py-2 mt-3"
                     />
                   )}
                 </div>

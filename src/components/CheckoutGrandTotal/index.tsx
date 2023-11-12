@@ -10,7 +10,7 @@ interface ICheckoutGrandTotalProps {
 const CheckoutGrandTotal = (props: ICheckoutGrandTotalProps) => {
   return (
     <>
-      <div className="bg-[#29374e] text-right px-[20px] py-6 text-white flex items-center justify-end gap-10 mobile:hidden mobile:invisible mobile:text-[14px] mobile:justify-center ">
+      <div className="bg-[#29374e] text-right px-[20px] py-6 text-white md:flex items-center md:justify-end gap-10 hidden md:visible invisible md:text-[18px] text-[14px] justify-center ">
         <div className="text-left h-[150px]">
           <h1>Order Total: </h1>
           <h1>Shipping Total: </h1>
@@ -31,7 +31,7 @@ const CheckoutGrandTotal = (props: ICheckoutGrandTotalProps) => {
           </h1>
         </div>
       </div>
-      <div className="bg-[#29374e] text-left px-[40px] py-6 text-white mobile:flex hidden invisible mobile:visible mobile:text-[14px]  ">
+      <div className="bg-[#29374e] text-left px-[40px] py-6 text-white flex md:hidden md:invisible visible md:text-[18px] text-[14px]  ">
         <div className="flex flex-col gap-6 w-full">
           <div className="flex justify-between">
             <h1>Order Total: </h1>

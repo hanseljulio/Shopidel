@@ -31,14 +31,14 @@ const IndividualVoucher = (props: IVoucherProps) => {
       }}
       className={`${
         props.currentSelectedVoucher === props.id ? "bg-[#fddf97]" : color
-      } w-full border-2 shadow-lg rounded-[8px] px-14 py-8 flex items-center gap-10 hover:cursor-pointer hover:bg-[#fddf97] mobile:py-4 mobile:px-8`}
+      } w-full border-2 shadow-lg rounded-[8px] md:px-14 md:py-8 flex items-center gap-10 hover:cursor-pointer hover:bg-[#fddf97] py-4 px-8`}
     >
       <div>
         <FaTicketAlt className="text-[30px] text-[#e09664]" />
       </div>
       <div>
-        <h1 className="mobile:text-[14px]">{props.name}</h1>
-        <h1 className="mobile:text-[12px]">{props.description}</h1>
+        <h1 className="md:text-[18px] text-[14px]">{props.name}</h1>
+        <h1 className="md:text-[18px] text-[12px]">{props.description}</h1>
       </div>
     </div>
   );
@@ -82,7 +82,7 @@ const CheckoutVoucherModal = (props: IVoucherModalProps) => {
   ]);
 
   return (
-    <div className="bg-white p-5 rounded-md  w-[500px] h-[600px] mobile:w-[99%]">
+    <div className="bg-white p-5 rounded-md  md:w-[500px] h-[600px] w-[99%]">
       <div className=" pb-3">
         <h1 className="text-[20px] ml-1">Voucher Select</h1>
       </div>

@@ -11,20 +11,20 @@ interface ICheckoutShippingSelect {
 
 const CheckoutShippingSelect = (props: ICheckoutShippingSelect) => {
   return (
-    <div className="text-[20px] flex justify-between border-x-2 mobile:flex-col mobile:pt-6">
-      <div className="basis-[40%] py-4 pl-6 border-r-2 mobile:p-0 mobile:flex mobile:justify-center mobile:border-none">
+    <div className="text-[20px] flex justify-between border-x-2 md:flex-row md:pt-0 flex-col pt-6">
+      <div className="basis-[40%] md:py-4 md:pl-6 md:border-r-2 p-0 md:block md:justify-normal flex justify-center border-none">
         <Input
           label="Notes:"
           labelStyle="pt-2"
-          styling="flex mobile:flex-col items-center gap-3 text-[16px]"
+          styling="flex md:flex-row flex-col items-center gap-3 text-[16px]"
           type="text"
           name="orderMessage"
           placeholder="Write additional notes here"
-          width="w-[350px] mobile:w-[300px]"
+          width="md:w-[350px] w-[300px]"
           onChange={props.onChange}
         />
       </div>
-      <div className="mobile:flex-col mobile:gap-4 flex text-[16px] items-center justify-between px-[21px] basis-[60%] mobile:py-8">
+      <div className="flex-col gap-4 flex md:flex-row md:gap-0 text-[16px] items-center justify-between px-[21px] basis-[60%] py-8 md:py-0">
         <h1 className="text-emerald-500">Shipping option:</h1>
         <h1>{props.shippingOption}</h1>
         <h1
@@ -32,12 +32,12 @@ const CheckoutShippingSelect = (props: ICheckoutShippingSelect) => {
           className="text-blue-600 hover:cursor-pointer hover:underline"
         >
           CHANGE{" "}
-          <span className="hidden invisible mobile:visible mobile:inline">
+          <span className="md:hidden md:invisible visible inline">
             SHIPPING
           </span>
         </h1>
         <h1>
-          <span className="hidden invisible mobile:visible mobile:inline">
+          <span className="md:hidden md:invisible visible inline">
             Shipping price:{" "}
           </span>
           {currencyConverter(props.shippingTotal)}

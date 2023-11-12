@@ -9,7 +9,7 @@ interface ICheckoutPaymentProps {
 
 const CheckoutPayment = (props: ICheckoutPaymentProps) => {
   return (
-    <div className="text-[20px] px-[20px] flex justify-between border-2 py-4 items-center mobile:flex-col mobile:gap-5">
+    <div className="text-[20px] px-[20px] flex justify-between border-2 py-4 items-center md:flex-row flex-col md:gap-0 gap-5">
       <h1 className="flex items-center gap-3">
         <FaWallet className=" text-amber-700" />
         My Wallet
