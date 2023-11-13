@@ -410,13 +410,13 @@ const ProductDetail = ({ product }: IProductDetailProps) => {
                   return (
                     <div key={i} className="flex gap-x-5 items-center">
                       <p>{item.variant_option_name}</p>
-                      <div className="flex gap-x-2">
+                      <div className="grid grid-cols-3 gap-2">
                         {item.childs.map((variant, k) => {
                           const optionName = item.variant_option_name;
                           return (
                             <p
                               key={k}
-                              className={`px-2 py-1 border rounded-md cursor-pointer ${
+                              className={`px-2 py-1 border text-center rounded-md cursor-pointer ${
                                 selectedVariants[optionName] === variant
                                   ? "bg-[#d6e4f8] border border-[#364968]"
                                   : ""
@@ -497,7 +497,9 @@ const ProductDetail = ({ product }: IProductDetailProps) => {
               </div>
               <div className="desc pt-5 ">
                 <p className="text-lg font-medium border-b my-4">Description</p>
-                <p className="">{product?.description}</p>
+                <p className="">
+                  {product?.description.replace(/\n/, "<br />")}
+                </p>
               </div>
             </div>
           </div>
