@@ -71,7 +71,9 @@ const ProductCard = ({
 
         <div className="flex justify-between text-xs md:text-sm pt-2">
           <p className="text-gray-500 ">
-            {place!.length > 15 ? `${title.substring(0, 12)}...` : place}
+            {place && place?.length > 15
+              ? `${title.substring(0, 12)}...`
+              : place}
           </p>
           <p className="text-gray-500 "> {`${order} sold`}</p>
         </div>
