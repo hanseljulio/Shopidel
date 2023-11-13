@@ -15,7 +15,8 @@ import { AiOutlineShoppingCart } from "react-icons/ai";
 import { BsStarFill } from "react-icons/bs";
 import { FaHeart, FaRegHeart, FaStar, FaStore } from "react-icons/fa";
 import { FaLocationDot, FaTruckFast } from "react-icons/fa6";
-import { toast } from "react-toastify";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 interface IAPIProductDetail {
   id: number;
@@ -259,6 +260,8 @@ const ProductDetail = ({ product }: IProductDetailProps) => {
       });
 
       if (response.status === 200) {
+        console.log("masuk kestatus 200");
+
         toast.success("Added to cart", { autoClose: 1500 });
       } else {
         toast.error("Failed to add to cart", { autoClose: 1500 });
@@ -285,7 +288,7 @@ const ProductDetail = ({ product }: IProductDetailProps) => {
 
     try {
       const response = await API.post(
-        `/products/${data.id}/favorites/add-favorite`, // Fix the API endpoint
+        `/products/${data.id}/favorites/add-favorite`,
         favData,
         {
           headers: {
@@ -296,11 +299,11 @@ const ProductDetail = ({ product }: IProductDetailProps) => {
 
       if (response.status === 200) {
         toast.success("Added to wishlist", { autoClose: 1500 });
+        setIsFavorite(true);
       } else {
         toast.error("Failed to add to wishlist", { autoClose: 1500 });
       }
       console.log("yes");
-
       console.log(response.data);
     } catch (error) {
       if (axios.isAxiosError(error)) {
@@ -315,12 +318,12 @@ const ProductDetail = ({ product }: IProductDetailProps) => {
   };
 
   if (product === null) {
-    // Handle the case when product is null, for example, show a loading message or redirect
     return <div>Loading...</div>;
   }
 
   return (
     <>
+      <ToastContainer />
       {isModal && (
         <div className="z-50 fixed">
           <Modal
@@ -371,8 +374,8 @@ const ProductDetail = ({ product }: IProductDetailProps) => {
                 })}
               </div>
               <div className="favorite-icon mt-5 text-right">
-                <button onClick={() => handleWishlist}>
-                  {isFavorite && product.is_favorite === false ? (
+                <button onClick={() => handleWishlist(product)}>
+                  {isFavorite || product.is_favorite ? (
                     <div className="flex items-center gap-1">
                       <FaHeart style={{ color: "red" }} />
                       <p>Favorite</p>
