@@ -147,8 +147,7 @@ const TopupWalletModal = ({ onBalanceChange }: ITopupWalletProps) => {
       >
         <input
           onChange={(e) => {
-            if (!/[0-9]/g.test(e.target.value) && e.target.value !== "")
-              return e.preventDefault();
+            if (!/^[0-9]*$/g.test(e.target.value)) return e.preventDefault();
             setAmount(e.target.value);
           }}
           value={amount}
@@ -584,11 +583,12 @@ const WalletDetail = ({
               </div>
             </div>
             <div className="flex self-end mt-2">
-              <Pagination
-                data={transactionHistoryRes?.pagination}
-                onNavigate={(navPage) => setPage(navPage)}
-                limit={3}
-              />
+              {transactionHistoryRes && (
+                <Pagination
+                  data={transactionHistoryRes?.pagination}
+                  onNavigate={(navPage) => setPage(navPage)}
+                />
+              )}
             </div>
           </div>
         )}
