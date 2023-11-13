@@ -31,9 +31,6 @@ export default function Home() {
       setProductList(data!);
     } catch (e) {
       if (axios.isAxiosError(e)) {
-        if (e.response?.status === 401) {
-          return clientUnauthorizeHandler(router, updateUser);
-        }
         return toast.error(e.message, {
           autoClose: 1500,
         });
