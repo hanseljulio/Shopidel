@@ -6,7 +6,11 @@ import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { API } from "@/network";
-import { IAPIResponse, IAPIWalletResponse } from "@/interfaces/api_interface";
+import {
+  IAPIPagination,
+  IAPIResponse,
+  IAPIWalletResponse,
+} from "@/interfaces/api_interface";
 import Modal from "@/components/Modal";
 import PinCode from "@/components/PinCode";
 import { GetServerSidePropsContext, InferGetServerSidePropsType } from "next";
@@ -20,6 +24,7 @@ import { useRouter } from "next/router";
 import { getCookie } from "cookies-next";
 import { IWalletTransaction } from "@/interfaces/wallet_interface";
 import { useUserStore } from "@/store/userStore";
+import Pagination from "@/components/Pagination";
 
 interface IActivateWalletProps {
   onOpenDialog: (content: JSX.Element) => void;
@@ -407,7 +412,6 @@ const WalletDetail = ({ wallet, onOpenDialog }: IWalletDetailProps) => {
   const [data, setData] = useState<IAPIWalletResponse>(wallet);
   const [transactionHistoryRes, setTransactionHistoryRes] =
     useState<IAPIResponse<IWalletTransaction[]>>();
-  const [paginationNumber, setPaginationNumber] = useState<number[]>([]);
   const [page, setPage] = useState<number>(1);
 
   const getWalletTransactionHistory = async () => {
@@ -425,16 +429,6 @@ const WalletDetail = ({ wallet, onOpenDialog }: IWalletDetailProps) => {
 
       const data = res.data as IAPIResponse<IWalletTransaction[]>;
       setTransactionHistoryRes(data);
-
-      if (data.pagination?.total_page! <= 5) {
-        return setPaginationNumber(
-          Array.from(Array(data.pagination?.total_page).keys())
-        );
-      }
-
-      if (paginationNumber.length === 0) {
-        return setPaginationNumber(Array.from(Array(5).keys()));
-      }
     } catch (e) {
       if (axios.isAxiosError(e)) {
         if (e.response?.status === 401) {
@@ -585,62 +579,11 @@ const WalletDetail = ({ wallet, onOpenDialog }: IWalletDetailProps) => {
               </div>
             </div>
             <div className="flex self-end mt-2">
-              {transactionHistoryRes?.pagination?.current_page !== 1 && (
-                <button
-                  onClick={() => {
-                    if (
-                      transactionHistoryRes?.pagination?.current_page ===
-                      paginationNumber[0] + 1
-                    ) {
-                      setPaginationNumber(
-                        Array.from(paginationNumber, (x) => x - 1)
-                      );
-                    }
-                    setPage(
-                      transactionHistoryRes?.pagination?.current_page! - 1
-                    );
-                  }}
-                  className="px-2 py-1 border text-sm rounded-bl-md rounded-tl-md "
-                >
-                  Prev
-                </button>
-              )}
-              {paginationNumber.map((i, _) => {
-                return (
-                  <Button
-                    key={i}
-                    text={(i + 1).toString()}
-                    styling={`px-3 py-1 border ${
-                      transactionHistoryRes?.pagination?.current_page ===
-                        i + 1 && "bg-slate-200 "
-                    }`}
-                    onClick={() => setPage(i + 1)}
-                  />
-                );
-              })}
-              {transactionHistoryRes?.pagination?.current_page !==
-                transactionHistoryRes?.pagination?.total_page && (
-                <button
-                  onClick={() => {
-                    if (
-                      paginationNumber[paginationNumber.length - 1] <
-                      transactionHistoryRes?.pagination?.current_page!
-                    ) {
-                      paginationNumber.shift();
-                      paginationNumber.push(
-                        paginationNumber[paginationNumber.length - 1] + 1
-                      );
-                      setPaginationNumber(paginationNumber);
-                    }
-                    setPage(
-                      transactionHistoryRes?.pagination?.current_page! + 1
-                    );
-                  }}
-                  className="px-2 py-1 border text-sm rounded-br-md rounded-tr-md "
-                >
-                  Next
-                </button>
-              )}
+              <Pagination
+                data={transactionHistoryRes?.pagination}
+                onNavigate={(navPage) => setPage(navPage)}
+                limit={3}
+              />
             </div>
           </div>
         )}
