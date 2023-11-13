@@ -125,7 +125,7 @@ export default function Home() {
           {productList.data?.map((product) => (
             <ProductCard
               onClick={() => router.push(`/${product.name}`)}
-              key={product.district}
+              key={product.id}
               image={product.picture_url}
               price={product.price}
               showStar={false}
