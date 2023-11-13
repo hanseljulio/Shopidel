@@ -288,6 +288,11 @@ const CheckoutPage = () => {
   };
 
   const getCheckoutData = () => {
+    if (cartStore.cart === undefined || cartStore.cart.length === 0) {
+      router.replace("/");
+      return;
+    }
+
     let total = 0;
     for (let i = 0; i < cartStore.cart!.length; i++) {
       for (let j = 0; j < cartStore.cart![i].cart_items.length; j++) {
