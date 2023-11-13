@@ -15,14 +15,14 @@ const ProfileLayout = ({ children, currentPage }: IProfileLayout) => {
         <Navbar />
       </div>
       <div className="flex-1">
-        <div className="flex mobile:flex-col h-full">
-          <div className="mobile:hidden">
+        <div className="flex flex-col md:flex-row h-full">
+          <div className="hidden md:block">
             <UserProfileSidebar />
           </div>
-          <div className="invisible hidden mobile:visible mobile:block">
+          <div className=" md:hidden">
             <MobileUserProfileSidebar currentPage={currentPage} />
           </div>
-          <div className="w-full mobile:mx-auto ">{children}</div>
+          <div className="w-full md:mx-0 mx-auto ">{children}</div>
         </div>
       </div>
     </div>
