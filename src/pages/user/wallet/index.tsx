@@ -406,7 +406,11 @@ const ActivateWallet = ({ onOpenDialog }: IActivateWalletProps) => {
   );
 };
 
-const WalletDetail = ({ wallet, onOpenDialog }: IWalletDetailProps) => {
+const WalletDetail = ({
+  wallet,
+  onOpenDialog,
+  onCloseDialog,
+}: IWalletDetailProps) => {
   const router = useRouter();
   const { updateUser } = useUserStore();
   const [data, setData] = useState<IAPIWalletResponse>(wallet);
@@ -464,7 +468,8 @@ const WalletDetail = ({ wallet, onOpenDialog }: IWalletDetailProps) => {
                 <TopupWalletModal
                   onBalanceChange={(amount) => {
                     const newBalance = parseInt(data.balance) + amount;
-                    return setData({ ...data, balance: newBalance.toString() });
+                    setData({ ...data, balance: newBalance.toString() });
+                    return onCloseDialog();
                   }}
                 />
               )
