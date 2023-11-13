@@ -78,9 +78,12 @@ const UserProfileSidebar = () => {
           </h1>
         </div>
         <div className="pl-[24px] border-slate-300 border-b-2 pb-[20px]">
-          <h1 className="text-[20px] flex items-center gap-4 mt-[20px] hover:cursor-pointer transition w-[250px] hover:text-[#92bcff]">
+          <h1
+            onClick={() => router.push("/user/transactionHistory")}
+            className="text-[20px] flex items-center gap-4 mt-[20px] hover:cursor-pointer transition w-[250px] hover:text-[#92bcff]"
+          >
             <FaDollarSign />
-            Purchase History
+            Transaction History
           </h1>
         </div>
         <div className="pl-[26px] border-slate-300 border-b-2 pb-[20px]">
