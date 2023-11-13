@@ -11,22 +11,26 @@ import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
 import { API } from "@/network";
 import { IAPIResponse } from "@/interfaces/api_interface";
-import { currencyConverter } from "@/utils/utils";
-
-interface IProduct {
-  id: number;
-  name: string;
-  district: string;
-  total_sold: number;
-  price: string;
-  picture_url: string;
-}
+import "react-toastify/dist/ReactToastify.css";
+import { IProduct } from "@/interfaces/product_interface";
+import { SubmitHandler, useForm } from "react-hook-form";
 
 const Search = () => {
   const router = useRouter();
   const [isModal, setIsModal] = useState<boolean>(false);
   const [contentModal, setContentModal] = useState<JSX.Element>();
   const [productsRes, setProductsRes] = useState<IAPIResponse<IProduct[]>>();
+  const [filter, setFilter] = useState<IProductFilter>({
+    districts: [],
+    category: [],
+    rating: [],
+    price: {
+      min: "",
+      max: "",
+    },
+    sortBy: "price",
+    sort: "desc",
+  });
 
   const query = router.query.q;
 
@@ -35,6 +39,9 @@ const Search = () => {
       const res = await API.get("/products", {
         params: {
           s: query,
+          sortBy: filter.sortBy,
+          sort: filter.sort,
+          limit: 30,
         },
       });
       setProductsRes(res.data as IAPIResponse<IProduct[]>);
@@ -51,7 +58,7 @@ const Search = () => {
     if (query !== undefined) {
       getProductsQuery();
     }
-  }, [query]);
+  }, [query, filter]);
 
   return (
     <>
@@ -68,7 +75,21 @@ const Search = () => {
                 <FaFilter />
                 <p>Filter</p>
               </div>
-              <div>
+              <div
+                onClick={() => {
+                  setFilter({
+                    ...filter,
+                    districts: [],
+                    category: [],
+                    rating: [],
+                    price: {
+                      min: "",
+                      max: "",
+                    },
+                  });
+                }}
+                className="hover:cursor-pointer"
+              >
                 <p className="text-xs text-red-500">Clear</p>
               </div>
             </div>
@@ -76,26 +97,35 @@ const Search = () => {
               <div className="flex flex-col gap-y-2">
                 <p className="font-bold">Location</p>
                 <div className="flex flex-col gap-y-2">
-                  <div className="flex gap-x-2 items-center">
-                    <input type="checkbox" name="" id="" className="rounded" />
-                    <p>DKI Jakarta</p>
-                  </div>
-                  <div className="flex gap-x-2 items-center">
-                    <input type="checkbox" name="" id="" className="rounded" />
-                    <p>Bekasi Selatan</p>
-                  </div>
-                  <div className="flex gap-x-2 items-center">
-                    <input type="checkbox" name="" id="" className="rounded" />
-                    <p>Tangerang</p>
-                  </div>
-                  <div className="flex gap-x-2 items-center">
-                    <input type="checkbox" name="" id="" className="rounded" />
-                    <p>Bandung</p>
-                  </div>
-                  <div className="flex gap-x-2 items-center">
-                    <input type="checkbox" name="" id="" className="rounded" />
-                    <p>Bogor</p>
-                  </div>
+                  {[
+                    ...new Set(productsRes?.data?.map((item) => item.district)),
+                  ].map((item, i) => {
+                    return (
+                      <div key={i} className="flex gap-x-2 items-center">
+                        <input
+                          type="checkbox"
+                          name=""
+                          id=""
+                          onChange={(e) => {
+                            if (filter?.districts?.includes(item)) {
+                              return setFilter({
+                                ...filter,
+                                districts: filter.districts.filter(
+                                  (district) => district !== item
+                                ),
+                              });
+                            }
+                            return setFilter({
+                              ...filter,
+                              districts: [...filter?.districts, item],
+                            });
+                          }}
+                          className="rounded"
+                        />
+                        <p>{item}</p>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
               <div className="flex flex-col gap-y-2">
@@ -108,6 +138,16 @@ const Search = () => {
                         <span>Rp</span>
                       </div>
                       <input
+                        onChange={(e) => {
+                          setFilter({
+                            ...filter,
+                            price: {
+                              ...filter.price,
+                              min: e.target.value,
+                            },
+                          });
+                        }}
+                        value={filter.price.min}
                         type="text"
                         name=""
                         id=""
@@ -122,6 +162,16 @@ const Search = () => {
                         <span>Rp</span>
                       </div>
                       <input
+                        onChange={(e) => {
+                          setFilter({
+                            ...filter,
+                            price: {
+                              ...filter.price,
+                              max: e.target.value,
+                            },
+                          });
+                        }}
+                        value={filter.price.max}
                         type="text"
                         name=""
                         id=""
@@ -134,42 +184,41 @@ const Search = () => {
               <div className="flex flex-col gap-y-2">
                 <p className="font-bold">Rating</p>
                 <div className="flex flex-col gap-y-2">
-                  <div className="flex gap-x-2 items-center">
-                    <input type="checkbox" name="" id="" className="rounded" />
-                    <p className="flex items-center gap-x-1">
-                      <span>
-                        <AiFillStar color={"orange"} size={15} />
-                      </span>
-                      4 above
-                    </p>
-                  </div>
-                  <div className="flex gap-x-2 items-center">
-                    <input type="checkbox" name="" id="" className="rounded" />
-                    <p className="flex items-center gap-x-1">
-                      <span>
-                        <AiFillStar color={"orange"} size={15} />
-                      </span>
-                      3 above
-                    </p>
-                  </div>
-                  <div className="flex gap-x-2 items-center">
-                    <input type="checkbox" name="" id="" className="rounded" />
-                    <p className="flex items-center gap-x-1">
-                      <span>
-                        <AiFillStar color={"orange"} size={15} />
-                      </span>
-                      2 above
-                    </p>
-                  </div>
-                  <div className="flex gap-x-2 items-center">
-                    <input type="checkbox" name="" id="" className="rounded" />
-                    <p className="flex items-center gap-x-1">
-                      <span>
-                        <AiFillStar color={"orange"} size={15} />
-                      </span>
-                      1 above
-                    </p>
-                  </div>
+                  {Array(5)
+                    .fill("")
+                    .map((_, i) => {
+                      return (
+                        <div key={i} className="flex gap-x-2 items-center">
+                          <input
+                            onChange={(_) => {
+                              if (filter.rating.includes(i + 1)) {
+                                return setFilter({
+                                  ...filter,
+                                  rating: filter.rating.filter(
+                                    (rating) => rating !== i + 1
+                                  ),
+                                });
+                              }
+                              return setFilter({
+                                ...filter,
+                                rating: [...filter.rating, i + 1],
+                              });
+                            }}
+                            type="checkbox"
+                            name=""
+                            id=""
+                            className="rounded"
+                          />
+                          <p className="flex items-center gap-x-1">
+                            <span>
+                              <AiFillStar color={"orange"} size={15} />
+                            </span>
+                            {i + 1 === 5 ? i + 1 : `${i + 1} Above`}
+                          </p>
+                        </div>
+                      );
+                    })
+                    .reverse()}
                 </div>
               </div>
               <div className="flex flex-col gap-y-2">
@@ -205,8 +254,15 @@ const Search = () => {
                 <div className="flex items-center gap-x-2">
                   <p className="text-sm">Sort: </p>
                   <select
-                    name="sort"
-                    id="sort"
+                    name="sortBy"
+                    id="sortBy"
+                    value={filter.sortBy}
+                    onChange={(e) => {
+                      setFilter({
+                        ...filter,
+                        sortBy: e.target.value as ProductSortByType,
+                      });
+                    }}
                     className="rounded-md border-slate-500 text-sm py-1"
                   >
                     <option value="recommended">Recommended</option>
@@ -218,6 +274,13 @@ const Search = () => {
                 <div className="flex items-center gap-x-2">
                   <p className="text-sm">Order: </p>
                   <select
+                    value={filter.sort}
+                    onChange={(e) => {
+                      setFilter({
+                        ...filter,
+                        sort: e.target.value as ProductSortType,
+                      });
+                    }}
                     name="sort"
                     id="sort"
                     className="rounded-md border-slate-500 text-sm py-1"
@@ -231,7 +294,18 @@ const Search = () => {
                 <div
                   onClick={() => {
                     setIsModal(true);
-                    setContentModal(<SortModal />);
+                    setContentModal(
+                      <SortModal
+                        filter={filter}
+                        onApply={(data) => {
+                          setFilter({
+                            ...filter,
+                            ...data,
+                          });
+                          return setIsModal(false);
+                        }}
+                      />
+                    );
                   }}
                   className="hover:cursor-pointer"
                 >
@@ -240,7 +314,18 @@ const Search = () => {
                 <div
                   onClick={() => {
                     setIsModal(true);
-                    setContentModal(<FilterModal />);
+                    setContentModal(
+                      <FilterModal
+                        data={productsRes!}
+                        filter={filter}
+                        onApply={(data) => {
+                          setFilter({
+                            ...filter,
+                            ...data,
+                          });
+                        }}
+                      />
+                    );
                   }}
                   className="hover:cursor-pointer"
                 >
@@ -263,276 +348,6 @@ const Search = () => {
                   />
                 );
               })}
-              {/* <ProductCard
-                showStar={true}
-                image="https://images.unsplash.com/photo-1697482036303-4c0cf56a38c3?auto=format&fit=crop&q=80&w=1973&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
-                price={"20000"}
-                order={3000}
-                title="Sun Flower flower flower flower flower flower"
-                place="Malang"
-                star={5}
-              />
-              <ProductCard
-                showStar={true}
-                image="https://images.unsplash.com/photo-1697482036303-4c0cf56a38c3?auto=format&fit=crop&q=80&w=1973&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
-                price={"20000"}
-                order={3000}
-                title="Sun Flower flower flower flower flower flower"
-                place="Malang"
-                star={5}
-              />
-              <ProductCard
-                showStar={true}
-                image="https://images.unsplash.com/photo-1697482036303-4c0cf56a38c3?auto=format&fit=crop&q=80&w=1973&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
-                price={"20000"}
-                order={3000}
-                title="Sun Flower flower flower flower flower flower"
-                place="Malang"
-                star={5}
-              />
-              <ProductCard
-                showStar={true}
-                image="https://images.unsplash.com/photo-1697482036303-4c0cf56a38c3?auto=format&fit=crop&q=80&w=1973&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
-                price={"20000"}
-                order={3000}
-                title="Sun Flower flower flower flower flower flower"
-                place="Malang"
-                star={5}
-              />
-              <ProductCard
-                showStar={true}
-                image="https://images.unsplash.com/photo-1697482036303-4c0cf56a38c3?auto=format&fit=crop&q=80&w=1973&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
-                price={"20000"}
-                order={3000}
-                title="Sun Flower flower flower flower flower flower"
-                place="Malang"
-                star={5}
-              />
-              <ProductCard
-                showStar={true}
-                image="https://images.unsplash.com/photo-1697482036303-4c0cf56a38c3?auto=format&fit=crop&q=80&w=1973&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
-                price={"20000"}
-                order={3000}
-                title="Sun Flower flower flower flower flower flower"
-                place="Malang"
-                star={5}
-              />
-              <ProductCard
-                showStar={true}
-                image="https://images.unsplash.com/photo-1697482036303-4c0cf56a38c3?auto=format&fit=crop&q=80&w=1973&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
-                price={"20000"}
-                order={3000}
-                title="Sun Flower flower flower flower flower flower"
-                place="Malang"
-                star={5}
-              />
-              <ProductCard
-                showStar={true}
-                image="https://images.unsplash.com/photo-1697482036303-4c0cf56a38c3?auto=format&fit=crop&q=80&w=1973&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
-                price={"20000"}
-                order={3000}
-                title="Sun Flower flower flower flower flower flower"
-                place="Malang"
-                star={5}
-              />
-              <ProductCard
-                showStar={true}
-                image="https://images.unsplash.com/photo-1697482036303-4c0cf56a38c3?auto=format&fit=crop&q=80&w=1973&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
-                price={"20000"}
-                order={3000}
-                title="Sun Flower flower flower flower flower flower"
-                place="Malang"
-                star={5}
-              />
-              <ProductCard
-                showStar={true}
-                image="https://images.unsplash.com/photo-1697482036303-4c0cf56a38c3?auto=format&fit=crop&q=80&w=1973&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
-                price={"20000"}
-                order={3000}
-                title="Sun Flower flower flower flower flower flower"
-                place="Malang"
-                star={5}
-              />
-              <ProductCard
-                showStar={true}
-                image="https://images.unsplash.com/photo-1697482036303-4c0cf56a38c3?auto=format&fit=crop&q=80&w=1973&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
-                price={"20000"}
-                order={3000}
-                title="Sun Flower flower flower flower flower flower"
-                place="Malang"
-                star={5}
-              />
-              <ProductCard
-                showStar={true}
-                image="https://images.unsplash.com/photo-1697482036303-4c0cf56a38c3?auto=format&fit=crop&q=80&w=1973&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
-                price={"20000"}
-                order={3000}
-                title="Sun Flower flower flower flower flower flower"
-                place="Malang"
-                star={5}
-              />
-              <ProductCard
-                showStar={true}
-                image="https://images.unsplash.com/photo-1697482036303-4c0cf56a38c3?auto=format&fit=crop&q=80&w=1973&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
-                price={"20000"}
-                order={3000}
-                title="Sun Flower flower flower flower flower flower"
-                place="Malang"
-                star={5}
-              />
-              <ProductCard
-                showStar={true}
-                image="https://images.unsplash.com/photo-1697482036303-4c0cf56a38c3?auto=format&fit=crop&q=80&w=1973&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
-                price={"20000"}
-                order={3000}
-                title="Sun Flower flower flower flower flower flower"
-                place="Malang"
-                star={5}
-              />
-              <ProductCard
-                showStar={true}
-                image="https://images.unsplash.com/photo-1697482036303-4c0cf56a38c3?auto=format&fit=crop&q=80&w=1973&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
-                price={"20000"}
-                order={3000}
-                title="Sun Flower flower flower flower flower flower"
-                place="Malang"
-                star={5}
-              />
-              <ProductCard
-                showStar={true}
-                image="https://images.unsplash.com/photo-1697482036303-4c0cf56a38c3?auto=format&fit=crop&q=80&w=1973&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
-                price={"20000"}
-                order={3000}
-                title="Sun Flower flower flower flower flower flower"
-                place="Malang"
-                star={5}
-              />
-              <ProductCard
-                showStar={true}
-                image="https://images.unsplash.com/photo-1697482036303-4c0cf56a38c3?auto=format&fit=crop&q=80&w=1973&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
-                price={"20000"}
-                order={3000}
-                title="Sun Flower flower flower flower flower flower"
-                place="Malang"
-                star={5}
-              />
-              <ProductCard
-                showStar={true}
-                image="https://images.unsplash.com/photo-1697482036303-4c0cf56a38c3?auto=format&fit=crop&q=80&w=1973&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
-                price={"20000"}
-                order={3000}
-                title="Sun Flower flower flower flower flower flower"
-                place="Malang"
-                star={5}
-              />
-              <ProductCard
-                showStar={true}
-                image="https://images.unsplash.com/photo-1697482036303-4c0cf56a38c3?auto=format&fit=crop&q=80&w=1973&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
-                price={"20000"}
-                order={3000}
-                title="Sun Flower flower flower flower flower flower"
-                place="Malang"
-                star={5}
-              />
-              <ProductCard
-                showStar={true}
-                image="https://images.unsplash.com/photo-1697482036303-4c0cf56a38c3?auto=format&fit=crop&q=80&w=1973&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
-                price={"20000"}
-                order={3000}
-                title="Sun Flower flower flower flower flower flower"
-                place="Malang"
-                star={5}
-              />
-              <ProductCard
-                showStar={true}
-                image="https://images.unsplash.com/photo-1697482036303-4c0cf56a38c3?auto=format&fit=crop&q=80&w=1973&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
-                price={"20000"}
-                order={3000}
-                title="Sun Flower flower flower flower flower flower"
-                place="Malang"
-                star={5}
-              />
-              <ProductCard
-                showStar={true}
-                image="https://images.unsplash.com/photo-1697482036303-4c0cf56a38c3?auto=format&fit=crop&q=80&w=1973&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
-                price={"20000"}
-                order={3000}
-                title="Sun Flower flower flower flower flower flower"
-                place="Malang"
-                star={5}
-              />
-              <ProductCard
-                showStar={true}
-                image="https://images.unsplash.com/photo-1697482036303-4c0cf56a38c3?auto=format&fit=crop&q=80&w=1973&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
-                price={"20000"}
-                order={3000}
-                title="Sun Flower flower flower flower flower flower"
-                place="Malang"
-                star={5}
-              />
-              <ProductCard
-                showStar={true}
-                image="https://images.unsplash.com/photo-1697482036303-4c0cf56a38c3?auto=format&fit=crop&q=80&w=1973&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
-                price={"20000"}
-                order={3000}
-                title="Sun Flower flower flower flower flower flower"
-                place="Malang"
-                star={5}
-              />
-              <ProductCard
-                showStar={true}
-                image="https://images.unsplash.com/photo-1697482036303-4c0cf56a38c3?auto=format&fit=crop&q=80&w=1973&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
-                price={"20000"}
-                order={3000}
-                title="Sun Flower flower flower flower flower flower"
-                place="Malang"
-                star={5}
-              />
-              <ProductCard
-                showStar={true}
-                image="https://images.unsplash.com/photo-1697482036303-4c0cf56a38c3?auto=format&fit=crop&q=80&w=1973&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
-                price={"20000"}
-                order={3000}
-                title="Sun Flower flower flower flower flower flower"
-                place="Malang"
-                star={5}
-              />
-              <ProductCard
-                showStar={true}
-                image="https://images.unsplash.com/photo-1697482036303-4c0cf56a38c3?auto=format&fit=crop&q=80&w=1973&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
-                price={"20000"}
-                order={3000}
-                title="Sun Flower flower flower flower flower flower"
-                place="Malang"
-                star={5}
-              />
-              <ProductCard
-                showStar={true}
-                image="https://images.unsplash.com/photo-1697482036303-4c0cf56a38c3?auto=format&fit=crop&q=80&w=1973&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
-                price={"20000"}
-                order={3000}
-                title="Sun Flower flower flower flower flower flower"
-                place="Malang"
-                star={5}
-              />
-              <ProductCard
-                showStar={true}
-                image="https://images.unsplash.com/photo-1697482036303-4c0cf56a38c3?auto=format&fit=crop&q=80&w=1973&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
-                price={"20000"}
-                order={3000}
-                title="Sun Flower flower flower flower flower flower"
-                place="Malang"
-                star={5}
-              />
-              <ProductCard
-                showStar={true}
-                image="https://images.unsplash.com/photo-1697482036303-4c0cf56a38c3?auto=format&fit=crop&q=80&w=1973&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
-                price={"20000"}
-                order={3000}
-                title="Sun Flower flower flower flower flower flower"
-                place="Malang"
-                star={5}
-              /> */}
             </div>
           </div>
         </div>
@@ -542,14 +357,31 @@ const Search = () => {
   );
 };
 
-const SortModal = () => {
+interface SortModalProps {
+  filter: IProductFilter;
+  onApply: (data: IProductFilter) => void;
+}
+
+const SortModal = ({ filter, onApply }: SortModalProps) => {
+  const { register, handleSubmit } = useForm<IProductFilter>({
+    defaultValues: {
+      sort: filter.sort,
+      sortBy: filter.sortBy,
+    },
+  });
+
+  const onSubmit: SubmitHandler<IProductFilter> = (data) => {
+    return onApply(data);
+  };
+
   return (
-    <div className="flex flex-col gap-y-5">
+    <form className="flex flex-col gap-y-5" onSubmit={handleSubmit(onSubmit)}>
       <div className="flex flex-col">
         <p className="text-sm">Sort</p>
         <select
-          name="sort"
-          id="sort"
+          {...register("sortBy")}
+          name="sortBy"
+          id="sortBy"
           className="rounded-md border-slate-500 text-sm py-1"
         >
           <option value="recommended">Recommended</option>
@@ -561,6 +393,7 @@ const SortModal = () => {
       <div className="flex flex-col">
         <p className="text-sm">Order</p>
         <select
+          {...register("sort")}
           name="sort"
           id="sort"
           className="rounded-md border-slate-500 text-sm py-1"
@@ -573,11 +406,15 @@ const SortModal = () => {
         text="Apply"
         styling="w-full bg-[#29374e] p-2  rounded-md text-white"
       />
-    </div>
+    </form>
   );
 };
 
-const FilterModal = () => {
+interface FilterModalProps extends SortModalProps {
+  data: IAPIResponse<IProduct[]>;
+}
+
+const FilterModal = ({ data, filter, onApply }: FilterModalProps) => {
   return (
     <>
       <div className="overflow-auto text-sm h-[75vh]">
@@ -594,26 +431,22 @@ const FilterModal = () => {
           <div className="flex flex-col gap-y-2">
             <p className="font-bold">Location</p>
             <div className="flex flex-col gap-y-2">
-              <div className="flex gap-x-2 items-center">
-                <input type="checkbox" name="" id="" className="rounded" />
-                <p>DKI Jakarta</p>
-              </div>
-              <div className="flex gap-x-2 items-center">
-                <input type="checkbox" name="" id="" className="rounded" />
-                <p>Bekasi Selatan</p>
-              </div>
-              <div className="flex gap-x-2 items-center">
-                <input type="checkbox" name="" id="" className="rounded" />
-                <p>Tangerang</p>
-              </div>
-              <div className="flex gap-x-2 items-center">
-                <input type="checkbox" name="" id="" className="rounded" />
-                <p>Bandung</p>
-              </div>
-              <div className="flex gap-x-2 items-center">
-                <input type="checkbox" name="" id="" className="rounded" />
-                <p>Bogor</p>
-              </div>
+              {[...new Set(data?.data?.map((item) => item.district))].map(
+                (item, i) => {
+                  return (
+                    <div key={i} className="flex gap-x-2 items-center">
+                      <input
+                        type="checkbox"
+                        name=""
+                        id=""
+                        onChange={(e) => {}}
+                        className="rounded"
+                      />
+                      <p>{item}</p>
+                    </div>
+                  );
+                }
+              )}
             </div>
           </div>
           <div className="flex flex-col gap-y-2">
