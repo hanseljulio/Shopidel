@@ -28,17 +28,19 @@ const ProductCard = ({
     <div
       onClick={onClick}
       className={classNames([
-        "w-full h-auto] md:w-full md:h-auto bg-white overflow-hidden shadow-md hover:shadow-none cursor-pointer rounded-md flex flex-col items-center align-middle justify-center transition-all duration-500 ease-in-out text-left",
+        "w-full h-auto md:w-full object-cover md:h-auto bg-white overflow-hidden shadow-md hover:shadow-none cursor-pointer rounded-md flex flex-col items-center align-middle justify-center transition-all duration-500 ease-in-out text-left",
       ])}
     >
-      <div className={" w-full h-full md "}>
-        <div className={"h-50 w-auto overflow-hidden"}>
+      <div className={"w-full h-full"}>
+        <div className={"h-48 w-full overflow-hidden"}>
           <img
-            width={100}
-            height={100}
             src={image}
             className={"object-cover w-full h-full"}
-            alt=""
+            alt="image product"
+            placeholder="/images/noimage.png"
+            onError={(e) => {
+              (e.target as HTMLInputElement).src = "/images/noimage.png";
+            }}
           />
         </div>
         {showStar === true && (
@@ -61,23 +63,30 @@ const ProductCard = ({
         )}
       </div>
 
-      <div className="pt-3 pb-3 md:pt-5  md:pb-6 w-full px-4 ">
-        <p className=" tracking-wider text-black text-sm md:text-base pt-2">
-          {title?.length > 20 ? `${title.substring(0, 23)}...` : title}
-        </p>
-        <p className=" tracking-wider text-[#f57b29] text-sm md:text-base">
-          {currencyConverter(parseInt(price))}
-        </p>
+      <table className="px-3 pb-3 md:p-5  md:pb-6 w-full h-full justify-between flex-col">
+        <thead></thead>
+        <tbody className="p-3">
+          <tr>
+            <td className=" tracking-wider text-black text-sm md:text-base pt-2 items-start col-span-2 px-3 p-2">
+              {title?.length > 20 ? `${title.substring(0, 20)}...` : title}
+            </td>
+          </tr>
+          <tr>
+            <td className=" tracking-wider text-[#f57b29] text-sm md:text-base col-span-2 px-3">
+              {currencyConverter(parseInt(price))}
+            </td>
+          </tr>
 
-        <div className="flex justify-between text-xs md:text-sm pt-2">
-          <p className="text-gray-500 ">
-            {(place || "").length > 15
-              ? `${(place || "").substring(0, 12)}...`
-              : place}
-          </p>
-          <p className="text-gray-500 "> {`${order} sold`}</p>
-        </div>
-      </div>
+          <tr className="flex justify-between text-xs md:text-sm pt-2 items-end px-3 py-2">
+            <td className="text-gray-500">
+              {(place || "").length > 15
+                ? `${(place || "").substring(0, 12)}...`
+                : place}
+            </td>
+            <td className="text-gray-500 "> {`${order} sold`}</td>
+          </tr>
+        </tbody>
+      </table>
     </div>
   );
 };
