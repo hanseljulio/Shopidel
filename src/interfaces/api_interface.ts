@@ -35,3 +35,15 @@ export interface IAPILoginResponse {
   access_token: string;
   refresh_token: string;
 }
+
+export interface IAPIProductsResponse{
+  id: number,
+  name: string,
+  district: string,
+  total_sold: number,
+  price: string,
+  picture_url: string,
+  created_at: string,
+  updated_at: string,
+  deleted_at: string
+}
