@@ -8,6 +8,9 @@ import { useEffect, useState } from "react";
 import Button from "@/components/Button";
 import Category from "@/components/Category";
 import { useRouter } from "next/router";
+import axios from "axios";
+import { clientUnauthorizeHandler } from "@/utils/utils";
+import { toast } from "react-toastify";
 
 interface IProductProps {
   products: IAPIProductsResponse[];
@@ -27,7 +30,14 @@ export default function Home() {
 
       setProductList(data!);
     } catch (e) {
-      console.error("Error fetching data:", e);
+      if (axios.isAxiosError(e)) {
+        if (e.response?.status === 401) {
+          return clientUnauthorizeHandler(router, updateUser);
+        }
+        return toast.error(e.message, {
+          autoClose: 1500,
+        });
+      }
     }
   };
 
@@ -117,7 +127,7 @@ export default function Home() {
         <div className="justify-between gap-x-4 gap-y-4 grid grid-cols-2 md:grid-cols-5">
           {productList.data?.map((product) => (
             <ProductCard
-              onClick={() => router.push(`/${product.id}`)}
+              onClick={() => router.push(`/${product.name}`)}
               key={product.district}
               image={product.picture_url}
               price={product.price}
