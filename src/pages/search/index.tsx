@@ -1,20 +1,61 @@
 import Navbar from "@/components/Navbar";
 import ProductCard from "@/components/ProductCard";
 import { useRouter } from "next/router";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { FaFilter, FaSort } from "react-icons/fa";
 import { AiFillStar } from "react-icons/ai";
 import Footer from "@/components/Footer";
 import Modal from "@/components/Modal";
 import Button from "@/components/Button";
+import axios from "axios";
+import { ToastContainer, toast } from "react-toastify";
+import { API } from "@/network";
+import { IAPIResponse } from "@/interfaces/api_interface";
+import { currencyConverter } from "@/utils/utils";
+
+interface IProduct {
+  id: number;
+  name: string;
+  district: string;
+  total_sold: number;
+  price: string;
+  picture_url: string;
+}
 
 const Search = () => {
   const router = useRouter();
   const [isModal, setIsModal] = useState<boolean>(false);
   const [contentModal, setContentModal] = useState<JSX.Element>();
+  const [productsRes, setProductsRes] = useState<IAPIResponse<IProduct[]>>();
+
+  const query = router.query.q;
+
+  const getProductsQuery = async () => {
+    try {
+      const res = await API.get("/products", {
+        params: {
+          s: query,
+        },
+      });
+      setProductsRes(res.data as IAPIResponse<IProduct[]>);
+    } catch (e) {
+      if (axios.isAxiosError(e)) {
+        toast.error(e.message, {
+          autoClose: 1500,
+        });
+      }
+    }
+  };
+
+  useEffect(() => {
+    if (query !== undefined) {
+      getProductsQuery();
+    }
+  }, [query]);
 
   return (
     <>
+      <ToastContainer />
       {isModal && (
         <Modal content={contentModal!} onClose={() => setIsModal(false)} />
       )}
@@ -208,7 +249,21 @@ const Search = () => {
               </div>
             </div>
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-5 mt-5">
-              <ProductCard
+              {productsRes?.data?.map((item, i) => {
+                return (
+                  <ProductCard
+                    key={i}
+                    showStar={true}
+                    image={item.picture_url}
+                    price={item.price}
+                    order={item.total_sold}
+                    title={item.name}
+                    place={item.district}
+                    star={5}
+                  />
+                );
+              })}
+              {/* <ProductCard
                 showStar={true}
                 image="https://images.unsplash.com/photo-1697482036303-4c0cf56a38c3?auto=format&fit=crop&q=80&w=1973&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
                 price={"20000"}
@@ -477,7 +532,7 @@ const Search = () => {
                 title="Sun Flower flower flower flower flower flower"
                 place="Malang"
                 star={5}
-              />
+              /> */}
             </div>
           </div>
         </div>
