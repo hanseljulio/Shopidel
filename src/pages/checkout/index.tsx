@@ -121,7 +121,7 @@ const SelectShippingModal = (props: ISelectShippingModalProps) => {
 
   const getCourier = async () => {
     try {
-      const response = await API.get("/orders/couriers/1");
+      const response = await API.get(`/orders/couriers/${props.sellerId}`);
       setCourierList(response.data.data);
     } catch (e) {
       if (axios.isAxiosError(e)) {
