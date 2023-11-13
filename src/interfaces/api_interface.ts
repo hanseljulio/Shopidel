@@ -4,7 +4,7 @@ export interface IAPIResponse<T = Object | []> {
   pagination?: IAPIPagination;
 }
 
-interface IAPIPagination {
+export interface IAPIPagination {
   total_page: number;
   total_item: number;
   current_page: number;
