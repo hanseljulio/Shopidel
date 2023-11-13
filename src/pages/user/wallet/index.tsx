@@ -583,11 +583,12 @@ const WalletDetail = ({
               </div>
             </div>
             <div className="flex self-end mt-2">
-              <Pagination
-                data={transactionHistoryRes?.pagination}
-                onNavigate={(navPage) => setPage(navPage)}
-                limit={3}
-              />
+              {transactionHistoryRes && (
+                <Pagination
+                  data={transactionHistoryRes?.pagination}
+                  onNavigate={(navPage) => setPage(navPage)}
+                />
+              )}
             </div>
           </div>
         )}
