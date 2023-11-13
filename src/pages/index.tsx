@@ -1,10 +1,47 @@
 import Navbar from "../components/Navbar";
 import Footer from "@/components/Footer";
 import ProductCard from "@/components/ProductCard";
-import Category from "@/components/Category";
 import CarouselHome from "@/components/Carousel";
+import { IAPIProductsResponse, IAPIResponse } from "@/interfaces/api_interface";
+import { API } from "@/network";
+import { useEffect, useState } from "react";
+import Button from "@/components/Button";
+import Category from "@/components/Category";
+import { useRouter } from "next/router";
+import axios from "axios";
+import { clientUnauthorizeHandler } from "@/utils/utils";
+import { toast } from "react-toastify";
+
+interface IProductProps {
+  products: IAPIProductsResponse[];
+}
 
 export default function Home() {
+  const router = useRouter();
+  const [productList, setProductList] = useState<
+    IAPIResponse<IAPIProductsResponse[]>
+  >({});
+
+  const getProduct = async () => {
+    try {
+      const res = await API.get(`/products?limit=18`);
+
+      const data = res.data as IAPIResponse<IAPIProductsResponse[]>;
+
+      setProductList(data!);
+    } catch (e) {
+      if (axios.isAxiosError(e)) {
+        return toast.error(e.message, {
+          autoClose: 1500,
+        });
+      }
+    }
+  };
+
+  useEffect(() => {
+    getProduct();
+  }, []);
+
   return (
     <div className="bg-gray-100">
       <Navbar />
@@ -85,80 +122,21 @@ export default function Home() {
           </p>
         </div>
         <div className="justify-between gap-x-4 gap-y-4 grid grid-cols-2 md:grid-cols-5">
-          <ProductCard
-            showStar={true}
-            image="https://images.unsplash.com/photo-1697482036303-4c0cf56a38c3?auto=format&fit=crop&q=80&w=1973&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
-            price={"20000"}
-            order={3000}
-            title="Sun Flower flower flower flower flower flower"
-            place="Malang"
-            star={5}
-          />
-          <ProductCard
-            showStar={true}
-            image="https://images.unsplash.com/photo-1697482036303-4c0cf56a38c3?auto=format&fit=crop&q=80&w=1973&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
-            price={"20000"}
-            order={3000}
-            title="Sun Flower flower flower flower flower flower"
-            place="Malang"
-            star={5}
-          />
-          <ProductCard
-            showStar={true}
-            image="https://images.unsplash.com/photo-1697482036303-4c0cf56a38c3?auto=format&fit=crop&q=80&w=1973&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
-            price={"20000"}
-            order={3000}
-            title="Sun Flower flower flower flower flower flower"
-            place="Malang"
-            star={5}
-          />
-          <ProductCard
-            showStar={true}
-            image="https://images.unsplash.com/photo-1697482036303-4c0cf56a38c3?auto=format&fit=crop&q=80&w=1973&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
-            price={"20000"}
-            order={3000}
-            title="Sun Flower flower flower flower flower flower"
-            place="Malang"
-            star={5}
-          />
-          <ProductCard
-            showStar={true}
-            image="https://images.unsplash.com/photo-1697482036303-4c0cf56a38c3?auto=format&fit=crop&q=80&w=1973&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
-            price={"20000"}
-            order={3000}
-            title="Sun Flower flower flower flower flower flower"
-            place="Malang"
-            star={5}
-          />
-          <ProductCard
-            showStar={true}
-            image="https://images.unsplash.com/photo-1697482036303-4c0cf56a38c3?auto=format&fit=crop&q=80&w=1973&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
-            price={"20000"}
-            order={3000}
-            title="Sun Flower flower flower flower flower flower"
-            place="Malang"
-            star={5}
-          />
-          <ProductCard
-            showStar={true}
-            image="https://images.unsplash.com/photo-1697482036303-4c0cf56a38c3?auto=format&fit=crop&q=80&w=1973&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
-            price={"20000"}
-            order={3000}
-            title="Sun Flower flower flower flower flower flower"
-            place="Malang"
-            star={5}
-          />
-          <ProductCard
-            showStar={true}
-            image="https://images.unsplash.com/photo-1697482036303-4c0cf56a38c3?auto=format&fit=crop&q=80&w=1973&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
-            price={"20000"}
-            order={3000}
-            title="Sun Flower flower flower flower flower flower"
-            place="Malang"
-            star={5}
-          />
+          {productList.data?.map((product) => (
+            <ProductCard
+              onClick={() => router.push(`/${product.name}`)}
+              key={product.district}
+              image={product.picture_url}
+              price={product.price}
+              showStar={false}
+              title={product.name}
+              place={product.district}
+              order={product.total_sold}
+            />
+          ))}
         </div>
       </div>
+
       <Footer />
     </div>
   );
