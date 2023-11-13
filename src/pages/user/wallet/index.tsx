@@ -147,8 +147,7 @@ const TopupWalletModal = ({ onBalanceChange }: ITopupWalletProps) => {
       >
         <input
           onChange={(e) => {
-            if (!/[0-9]/g.test(e.target.value) && e.target.value !== "")
-              return e.preventDefault();
+            if (!/^[0-9]*$/g.test(e.target.value)) return e.preventDefault();
             setAmount(e.target.value);
           }}
           value={amount}

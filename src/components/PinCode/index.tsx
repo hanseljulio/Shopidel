@@ -37,7 +37,7 @@ const PinCode = ({ onSubmit }: IPinCode) => {
               value={pin[i]}
               maxLength={i === pin.length - 1 ? 1 : undefined}
               onChange={(e) => {
-                if (!/[0-9]/g.test(e.target.value) && e.target.value !== "")
+                if (!/^[0-9]*$/g.test(e.target.value))
                   return e.preventDefault();
 
                 if (e.target.value == "") return;
