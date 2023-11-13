@@ -394,7 +394,53 @@ const ProductDetail = ({ product }: IProductDetailProps) => {
                 Set Amounts
               </p>
 
-              <div className="flex gap-3 md:gap-2 mb-2 text-sm text-neutral-600 py-3 justify-between">
+              {/* <table>
+                <thead> </thead>
+
+                <tbody>
+                  <tr>
+                    <td className="flex items-start justify-start top-0">
+                      Pengiriman
+                    </td>
+                    <td className="s row-span-2 col-span-2 w-fit">
+                      <span className="flex items-center">
+                        <FaLocationDot /> {"Malang"}
+                      </span>
+                      <span className="flex items-center">
+                        <FaTruckFast size={15} />{" "}
+                        {`Jakarta Selatan ${"Rp3000"}`}
+                      </span>
+                    </td>
+                  </tr>
+                  {product?.variant_options?.map((item, i) => {
+                    return (
+                      <tr key={i}>
+                        <td>{item.variant_option_name}</td>
+                        {item.childs.map((variant, k) => {
+                          const optionName = item.variant_option_name;
+                          return (
+                            <td
+                              key={k}
+                              className={`px-2 py-  ${
+                                selectedVariants[optionName] === variant
+                                  ? "bg-[#d6e4f8] border border-[#364968]"
+                                  : ""
+                              }`}
+                              onClick={() => handleClick(variant, optionName)}
+                            >
+                              <p className="px-2 py-1 border text-center rounded-md cursor-pointer ">
+                                {variant}
+                              </p>
+                            </td>
+                          );
+                        })}
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table> */}
+
+              <div className="flex gap-2 md:gap-1 mb-2 text-sm text-neutral-600 py-3 justify-between">
                 <p className="">Pengiriman</p>
                 <div>
                   <div className="flex items-center gap-1">
@@ -405,10 +451,13 @@ const ProductDetail = ({ product }: IProductDetailProps) => {
                   </div>
                 </div>
               </div>
-              <div className="flex flex-col gap-y-3 text-sm text-neutral-600">
+              <div className="flex flex-col gap-y-3 text-xs text-neutral-600">
                 {product?.variant_options?.map((item, i) => {
                   return (
-                    <div key={i} className="flex gap-x-5 items-center">
+                    <div
+                      key={i}
+                      className="flex md:gap-x-20 items-center gap-10"
+                    >
                       <p>{item.variant_option_name}</p>
                       <div className="grid grid-cols-3 gap-2">
                         {item.childs.map((variant, k) => {
@@ -504,7 +553,7 @@ const ProductDetail = ({ product }: IProductDetailProps) => {
             </div>
           </div>
           <div className="seller flex-col md:flex-row justify-between md:flex gap-10 py-5 px-5 md:px-0">
-            <div className="order-1  w-3/4">
+            <div className="order-1 w-full  md:w-3/4">
               <div className="sellerShop bg-[#364968] flex flex-row gap-y-5 text-white py-3 my-10 gap-10 px-5 ">
                 <img
                   width={90}
