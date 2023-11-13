@@ -31,13 +31,13 @@ const ProductCard = ({
         "w-full h-auto] md:w-full md:h-auto bg-white overflow-hidden shadow-md hover:shadow-none cursor-pointer rounded-md flex flex-col items-center align-middle justify-center transition-all duration-500 ease-in-out text-left",
       ])}
     >
-      <div className={"relative w-full md "}>
-        <div className={" h-auto md:h-48 w-auto overflow-hidden"}>
+      <div className={" w-full h-full md "}>
+        <div className={"h-50 w-auto overflow-hidden"}>
           <img
             width={100}
             height={100}
             src={image}
-            className={"object-cover w-full h-auto md:h-full "}
+            className={"object-cover w-full h-full"}
             alt=""
           />
         </div>
@@ -71,7 +71,9 @@ const ProductCard = ({
 
         <div className="flex justify-between text-xs md:text-sm pt-2">
           <p className="text-gray-500 ">
-            {place!.length > 15 ? `${title.substring(0, 12)}...` : place}
+            {(place || "").length > 15
+              ? `${(place || "").substring(0, 12)}...`
+              : place}
           </p>
           <p className="text-gray-500 "> {`${order} sold`}</p>
         </div>
