@@ -157,12 +157,21 @@ const Navbar = () => {
           </div>
         </div>
         <div className="hidden space-x-4 md:flex align-middle">
-          <button
-            className=" text-white rounded-md shadow align-middle"
-            onClick={() => router.push("/cart")}
-          >
-            <AiOutlineShoppingCart size={30} />
-          </button>
+          <div className="flex gap-x-2 group relative">
+            <button
+              className=" text-white rounded-md shadow align-middle"
+              onClick={() => router.push("/cart")}
+            >
+              <AiOutlineShoppingCart size={30} />
+            </button>
+            <div className="invisible opacity-0 group-hover:opacity-100 group-hover:visible transition-all duration-150 w-72 bg-white absolute top-[53px] right-0 z-50 rounded-bl-md rounded-br-md overflow-hidden shadow-lg">
+              <div className="px-5 pt-5 text-center">
+                <h1 className="font-bold w-full">My cart</h1>
+                <h1 className="p-3">Your cart is empty!</h1>
+              </div>
+            </div>
+          </div>
+
           <div className="flex gap-x-2 justify-center items-center">
             {logged ? (
               <div className="flex gap-x-2 group hover:cursor-pointer relative">
