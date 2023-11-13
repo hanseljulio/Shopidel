@@ -8,7 +8,7 @@ interface CheckoutVoucherSelectProps {
 
 const CheckoutVoucherSelect = (props: CheckoutVoucherSelectProps) => {
   return (
-    <div className="text-[20px] px-[20px] flex justify-between border-2 py-4 items-center mobile:flex-col gap-6">
+    <div className="text-[20px] px-[20px] flex justify-between border-2 py-4 items-center md:flex-row flex-col gap-6">
       <h1 className="flex items-center gap-3">
         <FaTicketAlt className="text-[#e09664]" />
         Promotions

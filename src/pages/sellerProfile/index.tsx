@@ -171,7 +171,7 @@ function Index() {
                 labelStyle="w-0 m-0 p-0"
                 width="w-[250px]"
                 //   value={}
-                flexLabel="flex items-center gap-[77px] pl-2 mobile:flex-col mobile:gap-2 mobile:items-start"
+                flexLabel="flex md:items-center md:gap-[77px] pl-2 md:flex-row flex-col gap-2 items-start"
                 options={[
                   "the most recent one",
                   "the most expensive",
