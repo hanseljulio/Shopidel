@@ -15,7 +15,7 @@ import "react-toastify/dist/ReactToastify.css";
 import { IProduct } from "@/interfaces/product_interface";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { IDistrict } from "@/interfaces/courier_interface";
-import { useSearchParams } from "next/navigation";
+import { ReadonlyURLSearchParams, useSearchParams } from "next/navigation";
 
 const Search = () => {
   const router = useRouter();
@@ -26,98 +26,51 @@ const Search = () => {
   const [searchCategories, setSearchCategories] = useState<number[]>();
   const [initialSearchProductRes, setInitialSearchProductRes] =
     useState<IAPIResponse<IProduct[]>>();
+  const [minPrice, setMinPrice] = useState<string>("");
+  const [maxPrice, setMaxPrice] = useState<string>("");
+
   const inputPriceMinRef = useRef<HTMLInputElement>(null);
   const inputPriceMaxRef = useRef<HTMLInputElement>(null);
   const searchParam = useSearchParams();
 
-  const [filter, setFilter] = useState<IProductFilter>({
-    districts: [],
-    category: [],
-    minRating: "",
-    price: {
-      min: "",
-      max: "",
-    },
-    sortBy: "price",
-    sort: "desc",
-  });
-
-  const query = router.query.q;
-
-  const getDistricts = async () => {
-    try {
-      const res = await API.get("/address/districts");
-
-      const data = res.data as IAPIResponse<IDistrict[]>;
-      setDistricts(data.data);
-    } catch (e) {
-      if (axios.isAxiosError(e)) {
-        toast.error(e.message, {
-          autoClose: 1500,
-        });
-      }
-    }
-  };
-
   const getProductsQuery = async () => {
-    setFilter({
-      ...filter,
-      districts: [],
-      category: [],
-      minRating: "",
-      price: {
-        min: "",
-        max: "",
-      },
-    });
     try {
       const res = await API.get("/products", {
         params: {
-          s: query,
-          sortBy: filter.sortBy,
-          sort: filter.sort,
-          limit: 30,
+          ...router.query,
         },
       });
 
       const data = res.data as IAPIResponse<IProduct[]>;
-
       setProductsRes(data);
       setInitialSearchProductRes(data);
       setSearchCategories([
         ...new Set(data.data?.map((item) => item.category_id)),
       ]);
-      console.log(data);
     } catch (e) {
       if (axios.isAxiosError(e)) {
-        toast.error(e.message, {
+        console.log(e.response?.data.message);
+        toast.error("Error fetching data", {
           autoClose: 1500,
         });
       }
     }
   };
 
-  const getProductFilter = async () => {
+  const getFilteredProductsQuery = async () => {
     try {
       const res = await API.get("/products", {
         params: {
-          s: query,
-          sortBy: filter.sortBy,
-          sort: filter.sort,
-          categoryId: filter.category.join("#"),
-          minRating: filter.minRating,
-          minPrice: filter.price.min,
-          maxPrice: filter.price.max,
-          limit: 30,
+          ...router.query,
         },
       });
 
       const data = res.data as IAPIResponse<IProduct[]>;
-
       setProductsRes(data);
     } catch (e) {
       if (axios.isAxiosError(e)) {
-        toast.error("Error getting data", {
+        console.log(e.response?.data.message);
+        toast.error("Error fetching data", {
           autoClose: 1500,
         });
       }
@@ -125,15 +78,16 @@ const Search = () => {
   };
 
   useEffect(() => {
-    if (query !== undefined) {
-      getDistricts();
+    if (router.isReady) {
       getProductsQuery();
     }
-  }, [query]);
+  }, [router.isReady, searchParam.get("s")]);
 
   useEffect(() => {
-    getProductFilter();
-  }, [filter]);
+    getFilteredProductsQuery();
+    setMaxPrice(searchParam.get("maxPrice") ?? "");
+    setMinPrice(searchParam.get("minPrice") ?? "");
+  }, [searchParam]);
 
   return (
     <>
@@ -164,18 +118,17 @@ const Search = () => {
                   </div>
                   <div
                     onClick={() => {
-                      setFilter({
-                        ...filter,
-                        districts: [],
-                        category: [],
-                        minRating: "",
-                        price: {
-                          min: "",
-                          max: "",
-                        },
-                      });
                       inputPriceMaxRef.current!.value = "";
                       inputPriceMinRef.current!.value = "";
+                      router.push({
+                        href: router.asPath,
+                        query: {
+                          s: searchParam.get("s"),
+                          sortBy: "price",
+                          sort: "desc",
+                          page: 1,
+                        },
+                      });
                     }}
                     className="hover:cursor-pointer"
                   >
@@ -222,14 +175,18 @@ const Search = () => {
                           <input
                             ref={inputPriceMinRef}
                             onBlur={(e) => {
-                              setFilter({
-                                ...filter,
-                                price: {
-                                  ...filter.price,
-                                  min: e.target.value,
+                              router.push({
+                                href: router.asPath,
+                                query: {
+                                  ...router.query,
+                                  minPrice: e.target.value,
                                 },
                               });
                             }}
+                            onChange={(e) => {
+                              return setMinPrice(e.target.value);
+                            }}
+                            value={minPrice}
                             type="text"
                             name=""
                             id=""
@@ -246,15 +203,19 @@ const Search = () => {
                           <input
                             ref={inputPriceMaxRef}
                             onBlur={(e) => {
-                              setFilter({
-                                ...filter,
-                                price: {
-                                  ...filter.price,
-                                  max: e.target.value,
+                              router.push({
+                                href: router.asPath,
+                                query: {
+                                  ...router.query,
+                                  maxPrice: e.target.value,
                                 },
                               });
                             }}
+                            onChange={(e) => {
+                              return setMaxPrice(e.target.value);
+                            }}
                             type="text"
+                            value={maxPrice}
                             name=""
                             id=""
                             className="w-full focus:border-none border border-[#F3F4F5] rounded-md text-sm pl-10"
@@ -273,7 +234,16 @@ const Search = () => {
                             <div key={i} className="flex items-center gap-x-2">
                               <div
                                 className="flex hover:cursor-pointer"
-                                onClick={() => {}}
+                                onClick={(e) => {
+                                  console.log(i);
+                                  router.push({
+                                    href: router.asPath,
+                                    query: {
+                                      ...router.query,
+                                      minRating: i + 1,
+                                    },
+                                  });
+                                }}
                               >
                                 {Array(5)
                                   .fill("")
@@ -315,11 +285,25 @@ const Search = () => {
                           <div key={i} className="flex gap-x-2 items-start">
                             <input
                               onChange={(e) => {
-                                router.push({
+                                let categoryId = (
+                                  searchParam.get("categoryId") ?? ""
+                                ).split("#");
+
+                                if (categoryId[0] === "") categoryId.pop();
+
+                                if (categoryId.includes(id.toString())) {
+                                  categoryId = categoryId.filter(
+                                    (data) => data !== id.toString()
+                                  );
+                                } else {
+                                  categoryId.push(id.toString());
+                                }
+
+                                return router.push({
                                   href: router.asPath,
                                   query: {
-                                    q: searchParam.get("q"),
-                                    categoryId: 1,
+                                    ...router.query,
+                                    categoryId: categoryId.join("#"),
                                   },
                                 });
                               }}
@@ -327,6 +311,13 @@ const Search = () => {
                               name=""
                               id=""
                               value={id}
+                              checked={
+                                searchParam
+                                  .get("categoryId")
+                                  ?.includes(id.toString())
+                                  ? true
+                                  : false
+                              }
                               className="rounded"
                             />
                             <p>
@@ -347,7 +338,8 @@ const Search = () => {
                 <div className="flex justify-between items-center ">
                   <p>
                     Product search result for &quot;
-                    <span className="font-bold">{router.query.q}</span>&quot;
+                    <span className="font-bold">{searchParam.get("s")}</span>
+                    &quot;
                   </p>
                   <div className="gap-x-5 hidden md:flex">
                     <div className="flex items-center gap-x-2">
@@ -355,11 +347,14 @@ const Search = () => {
                       <select
                         name="sortBy"
                         id="sortBy"
-                        value={filter.sortBy}
+                        value={searchParam.get("sortBy") ?? "price"}
                         onChange={(e) => {
-                          setFilter({
-                            ...filter,
-                            sortBy: e.target.value as ProductSortByType,
+                          router.push({
+                            href: router.asPath,
+                            query: {
+                              ...router.query,
+                              sortBy: e.target.value,
+                            },
                           });
                         }}
                         className="rounded-md border-slate-500 text-sm py-1"
@@ -373,11 +368,14 @@ const Search = () => {
                     <div className="flex items-center gap-x-2">
                       <p className="text-sm">Order: </p>
                       <select
-                        value={filter.sort}
+                        value={searchParam.get("sort") ?? "desc"}
                         onChange={(e) => {
-                          setFilter({
-                            ...filter,
-                            sort: e.target.value as ProductSortType,
+                          router.push({
+                            href: router.asPath,
+                            query: {
+                              ...router.query,
+                              sort: e.target.value,
+                            },
                           });
                         }}
                         name="sort"
@@ -395,13 +393,15 @@ const Search = () => {
                         setIsModal(true);
                         setContentModal(
                           <SortModal
-                            filter={filter}
+                            filter={searchParam}
                             onApply={(data) => {
-                              setFilter({
-                                ...filter,
-                                ...data,
+                              setIsModal(false);
+                              return router.push({
+                                href: router.asPath,
+                                query: {
+                                  ...data,
+                                },
                               });
-                              return setIsModal(false);
                             }}
                           />
                         );
@@ -415,14 +415,18 @@ const Search = () => {
                         setIsModal(true);
                         setContentModal(
                           <FilterModal
-                            data={productsRes!}
-                            filter={filter}
+                            data={initialSearchProductRes!}
+                            searchCategories={searchCategories!}
+                            filter={searchParam}
                             onApply={(data) => {
                               console.log(data);
-                              setFilter({
-                                ...data,
+                              setIsModal(false);
+                              return router.push({
+                                href: router.asPath,
+                                query: {
+                                  ...data,
+                                },
                               });
-                              return setIsModal(false);
                             }}
                           />
                         );
@@ -463,20 +467,22 @@ const Search = () => {
 };
 
 interface SortModalProps {
-  filter: IProductFilter;
+  filter: ReadonlyURLSearchParams;
   onApply: (data: IProductFilter) => void;
 }
 
 const SortModal = ({ filter, onApply }: SortModalProps) => {
   const { register, handleSubmit } = useForm<IProductFilter>({
     defaultValues: {
-      sort: filter.sort,
-      sortBy: filter.sortBy,
+      sort: (filter.get("sort") as ProductSortType) ?? "desc",
+      sortBy: (filter.get("sortBy") as ProductSortByType) ?? "price",
     },
   });
 
   const onSubmit: SubmitHandler<IProductFilter> = (data) => {
-    return onApply(data);
+    return onApply({
+      ...data,
+    });
   };
 
   return (
@@ -517,18 +523,35 @@ const SortModal = ({ filter, onApply }: SortModalProps) => {
 
 interface FilterModalProps extends SortModalProps {
   data: IAPIResponse<IProduct[]>;
+  searchCategories: number[];
 }
 
-const FilterModal = ({ data, filter, onApply }: FilterModalProps) => {
+const FilterModal = ({
+  data,
+  filter,
+  onApply,
+  searchCategories,
+}: FilterModalProps) => {
   const { register, setValue, watch, handleSubmit, getValues } =
     useForm<IProductFilter>({
-      defaultValues: filter,
+      defaultValues: {
+        s: filter.get("s") ?? "",
+        categoryId: filter.get("categoryId") ?? "",
+        district: filter.get("district") ?? "",
+        maxPrice: filter.get("maxPrice") ?? "",
+        minPrice: filter.get("minPrice") ?? "",
+        minRating: filter.get("minRating") ?? "",
+      },
     });
 
-  const watchDistricts = watch("districts");
-  const watchCategories = watch("category");
+  const watchDistricts = watch("district");
+  const watchCategories = watch("categoryId");
   const onSubmit: SubmitHandler<IProductFilter> = (data) => {
-    return onApply(data);
+    return onApply({
+      ...data,
+      sort: (filter.get("sort") as ProductSortType) ?? "desc",
+      sortBy: (filter.get("sortBy") as ProductSortByType) ?? "price",
+    });
   };
 
   return (
@@ -541,11 +564,11 @@ const FilterModal = ({ data, filter, onApply }: FilterModalProps) => {
           </div>
           <div
             onClick={() => {
-              setValue("category", []);
-              setValue("districts", []);
+              setValue("categoryId", "");
+              setValue("district", "");
               setValue("minRating", "");
-              setValue("price.max", "");
-              setValue("price.min", "");
+              setValue("maxPrice", "");
+              setValue("minPrice", "");
             }}
             className="hover:cursor-pointer"
           >
@@ -556,7 +579,7 @@ const FilterModal = ({ data, filter, onApply }: FilterModalProps) => {
           <div className="flex flex-col gap-y-2">
             <p className="font-bold">Location</p>
             <div className="flex flex-col gap-y-2">
-              {[...new Set(data?.data?.map((item) => item.district))].map(
+              {/* {[...new Set(data?.data?.map((item) => item.district))].map(
                 (item, i) => {
                   return (
                     <div key={i} className="flex gap-x-2 items-center">
@@ -566,18 +589,21 @@ const FilterModal = ({ data, filter, onApply }: FilterModalProps) => {
                         id={`districts.${i}`}
                         checked={watchDistricts.includes(item) ? true : false}
                         onChange={() => {
-                          if (getValues("districts").includes(item)) {
-                            return setValue(
-                              "districts",
-                              getValues("districts").filter(
-                                (district) => district !== item
-                              )
+                          let categoryId = (
+                            filter.get("categoryId") ?? ""
+                          ).split("#");
+
+                          if (categoryId[0] === "") categoryId.pop();
+
+                          if (categoryId.includes(item)) {
+                            categoryId = categoryId.filter(
+                              (data) => data !== item
                             );
+                          } else {
+                            categoryId.push(item);
                           }
-                          return setValue("districts", [
-                            ...getValues("districts"),
-                            item,
-                          ]);
+
+                         
                         }}
                         className="rounded"
                       />
@@ -585,7 +611,7 @@ const FilterModal = ({ data, filter, onApply }: FilterModalProps) => {
                     </div>
                   );
                 }
-              )}
+              )} */}
             </div>
           </div>
           <div className="flex flex-col gap-y-2">
@@ -598,10 +624,10 @@ const FilterModal = ({ data, filter, onApply }: FilterModalProps) => {
                     <span>Rp</span>
                   </div>
                   <input
-                    {...register("price.min")}
+                    {...register("minPrice")}
                     type="text"
-                    name="price.min"
-                    id="price.min"
+                    name="minPrice"
+                    id="minPrice"
                     className="w-full focus:border-none border border-[#F3F4F5] rounded-md text-sm pl-10"
                   />
                 </div>
@@ -613,10 +639,10 @@ const FilterModal = ({ data, filter, onApply }: FilterModalProps) => {
                     <span>Rp</span>
                   </div>
                   <input
-                    {...register("price.max")}
+                    {...register("maxPrice")}
                     type="text"
-                    name="price.max"
-                    id="price.max"
+                    name="maxPrice"
+                    id="maxPrice"
                     className="w-full focus:border-none border border-[#F3F4F5] rounded-md text-sm pl-10"
                   />
                 </div>
@@ -666,22 +692,43 @@ const FilterModal = ({ data, filter, onApply }: FilterModalProps) => {
           <div className="flex flex-col gap-y-2">
             <p className="font-bold">Category</p>
             <div className="flex flex-col gap-y-2">
-              <div className="flex gap-x-2 items-center">
-                <input type="checkbox" name="" id="" className="rounded" />
-                <p>Handphone</p>
-              </div>
-              <div className="flex gap-x-2 items-center">
-                <input type="checkbox" name="" id="" className="rounded" />
-                <p>Casing</p>
-              </div>
-              <div className="flex gap-x-2 items-center">
-                <input type="checkbox" name="" id="" className="rounded" />
-                <p>Accessories</p>
-              </div>
-              <div className="flex gap-x-2 items-center">
-                <input type="checkbox" name="" id="" className="rounded" />
-                <p>Charger</p>
-              </div>
+              {searchCategories?.map((id, i) => {
+                return (
+                  <div key={i} className="flex gap-x-2 items-start">
+                    <input
+                      onChange={() => {
+                        let categoryId = watchCategories.split("#");
+
+                        if (categoryId[0] === "") categoryId.pop();
+
+                        if (categoryId.includes(id.toString())) {
+                          categoryId = categoryId.filter(
+                            (data) => data !== id.toString()
+                          );
+                        } else {
+                          categoryId.push(id.toString());
+                        }
+
+                        setValue("categoryId", categoryId.join("#"));
+                      }}
+                      type="checkbox"
+                      name=""
+                      id=""
+                      value={id}
+                      checked={
+                        watchCategories.includes(id.toString()) ? true : false
+                      }
+                      className="rounded"
+                    />
+                    <p>
+                      {
+                        data?.data?.find((raw) => raw.category_id === id)
+                          ?.category_name
+                      }
+                    </p>
+                  </div>
+                );
+              })}
             </div>
           </div>
         </div>
