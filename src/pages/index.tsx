@@ -115,10 +115,12 @@ export default function Home() {
           </p>
         </div>
         <div className="justify-between gap-x-4 gap-y-4 grid grid-cols-2 md:grid-cols-5">
-          {productList.data?.map((product, i) => (
+          {productList.data?.map((product) => (
             <ProductCard
-              key={i}
-              onClick={() => router.push(`/${product.name}`)}
+              key={product.id}
+              onClick={() =>
+                router.push(`${product.seller_name}/${product.name}`)
+              }
               image={product.picture_url}
               price={product.price}
               showStar={false}
