@@ -20,37 +20,6 @@ import { FaLocationDot, FaTruckFast } from "react-icons/fa6";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-interface IAPIProductDetail {
-  id: number;
-  name: string;
-  description: string;
-  stars: string;
-  sold: number;
-  available: number;
-  images: null;
-  variant_options: [
-    {
-      variant_option_name: string;
-      childs: [];
-    }
-  ];
-  variants: [
-    {
-      variant_id: number;
-      variant_name: string;
-      selections: [
-        {
-          selection_variant_name: string;
-          selection_name: string;
-        }
-      ];
-      stock: number;
-      price: string;
-    }
-  ];
-  is_favorite: boolean;
-}
-
 interface IProductDetail {
   images: string;
   varian?: {
@@ -113,11 +82,11 @@ const imgDummy: IProductDetail[] = [
 export const getServerSideProps = async (
   context: GetServerSidePropsContext
 ) => {
-  let data: IAPIProductDetail | undefined;
+  let data: IAPIProductDetailResponse | undefined;
 
   try {
     const res = await API.get("/products/5");
-    data = (res.data as IAPIResponse<IAPIProductDetail>).data;
+    data = (res.data as IAPIResponse<IAPIProductDetailResponse>).data;
   } catch (e) {
     if (axios.isAxiosError(e)) {
       console.error(e.response?.data);
@@ -167,15 +136,38 @@ const ProductDetail = ({
   const [count, setCount] = useState<number>(1);
   const [isHovering, setIsHovering] = useState(false);
   const [isModal, setIsModal] = useState<boolean>(false);
-  const [variation, setVariation] = useState(
-    "https://down-id.img.susercontent.com/file/826639af5f9af89adae9a1700f073242"
-  );
+  const [variation, setVariation] = useState<string>("");
   const [selectedVariants, setSelectedVariants] = useState<{
     [key: string]: string;
   }>({});
   const [subtotal, setSubtotal] = useState<number>(0);
   const [currentStock, setCurrentStock] = useState<number>(0);
   const [isFavorite, setIsFavorite] = useState(false);
+  const [imagesProduct, setImagesProduct] = useState([]);
+
+  useEffect(() => {
+    if (imagesProduct.length > 0) {
+      setVariation(imagesProduct[0]);
+    }
+  }, [imagesProduct]);
+
+  const getImages = async () => {
+    try {
+      const res = await API.get(`/products/${product.id}/pictures`);
+      const data = res.data.data;
+      setImagesProduct(data);
+    } catch (e) {
+      if (axios.isAxiosError(e)) {
+        return toast.error(e.message, {
+          autoClose: 1500,
+        });
+      }
+    }
+  };
+
+  useEffect(() => {
+    getImages();
+  }, []);
 
   const calculateSubtotal = () => {
     const selectedVariant = product?.variants.find((variant) => {
@@ -337,14 +329,14 @@ const ProductDetail = ({
         <Navbar />
         <div className="mx-auto lg:max-w-7xl px-4 md:px-0">
           <div className="flex-col md:flex-row justify-between md:flex gap-10 py-5 px-5 md:px-0">
-            <div className="order-1 md:order-1 imageProduct w-full md:w-1/4">
+            <div className="order-1 md:order-1 imageProduct w-full md:w-1/4 rounded-md overflow-hidden">
               {isHovering == true ? (
                 <img
                   width={200}
                   height={200}
                   src={variation}
                   alt=""
-                  className="bigImage w-full cursor-pointer"
+                  className="bigImage w-full cursor-pointer rounded-md"
                   onClick={handleZoomImage}
                 />
               ) : (
@@ -353,21 +345,21 @@ const ProductDetail = ({
                   height={100}
                   src={variation}
                   alt=""
-                  className="bigImage w-full cursor-pointer"
+                  className="bigImage w-full cursor-pointer rounded-md"
                   onClick={handleZoomImage}
                 />
               )}
-              <div className="variation flex overflow-x-scroll [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none']">
-                {imgDummy.map((product) => {
+              <div className="variation justify-center gap-1 mt-2 flex overflow-x-scroll [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none']">
+                {imagesProduct.map((url, index) => {
                   return (
                     <img
-                      key={product.images}
-                      className="cursor-pointer w-[90px] h-full"
+                      key={index}
+                      className="cursor-pointer w-[90px] h-full rounded-md"
                       width={50}
                       height={50}
-                      src={product.images}
-                      alt="..."
-                      onMouseOver={() => handleMouseOver(product.images)}
+                      src={url}
+                      alt="images"
+                      onMouseOver={() => handleMouseOver(url)}
                       onMouseOut={handleMouseOut}
                       onClick={handleZoomImage}
                     />
