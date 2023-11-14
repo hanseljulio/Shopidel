@@ -38,9 +38,28 @@ const IndividualOrder = (props: IIndividualOrderProps) => {
                       {currencyConverter(parseInt(data.individual_price))}
                     </p>
                     {data.is_reviewed ? (
-                      <p className="text-green-600 hover:cursor-pointer">
-                        View Review
-                      </p>
+                      <div className="flex gap-x-2 group relative">
+                        <p className="text-green-600 hover:cursor-pointer">
+                          View Review
+                        </p>
+                        <div className="invisible opacity-0 group-hover:opacity-100 group-hover:visible transition-all duration-150 w-96 bg-white absolute left-24 z-50 border-2 top-2 rounded-bl-md rounded-br-md overflow-hidden shadow-lg">
+                          <div className="px-5 pt-5 text-center">
+                            <h1 className="font-bold w-full">Your Review</h1>
+                            <h1 className="p-3">
+                              {data.review.review_feedback}
+                            </h1>
+                            <h1 className="p-3">
+                              Rating: {data.review.review_rating}/5
+                            </h1>
+                            <h1 className="p-3">
+                              Reviewed on:{" "}
+                              {new Date(
+                                data.review.created_at
+                              ).toLocaleString()}
+                            </h1>
+                          </div>
+                        </div>
+                      </div>
                     ) : (
                       <p className="text-red-600 hover:cursor-pointer">
                         Review Order
