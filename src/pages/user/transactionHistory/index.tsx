@@ -14,15 +14,110 @@ import {
 } from "@/interfaces/user_interface";
 import Pagination from "@/components/Pagination";
 import Modal from "@/components/Modal";
+import { FaMapMarkerAlt, FaTag } from "react-icons/fa";
 
 interface IIndividualOrderProps {
   data: ITransactionHistoryData;
+  setCurrentTransaction: (transaction: ITransactionHistoryData) => void;
   setCurrentReview: (review: ITransactionHistoryReview) => void;
+}
+
+interface IDetailModalProps {
+  data: ITransactionHistoryData;
 }
 
 interface IReviewModal {
   review: ITransactionHistoryReview;
 }
+
+const DetailModal = (props: IDetailModalProps) => {
+  const getTotal = () => {
+    let total = 0;
+    for (let i = 0; i < props.data.products.length; i++) {
+      total +=
+        props.data.products[i].quantity *
+        parseInt(props.data.products[i].individual_price);
+    }
+
+    return total;
+  };
+
+  return (
+    <div className="bg-white p-5 rounded-md  md:w-[1000px] max-h-[800px] w-[99%] overflow-y-auto">
+      <div className="py-3 border-b-2">
+        <h1 className="text-[20px] font-bold">Transaction Details</h1>
+      </div>
+      <div className="pt-4">
+        <h1>Order status: {props.data.status}</h1>
+        <h1>Purchased from: {props.data.shop_name}</h1>
+      </div>
+      <div className="pt-8">
+        <h1 className="text-[20px] font-bold flex items-center gap-3">
+          <FaMapMarkerAlt className="text-[#ff3224]" />
+          Delivery Address
+        </h1>
+        <h1>{props.data.shipping.detail}</h1>
+        <h1>{`${props.data.shipping.kelurahan.toUpperCase()}, ${props.data.shipping.sub_district.toUpperCase()}, ${props.data.shipping.district.toUpperCase()}, ${props.data.shipping.province.toUpperCase()}, ID ${
+          props.data.shipping.zip_code
+        }`}</h1>
+      </div>
+
+      <div className="py-8">
+        <h1 className="text-[20px] font-bold flex items-center gap-3">
+          <FaTag className="text-[#ff3224]" />
+          Products purchased
+        </h1>
+        {props.data.products.map((data, index) => {
+          return (
+            <div key={index} className="py-3">
+              <h1 className="font-bold">{data.product_name}</h1>
+
+              <p>
+                {data.quantity} item x{" "}
+                {currencyConverter(parseInt(data.individual_price))}
+              </p>
+            </div>
+          );
+        })}
+      </div>
+      <div className="flex justify-end py-10 px-4 bg-[#29374e] text-white">
+        <div className="text-left h-[150px]">
+          <h1>Order Total: </h1>
+          <h1>Shipping Total: </h1>
+          {parseInt(props.data.promotions.shop_voucher) > 0 && (
+            <h1>Shop Promo: </h1>
+          )}
+          {parseInt(props.data.promotions.marketplace_voucher) > 0 && (
+            <h1>Marketplace Promo: </h1>
+          )}
+          <br />
+          <h1 className="pt-3">Total payment: </h1>
+        </div>
+
+        <div className="text-right h-[150px]">
+          <h1>{currencyConverter(getTotal())}</h1>
+          <h1>{currencyConverter(parseInt(props.data.delivery_fee))}</h1>
+          {parseInt(props.data.promotions.shop_voucher) > 0 && (
+            <h1>
+              {currencyConverter(parseInt(props.data.promotions.shop_voucher))}
+            </h1>
+          )}
+          {parseInt(props.data.promotions.marketplace_voucher) > 0 && (
+            <h1>
+              {currencyConverter(
+                parseInt(props.data.promotions.marketplace_voucher)
+              )}
+            </h1>
+          )}
+          <br />
+          <h1 className="text-[30px]">
+            {currencyConverter(parseInt(props.data.total_payment))}
+          </h1>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 const ReviewModal = (props: IReviewModal) => {
   return (
@@ -88,7 +183,10 @@ const IndividualOrder = (props: IIndividualOrderProps) => {
           })}
         </div>
         <div className="text-right flex flex-col gap-3 text-[18px]">
-          <h1 className="text-blue-600 hover:cursor-pointer hover:underline">
+          <h1
+            onClick={() => props.setCurrentTransaction(props.data)}
+            className="text-blue-600 hover:cursor-pointer hover:underline"
+          >
             View Transaction Detail
           </h1>
           <h1 className="">Status: {props.data.status.toUpperCase()}</h1>
@@ -101,7 +199,51 @@ const IndividualOrder = (props: IIndividualOrderProps) => {
 const TransactionHistory = () => {
   const { user, updateUser } = useUserStore();
   const router = useRouter();
-  const [transactionData, setTransactionData] = useState<ITransactionHistory>();
+  const [transactionData, setTransactionData] = useState<ITransactionHistory>({
+    data: [
+      {
+        order_id: 3,
+        shop_name: "Jejak Trendi",
+        status: "Completed",
+        products: [
+          {
+            product_id: 5,
+            product_name:
+              "KOMIN-Sandal Hiu Pria Dewasa Sendal Shark Sandal Couple Rumah Sendal Paus Eva Lembut Ringan Nyaman Sandal Pasangan Korea",
+            quantity: 1,
+            individual_price: "18000",
+            review: {
+              review_id: 0,
+              review_feedback: "",
+              review_rating: 0,
+              created_at: "0001-01-01T00:00:00Z",
+            },
+            is_reviewed: false,
+          },
+        ],
+        promotions: {
+          marketplace_voucher: "9000",
+          shop_voucher: "2000",
+        },
+        delivery_fee: "17000",
+        shipping: {
+          province: "Jabar",
+          district: "Jakarta",
+          zip_code: "52323",
+          sub_district: "diejdiejdid",
+          kelurahan: "aded",
+          detail: "dededededed",
+        },
+        total_payment: "520000",
+      },
+    ],
+    pagination: {
+      total_page: 2,
+      total_item: 13,
+      current_page: 1,
+      limit: 10,
+    },
+  });
   const [sortBy, setSortBy] = useState<string>("all");
   const orderStatus = [
     "All",
@@ -118,7 +260,29 @@ const TransactionHistory = () => {
       review_rating: 0,
       created_at: "0001-01-01T00:00:00Z",
     });
+  const [selectedTransaction, setSelectedTransaction] =
+    useState<ITransactionHistoryData>({
+      order_id: 0,
+      shop_name: "",
+      status: "",
+      products: [],
+      promotions: {
+        marketplace_voucher: "",
+        shop_voucher: "",
+      },
+      delivery_fee: "",
+      shipping: {
+        province: "",
+        district: "",
+        zip_code: "",
+        sub_district: "",
+        kelurahan: "",
+        detail: "",
+      },
+      total_payment: "",
+    });
   const [showReviewModal, setShowReviewModal] = useState<boolean>(false);
+  const [showDetailModal, setShowDetailModal] = useState<boolean>(false);
 
   const getTransactionData = async () => {
     try {
@@ -141,11 +305,18 @@ const TransactionHistory = () => {
   };
 
   useEffect(() => {
-    getTransactionData();
+    // getTransactionData();
   }, [sortBy, page]);
 
   return (
     <>
+      {showDetailModal && (
+        <Modal
+          content={<DetailModal data={selectedTransaction} />}
+          onClose={() => setShowDetailModal(false)}
+        />
+      )}
+
       {showReviewModal && (
         <Modal
           content={<ReviewModal review={selectedReview} />}
@@ -185,6 +356,10 @@ const TransactionHistory = () => {
                     <IndividualOrder
                       key={index}
                       data={data}
+                      setCurrentTransaction={(transaction) => {
+                        setSelectedTransaction(transaction);
+                        setShowDetailModal(true);
+                      }}
                       setCurrentReview={(review) => {
                         setSelectedReview(review);
                         setShowReviewModal(true);
