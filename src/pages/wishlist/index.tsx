@@ -29,28 +29,6 @@ function Index() {
   const [wishlist, setWishlist] = useState<IAPIResponse<IWishlist[]>>();
   const [paginationNumber, setPaginationNumber] = useState<number[]>([]);
   const [page, setPage] = useState<number>(1);
-  const [selectedIds, setSelectedIds] = useState<number[]>([]);
-  const [isSelecting, setIsSelecting] = useState(false);
-  const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false);
-
-  const [wishlistToDelete, setWishlistToDelete] = useState<number>(0);
-
-  const toggleSelection = (productId: number) => {
-    if (selectedIds.includes(productId)) {
-      setSelectedIds(selectedIds.filter((id) => id !== productId));
-    } else {
-      setSelectedIds([...selectedIds, productId]);
-    }
-  };
-
-  const deleteSelected = () => {
-    const updatedWishlist = wishlist?.data?.filter(
-      (product) => !selectedIds.includes(product.id)
-    );
-    setWishlist({ ...wishlist, data: updatedWishlist });
-    setSelectedIds([]);
-    setIsSelecting(false);
-  };
 
   const getWishlist = async () => {
     try {
@@ -84,41 +62,6 @@ function Index() {
     }
   };
 
-  const deleteWishlist = (id: number) => {
-    try {
-      toast.promise(
-        API.delete(`/products/favorites/${id}`),
-        {
-          pending: "Deleting wishlist...",
-          success: {
-            render() {
-              setShowDeleteModal(false);
-              return "Address successfully deleted!";
-            },
-          },
-          error: {
-            render({ data }) {
-              if (axios.isAxiosError(data)) {
-                return `${(data.response?.data as IAPIResponse).message}`;
-              }
-            },
-          },
-        },
-        {
-          autoClose: 1500,
-        }
-      );
-    } catch (e) {
-      if (axios.isAxiosError(e)) {
-        toast.error(e.message, {
-          autoClose: 1500,
-        });
-      }
-    }
-
-    getWishlist();
-  };
-
   useEffect(() => {
     getWishlist();
   }, []);
@@ -138,37 +81,19 @@ function Index() {
           />
         </div>
         <div className="gap-x-4 gap-y-1 grid grid-cols-2 md:grid-cols-6 mt-10">
-          {wishlist?.data?.map((product) => {
+          {wishlist?.data?.map((product, i) => {
             if (wishlist.data?.length !== 0) {
               return (
                 <div
-                  key={product.id}
+                  key={i}
                   className="hover:border hover:border-[#364968] rounded-md"
                 >
-                  <FaRegTrashAlt
-                    size={25}
-                    className="s text-[#f57b29] absolute z-10 flex cursor-pointer opacity-50 p-1 items-end bg-[#364968] rounded-br-xl"
-                    // onClick={() => deleteWishlist(product.id)}
-                    onClick={async () => {
-                      try {
-                        const res = await API.delete(
-                          `/products/favorites/${product.id}`
-                        );
-                        await getWishlist();
-                      } catch (error) {
-                        console.log(error);
-                      }
-                    }}
-                  />
-
                   <ProductCard
                     image={product.picture_url}
                     price={product.price}
                     showStar={false}
                     order={product.total_sold}
                     title={product.name}
-                    selected={selectedIds.includes(product.id)}
-                    onSelect={() => toggleSelection(product.id)}
                   />
                 </div>
               );
