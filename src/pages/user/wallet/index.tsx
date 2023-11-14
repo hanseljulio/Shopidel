@@ -44,7 +44,7 @@ const Wallet = ({
   const [modalContent, setModalContent] = useState<JSX.Element>();
 
   if (wallet === undefined) {
-    <ProfileLayout>
+    <ProfileLayout currentPage="My Wallet">
       <div className="flex justify-center items-center h-screen">
         <h1>An error occurred...</h1>
       </div>
@@ -63,7 +63,7 @@ const Wallet = ({
       {isModal && (
         <Modal content={modalContent!} onClose={() => setIsModal(false)} />
       )}
-      <ProfileLayout>
+      <ProfileLayout currentPage="My Wallet">
         {wallet!.isActive ? (
           <WalletDetail
             onOpenDialog={(data) => {
