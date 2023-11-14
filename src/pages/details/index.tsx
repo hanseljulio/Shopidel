@@ -25,64 +25,10 @@ import { FaLocationDot, FaTruckFast } from "react-icons/fa6";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-interface IProductDetail {
-  images: string;
-  varian?: {
-    type?: string;
-    color?: string;
-  };
+export interface IAPIProductDetailResponseWithSeller
+  extends IAPIProductDetailResponse {
+  seller_name: string;
 }
-
-const imgDummy: IProductDetail[] = [
-  {
-    images:
-      "https://down-id.img.susercontent.com/file/826639af5f9af89adae9a1700f073242",
-    varian: {
-      type: "color",
-      color: "red",
-    },
-  },
-  {
-    images:
-      "https://down-id.img.susercontent.com/file/65fe327802a4e2386cd19d6001e363ee",
-    varian: {
-      type: "color",
-      color: "purple",
-    },
-  },
-  {
-    images:
-      "https://down-id.img.susercontent.com/file/e4e359076303b2a2688506898fdb8793",
-    varian: {
-      type: "color",
-      color: "yellow",
-    },
-  },
-  {
-    images:
-      "https://down-id.img.susercontent.com/file/ff0a9d6bbc26dfaa93fb20a8e3f85a29",
-  },
-  {
-    images:
-      "https://down-id.img.susercontent.com/file/826639af5f9af89adae9a1700f073242",
-  },
-  {
-    images:
-      "https://down-id.img.susercontent.com/file/3926ab1d88624e7e9feb42c76a830d93",
-  },
-  {
-    images:
-      "https://down-id.img.susercontent.com/file/5676ea16c2a424a8285e806bb8b42616",
-  },
-  {
-    images:
-      "https://down-id.img.susercontent.com/file/50044a0096334c145d8560b7a085170c",
-  },
-  {
-    images:
-      "https://down-id.img.susercontent.com/file/bc3b634e8b2beb1f09f59671102800a7",
-  },
-];
 
 export const getServerSideProps = async (
   context: GetServerSidePropsContext
@@ -90,7 +36,7 @@ export const getServerSideProps = async (
   let data: IAPIProductDetailResponse | undefined;
 
   try {
-    const res = await API.get("/products/5");
+    const res = await API.get("/products/4");
     data = (res.data as IAPIResponse<IAPIProductDetailResponse>).data;
     console.log("hasil product", data);
   } catch (e) {
@@ -156,6 +102,8 @@ const ProductDetail = ({
   const [page, setPage] = useState<number>(1);
   const [suggestion, setSuggestion] =
     useState<IAPIResponse<IProductSuggestion[]>>();
+  const [shop, setShop] =
+    useState<IAPIResponse<IAPIProductDetailResponseWithSeller[]>>();
 
   useEffect(() => {
     if (imagesProduct.length > 0) {
@@ -210,6 +158,24 @@ const ProductDetail = ({
 
       const data = res.data as IAPIResponse<IProductSuggestion[]>;
       setSuggestion(data);
+    } catch (e) {
+      if (axios.isAxiosError(e)) {
+        return toast.error("Error fetching product suggestion", {
+          toastId: "errorWishlist",
+          autoClose: 1500,
+        });
+      }
+    }
+  };
+
+  const getShop = async () => {
+    try {
+      const res = await API.get(`/products/${product.id}/recommended-products`);
+
+      const data = res.data as IAPIResponse<
+        IAPIProductDetailResponseWithSeller[]
+      >;
+      setShop(data);
     } catch (e) {
       if (axios.isAxiosError(e)) {
         return toast.error("Error fetching product suggestion", {
@@ -285,14 +251,19 @@ const ProductDetail = ({
   };
 
   const handleToCart = async () => {
-    if (Object.keys(selectedVariants).length === 0 || count < 1) {
+    if (count < 1) {
       return;
     }
 
-    const variant = product.variants.find((v) => {
-      const variantKey = v.selections[0].selection_variant_name;
-      return selectedVariants[variantKey] === v.selections[0].selection_name;
-    });
+    let variant;
+    if (Object.keys(selectedVariants).length === 0) {
+      variant = product?.variants[0];
+    } else {
+      variant = product?.variants.find((v) => {
+        const variantKey = v.selections[0].selection_variant_name;
+        return selectedVariants[variantKey] === v.selections[0].selection_name;
+      });
+    }
 
     if (!variant) {
       return;
@@ -311,14 +282,10 @@ const ProductDetail = ({
       });
 
       if (response.status === 200) {
-        console.log("masuk kestatus 200");
-
         toast.success("Added to cart", { autoClose: 1500 });
       } else {
         toast.error("Failed to add to cart", { autoClose: 1500 });
       }
-      console.log("yess");
-
       console.log(response.data);
     } catch (error) {
       if (axios.isAxiosError(error)) {
@@ -328,7 +295,6 @@ const ProductDetail = ({
           autoClose: 1500,
         });
       }
-      console.log("nooooo");
     }
   };
 
@@ -447,52 +413,6 @@ const ProductDetail = ({
                 Set Amounts
               </p>
 
-              {/* <table>
-                <thead> </thead>
-
-                <tbody>
-                  <tr>
-                    <td className="flex items-start justify-start top-0">
-                      Pengiriman
-                    </td>
-                    <td className="s row-span-2 col-span-2 w-fit">
-                      <span className="flex items-center">
-                        <FaLocationDot /> {"Malang"}
-                      </span>
-                      <span className="flex items-center">
-                        <FaTruckFast size={15} />{" "}
-                        {`Jakarta Selatan ${"Rp3000"}`}
-                      </span>
-                    </td>
-                  </tr>
-                  {product?.variant_options?.map((item, i) => {
-                    return (
-                      <tr key={i}>
-                        <td>{item.variant_option_name}</td>
-                        {item.childs.map((variant, k) => {
-                          const optionName = item.variant_option_name;
-                          return (
-                            <td
-                              key={k}
-                              className={`px-2 py-  ${
-                                selectedVariants[optionName] === variant
-                                  ? "bg-[#d6e4f8] border border-[#364968]"
-                                  : ""
-                              }`}
-                              onClick={() => handleClick(variant, optionName)}
-                            >
-                              <p className="px-2 py-1 border text-center rounded-md cursor-pointer ">
-                                {variant}
-                              </p>
-                            </td>
-                          );
-                        })}
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table> */}
-
               <div className="flex gap-2 md:gap-1 mb-2 text-sm text-neutral-600 py-3 justify-between">
                 <p className="">Pengiriman</p>
                 <div>
@@ -600,7 +520,18 @@ const ProductDetail = ({
               <div className="desc pt-5 ">
                 <p className="text-lg font-medium border-b my-4">Description</p>
                 <p className="">
-                  {product?.description.replace(/\n/, "<br />")}
+                  {product?.description
+                    .split("\n\n")
+                    .map((paragraph, index) => (
+                      <span key={index} className="line-break">
+                        {paragraph.split("\n").map((line, lineIndex) => (
+                          <React.Fragment key={lineIndex}>
+                            {line}
+                            <br />
+                          </React.Fragment>
+                        ))}
+                      </span>
+                    ))}
                 </p>
               </div>
             </div>
