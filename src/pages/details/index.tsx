@@ -1,6 +1,7 @@
 import Footer from "@/components/Footer";
 import Modal from "@/components/Modal";
 import Navbar from "@/components/Navbar";
+import Pagination from "@/components/Pagination";
 import ProductCard from "@/components/ProductCard";
 import {
   IAPIProductDetailResponse,
@@ -637,7 +638,7 @@ const ProductDetail = ({
                   {reviews?.data?.map((review, index) => (
                     <div
                       key={index}
-                      className="buyerReviews flex mt-5  border-y"
+                      className="buyerReviews flex mt-5 py-2  border-y"
                     >
                       <div className="imageCust pr-4 rounded-full overflow-hidden">
                         <img
@@ -674,6 +675,14 @@ const ProductDetail = ({
                       </div>
                     </div>
                   ))}
+                  <div className="flex self-end mt-2 justify-center">
+                    {reviews && (
+                      <Pagination
+                        data={reviews?.pagination}
+                        onNavigate={(navPage: any) => setPage(navPage)}
+                      />
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
