@@ -49,7 +49,7 @@ const MobileUserProfileSidebar = (props: MobileUserProfileSidebarProps) => {
           disabled={props.currentPage === "Transaction History"}
         />
         <Button
-          text="My Vouchers"
+          text="Wishlist"
           styling="bg-blue-100 py-[12px] rounded-full w-[150px] px-8 hover:bg-blue-300 my-4"
         />
       </div>
