@@ -1,3 +1,4 @@
+import Button from "@/components/Button";
 import Footer from "@/components/Footer";
 import Modal from "@/components/Modal";
 import Navbar from "@/components/Navbar";
@@ -8,11 +9,13 @@ import {
   IAPIResponse,
 } from "@/interfaces/api_interface";
 import { IReviewProduct } from "@/interfaces/review_interface";
+import { IProductSuggestion } from "@/interfaces/suggestProduct_interface";
 import { API } from "@/network";
 import { currencyConverter } from "@/utils/utils";
 import axios from "axios";
 import { getCookie } from "cookies-next";
 import { GetServerSidePropsContext, InferGetServerSidePropsType } from "next";
+import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
 import { SubmitHandler } from "react-hook-form";
 import { AiOutlineShoppingCart } from "react-icons/ai";
@@ -135,6 +138,7 @@ export const getServerSideProps = async (
 const ProductDetail = ({
   product,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
+  const router = useRouter();
   const [count, setCount] = useState<number>(1);
   const [isHovering, setIsHovering] = useState(false);
   const [isModal, setIsModal] = useState<boolean>(false);
@@ -149,6 +153,8 @@ const ProductDetail = ({
   const [reviews, setReviews] = useState<IAPIResponse<IReviewProduct[]>>();
   const [paginationNumber, setPaginationNumber] = useState<number[]>([]);
   const [page, setPage] = useState<number>(1);
+  const [suggestion, setSuggestion] =
+    useState<IAPIResponse<IProductSuggestion[]>>();
 
   useEffect(() => {
     if (imagesProduct.length > 0) {
@@ -192,7 +198,27 @@ const ProductDetail = ({
       console.log("betul");
     } catch (e) {
       if (axios.isAxiosError(e)) {
-        return toast.error("Error fetching wishlist", {
+        return toast.error("Error fetching review products", {
+          toastId: "errorWishlist",
+          autoClose: 1500,
+        });
+      }
+      console.log("salah");
+    }
+  };
+
+  const getSuggest = async () => {
+    try {
+      const res = await API.get(`/products/${product.id}/recommended-products`);
+      console.log(res);
+      const data = res.data as IAPIResponse<IProductSuggestion[]>;
+      setSuggestion(data);
+      console.log(data.data);
+
+      console.log("betul suggest");
+    } catch (e) {
+      if (axios.isAxiosError(e)) {
+        return toast.error("Error fetching product suggestion", {
           toastId: "errorWishlist",
           autoClose: 1500,
         });
@@ -203,6 +229,7 @@ const ProductDetail = ({
 
   useEffect(() => {
     getImages();
+    getSuggest();
   }, []);
 
   useEffect(() => {
@@ -625,7 +652,7 @@ const ProductDetail = ({
                   </p>
                   <div>
                     <p>{"4.8 dari 5"}</p>
-                    <div className="star flex text-[#f57b29]">
+                    <div className="star flex text-[#fc9b5b]">
                       <FaStar />
                       <FaStar />
                       <FaStar />
@@ -687,25 +714,24 @@ const ProductDetail = ({
               </div>
             </div>
             <div className="order-2 w-full md:w-1/4 items-center flex flex-col  md:justify-end mt-5">
-              <p className="py-3">Other products from this store</p>
-              <div className="md:w-3/4 content-center flex flex-row gap-x-4 justify-between md:flex-col">
-                <ProductCard
-                  image="https://down-id.img.susercontent.com/file/bc3b634e8b2beb1f09f59671102800a7"
-                  title="Sepatu Neki"
-                  price={"1000000"}
-                  showStar={false}
-                />
-                <ProductCard
-                  image="https://down-id.img.susercontent.com/file/bc3b634e8b2beb1f09f59671102800a7"
-                  title="Sepatu Neki"
-                  price={"1000000"}
-                  showStar={false}
-                />
-                <ProductCard
-                  image="https://down-id.img.susercontent.com/file/bc3b634e8b2beb1f09f59671102800a7"
-                  title="Sepatu Neki"
-                  price={"1000000"}
-                  showStar={false}
+              <p className="py-3 font-medium text-lg">Others in our shop</p>
+              <div className="md:w-3/4 content-center grid grid-cols-2 md:grid-cols-1 gap-x-4 gap-y-2 justify-between">
+                {suggestion?.data?.map(
+                  (e, i) =>
+                    i < 6 && (
+                      <ProductCard
+                        key={i}
+                        image={e.product_picture_url}
+                        title={e.product_name}
+                        price={e.product_price}
+                        showStar={false}
+                      />
+                    )
+                )}
+                <Button
+                  text="View More"
+                  styling="bg-[#f57b29] rounded-md p-3 shadow-lg text-white hover:bg-[#fc9b5b] col-span-2 md:col-span-1"
+                  onClick={() => router.push(`/`)}
                 />
               </div>
             </div>
