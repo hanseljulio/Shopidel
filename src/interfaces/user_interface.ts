@@ -46,7 +46,7 @@ export interface ITransactionHistoryProducts {
   quantity: number;
   individual_price: string;
   review: ITransactionHistoryReview;
-  is_reviewed: true;
+  is_reviewed: boolean;
 }
 
 export interface ITransactionHistoryReview {

@@ -3,7 +3,7 @@ import axios, { AxiosError } from "axios";
 import { getCookie } from "cookies-next";
 
 export const API = axios.create({
-  baseURL: "https://digitalent.games.test.shopee.io/vm2/api",
+  baseURL: "http://10.20.191.39:8080",
 });
 
 API.interceptors.request.use(async (config) => {
