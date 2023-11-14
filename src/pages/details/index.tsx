@@ -2,13 +2,15 @@ import Footer from "@/components/Footer";
 import Modal from "@/components/Modal";
 import Navbar from "@/components/Navbar";
 import ProductCard from "@/components/ProductCard";
-import { IAPIResponse } from "@/interfaces/api_interface";
+import {
+  IAPIProductDetailResponse,
+  IAPIResponse,
+} from "@/interfaces/api_interface";
 import { API } from "@/network";
 import { currencyConverter } from "@/utils/utils";
 import axios from "axios";
 import { getCookie } from "cookies-next";
-import { GetServerSidePropsContext } from "next";
-import { useRouter } from "next/router";
+import { GetServerSidePropsContext, InferGetServerSidePropsType } from "next";
 import React, { useEffect, useState } from "react";
 import { SubmitHandler } from "react-hook-form";
 import { AiOutlineShoppingCart } from "react-icons/ai";
@@ -55,10 +57,6 @@ interface IProductDetail {
     type?: string;
     color?: string;
   };
-}
-
-interface IProductDetailProps {
-  product: IAPIProductDetail;
 }
 
 const imgDummy: IProductDetail[] = [
@@ -158,13 +156,14 @@ export const getServerSideProps = async (
 
   return {
     props: {
-      product: data,
+      product: data!,
     },
   };
 };
 
-const ProductDetail = ({ product }: IProductDetailProps) => {
-  const router = useRouter();
+const ProductDetail = ({
+  product,
+}: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   const [count, setCount] = useState<number>(1);
   const [isHovering, setIsHovering] = useState(false);
   const [isModal, setIsModal] = useState<boolean>(false);
@@ -281,8 +280,10 @@ const ProductDetail = ({ product }: IProductDetailProps) => {
     }
   };
 
-  const handleWishlist: SubmitHandler<IAPIProductDetail> = async (data) => {
-    let favData: Pick<IAPIProductDetail, "id"> = {
+  const handleWishlist: SubmitHandler<IAPIProductDetailResponse> = async (
+    data
+  ) => {
+    let favData: Pick<IAPIProductDetailResponse, "id"> = {
       id: data.id,
     };
 

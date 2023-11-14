@@ -36,14 +36,32 @@ export interface IAPILoginResponse {
   refresh_token: string;
 }
 
-export interface IAPIProductsResponse{
-  id: number,
-  name: string,
-  district: string,
-  total_sold: number,
-  price: string,
-  picture_url: string,
-  created_at: string,
-  updated_at: string,
-  deleted_at: string
+export interface IAPIProductDetailResponse {
+  id: number;
+  name: string;
+  description: string;
+  stars: string;
+  sold: number;
+  available: number;
+  images: null;
+  variant_options: [
+    {
+      variant_option_name: string;
+      childs: [];
+    }
+  ];
+  variants: [
+    {
+      variant_id: number;
+      variant_name: string;
+      selections: [
+        {
+          selection_variant_name: string;
+          selection_name: string;
+        }
+      ];
+      stock: number;
+      price: string;
+    }
+  ];
 }

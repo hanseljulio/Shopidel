@@ -2,31 +2,24 @@ import Navbar from "../components/Navbar";
 import Footer from "@/components/Footer";
 import ProductCard from "@/components/ProductCard";
 import CarouselHome from "@/components/Carousel";
-import { IAPIProductsResponse, IAPIResponse } from "@/interfaces/api_interface";
+import { IAPIResponse } from "@/interfaces/api_interface";
 import { API } from "@/network";
 import { useEffect, useState } from "react";
-import Button from "@/components/Button";
 import Category from "@/components/Category";
 import { useRouter } from "next/router";
 import axios from "axios";
-import { clientUnauthorizeHandler } from "@/utils/utils";
 import { toast } from "react-toastify";
-
-interface IProductProps {
-  products: IAPIProductsResponse[];
-}
+import { IProduct } from "@/interfaces/product_interface";
 
 export default function Home() {
   const router = useRouter();
-  const [productList, setProductList] = useState<
-    IAPIResponse<IAPIProductsResponse[]>
-  >({});
+  const [productList, setProductList] = useState<IAPIResponse<IProduct[]>>({});
 
   const getProduct = async () => {
     try {
       const res = await API.get(`/products?limit=18`);
 
-      const data = res.data as IAPIResponse<IAPIProductsResponse[]>;
+      const data = res.data as IAPIResponse<IProduct[]>;
 
       setProductList(data!);
     } catch (e) {
@@ -122,10 +115,10 @@ export default function Home() {
           </p>
         </div>
         <div className="justify-between gap-x-4 gap-y-4 grid grid-cols-2 md:grid-cols-5">
-          {productList.data?.map((product) => (
+          {productList.data?.map((product, i) => (
             <ProductCard
+              key={i}
               onClick={() => router.push(`/${product.name}`)}
-              key={product.district}
               image={product.picture_url}
               price={product.price}
               showStar={false}
