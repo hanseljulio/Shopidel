@@ -8,8 +8,10 @@ import {
   IAPIProductDetailResponse,
   IAPIResponse,
 } from "@/interfaces/api_interface";
-import { IReviewProduct } from "@/interfaces/review_interface";
-import { IProductSuggestion } from "@/interfaces/suggestProduct_interface";
+import {
+  IProductSuggestion,
+  IReviewProduct,
+} from "@/interfaces/product_interface";
 import { API } from "@/network";
 import { currencyConverter } from "@/utils/utils";
 import axios from "axios";
@@ -133,16 +135,6 @@ const ProductDetail = ({
       );
       const data = res.data as IAPIResponse<IReviewProduct[]>;
       setReviews(data);
-
-      if (data.pagination?.total_page! <= 5) {
-        return setPaginationNumber(
-          Array.from(Array(data.pagination?.total_page).keys())
-        );
-      }
-
-      if (paginationNumber.length === 0) {
-        return setPaginationNumber(Array.from(Array(5).keys()));
-      }
     } catch (e) {
       if (axios.isAxiosError(e)) {
         return toast.error("Error fetching review products", {
@@ -193,9 +185,6 @@ const ProductDetail = ({
     getImages();
     getSuggest();
     getShop();
-  }, []);
-
-  useEffect(() => {
     getReviewProducts();
   }, []);
 
