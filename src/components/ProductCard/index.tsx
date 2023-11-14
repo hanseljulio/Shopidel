@@ -13,6 +13,7 @@ interface IProductCard {
   star?: number;
   onClick?: MouseEventHandler;
   showStar: boolean;
+  districtSold?: boolean;
 }
 const ProductCard = ({
   image,
@@ -23,6 +24,7 @@ const ProductCard = ({
   star,
   onClick,
   showStar,
+  districtSold,
 }: IProductCard) => {
   return (
     <div
@@ -68,15 +70,16 @@ const ProductCard = ({
         <p className=" tracking-wider text-[#f57b29] text-sm md:text-base">
           {currencyConverter(parseInt(price))}
         </p>
-
-        <div className="flex justify-between text-xs md:text-sm pt-2">
-          <p className="text-gray-500 ">
-            {place && place?.length > 15
-              ? `${title.substring(0, 12)}...`
-              : place}
-          </p>
-          <p className="text-gray-500 "> {`${order} sold`}</p>
-        </div>
+        {districtSold === true && (
+          <div className="flex justify-between text-xs md:text-sm pt-2">
+            <p className="text-gray-500 ">
+              {place && place?.length > 15
+                ? `${title.substring(0, 12)}...`
+                : place}
+            </p>
+            <p className="text-gray-500 "> {`${order} sold`}</p>
+          </div>
+        )}
       </div>
     </div>
   );
