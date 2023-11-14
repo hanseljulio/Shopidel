@@ -159,17 +159,14 @@ const TransactionHistory = () => {
                   name="category-dropdown"
                 >
                   {orderStatus.map((option, index) => (
-                    <option
-                      key={index}
-                      value={option.replace(/\s+/g, "").toLowerCase()}
-                    >
+                    <option key={index} value={option.toLowerCase()}>
                       {option}
                     </option>
                   ))}
                 </select>
               </div>
             </div>
-            {!transactionData ? (
+            {!transactionData || transactionData.data.length === 0 ? (
               <h1 className="text-center pt-[80px] font-bold text-[25px]">
                 Nothing to see here!
               </h1>
