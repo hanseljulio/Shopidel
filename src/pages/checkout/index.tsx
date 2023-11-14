@@ -23,7 +23,7 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { getCookie } from "cookies-next";
 import { IAPIResponse } from "@/interfaces/api_interface";
-import { IAddress } from "@/interfaces/address_interface";
+import { IAddress } from "@/interfaces/user_interface";
 import { useRouter } from "next/router";
 import { useUserStore } from "@/store/userStore";
 import PinCode from "@/components/PinCode";
@@ -69,7 +69,7 @@ const NoAddressModal = () => {
   const router = useRouter();
 
   return (
-    <div className="bg-white p-5 rounded-md  w-[500px] h-[290px] mobile:w-[99%]">
+    <div className="bg-white p-5 rounded-md  md:w-[500px] h-[290px] w-[99%]">
       <div className="pb-3">
         <h1 className="text-[20px]">No Address Found</h1>
       </div>
@@ -92,7 +92,7 @@ const NoWalletModal = () => {
   const router = useRouter();
 
   return (
-    <div className="bg-white p-5 rounded-md  w-[500px] h-[290px] mobile:w-[99%]">
+    <div className="bg-white p-5 rounded-md  md:w-[500px] h-[290px] w-[99%]">
       <div className="pb-3">
         <h1 className="text-[20px]">Wallet has not been activated</h1>
       </div>
@@ -121,7 +121,7 @@ const SelectShippingModal = (props: ISelectShippingModalProps) => {
 
   const getCourier = async () => {
     try {
-      const response = await API.get("/orders/couriers/1");
+      const response = await API.get(`/orders/couriers/${props.sellerId}`);
       setCourierList(response.data.data);
     } catch (e) {
       if (axios.isAxiosError(e)) {
@@ -167,11 +167,11 @@ const SelectShippingModal = (props: ISelectShippingModalProps) => {
   }, [currentCourierId]);
 
   return (
-    <div className="bg-white p-5 rounded-md  w-[500px] h-[300px] mobile:w-[99%] mobile:h-[350px]">
+    <div className="bg-white p-5 rounded-md  md:w-[500px] md:h-[300px] w-[99%] h-[350px]">
       <div className="pb-3">
         <h1 className="text-[20px]">Select Shipping</h1>
       </div>
-      <div className="flex items-center justify-between pt-6 pb-8 mobile:flex-col mobile: gap-6">
+      <div className="flex items-center justify-between pt-6 pb-8 md:flex-row md:gap-0 flex-col gap-6">
         <div>
           <h1>Select courier here</h1>
           <select
@@ -191,7 +191,7 @@ const SelectShippingModal = (props: ISelectShippingModalProps) => {
             ))}
           </select>
         </div>
-        <div className="text-right mobile:text-center">
+        <div className="md:text-right text-center">
           <h1>
             Shipping cost:{" "}
             {currencyConverter(
@@ -220,7 +220,7 @@ const SelectShippingModal = (props: ISelectShippingModalProps) => {
 
 const EnterWalletPinModal = (props: IEnterWalletPinModalProps) => {
   return (
-    <div className="bg-white p-5 rounded-md  w-[500px] h-[180px] mobile:w-[99%]">
+    <div className="bg-white p-5 rounded-md  md:w-[500px] h-[180px] w-[99%]">
       <div className="pb-5">
         <h1 className="text-[20px] text-center">Verify your Wallet PIN</h1>
       </div>
@@ -288,6 +288,11 @@ const CheckoutPage = () => {
   };
 
   const getCheckoutData = () => {
+    if (cartStore.cart === undefined || cartStore.cart.length === 0) {
+      router.replace("/");
+      return;
+    }
+
     let total = 0;
     for (let i = 0; i < cartStore.cart!.length; i++) {
       for (let j = 0; j < cartStore.cart![i].cart_items.length; j++) {
@@ -516,16 +521,16 @@ const CheckoutPage = () => {
         <Navbar />
         <ToastContainer />
         <div className="lg:max-w-7xl mx-auto">
-          <div className="flex mt-[30px] justify-between mobile:block pb-8">
-            <h1 className="text-[30px] mobile:text-center">Checkout</h1>
+          <div className="flex md:justify-normal items-center mt-[30px] py-6 justify-center">
+            <h1 className="text-[30px] md:text-left text-center">Checkout</h1>
           </div>
 
-          <div className="border-2 px-[20px] text-[20px] p-6 mobile:text-center">
+          <div className="border-2 px-[20px] text-[20px] p-6 md:text-left text-center">
             <h1 className="flex gap-3 items-center">
               <FaMapMarkerAlt className="text-[#ff3224]" />
               Delivery Address
             </h1>
-            <div className="flex text-[18px] pt-6 items-center mobile:flex-col mobile:gap-5">
+            <div className="flex text-[18px] pt-6 items-center md:flex-row md:gap-0 flex-col gap-5">
               <h1
                 suppressHydrationWarning
                 className="flex flex-col font-bold basis-[20%]"
@@ -555,7 +560,7 @@ const CheckoutPage = () => {
           </div>
           <br />
 
-          <div className="hidden invisible mobile:visible mobile:block">
+          <div className="md:hidden md:invisible visible block">
             <table className="mx-auto">
               <tbody>
                 <CheckoutTableHeadMobile />
@@ -584,7 +589,7 @@ const CheckoutPage = () => {
             </table>
           </div>
 
-          <div className="mobile:hidden mobile:invisible">
+          <div className="md:visible md:block hidden invisible">
             <table className="w-full border-2">
               <tbody>
                 <CheckoutTableHead />
@@ -618,7 +623,7 @@ const CheckoutPage = () => {
             shippingTotal={shippingTotal}
             openShippingModal={() => setShowShippingModal(true)}
           />
-          <div className="bg-[#29374e] text-right px-[20px] text-[20px] p-6 text-white mobile:text-center">
+          <div className="bg-[#29374e] md:text-right px-[20px] text-[20px] p-6 text-white text-center">
             <h1>
               Order Total: {currencyConverter(orderTotal + shippingTotal)}
             </h1>
@@ -640,7 +645,7 @@ const CheckoutPage = () => {
             shipping={shippingTotal}
             voucher={voucherTotal}
           />
-          <div className="border-2 text-right text-[18px] mb-20 pr-4 mobile:text-center">
+          <div className="border-2 md:text-right text-[18px] mb-20 md:pr-4 text-center">
             <Button
               text="Place order"
               styling="bg-[#fddf97] p-3 rounded-[8px] w-[250px]  my-4"

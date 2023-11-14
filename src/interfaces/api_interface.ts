@@ -4,7 +4,7 @@ export interface IAPIResponse<T = Object | []> {
   pagination?: IAPIPagination;
 }
 
-interface IAPIPagination {
+export interface IAPIPagination {
   total_page: number;
   total_item: number;
   current_page: number;
@@ -34,4 +34,34 @@ export interface IAPIUserProfileResponse {
 export interface IAPILoginResponse {
   access_token: string;
   refresh_token: string;
+}
+
+export interface IAPIProductDetailResponse {
+  id: number;
+  name: string;
+  description: string;
+  stars: string;
+  sold: number;
+  available: number;
+  images: null;
+  variant_options: [
+    {
+      variant_option_name: string;
+      childs: [];
+    }
+  ];
+  variants: [
+    {
+      variant_id: number;
+      variant_name: string;
+      selections: [
+        {
+          selection_variant_name: string;
+          selection_name: string;
+        }
+      ];
+      stock: number;
+      price: string;
+    }
+  ];
 }

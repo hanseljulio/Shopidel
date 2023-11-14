@@ -7,7 +7,7 @@ interface ICartProductProps {
 
 const CartProduct = (props: ICartProductProps) => {
   return (
-    <div className="flex items-center gap-6 justify-center mobile:gap-2">
+    <div className="flex items-center md:gap-6 justify-center gap-2">
       <img
         alt="productpic"
         src={"/images/emptycart.png"}
@@ -15,7 +15,7 @@ const CartProduct = (props: ICartProductProps) => {
         height={250}
         className="w-[60px] h-[60px] object-cover"
       />
-      <h1 className="w-[300px] text-left mobile:w-[250px] mobile:text-[12px]">
+      <h1 className="md:w-[300px] text-left w-[250px] md:text-[18px] text-[12px]">
         {props.productName.length > 80
           ? props.productName.substring(0, 80) + "..."
           : props.productName}
