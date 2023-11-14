@@ -23,7 +23,7 @@ const Pagination = ({ data, onNavigate, limit = 5 }: IPagination) => {
 
   useEffect(() => {
     setPaginationLimit();
-  }, []);
+  }, [data]);
 
   return (
     <>

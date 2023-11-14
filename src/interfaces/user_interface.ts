@@ -24,7 +24,7 @@ export interface IAddress {
 }
 
 export interface ITransactionHistory {
-  data: ITransactionHistoryData;
+  data: ITransactionHistoryData[];
   pagination: {
     total_page: number;
     total_item: number;

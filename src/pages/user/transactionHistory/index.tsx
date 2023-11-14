@@ -11,6 +11,8 @@ import {
   ITransactionHistoryData,
   ITransactionHistory,
 } from "@/interfaces/user_interface";
+import Pagination from "@/components/Pagination";
+import { IAPIPagination } from "@/interfaces/api_interface";
 
 interface IIndividualOrderProps {
   data: ITransactionHistoryData;
@@ -38,7 +40,7 @@ const IndividualOrder = (props: IIndividualOrderProps) => {
                       {currencyConverter(parseInt(data.individual_price))}
                     </p>
                     {data.is_reviewed ? (
-                      <div className="flex gap-x-2 group relative">
+                      <div className="flex gap-x-2 group relative w-24">
                         <p className="text-green-600 hover:cursor-pointer">
                           View Review
                         </p>
@@ -61,7 +63,7 @@ const IndividualOrder = (props: IIndividualOrderProps) => {
                         </div>
                       </div>
                     ) : (
-                      <p className="text-red-600 hover:cursor-pointer">
+                      <p className="text-red-600 hover:cursor-pointer w-28">
                         Review Order
                       </p>
                     )}
@@ -84,9 +86,7 @@ const IndividualOrder = (props: IIndividualOrderProps) => {
 const TransactionHistory = () => {
   const { user, updateUser } = useUserStore();
   const router = useRouter();
-  const [transactionData, setTransactionData] = useState<
-    ITransactionHistoryData[]
-  >([]);
+  const [transactionData, setTransactionData] = useState<ITransactionHistory>();
   const [sortBy, setSortBy] = useState<string>("all");
   const orderStatus = [
     "All",
@@ -95,13 +95,13 @@ const TransactionHistory = () => {
     "Completed",
     "Cancelled",
   ];
-
-  // console.log(transactionData);
+  const [page, setPage] = useState<number>(1);
 
   const getTransactionData = async () => {
     try {
       const response = await API.get(`/orders/histories?status=${sortBy}`);
-      setTransactionData(response.data.data);
+      const data = await response.data;
+      setTransactionData(data);
     } catch (e) {
       if (axios.isAxiosError(e)) {
         if (e.response?.status === 401) {
@@ -116,14 +116,16 @@ const TransactionHistory = () => {
 
   useEffect(() => {
     getTransactionData();
-  }, [sortBy]);
+  }, [sortBy, page]);
+
+  console.log(transactionData);
 
   return (
     <div>
       <ProfileLayout currentPage="Transaction History">
         <ToastContainer />
         <div className="w-full mx-auto mt-6 ">
-          <div className="flex items-center justify-between md:flex-row md:pl-[76px] md:pr-[80px] flex-col p-0 md:gap-0 gap-8">
+          <div className="flex items-center justify-between md:flex-row md:mx-[5%] flex-col p-0 md:gap-0 gap-8">
             <h1 className="text-[30px]">Transaction History</h1>
             <div className="flex items-center gap-6">
               <p>Sort By</p>
@@ -144,9 +146,15 @@ const TransactionHistory = () => {
             </div>
           </div>
           <div className="pt-6 flex flex-col items-center gap-8">
-            {transactionData.map((data, index) => (
+            {transactionData?.data.map((data, index) => (
               <IndividualOrder key={index} data={data} />
             ))}
+          </div>
+          <div className="flex justify-center py-10">
+            <Pagination
+              data={transactionData?.pagination}
+              onNavigate={(navPage) => setPage(navPage)}
+            />
           </div>
         </div>
       </ProfileLayout>
