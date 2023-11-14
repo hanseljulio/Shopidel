@@ -92,6 +92,7 @@ export const getServerSideProps = async (
   try {
     const res = await API.get("/products/5");
     data = (res.data as IAPIResponse<IAPIProductDetailResponse>).data;
+    console.log("hasil product", data);
   } catch (e) {
     if (axios.isAxiosError(e)) {
       console.error(e.response?.data);
@@ -181,10 +182,8 @@ const ProductDetail = ({
       const res = await API.get(
         `products/${product.id}/reviews?page=1&stars=5&comment=true&image=true&orderBy=newest`
       );
-      console.log(res);
       const data = res.data as IAPIResponse<IReviewProduct[]>;
       setReviews(data);
-      console.log(data.data);
 
       if (data.pagination?.total_page! <= 5) {
         return setPaginationNumber(
@@ -195,7 +194,6 @@ const ProductDetail = ({
       if (paginationNumber.length === 0) {
         return setPaginationNumber(Array.from(Array(5).keys()));
       }
-      console.log("betul");
     } catch (e) {
       if (axios.isAxiosError(e)) {
         return toast.error("Error fetching review products", {
@@ -203,19 +201,15 @@ const ProductDetail = ({
           autoClose: 1500,
         });
       }
-      console.log("salah");
     }
   };
 
   const getSuggest = async () => {
     try {
       const res = await API.get(`/products/${product.id}/recommended-products`);
-      console.log(res);
+
       const data = res.data as IAPIResponse<IProductSuggestion[]>;
       setSuggestion(data);
-      console.log(data.data);
-
-      console.log("betul suggest");
     } catch (e) {
       if (axios.isAxiosError(e)) {
         return toast.error("Error fetching product suggestion", {
@@ -223,7 +217,6 @@ const ProductDetail = ({
           autoClose: 1500,
         });
       }
-      console.log("salah");
     }
   };
 
@@ -516,10 +509,10 @@ const ProductDetail = ({
                   return (
                     <div
                       key={i}
-                      className="flex md:gap-x-20 items-center gap-10"
+                      className="flex md:gap-x-20 items-start gap-10"
                     >
                       <p>{item.variant_option_name}</p>
-                      <div className="grid grid-cols-3 gap-2">
+                      <div className="grid grid-cols-2 gap-2">
                         {item.childs.map((variant, k) => {
                           const optionName = item.variant_option_name;
                           return (
@@ -725,6 +718,7 @@ const ProductDetail = ({
                         title={e.product_name}
                         price={e.product_price}
                         showStar={false}
+                        districtSold={false}
                       />
                     )
                 )}
