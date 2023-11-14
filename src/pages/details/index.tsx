@@ -33,11 +33,11 @@ export interface IAPIProductDetailResponseWithSeller
 export const getServerSideProps = async (
   context: GetServerSidePropsContext
 ) => {
-  let data: IAPIProductDetailResponse | undefined;
+  let data: IAPIProductDetailResponseWithSeller | undefined;
 
   try {
     const res = await API.get("/products/4");
-    data = (res.data as IAPIResponse<IAPIProductDetailResponse>).data;
+    data = (res.data as IAPIResponse<IAPIProductDetailResponseWithSeller>).data;
     console.log("hasil product", data);
   } catch (e) {
     if (axios.isAxiosError(e)) {
@@ -51,6 +51,7 @@ export const getServerSideProps = async (
       sold: 0,
       available: 0,
       images: null,
+      seller_name: "",
       variant_options: [
         {
           variant_option_name: "",
@@ -170,7 +171,9 @@ const ProductDetail = ({
 
   const getShop = async () => {
     try {
-      const res = await API.get(`/products/${product.id}/recommended-products`);
+      const res = await API.get(
+        `/products/${product.seller_name}/recommended-products`
+      );
 
       const data = res.data as IAPIResponse<
         IAPIProductDetailResponseWithSeller[]
@@ -189,6 +192,7 @@ const ProductDetail = ({
   useEffect(() => {
     getImages();
     getSuggest();
+    getShop();
   }, []);
 
   useEffect(() => {
