@@ -7,9 +7,10 @@ import { API } from "@/network";
 import { checkAuthSSR, currencyConverter } from "@/utils/utils";
 import axios from "axios";
 import { GetServerSidePropsContext } from "next";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { FaListUl, FaStar, FaStore } from "react-icons/fa";
 import { FaLocationDot } from "react-icons/fa6";
+import { toast } from "react-toastify";
 
 interface IProductDetail {
   images: string;
@@ -18,6 +19,16 @@ interface IProductDetail {
     color?: string;
   };
 }
+
+interface IBestSelling {
+  name: string;
+  price: string;
+  picture_url: string;
+  stars: string;
+  total_sold: string;
+  category: string;
+}
+
 const imgDummy: IProductDetail[] = [
   {
     images:
@@ -110,29 +121,54 @@ interface IProfileShopProps {
 export const getServerSideProps = async (
   context: GetServerSidePropsContext
 ) => {
-  let data: IAPIProfileShopResponse | undefined;
+  let data: IAPIProfileShopResponse | undefined = undefined;
 
   let accessToken = context.req.cookies["accessToken"];
 
   try {
-    const res = await API.get(`/sellers/profile/1`);
+    const res = await API.get(`/sellers/${`Jejak Trendi`}/profile`); //masih hardcode
     data = (res.data as IAPIResponse<IAPIProfileShopResponse>).data;
   } catch (e) {
     if (axios.isAxiosError(e)) {
       console.log(e.response?.data);
-      console.log("errrorrrrr");
+      console.log("errorrrrr");
     }
   }
 
   return {
     props: {
-      shop: data,
+      shop: data || null,
     },
   };
 };
 
 function Index({ shop }: IProfileShopProps) {
   const [showAllProducts, setShowAllProducts] = useState(false);
+  const [bestSelling, setBestSelling] = useState<IBestSelling[]>([]);
+
+  const getBestSelling = async () => {
+    try {
+      const res = await API.get(`sellers/${`Jejak Trendi`}/best-selling`); //seller_name masih harcode
+      const data = res.data as IAPIResponse<IBestSelling[]>;
+
+      if (data.data) {
+        setBestSelling(data.data);
+      } else {
+        console.error("Data is undefined or null");
+      }
+      console.log("best");
+    } catch (e) {
+      if (axios.isAxiosError(e)) {
+        return toast.error(e.message, {
+          autoClose: 1500,
+        });
+      }
+    }
+  };
+
+  useEffect(() => {
+    getBestSelling();
+  }, []);
 
   const calculateAverageStars = (products: { stars: string }[]) => {
     const validProducts = products.filter(
@@ -154,11 +190,11 @@ function Index({ shop }: IProfileShopProps) {
     return averageStars;
   };
 
-  console.log("Seller Products:", shop.seller_products);
+  const averageStars = calculateAverageStars(shop?.seller_products || []);
 
-  const averageStars = calculateAverageStars(shop.seller_products || []);
-
-  const imgDummyToShow = showAllProducts ? imgDummy : imgDummy.slice(0, 6);
+  const showBestSelling = showAllProducts
+    ? bestSelling
+    : bestSelling.slice(0, 6);
   return (
     <div>
       <Navbar />
@@ -167,17 +203,17 @@ function Index({ shop }: IProfileShopProps) {
           <img
             width={90}
             height={0}
-            src={shop.seller_picture_url}
-            alt={shop.seller_name}
-            className="imgSeller w-20 h-full"
+            src={shop?.seller_picture_url}
+            alt={shop?.seller_name}
+            className="imgSeller w-20 h-ful "
           />
           <div className="flex flex-col md:flex-row gap-y-4 gap-x-48 w-full">
             <div className="aboutSeller  md:w-full flex flex-col gap-y-2">
               <p className="text-lg md:text-xl font-semibold">
-                {shop.seller_name}
+                {shop?.seller_name}
               </p>
               <p className="text-sm flex items-center text-neutral-600">
-                <FaLocationDot /> <span>{shop.seller_district}</span>
+                <FaLocationDot /> <span>{shop?.seller_district}</span>
               </p>
             </div>
 
@@ -194,7 +230,7 @@ function Index({ shop }: IProfileShopProps) {
                 <p className=" text-neutral-600 text-sm"> Products</p>
               </div>
               <div className="w-fit md:text-center text-left md:items-center md:justify-center">
-                <p className="font-semibold">{`${shop.seller_operating_hour.start} - ${shop.seller_operating_hour.end} WIB`}</p>
+                <p className="font-semibold">{`${shop?.seller_operating_hour.start} - ${shop?.seller_operating_hour.end} WIB`}</p>
                 <p className=" text-neutral-600 text-sm">Operating hours</p>
               </div>
             </div>
@@ -202,20 +238,23 @@ function Index({ shop }: IProfileShopProps) {
         </div>
         <div>
           <p className="w-full font-semibold text-lg md:text-xl justify-center text-center my-3 py-2 ">
-            Best Seller
+            Best Selling
           </p>
           <div className="grid grid-cols-2 md:grid-cols-6 gap-3">
-            {imgDummyToShow.map((e, k) => (
-              <ProductCard
-                key={k}
-                image={e.images}
-                price="35000"
-                showStar={true}
-                title="Laptop"
-                star={4.6}
-                order={400}
-              />
-            ))}
+            {showBestSelling.map(
+              (e, k) =>
+                k < 12 && (
+                  <ProductCard
+                    key={k}
+                    image={e.picture_url}
+                    price={e.price}
+                    showStar={true}
+                    title={e.name}
+                    star={parseInt(e.stars)}
+                    order={parseInt(e.total_sold)}
+                  />
+                )
+            )}
             {!showAllProducts && (
               <div className="lg:max-w-7xl w-full absolute align-middle justify-end items-center text-right hidden md:flex mt-40">
                 <button
