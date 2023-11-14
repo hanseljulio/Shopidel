@@ -11,7 +11,7 @@ interface IPagination {
 const Pagination = ({ data, onNavigate, limit = 5 }: IPagination) => {
   const [paginationNumber, setPaginationNumber] = useState<number[]>([]);
 
-  useEffect(() => {
+  const setPaginationLimit = () => {
     if (data?.total_page! <= 5) {
       return setPaginationNumber(Array.from(Array(data?.total_page).keys()));
     }
@@ -19,6 +19,10 @@ const Pagination = ({ data, onNavigate, limit = 5 }: IPagination) => {
     if (paginationNumber.length === 0) {
       return setPaginationNumber(Array.from(Array(limit).keys()));
     }
+  };
+
+  useEffect(() => {
+    setPaginationLimit();
   }, []);
 
   return (

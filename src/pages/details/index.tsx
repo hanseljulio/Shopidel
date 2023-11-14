@@ -2,13 +2,15 @@ import Footer from "@/components/Footer";
 import Modal from "@/components/Modal";
 import Navbar from "@/components/Navbar";
 import ProductCard from "@/components/ProductCard";
-import { IAPIResponse } from "@/interfaces/api_interface";
+import {
+  IAPIProductDetailResponse,
+  IAPIResponse,
+} from "@/interfaces/api_interface";
 import { API } from "@/network";
 import { currencyConverter } from "@/utils/utils";
 import axios from "axios";
 import { getCookie } from "cookies-next";
-import { GetServerSidePropsContext } from "next";
-import { useRouter } from "next/router";
+import { GetServerSidePropsContext, InferGetServerSidePropsType } from "next";
 import React, { useEffect, useState } from "react";
 import { SubmitHandler } from "react-hook-form";
 import { AiOutlineShoppingCart } from "react-icons/ai";
@@ -17,46 +19,12 @@ import { FaHeart, FaRegHeart, FaStar, FaStore } from "react-icons/fa";
 import { FaLocationDot, FaTruckFast } from "react-icons/fa6";
 import { toast } from "react-toastify";
 
-interface IAPIProductDetail {
-  id: number;
-  name: string;
-  description: string;
-  stars: string;
-  sold: number;
-  available: number;
-  images: null;
-  variant_options: [
-    {
-      variant_option_name: string;
-      childs: [];
-    }
-  ];
-  variants: [
-    {
-      variant_id: number;
-      variant_name: string;
-      selections: [
-        {
-          selection_variant_name: string;
-          selection_name: string;
-        }
-      ];
-      stock: number;
-      price: string;
-    }
-  ];
-}
-
 interface IProductDetail {
   images: string;
   varian?: {
     type?: string;
     color?: string;
   };
-}
-
-interface IProductDetailProps {
-  product: IAPIProductDetail;
 }
 
 const imgDummy: IProductDetail[] = [
@@ -110,38 +78,28 @@ const imgDummy: IProductDetail[] = [
   },
 ];
 
-export const getServerSideProps = async (
-  context: GetServerSidePropsContext
-) => {
-  let data: IAPIProductDetail | undefined;
-
-  let accessToken = context.req.cookies["accessToken"];
+export const getServerSideProps = async () => {
+  let data: IAPIProductDetailResponse;
 
   try {
-    const res = await API.get(`/products/2`, {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-        "Content-Type": "application/json",
-      },
-    });
-    data = (res.data as IAPIResponse<IAPIProductDetail>).data;
-    console.log(data, "dataa");
+    const res = await API.get(`/products/5`);
+    data = (res.data as IAPIResponse<IAPIProductDetailResponse>).data!;
   } catch (e) {
     if (axios.isAxiosError(e)) {
       console.log(e.response?.data);
-      console.log("errrorrrrr");
     }
   }
 
   return {
     props: {
-      product: data,
+      product: data!,
     },
   };
 };
 
-const ProductDetail = ({ product }: IProductDetailProps) => {
-  const router = useRouter();
+const ProductDetail = ({
+  product,
+}: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   const [count, setCount] = useState<number>(1);
   const [isHovering, setIsHovering] = useState(false);
   const [isModal, setIsModal] = useState<boolean>(false);
@@ -156,7 +114,7 @@ const ProductDetail = ({ product }: IProductDetailProps) => {
   const [isFavorite, setIsFavorite] = useState(false);
 
   const handleFavoriteClick = async () => {
-    let data: Pick<IAPIProductDetail, "id"> = {
+    let data: Pick<IAPIProductDetailResponse, "id"> = {
       id: product.id,
     };
 
@@ -300,8 +258,10 @@ const ProductDetail = ({ product }: IProductDetailProps) => {
     }
   };
 
-  const handleWishlist: SubmitHandler<IAPIProductDetail> = async (data) => {
-    let favData: Pick<IAPIProductDetail, "id"> = {
+  const handleWishlist: SubmitHandler<IAPIProductDetailResponse> = async (
+    data
+  ) => {
+    let favData: Pick<IAPIProductDetailResponse, "id"> = {
       id: data.id,
     };
 

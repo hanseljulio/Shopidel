@@ -65,18 +65,20 @@ const ProductCard = ({
 
       <div className="pt-3 pb-3 md:pt-5  md:pb-6 w-full px-4 ">
         <p className=" tracking-wider text-black text-sm md:text-base pt-2">
-          {title.length > 20 ? `${title.substring(0, 23)}...` : title}
+          {title?.length > 20 ? `${title.substring(0, 23)}...` : title}
         </p>
         <p className=" tracking-wider text-[#f57b29] text-sm md:text-base">
           {currencyConverter(parseInt(price))}
         </p>
 
-        {showStar === true && (
-          <div className="flex justify-between text-xs md:text-sm pt-2">
-            <p> {place} </p>
-            <p className="text-gray-500 "> {`${order} sold`}</p>
-          </div>
-        )}
+        <div className="flex justify-between text-xs md:text-sm pt-2">
+          <p className="text-gray-500 ">
+            {place && place?.length > 15
+              ? `${title.substring(0, 12)}...`
+              : place}
+          </p>
+          <p className="text-gray-500 "> {`${order} sold`}</p>
+        </div>
       </div>
     </div>
   );
