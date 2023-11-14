@@ -36,6 +36,7 @@ export interface ITransactionHistory {
 export interface ITransactionHistoryData {
   order_id: number;
   shop_name: string;
+  status: string;
   products: ITransactionHistoryProducts[];
   total_payment: string;
 }

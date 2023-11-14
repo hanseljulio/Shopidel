@@ -44,6 +44,7 @@ const IndividualOrder = (props: IIndividualOrderProps) => {
     <div className="p-5 rounded-md md:w-[90%] border-2 border-black w-[80%]">
       <div className="pb-3 flex justify-between">
         <h1 className="text-[20px] ">{props.data.shop_name}</h1>
+
         <h1 className="text-[20px] ">
           {currencyConverter(parseInt(props.data.total_payment))}
         </h1>
@@ -70,7 +71,13 @@ const IndividualOrder = (props: IIndividualOrderProps) => {
                         </p>
                       </div>
                     ) : (
-                      <p className="text-red-600 hover:cursor-pointer w-28">
+                      <p
+                        className={`${
+                          props.data.status !== "Completed"
+                            ? "hidden invisible"
+                            : ""
+                        } text-red-600 hover:cursor-pointer w-28`}
+                      >
                         Review Order
                       </p>
                     )}
@@ -84,6 +91,7 @@ const IndividualOrder = (props: IIndividualOrderProps) => {
           <h1 className="text-blue-600 hover:cursor-pointer hover:underline">
             View Transaction Detail
           </h1>
+          <h1 className="">Status: {props.data.status.toUpperCase()}</h1>
         </div>
       </div>
     </div>
@@ -100,7 +108,7 @@ const TransactionHistory = () => {
     "On Process",
     "Delivered",
     "Completed",
-    "Cancelled",
+    "Canceled",
   ];
   const [page, setPage] = useState<number>(1);
   const [selectedReview, setSelectedReview] =
