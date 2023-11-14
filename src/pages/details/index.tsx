@@ -6,6 +6,7 @@ import {
   IAPIProductDetailResponse,
   IAPIResponse,
 } from "@/interfaces/api_interface";
+import { IReviewProduct } from "@/interfaces/review_interface";
 import { API } from "@/network";
 import { currencyConverter } from "@/utils/utils";
 import axios from "axios";
@@ -144,6 +145,9 @@ const ProductDetail = ({
   const [currentStock, setCurrentStock] = useState<number>(0);
   const [isFavorite, setIsFavorite] = useState(false);
   const [imagesProduct, setImagesProduct] = useState([]);
+  const [reviews, setReviews] = useState<IAPIResponse<IReviewProduct[]>>();
+  const [paginationNumber, setPaginationNumber] = useState<number[]>([]);
+  const [page, setPage] = useState<number>(1);
 
   useEffect(() => {
     if (imagesProduct.length > 0) {
@@ -165,8 +169,43 @@ const ProductDetail = ({
     }
   };
 
+  const getReviewProducts = async () => {
+    try {
+      const res = await API.get(
+        `products/${product.id}/reviews?page=1&stars=5&comment=true&image=true&orderBy=newest`
+      );
+      console.log(res);
+      const data = res.data as IAPIResponse<IReviewProduct[]>;
+      setReviews(data);
+      console.log(data.data);
+
+      if (data.pagination?.total_page! <= 5) {
+        return setPaginationNumber(
+          Array.from(Array(data.pagination?.total_page).keys())
+        );
+      }
+
+      if (paginationNumber.length === 0) {
+        return setPaginationNumber(Array.from(Array(5).keys()));
+      }
+      console.log("betul");
+    } catch (e) {
+      if (axios.isAxiosError(e)) {
+        return toast.error("Error fetching wishlist", {
+          toastId: "errorWishlist",
+          autoClose: 1500,
+        });
+      }
+      console.log("salah");
+    }
+  };
+
   useEffect(() => {
     getImages();
+  }, []);
+
+  useEffect(() => {
+    getReviewProducts();
   }, []);
 
   const calculateSubtotal = () => {
@@ -585,7 +624,7 @@ const ProductDetail = ({
                   </p>
                   <div>
                     <p>{"4.8 dari 5"}</p>
-                    <div className="star flex">
+                    <div className="star flex text-[#f57b29]">
                       <FaStar />
                       <FaStar />
                       <FaStar />
@@ -595,188 +634,46 @@ const ProductDetail = ({
                   </div>
                 </div>
                 <div>
-                  <div className="buyerReviews flex mt-5  border-y">
-                    <div className="imageCust pr-4 rounded-full overflow-hidden">
-                      <img
-                        width={100}
-                        height={100}
-                        src={"/images/auth_hero.png"}
-                        alt=".."
-                      />
+                  {reviews?.data?.map((review, index) => (
+                    <div
+                      key={index}
+                      className="buyerReviews flex mt-5  border-y"
+                    >
+                      <div className="imageCust pr-4 rounded-full overflow-hidden">
+                        <img
+                          width={100}
+                          height={100}
+                          src={review.customer_picture_url}
+                          alt="profile"
+                          placeholder="https://cdn4.iconfinder.com/data/icons/web-ui-color/128/Account-512.png"
+                          onError={(e) => {
+                            (e.target as HTMLInputElement).src =
+                              "https://cdn4.iconfinder.com/data/icons/web-ui-color/128/Account-512.png";
+                          }}
+                        />
+                      </div>
+                      <div className="bodyReview flex-row gap-y-5">
+                        <p className="custName">{review.customer_name}</p>
+
+                        <p className="flex">
+                          {Array.from({ length: parseInt(review.stars) }).map(
+                            (_, index) => (
+                              <FaStar
+                                key={index}
+                                style={{ color: "#f57b29" }}
+                                size={13}
+                              />
+                            )
+                          )}
+                        </p>
+                        <p className="dateReview text-sm text-neutral-500 pb-3 items-center">
+                          {review.created_at.split("T")[0]} |
+                          <span> variation: {review.variant}</span>
+                        </p>
+                        <p className="theReview">{review.comment}</p>
+                      </div>
                     </div>
-                    <div className="bodyReview flex-row gap-y-5">
-                      <p className="custName">{"cust name"}</p>
-                      <p className="flex">
-                        <FaStar />
-                        <FaStar />
-                        <FaStar />
-                        <FaStar />
-                        <FaStar />
-                      </p>
-                      <p className="dateReview text-sm text-neutral-500 pb-3">
-                        {"2023-06-05"}| {"Variasi: S"}
-                      </p>
-                      <p className="theReview">
-                        {" terlalu mahal dengan kwalitas kain yg nerawang"}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="buyerReviews flex mt-5  border-y">
-                    <div className="imageCust pr-4 rounded-full overflow-hidden">
-                      <img
-                        width={100}
-                        height={100}
-                        src={"/images/auth_hero.png"}
-                        alt=".."
-                      />
-                    </div>
-                    <div className="bodyReview flex-row gap-y-5">
-                      <p className="custName">{"cust name"}</p>
-                      <p className="flex">
-                        <FaStar />
-                        <FaStar />
-                        <FaStar />
-                        <FaStar />
-                        <FaStar />
-                      </p>
-                      <p className="dateReview text-sm text-neutral-500 pb-3">
-                        {"2023-06-05"}| {"Variasi: S"}
-                      </p>
-                      <p className="theReview">
-                        {" terlalu mahal dengan kwalitas kain yg nerawang"}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="buyerReviews flex mt-5  border-y">
-                    <div className="imageCust pr-4 rounded-full overflow-hidden">
-                      <img
-                        width={100}
-                        height={100}
-                        src={"/images/auth_hero.png"}
-                        alt=".."
-                      />
-                    </div>
-                    <div className="bodyReview flex-row gap-y-5">
-                      <p className="custName">{"cust name"}</p>
-                      <p className="flex">
-                        <FaStar />
-                        <FaStar />
-                        <FaStar />
-                        <FaStar />
-                        <FaStar />
-                      </p>
-                      <p className="dateReview text-sm text-neutral-500 pb-3">
-                        {"2023-06-05"}| {"Variasi: S"}
-                      </p>
-                      <p className="theReview">
-                        {" terlalu mahal dengan kwalitas kain yg nerawang"}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="buyerReviews flex mt-5  border-y">
-                    <div className="imageCust pr-4 rounded-full overflow-hidden">
-                      <img
-                        width={100}
-                        height={100}
-                        src={"/images/auth_hero.png"}
-                        alt=".."
-                      />
-                    </div>
-                    <div className="bodyReview flex-row gap-y-5">
-                      <p className="custName">{"cust name"}</p>
-                      <p className="flex">
-                        <FaStar />
-                        <FaStar />
-                        <FaStar />
-                        <FaStar />
-                        <FaStar />
-                      </p>
-                      <p className="dateReview text-sm text-neutral-500 pb-3">
-                        {"2023-06-05"}| {"Variasi: S"}
-                      </p>
-                      <p className="theReview">
-                        {" terlalu mahal dengan kwalitas kain yg nerawang"}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="buyerReviews flex mt-5  border-y">
-                    <div className="imageCust pr-4 rounded-full overflow-hidden">
-                      <img
-                        width={100}
-                        height={100}
-                        src={"/images/auth_hero.png"}
-                        alt=".."
-                      />
-                    </div>
-                    <div className="bodyReview flex-row gap-y-5">
-                      <p className="custName">{"cust name"}</p>
-                      <p className="flex">
-                        <FaStar />
-                        <FaStar />
-                        <FaStar />
-                        <FaStar />
-                        <FaStar />
-                      </p>
-                      <p className="dateReview text-sm text-neutral-500 pb-3">
-                        {"2023-06-05"}| {"Variasi: S"}
-                      </p>
-                      <p className="theReview">
-                        {" terlalu mahal dengan kwalitas kain yg nerawang"}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="buyerReviews flex mt-5  border-y">
-                    <div className="imageCust pr-4 rounded-full overflow-hidden">
-                      <img
-                        width={100}
-                        height={100}
-                        src={"/images/auth_hero.png"}
-                        alt=".."
-                      />
-                    </div>
-                    <div className="bodyReview flex-row gap-y-5">
-                      <p className="custName">{"cust name"}</p>
-                      <p className="flex">
-                        <FaStar />
-                        <FaStar />
-                        <FaStar />
-                        <FaStar />
-                        <FaStar />
-                      </p>
-                      <p className="dateReview text-sm text-neutral-500 pb-3">
-                        {"2023-06-05"}| {"Variasi: S"}
-                      </p>
-                      <p className="theReview">
-                        {" terlalu mahal dengan kwalitas kain yg nerawang"}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="buyerReviews flex mt-5  border-y">
-                    <div className="imageCust pr-4 rounded-full overflow-hidden">
-                      <img
-                        width={100}
-                        height={100}
-                        src={"/images/auth_hero.png"}
-                        alt=".."
-                      />
-                    </div>
-                    <div className="bodyReview flex-row gap-y-5">
-                      <p className="custName">{"cust name"}</p>
-                      <p className="flex">
-                        <FaStar />
-                        <FaStar />
-                        <FaStar />
-                        <FaStar />
-                        <FaStar />
-                      </p>
-                      <p className="dateReview text-sm text-neutral-500 pb-3">
-                        {"2023-06-05"}| {"Variasi: S"}
-                      </p>
-                      <p className="theReview">
-                        {" terlalu mahal dengan kwalitas kain yg nerawang"}
-                      </p>
-                    </div>
-                  </div>
+                  ))}
                 </div>
               </div>
             </div>
