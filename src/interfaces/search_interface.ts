@@ -6,8 +6,8 @@ interface IProductFilter {
     min: string;
     max: string;
   };
-  rating: number[];
-  category: number[];
+  minRating: string;
+  category: string[];
   sortBy: ProductSortByType;
   sort: ProductSortType;
 }
