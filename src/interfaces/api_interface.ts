@@ -43,7 +43,7 @@ export interface IAPIProductDetailResponse {
   stars: string;
   sold: number;
   available: number;
-  images: [];
+  images: null;
   variant_options: [
     {
       variant_option_name: string;
