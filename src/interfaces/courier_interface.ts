@@ -3,3 +3,8 @@ export interface ICourier {
   name: string;
   description: string;
 }
+
+export interface IDistrict {
+  id: number;
+  name: string;
+}

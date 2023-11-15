@@ -29,7 +29,10 @@ const Navbar = () => {
     router.push({
       pathname: "/search",
       query: {
-        q: query,
+        s: query,
+        sortBy: "price",
+        sort: "desc",
+        page: 1,
       },
     });
   };
