@@ -464,7 +464,7 @@ const Search = () => {
                     className="rounded-md border-slate-500 text-sm py-1"
                   >
                     <option value="recommended">Recommended</option>
-                    <option value="newest">Newest</option>
+                    <option value="date">Newest</option>
                     <option value="most_buy">Most buy</option>
                     <option value="price">Price</option>
                   </select>
@@ -611,7 +611,7 @@ const SortModal = ({ filter, onApply }: SortModalProps) => {
           className="roole.log(data);unded-md border-slate-500 text-sm py-1"
         >
           <option value="recommended">Recommended</option>
-          <option value="newest">Newest</option>
+          <option value="date">Newest</option>
           <option value="most_buy">Most buy</option>
           <option value="price">Price</option>
         </select>
