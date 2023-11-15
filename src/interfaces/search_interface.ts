@@ -1,4 +1,4 @@
-type ProductSortByType = "recommended" | "price" | "newest" | "most_buy";
+type ProductSortByType = "recommended" | "price" | "date" | "most_buy";
 type ProductSortType = "asc" | "desc";
 interface IProductFilter {
   s: string;
