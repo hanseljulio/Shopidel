@@ -152,6 +152,8 @@ const ProductDetail = ({
       setSuggestion(data);
     } catch (e) {
       if (axios.isAxiosError(e)) {
+        console.log(e);
+
         return toast.error("Error fetching product suggestion", {
           toastId: "errorSuggestion",
           autoClose: 1500,
@@ -516,12 +518,17 @@ const ProductDetail = ({
                     .split("\n\n")
                     .map((paragraph, index) => (
                       <span key={index} className="line-break">
-                        {paragraph.split("\n").map((line, lineIndex) => (
-                          <React.Fragment key={lineIndex}>
-                            {line}
-                            <br />
-                          </React.Fragment>
-                        ))}
+                        {paragraph.split("\\n").map(
+                          (
+                            line,
+                            lineIndex // Change '\n' to '\\n'
+                          ) => (
+                            <React.Fragment key={lineIndex}>
+                              {line}
+                              <br />
+                            </React.Fragment>
+                          )
+                        )}
                       </span>
                     ))}
                 </p>
