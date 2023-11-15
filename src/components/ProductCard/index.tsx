@@ -30,13 +30,13 @@ const ProductCard = ({
         "w-full h-auto] md:w-full md:h-auto bg-white overflow-hidden shadow-md hover:shadow-none cursor-pointer rounded-md flex flex-col items-center align-middle justify-center transition-all duration-500 ease-in-out text-left",
       ])}
     >
-      <div className={"relative w-full md "}>
+      <div className={"relative h-full w-full md "}>
         <div className={" h-auto md:h-48 w-auto overflow-hidden"}>
           <img
             width={100}
             height={100}
             src={image}
-            className={"object-cover w-full h-auto md:h-full "}
+            className={"object-cover w-full h-full md:h-full "}
             alt=""
           />
         </div>
@@ -69,12 +69,12 @@ const ProductCard = ({
         </p>
 
         <div className="flex justify-between text-xs md:text-sm pt-2">
-          {place && (
+          {place !== undefined && (
             <p className="text-gray-500 ">
               {place?.length > 15 ? `${place.substring(0, 12)}...` : place}
             </p>
           )}
-          {order && <p className={`text-gray-500 `}>{order}</p>}
+          {order !== undefined && <p className={`text-gray-500`}>{order}</p>}
         </div>
       </div>
     </div>
