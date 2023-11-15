@@ -9,11 +9,14 @@ import Category from "@/components/Category";
 import { useRouter } from "next/router";
 import axios from "axios";
 import { toast } from "react-toastify";
-import { IProduct } from "@/interfaces/product_interface";
+import { IListCategory, IProduct } from "@/interfaces/product_interface";
 
 export default function Home() {
   const router = useRouter();
   const [productList, setProductList] = useState<IAPIResponse<IProduct[]>>({});
+  const [listCategory, setListCategory] = useState<
+    IAPIResponse<IListCategory[]>
+  >({});
 
   const getProduct = async () => {
     try {
@@ -33,8 +36,26 @@ export default function Home() {
     }
   };
 
+  const getCategories = async () => {
+    try {
+      const res = await API.get(`/products/top-categories`);
+
+      const data = res.data as IAPIResponse<IListCategory[]>;
+
+      setListCategory(data!);
+      console.log("data", data);
+    } catch (e) {
+      if (axios.isAxiosError(e)) {
+        return toast.error(e.message, {
+          autoClose: 1500,
+        });
+      }
+    }
+  };
+
   useEffect(() => {
     getProduct();
+    getCategories();
   }, []);
 
   return (
@@ -115,7 +136,25 @@ export default function Home() {
             <Category src="tas.png" alt="Men's Bag" text="Men's Bag" />
           </div>
         </div>
-
+        <div className="grid grid-cols-4 md:grid-cols-9 gap-x-4 gap-y-4">
+          {listCategory.data?.map((e, i) => (
+            <>
+              <Category
+                src={e.picture_url}
+                text={e.name}
+                alt={e.name}
+                onClick={() =>
+                  router.push({
+                    pathname: "/search",
+                    query: {
+                      categoryId: e.category_id,
+                    },
+                  })
+                }
+              />
+            </>
+          ))}
+        </div>
         <div>
           <p className="text-lg md:text-xl mt-14 mb-3 py-2 font-semibold text-center text-[#29374e]">
             Recommendation
