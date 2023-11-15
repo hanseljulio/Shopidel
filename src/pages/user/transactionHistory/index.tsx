@@ -45,16 +45,6 @@ const AddReviewModal = (props: IAddReviewModal) => {
   const submit = async (e: any) => {
     e.preventDefault();
 
-    if (review === "") {
-      toast.error("Review cannot be empty");
-      return;
-    }
-
-    if (rating === "") {
-      toast.error("Rating cannot be empty");
-      return;
-    }
-
     const sendData = {
       product_id: props.id,
       feedback: review,
@@ -73,7 +63,16 @@ const AddReviewModal = (props: IAddReviewModal) => {
         Product name: <span className="font-bold">{props.name}</span>
       </h1>
       <div className="pt-4">
-        <p className="pb-2">Your review</p>
+        <div className="flex justify-between">
+          <p className="pb-2">Your review (max 500 characters!)</p>
+          <p
+            className={`${
+              review.length > 500 || review.length === 0 ? "text-red-600" : ""
+            } `}
+          >
+            {review.length}
+          </p>
+        </div>
         <textarea
           className="w-full h-80"
           onChange={(e) => setReview(e.target.value)}
@@ -105,6 +104,7 @@ const AddReviewModal = (props: IAddReviewModal) => {
           text="Submit Review"
           onClick={submit}
           styling="bg-[#fddf97] p-3 rounded-[8px] w-[250px] my-4"
+          disabled={review.length > 500 || rating === "" || review.length === 0}
         />
       </div>
     </div>
@@ -229,12 +229,17 @@ const DetailModal = (props: IDetailModalProps) => {
 
 const ReviewModal = (props: IReviewModal) => {
   return (
-    <div className="bg-white p-5 rounded-md  md:w-[500px] h-[280px] w-[99%]">
-      <div className="px-5 pt-5 text-center">
-        <h1 className="font-bold w-full">Your Review</h1>
-        <h1 className="p-3">{props.review.review_feedback}</h1>
-        <h1 className="p-3">Rating: {props.review.review_rating}/5</h1>
-        <h1 className="p-3">
+    <div className="bg-white p-5 rounded-md md:w-[1000px] md:max-h-[350px] max-h-[80vh] w-[90vw] overflow-y-auto">
+      <div className="py-3 border-b-2">
+        <h1 className="text-[20px] font-bold">Your Review</h1>
+      </div>
+      <div className="pt-4">
+        <h1>{props.review.review_feedback}</h1>
+      </div>
+      <div className="pt-10">
+        <h1 className="text-[20px] font-bold">Additional Information</h1>
+        <h1>Rating: {props.review.review_rating}/5</h1>
+        <h1>
           Reviewed on: {new Date(props.review.created_at).toLocaleString()}
         </h1>
       </div>
