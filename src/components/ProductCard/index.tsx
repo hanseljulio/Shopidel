@@ -69,12 +69,12 @@ const ProductCard = ({
         </p>
 
         <div className="flex justify-between text-xs md:text-sm pt-2">
-          {place && (
+          {place !== undefined && (
             <p className="text-gray-500 ">
               {place?.length > 15 ? `${place.substring(0, 12)}...` : place}
             </p>
           )}
-          {order && <p className={`text-gray-500 `}>{order}</p>}
+          {order !== undefined && <p className={`text-gray-500`}>{order}</p>}
         </div>
       </div>
     </div>
