@@ -1,7 +1,6 @@
 import React, { MouseEventHandler } from "react";
 import classNames from "classnames";
 import { BsStarFill } from "react-icons/bs";
-import Image from "next/image";
 import { currencyConverter } from "@/utils/utils";
 
 interface IProductCard {
@@ -13,7 +12,6 @@ interface IProductCard {
   star?: number;
   onClick?: MouseEventHandler;
   showStar: boolean;
-  districtSold?: boolean;
 }
 const ProductCard = ({
   image,
@@ -24,7 +22,6 @@ const ProductCard = ({
   star,
   onClick,
   showStar,
-  districtSold,
 }: IProductCard) => {
   return (
     <div
@@ -70,16 +67,15 @@ const ProductCard = ({
         <p className=" tracking-wider text-[#f57b29] text-sm md:text-base">
           {currencyConverter(parseInt(price))}
         </p>
-        {districtSold === true && (
-          <div className="flex justify-between text-xs md:text-sm pt-2">
+
+        <div className="flex justify-between text-xs md:text-sm pt-2">
+          {place && (
             <p className="text-gray-500 ">
-              {place && place?.length > 15
-                ? `${place.substring(0, 12)}...`
-                : place}
+              {place?.length > 15 ? `${place.substring(0, 12)}...` : place}
             </p>
-            <p className="text-gray-500 "> {`${order} sold`}</p>
-          </div>
-        )}
+          )}
+          {order && <p className={`text-gray-500 `}>{order}</p>}
+        </div>
       </div>
     </div>
   );
