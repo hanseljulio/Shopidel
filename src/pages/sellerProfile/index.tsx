@@ -376,9 +376,8 @@ function Index({ shop }: IProfileShopProps) {
                   key={k}
                   image={e.picture_url}
                   price={e.price}
-                  showStar={true}
+                  showStar={false}
                   title={e.name}
-                  star={e.rating}
                   place={e.district}
                   order={e.total_sold}
                 />
