@@ -52,7 +52,7 @@ export const getServerSideProps = async (
       stars: "",
       sold: 0,
       available: 0,
-      images: null,
+      images: [],
       seller_name: "",
       variant_options: [
         {
@@ -616,6 +616,21 @@ const ProductDetail = ({
                           <span> variation: {review.variant}</span>
                         </p>
                         <p className="theReview">{review.comment}</p>
+                        <div className="grid grid-cols-4 gap-x-2 mt-3">
+                          {imagesProduct.map((url, index) => {
+                            return (
+                              <img
+                                key={index}
+                                className="cursor-pointer w-28 h-full rounded-sm"
+                                width={50}
+                                height={50}
+                                src={url}
+                                alt="image review"
+                                onClick={handleZoomImage}
+                              />
+                            );
+                          })}
+                        </div>
                       </div>
                     </div>
                   ))}
@@ -642,7 +657,6 @@ const ProductDetail = ({
                         title={e.product_name}
                         price={e.product_price}
                         showStar={false}
-                        districtSold={false}
                       />
                     )
                 )}
