@@ -17,11 +17,14 @@ export default function Home() {
 
   const getProduct = async () => {
     try {
-      const res = await API.get(`/products?limit=18`);
+      const res = await API.get(
+        `/products?page=1&sortBy=price&sort=asc&limit=18`
+      );
 
       const data = res.data as IAPIResponse<IProduct[]>;
 
       setProductList(data!);
+      console.log(data);
     } catch (e) {
       if (axios.isAxiosError(e)) {
         return toast.error(e.message, {
@@ -119,7 +122,7 @@ export default function Home() {
             <ProductCard
               key={product.id}
               onClick={() =>
-                router.push(`${product.seller_name}/${product.name}`)
+                router.push(`/${product.shop_name}/${product.name}`)
               }
               image={product.picture_url}
               price={product.price}

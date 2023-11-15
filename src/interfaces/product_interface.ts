@@ -5,7 +5,7 @@ export interface IProduct {
   total_sold: number;
   price: string;
   picture_url: string;
-  seller_name: string;
+  shop_name: string;
 }
 
 export interface IReviewProduct
