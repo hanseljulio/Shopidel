@@ -16,7 +16,11 @@ import { API } from "@/network";
 import { currencyConverter } from "@/utils/utils";
 import axios from "axios";
 import { getCookie } from "cookies-next";
-import { GetServerSidePropsContext, InferGetServerSidePropsType } from "next";
+import {
+  GetServerSidePropsContext,
+  GetStaticProps,
+  InferGetServerSidePropsType,
+} from "next";
 import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
 import { SubmitHandler } from "react-hook-form";
@@ -32,62 +36,61 @@ export interface IAPIProductDetailResponseWithSeller
   seller_name: string;
 }
 
-export const getServerSideProps = async (
-  context: GetServerSidePropsContext
-) => {
-  let data: IAPIProductDetailResponseWithSeller | undefined;
-
+export const getStaticPaths = async () => {
   try {
-    const res = await API.get("/products/5");
-    data = (res.data as IAPIResponse<IAPIProductDetailResponseWithSeller>).data;
-    console.log("hasil product", data);
-  } catch (e) {
-    if (axios.isAxiosError(e)) {
-      console.error(e.response?.data);
-    }
-    data = {
-      id: 0,
-      name: "",
-      description: "",
-      stars: "",
-      sold: 0,
-      available: 0,
-      images: [],
-      seller_name: "",
-      variant_options: [
-        {
-          variant_option_name: "",
-          childs: [],
+    const response = await API.get(`/products`);
+    const products = response.data;
+
+    const paths = products.map(
+      (product: { shop_name: string; product_name: string }) => ({
+        params: {
+          shop_name: product.shop_name,
+          product_name: product.product_name,
         },
-      ],
-      variants: [
-        {
-          variant_id: 0,
-          variant_name: "",
-          selections: [
-            {
-              selection_variant_name: "",
-              selection_name: "",
-            },
-          ],
-          stock: 0,
-          price: "",
-        },
-      ],
-      is_favorite: false,
+      })
+    );
+    console.log("ada product");
+    return { paths, fallback: true };
+  } catch (error) {
+    console.error("Error fetching product details:", error);
+    return {
+      paths: [],
+      fallback: true,
     };
   }
-
-  return {
-    props: {
-      product: data!,
-    },
-  };
 };
 
-const ProductDetail = ({
-  product,
-}: InferGetServerSidePropsType<typeof getServerSideProps>) => {
+export const getStaticProps: GetStaticProps<IProductDetailProps> = async ({
+  params,
+}) => {
+  try {
+    const { shop_name, product_name } = params || {};
+    const response = await API.get(
+      `/products/detail/${shop_name}/${product_name}`
+    );
+    const product = response.data.data;
+    console.log(product);
+    console.log("ada product");
+
+    return {
+      props: {
+        product,
+      },
+    };
+  } catch (error) {
+    console.error("Error fetching product details:", error);
+
+    return {
+      notFound: true,
+    };
+  }
+};
+
+interface IProductDetailProps {
+  product: IAPIProductDetailResponse;
+}
+
+const ProductDetail = ({ product }: IProductDetailProps) => {
   const router = useRouter();
   const [count, setCount] = useState<number>(1);
   const [isHovering, setIsHovering] = useState(false);
@@ -162,30 +165,30 @@ const ProductDetail = ({
     }
   };
 
-  const getShop = async () => {
-    try {
-      const res = await API.get(
-        `/products/${product.seller_name}/recommended-products`
-      );
+  // const getShop = async () => {
+  //   try {
+  //     const res = await API.get(
+  //       `/products/${product.}/recommended-products`
+  //     );
 
-      const data = res.data as IAPIResponse<
-        IAPIProductDetailResponseWithSeller[]
-      >;
-      setShop(data);
-    } catch (e) {
-      if (axios.isAxiosError(e)) {
-        return toast.error("Error fetching product suggestion", {
-          toastId: "errorWishlist",
-          autoClose: 1500,
-        });
-      }
-    }
-  };
+  //     const data = res.data as IAPIResponse<
+  //       IAPIProductDetailResponseWithSeller[]
+  //     >;
+  //     setShop(data);
+  //   } catch (e) {
+  //     if (axios.isAxiosError(e)) {
+  //       return toast.error("Error fetching product suggestion", {
+  //         toastId: "errorWishlist",
+  //         autoClose: 1500,
+  //       });
+  //     }
+  //   }
+  // };
 
   useEffect(() => {
     getImages();
     getSuggest();
-    getShop();
+    // getShop();
     getReviewProducts();
   }, []);
 
@@ -388,7 +391,7 @@ const ProductDetail = ({
               </div>
               <div className="favorite-icon mt-5 text-right">
                 <button onClick={() => handleWishlist(product)}>
-                  {isFavorite || product.is_favorite ? (
+                  {isFavorite || product?.is_favorite ? (
                     <div className="flex items-center gap-1">
                       <FaHeart style={{ color: "red" }} />
                       <p>Favorite</p>
