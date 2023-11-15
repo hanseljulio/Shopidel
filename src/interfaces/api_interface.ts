@@ -43,7 +43,7 @@ export interface IAPIProductDetailResponse {
   stars: string;
   sold: number;
   available: number;
-  images: null;
+  images: [];
   variant_options: [
     {
       variant_option_name: string;
@@ -64,4 +64,5 @@ export interface IAPIProductDetailResponse {
       price: string;
     }
   ];
+  is_favorite: boolean
 }

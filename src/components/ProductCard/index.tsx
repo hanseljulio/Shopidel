@@ -1,7 +1,6 @@
 import React, { MouseEventHandler } from "react";
 import classNames from "classnames";
 import { BsStarFill } from "react-icons/bs";
-import Image from "next/image";
 import { currencyConverter } from "@/utils/utils";
 
 interface IProductCard {
@@ -72,12 +71,12 @@ const ProductCard = ({
         </p>
 
         <div className="flex justify-between text-xs md:text-sm pt-2">
-          <p className="text-gray-500 ">
-            {place && place?.length > 15
-              ? `${title.substring(0, 12)}...`
-              : place}
-          </p>
-          <p className="text-gray-500 "> {`${order} sold`}</p>
+          {place && (
+            <p className="text-gray-500 ">
+              {place?.length > 15 ? `${place.substring(0, 12)}...` : place}
+            </p>
+          )}
+          {order && <p className={`text-gray-500 `}>{order}</p>}
         </div>
       </div>
     </div>
