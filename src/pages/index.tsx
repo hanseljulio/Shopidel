@@ -24,7 +24,6 @@ export default function Home() {
       const data = res.data as IAPIResponse<IProduct[]>;
 
       setProductList(data!);
-      console.log(data);
     } catch (e) {
       if (axios.isAxiosError(e)) {
         return toast.error(e.message, {
