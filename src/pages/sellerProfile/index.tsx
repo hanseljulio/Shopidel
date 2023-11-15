@@ -197,16 +197,24 @@ function Index({ shop }: IProfileShopProps) {
     }
   };
 
-  const getProductBasedOnCategory = async (id: number) => {
+  const getProductBasedOnCategory = async (id: number | null) => {
     try {
-      const res = await API.get(
-        `/sellers/${shop.seller_name}/categories/${id}/products`
-      );
+      let res;
+      if (id !== null) {
+        res = await API.get(
+          `/sellers/${shop.seller_name}/categories/${id}/products`
+        );
+      } else {
+        // Fetch all products when no category is selected
+        res = await API.get(`/sellers/${shop.seller_name}/best-selling
+        `);
+      }
+
       const data = res.data as IAPIResponse<IProduct[]>;
 
       if (data.data) {
         setProductCategory(data.data);
-        setSelectedCategory(id); // Update the selected category
+        setSelectedCategory(id);
       } else {
         console.error("Data is undefined or null");
       }
@@ -340,6 +348,14 @@ function Index({ shop }: IProfileShopProps) {
             </div>
             <div>
               <ul className="gap-y-5 flex md:flex-col gap-x-3">
+                <li
+                  className={`cursor-pointer ${
+                    selectedCategory === null ? "text-[#e09664]" : ""
+                  }`}
+                  onClick={() => getProductBasedOnCategory(null)}
+                >
+                  All
+                </li>
                 {categoryList.map((e, i) => (
                   <li
                     key={i}
