@@ -15,15 +15,16 @@ import {
 import Pagination from "@/components/Pagination";
 import Modal from "@/components/Modal";
 import { FaMapMarkerAlt, FaTag } from "react-icons/fa";
+import CheckoutGrandTotal from "@/components/CheckoutGrandTotal";
 
 interface IIndividualOrderProps {
   data: ITransactionHistoryData;
-  setCurrentTransaction: (transaction: ITransactionHistoryData) => void;
+  setCurrentTransaction: (transactionId: number) => void;
   setCurrentReview: (review: ITransactionHistoryReview) => void;
 }
 
 interface IDetailModalProps {
-  data: ITransactionHistoryData;
+  id: number;
 }
 
 interface IReviewModal {
@@ -31,12 +32,55 @@ interface IReviewModal {
 }
 
 const DetailModal = (props: IDetailModalProps) => {
+  const [data, setData] = useState<ITransactionHistoryData>({
+    order_id: 0,
+    shop_name: "",
+    status: "",
+    products: [],
+    promotions: {
+      marketplace_voucher: "",
+      shop_voucher: "",
+    },
+    delivery_fee: "",
+    shipping: {
+      province: "",
+      district: "",
+      zip_code: "",
+      sub_district: "",
+      kelurahan: "",
+      detail: "",
+    },
+    total_payment: "",
+  });
+  const router = useRouter();
+  const { updateUser } = useUserStore();
+
+  const getDetail = async () => {
+    try {
+      const response = await API.get(`orders/${props.id}`);
+      const data = await response.data.data;
+      setData(data);
+    } catch (e) {
+      if (axios.isAxiosError(e)) {
+        if (e.response?.status === 401) {
+          return clientUnauthorizeHandler(router, updateUser);
+        }
+        return toast.error(e.message, {
+          autoClose: 1500,
+        });
+      }
+    }
+  };
+
+  useEffect(() => {
+    getDetail();
+  }, []);
+
   const getTotal = () => {
     let total = 0;
-    for (let i = 0; i < props.data.products.length; i++) {
+    for (let i = 0; i < data.products.length; i++) {
       total +=
-        props.data.products[i].quantity *
-        parseInt(props.data.products[i].individual_price);
+        data.products[i].quantity * parseInt(data.products[i].individual_price);
     }
 
     return total;
@@ -48,17 +92,17 @@ const DetailModal = (props: IDetailModalProps) => {
         <h1 className="text-[20px] font-bold">Transaction Details</h1>
       </div>
       <div className="pt-4">
-        <h1>Order status: {props.data.status}</h1>
-        <h1>Purchased from: {props.data.shop_name}</h1>
+        <h1>Order status: {data.status}</h1>
+        <h1>Purchased from: {data.shop_name}</h1>
       </div>
       <div className="pt-8">
         <h1 className="text-[20px] font-bold flex items-center gap-3">
           <FaMapMarkerAlt className="text-[#ff3224]" />
           Delivery Address
         </h1>
-        <h1>{props.data.shipping.detail}</h1>
-        <h1>{`${props.data.shipping.kelurahan.toUpperCase()}, ${props.data.shipping.sub_district.toUpperCase()}, ${props.data.shipping.district.toUpperCase()}, ${props.data.shipping.province.toUpperCase()}, ID ${
-          props.data.shipping.zip_code
+        <h1>{data.shipping.detail}</h1>
+        <h1>{`${data.shipping.kelurahan.toUpperCase()}, ${data.shipping.sub_district.toUpperCase()}, ${data.shipping.district.toUpperCase()}, ${data.shipping.province.toUpperCase()}, ID ${
+          data.shipping.zip_code
         }`}</h1>
       </div>
 
@@ -67,7 +111,7 @@ const DetailModal = (props: IDetailModalProps) => {
           <FaTag className="text-[#ff3224]" />
           Products purchased
         </h1>
-        {props.data.products.map((data, index) => {
+        {data.products.map((data, index) => {
           return (
             <div key={index} className="py-3">
               <h1 className="font-bold">{data.product_name}</h1>
@@ -80,41 +124,25 @@ const DetailModal = (props: IDetailModalProps) => {
           );
         })}
       </div>
-      <div className="flex justify-end py-10 px-4 bg-[#29374e] text-white">
-        <div className="text-left h-[150px]">
-          <h1>Order Total: </h1>
-          <h1>Shipping Total: </h1>
-          {parseInt(props.data.promotions.shop_voucher) > 0 && (
-            <h1>Shop Promo: </h1>
-          )}
-          {parseInt(props.data.promotions.marketplace_voucher) > 0 && (
-            <h1>Marketplace Promo: </h1>
-          )}
-          <br />
-          <h1 className="pt-3">Total payment: </h1>
-        </div>
-
-        <div className="text-right h-[150px]">
-          <h1>{currencyConverter(getTotal())}</h1>
-          <h1>{currencyConverter(parseInt(props.data.delivery_fee))}</h1>
-          {parseInt(props.data.promotions.shop_voucher) > 0 && (
-            <h1>
-              {currencyConverter(parseInt(props.data.promotions.shop_voucher))}
-            </h1>
-          )}
-          {parseInt(props.data.promotions.marketplace_voucher) > 0 && (
-            <h1>
-              {currencyConverter(
-                parseInt(props.data.promotions.marketplace_voucher)
-              )}
-            </h1>
-          )}
-          <br />
-          <h1 className="text-[30px]">
-            {currencyConverter(parseInt(props.data.total_payment))}
-          </h1>
-        </div>
-      </div>
+      <CheckoutGrandTotal
+        merchandise={getTotal()}
+        shipping={
+          isNaN(parseInt(data.delivery_fee)) ? 0 : parseInt(data.delivery_fee)
+        }
+        voucher={
+          isNaN(parseInt(data.promotions.shop_voucher))
+            ? 0
+            : parseInt(data.promotions.shop_voucher)
+        }
+        marketplace={
+          isNaN(parseInt(data.promotions.marketplace_voucher))
+            ? 0
+            : parseInt(data.promotions.marketplace_voucher)
+        }
+        total={
+          isNaN(parseInt(data.total_payment)) ? 0 : parseInt(data.total_payment)
+        }
+      />
     </div>
   );
 };
@@ -184,7 +212,7 @@ const IndividualOrder = (props: IIndividualOrderProps) => {
         </div>
         <div className="text-right flex flex-col gap-3 text-[18px]">
           <h1
-            onClick={() => props.setCurrentTransaction(props.data)}
+            onClick={() => props.setCurrentTransaction(props.data.order_id)}
             className="text-blue-600 hover:cursor-pointer hover:underline"
           >
             View Transaction Detail
@@ -199,51 +227,7 @@ const IndividualOrder = (props: IIndividualOrderProps) => {
 const TransactionHistory = () => {
   const { user, updateUser } = useUserStore();
   const router = useRouter();
-  const [transactionData, setTransactionData] = useState<ITransactionHistory>({
-    data: [
-      {
-        order_id: 3,
-        shop_name: "Jejak Trendi",
-        status: "Completed",
-        products: [
-          {
-            product_id: 5,
-            product_name:
-              "KOMIN-Sandal Hiu Pria Dewasa Sendal Shark Sandal Couple Rumah Sendal Paus Eva Lembut Ringan Nyaman Sandal Pasangan Korea",
-            quantity: 1,
-            individual_price: "18000",
-            review: {
-              review_id: 0,
-              review_feedback: "",
-              review_rating: 0,
-              created_at: "0001-01-01T00:00:00Z",
-            },
-            is_reviewed: false,
-          },
-        ],
-        promotions: {
-          marketplace_voucher: "9000",
-          shop_voucher: "2000",
-        },
-        delivery_fee: "17000",
-        shipping: {
-          province: "Jabar",
-          district: "Jakarta",
-          zip_code: "52323",
-          sub_district: "diejdiejdid",
-          kelurahan: "aded",
-          detail: "dededededed",
-        },
-        total_payment: "520000",
-      },
-    ],
-    pagination: {
-      total_page: 2,
-      total_item: 13,
-      current_page: 1,
-      limit: 10,
-    },
-  });
+  const [transactionData, setTransactionData] = useState<ITransactionHistory>();
   const [sortBy, setSortBy] = useState<string>("all");
   const orderStatus = [
     "All",
@@ -260,27 +244,7 @@ const TransactionHistory = () => {
       review_rating: 0,
       created_at: "0001-01-01T00:00:00Z",
     });
-  const [selectedTransaction, setSelectedTransaction] =
-    useState<ITransactionHistoryData>({
-      order_id: 0,
-      shop_name: "",
-      status: "",
-      products: [],
-      promotions: {
-        marketplace_voucher: "",
-        shop_voucher: "",
-      },
-      delivery_fee: "",
-      shipping: {
-        province: "",
-        district: "",
-        zip_code: "",
-        sub_district: "",
-        kelurahan: "",
-        detail: "",
-      },
-      total_payment: "",
-    });
+  const [selectedTransactionId, setSelectedTransactionId] = useState<number>(0);
   const [showReviewModal, setShowReviewModal] = useState<boolean>(false);
   const [showDetailModal, setShowDetailModal] = useState<boolean>(false);
 
@@ -305,14 +269,14 @@ const TransactionHistory = () => {
   };
 
   useEffect(() => {
-    // getTransactionData();
+    getTransactionData();
   }, [sortBy, page]);
 
   return (
     <>
       {showDetailModal && (
         <Modal
-          content={<DetailModal data={selectedTransaction} />}
+          content={<DetailModal id={selectedTransactionId} />}
           onClose={() => setShowDetailModal(false)}
         />
       )}
@@ -356,8 +320,8 @@ const TransactionHistory = () => {
                     <IndividualOrder
                       key={index}
                       data={data}
-                      setCurrentTransaction={(transaction) => {
-                        setSelectedTransaction(transaction);
+                      setCurrentTransaction={(id) => {
+                        setSelectedTransactionId(id);
                         setShowDetailModal(true);
                       }}
                       setCurrentReview={(review) => {
