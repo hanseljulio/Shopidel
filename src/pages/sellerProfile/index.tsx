@@ -230,6 +230,7 @@ function Index({ shop }: IProfileShopProps) {
   useEffect(() => {
     getBestSelling();
     getCategories();
+    getProductBasedOnCategory(null);
   }, []);
 
   const calculateAverageStars = (products: { stars: string }[]) => {
