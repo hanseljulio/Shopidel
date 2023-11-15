@@ -28,3 +28,9 @@ export interface IProductSuggestion{
     product_price: string
     seller_name: string
 }
+
+export interface IListCategory{
+  category_id: number,
+  name: string
+  picture_url: string
+}
