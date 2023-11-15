@@ -28,9 +28,9 @@ const ResetPassword = () => {
   return (
     <div className="h-screen w-screen flex justify-center items-center">
       <ToastContainer />
-      <div className="flex flex-col items-center">
+      <div className="flex flex-col items-center px-5 md:px-0">
         <h1 className="text-xl font-bold">Reset Password</h1>
-        <form onSubmit={handleSubmit(onSubmit)} className="mt-5">
+        <form onSubmit={handleSubmit(onSubmit)} className="mt-5 w-full md:w-96">
           <div className="flex flex-col">
             <label htmlFor="email" className="text-sm">
               Password
