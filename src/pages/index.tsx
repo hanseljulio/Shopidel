@@ -71,7 +71,19 @@ export default function Home() {
         <div className="grid grid-cols-4 md:grid-cols-9 gap-x-4 gap-y-4">
           {listCategory.data?.map((e, i) => (
             <>
-              <Category src={e.picture_url} text={e.name} alt={e.name} />
+              <Category
+                src={e.picture_url}
+                text={e.name}
+                alt={e.name}
+                onClick={() =>
+                  router.push({
+                    pathname: "/search",
+                    query: {
+                      categoryId: e.category_id,
+                    },
+                  })
+                }
+              />
             </>
           ))}
         </div>
