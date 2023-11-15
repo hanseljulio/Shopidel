@@ -16,11 +16,13 @@ import Pagination from "@/components/Pagination";
 import Modal from "@/components/Modal";
 import { FaMapMarkerAlt, FaTag } from "react-icons/fa";
 import CheckoutGrandTotal from "@/components/CheckoutGrandTotal";
+import Button from "@/components/Button";
 
 interface IIndividualOrderProps {
   data: ITransactionHistoryData;
   setCurrentTransaction: (transactionId: number) => void;
   setCurrentReview: (review: ITransactionHistoryReview) => void;
+  setProductReviewId: (id: number, name: string) => void;
 }
 
 interface IDetailModalProps {
@@ -30,6 +32,84 @@ interface IDetailModalProps {
 interface IReviewModal {
   review: ITransactionHistoryReview;
 }
+
+interface IAddReviewModal {
+  id: number;
+  name: string;
+}
+
+const AddReviewModal = (props: IAddReviewModal) => {
+  const [review, setReview] = useState<string>("");
+  const [rating, setRating] = useState<string>("");
+
+  const submit = async (e: any) => {
+    e.preventDefault();
+
+    if (review === "") {
+      toast.error("Review cannot be empty");
+      return;
+    }
+
+    if (rating === "") {
+      toast.error("Rating cannot be empty");
+      return;
+    }
+
+    const sendData = {
+      product_id: props.id,
+      feedback: review,
+      rating: rating,
+    };
+
+    console.log(sendData);
+  };
+
+  return (
+    <div className="bg-white p-5 rounded-md md:w-[1000px] md:h-[750px] h-[80vh] w-[90vw] overflow-y-auto">
+      <div className="py-3 border-b-2">
+        <h1 className="text-[20px] font-bold">Review Order</h1>
+      </div>
+      <h1 className="pt-3">
+        Product name: <span className="font-bold">{props.name}</span>
+      </h1>
+      <div className="pt-4">
+        <p className="pb-2">Your review</p>
+        <textarea
+          className="w-full h-80"
+          onChange={(e) => setReview(e.target.value)}
+        />
+      </div>
+      <div className="pt-6 flex md:justify-between items-center py-6 md:flex-row flex-col md:gap-0 gap-6">
+        <div className="flex items-center gap-6">
+          <p className="font-bold">Rating (out of 5): </p>
+          <select
+            onChange={(e) => setRating(e.target.value)}
+            className={`p-4 w-[100px] h-16 rounded`}
+            name="category-dropdown"
+          >
+            <option disabled selected></option>
+            <option value={"1"}>{"1"}</option>
+            <option value={"2"}>{"2"}</option>
+            <option value={"3"}>{"3"}</option>
+            <option value={"4"}>{"4"}</option>
+            <option value={"5"}>{"5"}</option>
+          </select>
+        </div>
+        <div className="flex flex-col gap-4">
+          <p>Upload your picture here:</p>
+          <input type="file" />
+        </div>
+      </div>
+      <div className="pt-8 flex justify-center">
+        <Button
+          text="Submit Review"
+          onClick={submit}
+          styling="bg-[#fddf97] p-3 rounded-[8px] w-[250px] my-4"
+        />
+      </div>
+    </div>
+  );
+};
 
 const DetailModal = (props: IDetailModalProps) => {
   const [data, setData] = useState<ITransactionHistoryData>({
@@ -87,7 +167,7 @@ const DetailModal = (props: IDetailModalProps) => {
   };
 
   return (
-    <div className="bg-white p-5 rounded-md  md:w-[1000px] max-h-[800px] w-[99%] overflow-y-auto">
+    <div className="bg-white p-5 rounded-md  md:w-[1000px] md:max-h-[800px] h-[80vh] w-[90vw] overflow-y-auto">
       <div className="py-3 border-b-2">
         <h1 className="text-[20px] font-bold">Transaction Details</h1>
       </div>
@@ -195,6 +275,12 @@ const IndividualOrder = (props: IIndividualOrderProps) => {
                       </div>
                     ) : (
                       <p
+                        onClick={() =>
+                          props.setProductReviewId(
+                            data.product_id,
+                            data.product_name
+                          )
+                        }
                         className={`${
                           props.data.status !== "Completed"
                             ? "hidden invisible"
@@ -210,7 +296,7 @@ const IndividualOrder = (props: IIndividualOrderProps) => {
             );
           })}
         </div>
-        <div className="text-right flex flex-col gap-3 text-[18px]">
+        <div className="md:text-right flex flex-col gap-3 text-[18px] text-center">
           <h1
             onClick={() => props.setCurrentTransaction(props.data.order_id)}
             className="text-blue-600 hover:cursor-pointer hover:underline"
@@ -247,6 +333,9 @@ const TransactionHistory = () => {
   const [selectedTransactionId, setSelectedTransactionId] = useState<number>(0);
   const [showReviewModal, setShowReviewModal] = useState<boolean>(false);
   const [showDetailModal, setShowDetailModal] = useState<boolean>(false);
+  const [showAddReviewModal, setShowAddReviewModal] = useState<boolean>(false);
+  const [selectedProductId, setSelectedProductId] = useState<number>(0);
+  const [selectedProductName, setSelectedProductName] = useState<string>("");
 
   const getTransactionData = async () => {
     try {
@@ -274,6 +363,15 @@ const TransactionHistory = () => {
 
   return (
     <>
+      {showAddReviewModal && (
+        <Modal
+          content={
+            <AddReviewModal id={selectedProductId} name={selectedProductName} />
+          }
+          onClose={() => setShowAddReviewModal(false)}
+        />
+      )}
+
       {showDetailModal && (
         <Modal
           content={<DetailModal id={selectedTransactionId} />}
@@ -327,6 +425,11 @@ const TransactionHistory = () => {
                       setCurrentReview={(review) => {
                         setSelectedReview(review);
                         setShowReviewModal(true);
+                      }}
+                      setProductReviewId={(id, name) => {
+                        setSelectedProductId(id);
+                        setSelectedProductName(name);
+                        setShowAddReviewModal(true);
                       }}
                     />
                   ))}
