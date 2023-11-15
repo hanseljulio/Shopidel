@@ -5,16 +5,19 @@ interface ICheckoutGrandTotalProps {
   merchandise: number;
   shipping: number;
   voucher: number;
+  marketplace: number;
+  total?: number;
 }
 
 const CheckoutGrandTotal = (props: ICheckoutGrandTotalProps) => {
   return (
     <>
-      <div className="bg-[#29374e] text-right px-[20px] py-6 text-white md:flex items-center md:justify-end gap-10 hidden md:visible invisible md:text-[18px] text-[14px] justify-center ">
+      <div className="bg-[#29374e] text-right px-[20px] py-16 text-white md:flex items-center md:justify-end gap-10 hidden md:visible invisible md:text-[18px] text-[14px] justify-center ">
         <div className="text-left h-[150px]">
           <h1>Order Total: </h1>
           <h1>Shipping Total: </h1>
-          {props.voucher > 0 && <h1>Promo Total: </h1>}
+          {props.voucher > 0 && <h1>Shop promo: </h1>}
+          {props.marketplace > 0 && <h1>Marketplace Promo: </h1>}
           <br />
           <h1 className="pt-3">Total payment: </h1>
         </div>
@@ -23,6 +26,9 @@ const CheckoutGrandTotal = (props: ICheckoutGrandTotalProps) => {
           <h1>{currencyConverter(props.merchandise)}</h1>
           <h1>{currencyConverter(props.shipping)}</h1>
           {props.voucher > 0 && <h1>{currencyConverter(props.voucher)}</h1>}
+          {props.marketplace > 0 && (
+            <h1>{currencyConverter(props.marketplace)}</h1>
+          )}
           <br />
           <h1 className="text-[30px]">
             {currencyConverter(
@@ -52,7 +58,9 @@ const CheckoutGrandTotal = (props: ICheckoutGrandTotalProps) => {
             <h1 className="pt-3">Total payment: </h1>
             <h1 className="text-[30px]">
               {currencyConverter(
-                props.merchandise + props.shipping - props.voucher
+                props.total
+                  ? props.total
+                  : props.merchandise + props.shipping - props.voucher
               )}
             </h1>
           </div>

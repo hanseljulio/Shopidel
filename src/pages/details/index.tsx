@@ -1,93 +1,81 @@
+import Button from "@/components/Button";
 import Footer from "@/components/Footer";
 import Modal from "@/components/Modal";
 import Navbar from "@/components/Navbar";
+import Pagination from "@/components/Pagination";
 import ProductCard from "@/components/ProductCard";
 import {
   IAPIProductDetailResponse,
   IAPIResponse,
 } from "@/interfaces/api_interface";
+import {
+  IProductSuggestion,
+  IReviewProduct,
+} from "@/interfaces/product_interface";
 import { API } from "@/network";
 import { currencyConverter } from "@/utils/utils";
 import axios from "axios";
 import { getCookie } from "cookies-next";
 import { GetServerSidePropsContext, InferGetServerSidePropsType } from "next";
+import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
 import { SubmitHandler } from "react-hook-form";
 import { AiOutlineShoppingCart } from "react-icons/ai";
 import { BsStarFill } from "react-icons/bs";
 import { FaHeart, FaRegHeart, FaStar, FaStore } from "react-icons/fa";
 import { FaLocationDot, FaTruckFast } from "react-icons/fa6";
-import { toast } from "react-toastify";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
-interface IProductDetail {
-  images: string;
-  varian?: {
-    type?: string;
-    color?: string;
-  };
+export interface IAPIProductDetailResponseWithSeller
+  extends IAPIProductDetailResponse {
+  seller_name: string;
 }
 
-const imgDummy: IProductDetail[] = [
-  {
-    images:
-      "https://down-id.img.susercontent.com/file/826639af5f9af89adae9a1700f073242",
-    varian: {
-      type: "color",
-      color: "red",
-    },
-  },
-  {
-    images:
-      "https://down-id.img.susercontent.com/file/65fe327802a4e2386cd19d6001e363ee",
-    varian: {
-      type: "color",
-      color: "purple",
-    },
-  },
-  {
-    images:
-      "https://down-id.img.susercontent.com/file/e4e359076303b2a2688506898fdb8793",
-    varian: {
-      type: "color",
-      color: "yellow",
-    },
-  },
-  {
-    images:
-      "https://down-id.img.susercontent.com/file/ff0a9d6bbc26dfaa93fb20a8e3f85a29",
-  },
-  {
-    images:
-      "https://down-id.img.susercontent.com/file/826639af5f9af89adae9a1700f073242",
-  },
-  {
-    images:
-      "https://down-id.img.susercontent.com/file/3926ab1d88624e7e9feb42c76a830d93",
-  },
-  {
-    images:
-      "https://down-id.img.susercontent.com/file/5676ea16c2a424a8285e806bb8b42616",
-  },
-  {
-    images:
-      "https://down-id.img.susercontent.com/file/50044a0096334c145d8560b7a085170c",
-  },
-  {
-    images:
-      "https://down-id.img.susercontent.com/file/bc3b634e8b2beb1f09f59671102800a7",
-  },
-];
-
-export const getServerSideProps = async () => {
-  let data: IAPIProductDetailResponse;
+export const getServerSideProps = async (
+  context: GetServerSidePropsContext
+) => {
+  let data: IAPIProductDetailResponseWithSeller | undefined;
 
   try {
-    const res = await API.get(`/products/5`);
-    data = (res.data as IAPIResponse<IAPIProductDetailResponse>).data!;
+    const res = await API.get("/products/5");
+    data = (res.data as IAPIResponse<IAPIProductDetailResponseWithSeller>).data;
+    console.log("hasil product", data);
   } catch (e) {
     if (axios.isAxiosError(e)) {
-      console.log(e.response?.data);
+      console.error(e.response?.data);
     }
+    data = {
+      id: 0,
+      name: "",
+      description: "",
+      stars: "",
+      sold: 0,
+      available: 0,
+      images: [],
+      seller_name: "",
+      variant_options: [
+        {
+          variant_option_name: "",
+          childs: [],
+        },
+      ],
+      variants: [
+        {
+          variant_id: 0,
+          variant_name: "",
+          selections: [
+            {
+              selection_variant_name: "",
+              selection_name: "",
+            },
+          ],
+          stock: 0,
+          price: "",
+        },
+      ],
+      is_favorite: false,
+    };
   }
 
   return {
@@ -100,65 +88,109 @@ export const getServerSideProps = async () => {
 const ProductDetail = ({
   product,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
+  const router = useRouter();
   const [count, setCount] = useState<number>(1);
   const [isHovering, setIsHovering] = useState(false);
   const [isModal, setIsModal] = useState<boolean>(false);
-  const [variation, setVariation] = useState(
-    "https://down-id.img.susercontent.com/file/826639af5f9af89adae9a1700f073242"
-  );
+  const [variation, setVariation] = useState<string>("");
   const [selectedVariants, setSelectedVariants] = useState<{
     [key: string]: string;
   }>({});
   const [subtotal, setSubtotal] = useState<number>(0);
   const [currentStock, setCurrentStock] = useState<number>(0);
   const [isFavorite, setIsFavorite] = useState(false);
+  const [imagesProduct, setImagesProduct] = useState([]);
+  const [reviews, setReviews] = useState<IAPIResponse<IReviewProduct[]>>();
+  const [page, setPage] = useState<number>(1);
+  const [suggestion, setSuggestion] =
+    useState<IAPIResponse<IProductSuggestion[]>>();
+  const [shop, setShop] =
+    useState<IAPIResponse<IAPIProductDetailResponseWithSeller[]>>();
 
-  const handleFavoriteClick = async () => {
-    let data: Pick<IAPIProductDetailResponse, "id"> = {
-      id: product.id,
-    };
+  useEffect(() => {
+    if (imagesProduct.length > 0) {
+      setVariation(imagesProduct[0]);
+    }
+  }, [imagesProduct]);
 
-    if (isFavorite) {
-      try {
-        await API.delete(
-          `/products/${product.id}/favorites/add-favorite
-        `,
-          {
-            headers: {
-              Authorization: `Bearer ${getCookie("accessToken")}`,
-            },
-          }
-        );
-        console.log("delete");
-
-        setIsFavorite(false);
-      } catch (error) {
-        console.error("Error removing from wishlist:", error);
-      }
-    } else {
-      try {
-        const response = await API.post(
-          `/products/${product.id}/favorites/add-favorite`,
-          data,
-          {
-            headers: {
-              Authorization: `Bearer ${getCookie("accessToken")}`,
-            },
-          }
-        );
-
-        console.log("masuk");
-        console.log(response.data);
-
-        setIsFavorite(true);
-      } catch (error) {
-        console.error("Error adding to wishlist:", error);
+  const getImages = async () => {
+    try {
+      const res = await API.get(`/products/${product.id}/pictures`);
+      const data = res.data.data;
+      setImagesProduct(data);
+    } catch (e) {
+      if (axios.isAxiosError(e)) {
+        return toast.error(e.message, {
+          autoClose: 1500,
+        });
       }
     }
   };
 
+  const getReviewProducts = async () => {
+    try {
+      const res = await API.get(
+        `products/${product.id}/reviews?page=1&stars=5&comment=true&image=true&orderBy=newest`
+      );
+      const data = res.data as IAPIResponse<IReviewProduct[]>;
+      setReviews(data);
+    } catch (e) {
+      if (axios.isAxiosError(e)) {
+        return toast.error("Error fetching review products", {
+          toastId: "errorWishlist",
+          autoClose: 1500,
+        });
+      }
+    }
+  };
+
+  const getSuggest = async () => {
+    try {
+      const res = await API.get(`/products/${product.id}/recommended-products`);
+
+      const data = res.data as IAPIResponse<IProductSuggestion[]>;
+      setSuggestion(data);
+    } catch (e) {
+      if (axios.isAxiosError(e)) {
+        console.log(e);
+
+        return toast.error("Error fetching product suggestion", {
+          toastId: "errorSuggestion",
+          autoClose: 1500,
+        });
+      }
+    }
+  };
+
+  const getShop = async () => {
+    try {
+      const res = await API.get(
+        `/products/${product.seller_name}/recommended-products`
+      );
+
+      const data = res.data as IAPIResponse<
+        IAPIProductDetailResponseWithSeller[]
+      >;
+      setShop(data);
+    } catch (e) {
+      if (axios.isAxiosError(e)) {
+        return toast.error("Error fetching product suggestion", {
+          toastId: "errorWishlist",
+          autoClose: 1500,
+        });
+      }
+    }
+  };
+
+  useEffect(() => {
+    getImages();
+    getSuggest();
+    getShop();
+    getReviewProducts();
+  }, []);
+
   const calculateSubtotal = () => {
-    const selectedVariant = product.variants.find((variant) => {
+    const selectedVariant = product?.variants.find((variant) => {
       return Object.keys(selectedVariants).every((optionName) => {
         return variant.selections.some((selection) => {
           return (
@@ -213,14 +245,19 @@ const ProductDetail = ({
   };
 
   const handleToCart = async () => {
-    if (Object.keys(selectedVariants).length === 0 || count < 1) {
+    if (count < 1) {
       return;
     }
 
-    const variant = product.variants.find((v) => {
-      const variantKey = v.selections[0].selection_variant_name;
-      return selectedVariants[variantKey] === v.selections[0].selection_name;
-    });
+    let variant;
+    if (Object.keys(selectedVariants).length === 0) {
+      variant = product?.variants[0];
+    } else {
+      variant = product?.variants.find((v) => {
+        const variantKey = v.selections[0].selection_variant_name;
+        return selectedVariants[variantKey] === v.selections[0].selection_name;
+      });
+    }
 
     if (!variant) {
       return;
@@ -243,8 +280,6 @@ const ProductDetail = ({
       } else {
         toast.error("Failed to add to cart", { autoClose: 1500 });
       }
-      console.log("yess");
-
       console.log(response.data);
     } catch (error) {
       if (axios.isAxiosError(error)) {
@@ -254,7 +289,6 @@ const ProductDetail = ({
           autoClose: 1500,
         });
       }
-      console.log("nooooo");
     }
   };
 
@@ -267,7 +301,7 @@ const ProductDetail = ({
 
     try {
       const response = await API.post(
-        `products/2/favorites/add-favorite`,
+        `/products/${data.id}/favorites/add-favorite`,
         favData,
         {
           headers: {
@@ -277,27 +311,32 @@ const ProductDetail = ({
       );
 
       if (response.status === 200) {
-        toast.success("Added to cart", { autoClose: 1500 });
+        toast.success("Added to wishlist", { autoClose: 1500 });
+        setIsFavorite(true);
       } else {
-        toast.error("Failed to add to cart", { autoClose: 1500 });
+        toast.error("Failed to add to wishlist", { autoClose: 1500 });
       }
-      console.log("yess");
-
+      console.log("yes");
       console.log(response.data);
     } catch (error) {
       if (axios.isAxiosError(error)) {
         toast.error(error.response?.data.message, { autoClose: 1500 });
       } else {
-        toast.error("An error occurred while adding to cart", {
+        toast.error("An error occurred while adding to wishlist", {
           autoClose: 1500,
         });
       }
-      console.log("nooooo");
+      console.log("no");
     }
   };
 
+  if (product === null) {
+    return <div>Loading...</div>;
+  }
+
   return (
     <>
+      <ToastContainer />
       {isModal && (
         <div className="z-50 fixed">
           <Modal
@@ -310,14 +349,14 @@ const ProductDetail = ({
         <Navbar />
         <div className="mx-auto lg:max-w-7xl px-4 md:px-0">
           <div className="flex-col md:flex-row justify-between md:flex gap-10 py-5 px-5 md:px-0">
-            <div className="order-1 md:order-1 imageProduct w-full md:w-1/4">
+            <div className="order-1 md:order-1 imageProduct w-full md:w-1/4 rounded-md overflow-hidden">
               {isHovering == true ? (
                 <img
                   width={200}
                   height={200}
                   src={variation}
                   alt=""
-                  className="bigImage w-full cursor-pointer"
+                  className="bigImage w-full cursor-pointer rounded-md"
                   onClick={handleZoomImage}
                 />
               ) : (
@@ -326,21 +365,21 @@ const ProductDetail = ({
                   height={100}
                   src={variation}
                   alt=""
-                  className="bigImage w-full cursor-pointer"
+                  className="bigImage w-full cursor-pointer rounded-md"
                   onClick={handleZoomImage}
                 />
               )}
-              <div className="variation flex overflow-x-scroll [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none']">
-                {imgDummy.map((product) => {
+              <div className="variation justify-center gap-1 mt-2 flex overflow-x-scroll [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none']">
+                {imagesProduct.map((url, index) => {
                   return (
                     <img
-                      key={product.images}
-                      className="cursor-pointer w-[90px] h-full"
+                      key={index}
+                      className="cursor-pointer w-[90px] h-full rounded-md"
                       width={50}
                       height={50}
-                      src={product.images}
-                      alt="..."
-                      onMouseOver={() => handleMouseOver(product.images)}
+                      src={url}
+                      alt="images"
+                      onMouseOver={() => handleMouseOver(url)}
                       onMouseOut={handleMouseOut}
                       onClick={handleZoomImage}
                     />
@@ -348,8 +387,8 @@ const ProductDetail = ({
                 })}
               </div>
               <div className="favorite-icon mt-5 text-right">
-                <button onClick={handleFavoriteClick}>
-                  {isFavorite ? (
+                <button onClick={() => handleWishlist(product)}>
+                  {isFavorite || product.is_favorite ? (
                     <div className="flex items-center gap-1">
                       <FaHeart style={{ color: "red" }} />
                       <p>Favorite</p>
@@ -368,7 +407,7 @@ const ProductDetail = ({
                 Set Amounts
               </p>
 
-              <div className="flex gap-3 md:gap-2 mb-2 text-sm text-neutral-600 py-3 justify-between">
+              <div className="flex gap-2 md:gap-1 mb-2 text-sm text-neutral-600 py-3 justify-between">
                 <p className="">Pengiriman</p>
                 <div>
                   <div className="flex items-center gap-1">
@@ -379,18 +418,21 @@ const ProductDetail = ({
                   </div>
                 </div>
               </div>
-              <div className="flex flex-col gap-y-3 text-sm text-neutral-600">
-                {product.variant_options.map((item, i) => {
+              <div className="flex flex-col gap-y-3 text-xs text-neutral-600">
+                {product?.variant_options?.map((item, i) => {
                   return (
-                    <div key={i} className="flex gap-x-5 items-center">
+                    <div
+                      key={i}
+                      className="flex md:gap-x-20 items-start gap-10"
+                    >
                       <p>{item.variant_option_name}</p>
-                      <div className="flex gap-x-2">
+                      <div className="grid grid-cols-2 gap-2">
                         {item.childs.map((variant, k) => {
                           const optionName = item.variant_option_name;
                           return (
                             <p
                               key={k}
-                              className={`px-2 py-1 border rounded-md cursor-pointer ${
+                              className={`px-2 py-1 border text-center rounded-md cursor-pointer ${
                                 selectedVariants[optionName] === variant
                                   ? "bg-[#d6e4f8] border border-[#364968]"
                                   : ""
@@ -456,27 +498,45 @@ const ProductDetail = ({
             <div className="order-3 md:order-2 description mt-10 md:mt-0 md:w-2/4">
               <div className="spesification">
                 <p className="productTitle text-2xl font-medium pb-3">
-                  {product.name}
+                  {product?.name}
                 </p>
                 <div className="historyProduct flex items-center text-xs pb-3">
-                  <p className="pr-3">{`Sold ${product.sold}`} </p>
+                  <p className="pr-3">{`Sold ${product?.sold}`} </p>
                   <p className="px-3 border-l border-slate-600 flex-row  md:flex flex gap-1 items-center justify-center ">
                     <BsStarFill style={{ color: "#f57b29" }} />
-                    <span className="items-center">5</span>
+                    <span className="items-center">{product?.stars}</span>
                   </p>
                 </div>
                 <p className="productPrice text-2xl font-semibold text-[#f57b29] py-3">
-                  {currencyConverter(parseInt(product.variants[0].price))}
+                  {currencyConverter(parseInt(product?.variants[0].price))}
                 </p>
               </div>
               <div className="desc pt-5 ">
                 <p className="text-lg font-medium border-b my-4">Description</p>
-                <p className="">{product.description}</p>
+                <p className="">
+                  {product?.description
+                    .split("\n\n")
+                    .map((paragraph, index) => (
+                      <span key={index} className="line-break">
+                        {paragraph.split("\\n").map(
+                          (
+                            line,
+                            lineIndex // Change '\n' to '\\n'
+                          ) => (
+                            <React.Fragment key={lineIndex}>
+                              {line}
+                              <br />
+                            </React.Fragment>
+                          )
+                        )}
+                      </span>
+                    ))}
+                </p>
               </div>
             </div>
           </div>
           <div className="seller flex-col md:flex-row justify-between md:flex gap-10 py-5 px-5 md:px-0">
-            <div className="order-1  w-3/4">
+            <div className="order-1 w-full  md:w-3/4">
               <div className="sellerShop bg-[#364968] flex flex-row gap-y-5 text-white py-3 my-10 gap-10 px-5 ">
                 <img
                   width={90}
@@ -515,7 +575,7 @@ const ProductDetail = ({
                   </p>
                   <div>
                     <p>{"4.8 dari 5"}</p>
-                    <div className="star flex">
+                    <div className="star flex text-[#fc9b5b]">
                       <FaStar />
                       <FaStar />
                       <FaStar />
@@ -525,211 +585,93 @@ const ProductDetail = ({
                   </div>
                 </div>
                 <div>
-                  <div className="buyerReviews flex mt-5  border-y">
-                    <div className="imageCust pr-4 rounded-full overflow-hidden">
-                      <img
-                        width={100}
-                        height={100}
-                        src={"/images/auth_hero.png"}
-                        alt=".."
+                  {reviews?.data?.map((review, index) => (
+                    <div
+                      key={index}
+                      className="buyerReviews flex mt-5 py-2  border-y"
+                    >
+                      <div className="imageCust pr-4 rounded-full overflow-hidden">
+                        <img
+                          width={100}
+                          height={100}
+                          src={review.customer_picture_url}
+                          alt="profile"
+                          placeholder="https://cdn4.iconfinder.com/data/icons/web-ui-color/128/Account-512.png"
+                          onError={(e) => {
+                            (e.target as HTMLInputElement).src =
+                              "https://cdn4.iconfinder.com/data/icons/web-ui-color/128/Account-512.png";
+                          }}
+                        />
+                      </div>
+                      <div className="bodyReview flex-row gap-y-5">
+                        <p className="custName">{review.customer_name}</p>
+
+                        <p className="flex">
+                          {Array.from({ length: parseInt(review.stars) }).map(
+                            (_, index) => (
+                              <FaStar
+                                key={index}
+                                style={{ color: "#f57b29" }}
+                                size={13}
+                              />
+                            )
+                          )}
+                        </p>
+                        <p className="dateReview text-sm text-neutral-500 pb-3 items-center">
+                          {review.created_at.split("T")[0]} |
+                          <span> variation: {review.variant}</span>
+                        </p>
+                        <p className="theReview">{review.comment}</p>
+                        <div className="grid grid-cols-4 gap-x-2 mt-3">
+                          {imagesProduct.map((url, index) => {
+                            return (
+                              <img
+                                key={index}
+                                className="cursor-pointer w-28 h-full rounded-sm"
+                                width={50}
+                                height={50}
+                                src={url}
+                                alt="image review"
+                                onMouseOver={() => handleMouseOver(url)}
+                                onMouseOut={handleMouseOut}
+                                onClick={handleZoomImage}
+                              />
+                            );
+                          })}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                  <div className="flex self-end mt-2 justify-center">
+                    {reviews && (
+                      <Pagination
+                        data={reviews?.pagination}
+                        onNavigate={(navPage: any) => setPage(navPage)}
                       />
-                    </div>
-                    <div className="bodyReview flex-row gap-y-5">
-                      <p className="custName">{"cust name"}</p>
-                      <p className="flex">
-                        <FaStar />
-                        <FaStar />
-                        <FaStar />
-                        <FaStar />
-                        <FaStar />
-                      </p>
-                      <p className="dateReview text-sm text-neutral-500 pb-3">
-                        {"2023-06-05"}| {"Variasi: S"}
-                      </p>
-                      <p className="theReview">
-                        {" terlalu mahal dengan kwalitas kain yg nerawang"}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="buyerReviews flex mt-5  border-y">
-                    <div className="imageCust pr-4 rounded-full overflow-hidden">
-                      <img
-                        width={100}
-                        height={100}
-                        src={"/images/auth_hero.png"}
-                        alt=".."
-                      />
-                    </div>
-                    <div className="bodyReview flex-row gap-y-5">
-                      <p className="custName">{"cust name"}</p>
-                      <p className="flex">
-                        <FaStar />
-                        <FaStar />
-                        <FaStar />
-                        <FaStar />
-                        <FaStar />
-                      </p>
-                      <p className="dateReview text-sm text-neutral-500 pb-3">
-                        {"2023-06-05"}| {"Variasi: S"}
-                      </p>
-                      <p className="theReview">
-                        {" terlalu mahal dengan kwalitas kain yg nerawang"}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="buyerReviews flex mt-5  border-y">
-                    <div className="imageCust pr-4 rounded-full overflow-hidden">
-                      <img
-                        width={100}
-                        height={100}
-                        src={"/images/auth_hero.png"}
-                        alt=".."
-                      />
-                    </div>
-                    <div className="bodyReview flex-row gap-y-5">
-                      <p className="custName">{"cust name"}</p>
-                      <p className="flex">
-                        <FaStar />
-                        <FaStar />
-                        <FaStar />
-                        <FaStar />
-                        <FaStar />
-                      </p>
-                      <p className="dateReview text-sm text-neutral-500 pb-3">
-                        {"2023-06-05"}| {"Variasi: S"}
-                      </p>
-                      <p className="theReview">
-                        {" terlalu mahal dengan kwalitas kain yg nerawang"}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="buyerReviews flex mt-5  border-y">
-                    <div className="imageCust pr-4 rounded-full overflow-hidden">
-                      <img
-                        width={100}
-                        height={100}
-                        src={"/images/auth_hero.png"}
-                        alt=".."
-                      />
-                    </div>
-                    <div className="bodyReview flex-row gap-y-5">
-                      <p className="custName">{"cust name"}</p>
-                      <p className="flex">
-                        <FaStar />
-                        <FaStar />
-                        <FaStar />
-                        <FaStar />
-                        <FaStar />
-                      </p>
-                      <p className="dateReview text-sm text-neutral-500 pb-3">
-                        {"2023-06-05"}| {"Variasi: S"}
-                      </p>
-                      <p className="theReview">
-                        {" terlalu mahal dengan kwalitas kain yg nerawang"}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="buyerReviews flex mt-5  border-y">
-                    <div className="imageCust pr-4 rounded-full overflow-hidden">
-                      <img
-                        width={100}
-                        height={100}
-                        src={"/images/auth_hero.png"}
-                        alt=".."
-                      />
-                    </div>
-                    <div className="bodyReview flex-row gap-y-5">
-                      <p className="custName">{"cust name"}</p>
-                      <p className="flex">
-                        <FaStar />
-                        <FaStar />
-                        <FaStar />
-                        <FaStar />
-                        <FaStar />
-                      </p>
-                      <p className="dateReview text-sm text-neutral-500 pb-3">
-                        {"2023-06-05"}| {"Variasi: S"}
-                      </p>
-                      <p className="theReview">
-                        {" terlalu mahal dengan kwalitas kain yg nerawang"}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="buyerReviews flex mt-5  border-y">
-                    <div className="imageCust pr-4 rounded-full overflow-hidden">
-                      <img
-                        width={100}
-                        height={100}
-                        src={"/images/auth_hero.png"}
-                        alt=".."
-                      />
-                    </div>
-                    <div className="bodyReview flex-row gap-y-5">
-                      <p className="custName">{"cust name"}</p>
-                      <p className="flex">
-                        <FaStar />
-                        <FaStar />
-                        <FaStar />
-                        <FaStar />
-                        <FaStar />
-                      </p>
-                      <p className="dateReview text-sm text-neutral-500 pb-3">
-                        {"2023-06-05"}| {"Variasi: S"}
-                      </p>
-                      <p className="theReview">
-                        {" terlalu mahal dengan kwalitas kain yg nerawang"}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="buyerReviews flex mt-5  border-y">
-                    <div className="imageCust pr-4 rounded-full overflow-hidden">
-                      <img
-                        width={100}
-                        height={100}
-                        src={"/images/auth_hero.png"}
-                        alt=".."
-                      />
-                    </div>
-                    <div className="bodyReview flex-row gap-y-5">
-                      <p className="custName">{"cust name"}</p>
-                      <p className="flex">
-                        <FaStar />
-                        <FaStar />
-                        <FaStar />
-                        <FaStar />
-                        <FaStar />
-                      </p>
-                      <p className="dateReview text-sm text-neutral-500 pb-3">
-                        {"2023-06-05"}| {"Variasi: S"}
-                      </p>
-                      <p className="theReview">
-                        {" terlalu mahal dengan kwalitas kain yg nerawang"}
-                      </p>
-                    </div>
+                    )}
                   </div>
                 </div>
               </div>
             </div>
             <div className="order-2 w-full md:w-1/4 items-center flex flex-col  md:justify-end mt-5">
-              <p className="py-3">Other products from this store</p>
-              <div className="md:w-3/4 content-center flex flex-row gap-x-4 justify-between md:flex-col">
-                <ProductCard
-                  image="https://down-id.img.susercontent.com/file/bc3b634e8b2beb1f09f59671102800a7"
-                  title="Sepatu Neki"
-                  price={"1000000"}
-                  showStar={false}
-                />
-                <ProductCard
-                  image="https://down-id.img.susercontent.com/file/bc3b634e8b2beb1f09f59671102800a7"
-                  title="Sepatu Neki"
-                  price={"1000000"}
-                  showStar={false}
-                />
-                <ProductCard
-                  image="https://down-id.img.susercontent.com/file/bc3b634e8b2beb1f09f59671102800a7"
-                  title="Sepatu Neki"
-                  price={"1000000"}
-                  showStar={false}
+              <p className="py-3 font-medium text-lg">Others in our shop</p>
+              <div className="md:w-3/4 content-center grid grid-cols-2 md:grid-cols-1 gap-x-4 gap-y-2 justify-between">
+                {suggestion?.data?.map(
+                  (e, i) =>
+                    i < 6 && (
+                      <ProductCard
+                        key={i}
+                        image={e.product_picture_url}
+                        title={e.product_name}
+                        price={e.product_price}
+                        showStar={false}
+                      />
+                    )
+                )}
+                <Button
+                  text="View More"
+                  styling="bg-[#f57b29] rounded-md p-3 shadow-lg text-white hover:bg-[#fc9b5b] col-span-2 md:col-span-1"
+                  onClick={() => router.push(`/`)}
                 />
               </div>
             </div>

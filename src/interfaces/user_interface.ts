@@ -38,11 +38,22 @@ export interface ITransactionHistoryData {
   shop_name: string;
   status: string;
   products: ITransactionHistoryProducts[];
+  promotions: ITransactionHistoryPromotions;
+  delivery_fee: string;
+  shipping: {
+    province: string;
+    district: string;
+    zip_code: string;
+    sub_district: string;
+    kelurahan: string;
+    detail: string;
+  };
   total_payment: string;
 }
 
 export interface ITransactionHistoryProducts {
   product_id: number;
+  product_order_detail_id: string;
   product_name: string;
   quantity: number;
   individual_price: string;
@@ -54,5 +65,11 @@ export interface ITransactionHistoryReview {
   review_id: number;
   review_feedback: string;
   review_rating: number;
+  review_image_url: string;
   created_at: string;
+}
+
+export interface ITransactionHistoryPromotions {
+  marketplace_voucher: string;
+  shop_voucher: string;
 }

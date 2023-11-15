@@ -64,4 +64,5 @@ export interface IAPIProductDetailResponse {
       price: string;
     }
   ];
+  is_favorite: boolean
 }
