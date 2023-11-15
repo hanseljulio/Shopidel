@@ -101,7 +101,6 @@ const ProductDetail = ({
   const [isFavorite, setIsFavorite] = useState(false);
   const [imagesProduct, setImagesProduct] = useState([]);
   const [reviews, setReviews] = useState<IAPIResponse<IReviewProduct[]>>();
-  const [paginationNumber, setPaginationNumber] = useState<number[]>([]);
   const [page, setPage] = useState<number>(1);
   const [suggestion, setSuggestion] =
     useState<IAPIResponse<IProductSuggestion[]>>();
@@ -626,6 +625,8 @@ const ProductDetail = ({
                                 height={50}
                                 src={url}
                                 alt="image review"
+                                onMouseOver={() => handleMouseOver(url)}
+                                onMouseOut={handleMouseOut}
                                 onClick={handleZoomImage}
                               />
                             );
