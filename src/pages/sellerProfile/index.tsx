@@ -3,6 +3,7 @@ import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar";
 import ProductCard from "@/components/ProductCard";
 import { IAPIResponse } from "@/interfaces/api_interface";
+import { IProduct } from "@/interfaces/product_interface";
 import { API } from "@/network";
 import { checkAuthSSR, currencyConverter } from "@/utils/utils";
 import axios from "axios";
@@ -80,6 +81,11 @@ const imgDummy: IProductDetail[] = [
   },
 ];
 
+interface ICategoryProduct {
+  category_id: number;
+  category_name: string;
+}
+
 interface IAPIProfileShopResponse {
   seller_id: number;
   seller_name: string;
@@ -145,10 +151,13 @@ export const getServerSideProps = async (
 function Index({ shop }: IProfileShopProps) {
   const [showAllProducts, setShowAllProducts] = useState(false);
   const [bestSelling, setBestSelling] = useState<IBestSelling[]>([]);
+  const [categoryList, setCategoryList] = useState<ICategoryProduct[]>([]);
+  const [productCategory, setProductCategory] = useState<IProduct[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
 
   const getBestSelling = async () => {
     try {
-      const res = await API.get(`sellers/${`Jejak Trendi`}/best-selling`); //seller_name masih harcode
+      const res = await API.get(`sellers/${shop.seller_name}/best-selling`); //seller_name masih harcode
       const data = res.data as IAPIResponse<IBestSelling[]>;
 
       if (data.data) {
@@ -166,8 +175,54 @@ function Index({ shop }: IProfileShopProps) {
     }
   };
 
+  const getCategories = async () => {
+    try {
+      const res = await API.get(
+        `/sellers/${shop.seller_name}/categories
+          `
+      );
+      const data = res.data as IAPIResponse<ICategoryProduct[]>;
+      if (data.data) {
+        setCategoryList(data.data);
+      } else {
+        console.error("Data is undefined or null");
+      }
+    } catch (e) {
+      if (axios.isAxiosError(e)) {
+        return toast.error("Error fetching review products", {
+          toastId: "errorWishlist",
+          autoClose: 1500,
+        });
+      }
+    }
+  };
+
+  const getProductBasedOnCategory = async (id: number) => {
+    try {
+      const res = await API.get(
+        `/sellers/${shop.seller_name}/categories/${id}/products`
+      );
+      const data = res.data as IAPIResponse<IProduct[]>;
+
+      if (data.data) {
+        setProductCategory(data.data);
+        setSelectedCategory(id); // Update the selected category
+      } else {
+        console.error("Data is undefined or null");
+      }
+    } catch (e) {
+      if (axios.isAxiosError(e)) {
+        return toast.error("Error fetching products", {
+          toastId: "errorWishlist",
+          autoClose: 1500,
+        });
+      }
+    }
+  };
+
   useEffect(() => {
     getBestSelling();
+    getCategories();
   }, []);
 
   const calculateAverageStars = (products: { stars: string }[]) => {
@@ -285,10 +340,17 @@ function Index({ shop }: IProfileShopProps) {
             </div>
             <div>
               <ul className="gap-y-5 flex md:flex-col gap-x-3">
-                <li>Acer</li>
-                <li>Lenovo</li>
-                <li>Asus</li>
-                <li>Dell</li>
+                {categoryList.map((e, i) => (
+                  <li
+                    key={i}
+                    className={`cursor-pointer ${
+                      selectedCategory === e.category_id ? "text-[#e09664]" : ""
+                    }`}
+                    onClick={() => getProductBasedOnCategory(e.category_id)}
+                  >
+                    {e.category_name}
+                  </li>
+                ))}
               </ul>
             </div>
           </div>
@@ -309,16 +371,16 @@ function Index({ shop }: IProfileShopProps) {
               />
             </div>
             <div className="w-full grid grid-cols-2 md:grid-cols-4 gap-3 md:mt-3">
-              {imgDummy.map((e, k) => (
+              {productCategory.map((e, k) => (
                 <ProductCard
                   key={k}
-                  image={e.images}
-                  price={currencyConverter(3000)}
+                  image={e.picture_url}
+                  price={e.price}
                   showStar={true}
-                  title="Laptop"
-                  star={4.6}
-                  place="Malang"
-                  order={400}
+                  title={e.name}
+                  star={e.rating}
+                  place={e.district}
+                  order={e.total_sold}
                 />
               ))}
             </div>
