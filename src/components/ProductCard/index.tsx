@@ -13,6 +13,7 @@ interface IProductCard {
   star?: number;
   onClick?: MouseEventHandler;
   showStar: boolean;
+  districtSold?: boolean;
 }
 const ProductCard = ({
   image,
@@ -23,6 +24,7 @@ const ProductCard = ({
   star,
   onClick,
   showStar,
+  districtSold,
 }: IProductCard) => {
   return (
     <div
@@ -63,30 +65,24 @@ const ProductCard = ({
         )}
       </div>
 
-      <table className="px-3 pb-3 md:p-5  md:pb-6 w-full h-full justify-between flex-col">
-        <thead></thead>
-        <tbody className="p-3">
-          <tr>
-            <td className=" tracking-wider text-black text-sm md:text-base pt-2 items-start col-span-2 px-3 p-2">
-              {title?.length > 20 ? `${title.substring(0, 20)}...` : title}
-            </td>
-          </tr>
-          <tr>
-            <td className=" tracking-wider text-[#f57b29] text-sm md:text-base col-span-2 px-3">
-              {currencyConverter(parseInt(price))}
-            </td>
-          </tr>
-
-          <tr className="flex justify-between text-xs md:text-sm py-2 px-3">
-            <td className="text-gray-500 ">
+      <div className="pt-3 pb-3 md:pt-5  md:pb-6 w-full px-4 ">
+        <p className=" tracking-wider text-black text-sm md:text-base pt-2">
+          {title?.length > 20 ? `${title.substring(0, 23)}...` : title}
+        </p>
+        <p className=" tracking-wider text-[#f57b29] text-sm md:text-base">
+          {currencyConverter(parseInt(price))}
+        </p>
+        {districtSold === true && (
+          <div className="flex justify-between text-xs md:text-sm pt-2">
+            <p className="text-gray-500 ">
               {place && place?.length > 15
                 ? `${place.substring(0, 12)}...`
                 : place}
-            </td>
-            <td className="text-gray-500 "> {`${order} sold`}</td>
-          </tr>
-        </tbody>
-      </table>
+            </p>
+            <p className="text-gray-500 "> {`${order} sold`}</p>
+          </div>
+        )}
+      </div>
     </div>
   );
 };
