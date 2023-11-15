@@ -1,9 +1,9 @@
 import Navbar from "@/components/Navbar";
 import ProductCard from "@/components/ProductCard";
 import { useRouter } from "next/router";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { FaFilter, FaSort } from "react-icons/fa";
-import { AiFillStar } from "react-icons/ai";
+import { AiFillStar, AiOutlineArrowUp, AiOutlineStar } from "react-icons/ai";
 import Footer from "@/components/Footer";
 import Modal from "@/components/Modal";
 import Button from "@/components/Button";
@@ -14,40 +14,78 @@ import { IAPIResponse } from "@/interfaces/api_interface";
 import "react-toastify/dist/ReactToastify.css";
 import { IProduct } from "@/interfaces/product_interface";
 import { SubmitHandler, useForm } from "react-hook-form";
+import { IDistrict } from "@/interfaces/courier_interface";
+import { ReadonlyURLSearchParams, useSearchParams } from "next/navigation";
+import { TiDeleteOutline } from "react-icons/ti";
 
 const Search = () => {
   const router = useRouter();
   const [isModal, setIsModal] = useState<boolean>(false);
   const [contentModal, setContentModal] = useState<JSX.Element>();
   const [productsRes, setProductsRes] = useState<IAPIResponse<IProduct[]>>();
-  const [filter, setFilter] = useState<IProductFilter>({
-    districts: [],
-    category: [],
-    rating: [],
-    price: {
-      min: "",
-      max: "",
-    },
-    sortBy: "price",
-    sort: "desc",
-  });
+  const [districts, setDistricts] = useState<IDistrict[]>();
+  const [searchCategories, setSearchCategories] = useState<number[]>();
+  const [initialSearchProductRes, setInitialSearchProductRes] =
+    useState<IAPIResponse<IProduct[]>>();
+  const [minPrice, setMinPrice] = useState<string>("");
+  const [maxPrice, setMaxPrice] = useState<string>("");
+  const inputPriceMinRef = useRef<HTMLInputElement>(null);
+  const inputPriceMaxRef = useRef<HTMLInputElement>(null);
+  const searchParam = useSearchParams();
+  const [districtPopup, setDistrictsPopup] = useState<boolean>(false);
+  const [districtSearch, setDistrictsSearch] = useState<string>("");
 
-  const query = router.query.q;
+  const getDistricts = async () => {
+    try {
+      const res = await API.get("/address/districts");
+
+      const data = res.data as IAPIResponse<IDistrict[]>;
+      setDistricts(data.data);
+    } catch (e) {
+      if (axios.isAxiosError(e)) {
+        toast.error("Error fetching districts", {
+          autoClose: 1500,
+        });
+      }
+    }
+  };
 
   const getProductsQuery = async () => {
     try {
       const res = await API.get("/products", {
         params: {
-          s: query,
-          sortBy: filter.sortBy,
-          sort: filter.sort,
-          limit: 30,
+          ...router.query,
         },
       });
-      setProductsRes(res.data as IAPIResponse<IProduct[]>);
+
+      const data = res.data as IAPIResponse<IProduct[]>;
+      setProductsRes(data);
+      setInitialSearchProductRes(data);
+      setSearchCategories([
+        ...new Set(data.data?.map((item) => item.category_id)),
+      ]);
     } catch (e) {
       if (axios.isAxiosError(e)) {
-        toast.error(e.message, {
+        toast.error("Error fetching data", {
+          autoClose: 1500,
+        });
+      }
+    }
+  };
+
+  const getFilteredProductsQuery = async () => {
+    try {
+      const res = await API.get("/products", {
+        params: {
+          ...router.query,
+        },
+      });
+
+      const data = res.data as IAPIResponse<IProduct[]>;
+      setProductsRes(data);
+    } catch (e) {
+      if (axios.isAxiosError(e)) {
+        toast.error("Error fetching data", {
           autoClose: 1500,
         });
       }
@@ -55,10 +93,17 @@ const Search = () => {
   };
 
   useEffect(() => {
-    if (query !== undefined) {
+    if (router.isReady) {
+      getDistricts();
       getProductsQuery();
     }
-  }, [query, filter]);
+  }, [router.isReady, searchParam.get("s")]);
+
+  useEffect(() => {
+    getFilteredProductsQuery();
+    setMaxPrice(searchParam.get("maxPrice") ?? "");
+    setMinPrice(searchParam.get("minPrice") ?? "");
+  }, [searchParam]);
 
   return (
     <>
@@ -69,7 +114,7 @@ const Search = () => {
       <Navbar />
       <div className="py-8">
         <div className="max-w-7xl mx-auto flex px-5 lg:px-0">
-          <div className="pr-10 text-sm w-[15%] hidden md:inline">
+          <div className="pr-10 text-sm w-[15%]  hidden md:inline">
             <div className="flex justify-between items-center">
               <div className="flex items-center gap-x-2">
                 <FaFilter />
@@ -77,14 +122,15 @@ const Search = () => {
               </div>
               <div
                 onClick={() => {
-                  setFilter({
-                    ...filter,
-                    districts: [],
-                    category: [],
-                    rating: [],
-                    price: {
-                      min: "",
-                      max: "",
+                  inputPriceMaxRef.current!.value = "";
+                  inputPriceMinRef.current!.value = "";
+                  router.push({
+                    href: router.asPath,
+                    query: {
+                      s: searchParam.get("s"),
+                      sortBy: "price",
+                      sort: "desc",
+                      page: 1,
                     },
                   });
                 }}
@@ -94,38 +140,134 @@ const Search = () => {
               </div>
             </div>
             <div className="mt-5 flex flex-col gap-y-4">
-              <div className="flex flex-col gap-y-2">
+              <div className="flex flex-col gap-y-2 relative ">
                 <p className="font-bold">Location</p>
                 <div className="flex flex-col gap-y-2">
-                  {[
-                    ...new Set(productsRes?.data?.map((item) => item.district)),
-                  ].map((item, i) => {
+                  {districts?.slice(0, 5).map((item, i) => {
                     return (
-                      <div key={i} className="flex gap-x-2 items-center">
+                      <div key={i} className="flex gap-x-2 items-start">
                         <input
                           type="checkbox"
-                          name=""
-                          id=""
-                          onChange={(e) => {
-                            if (filter?.districts?.includes(item)) {
-                              return setFilter({
-                                ...filter,
-                                districts: filter.districts.filter(
-                                  (district) => district !== item
-                                ),
-                              });
+                          onChange={() => {
+                            let districts = (
+                              searchParam.get("district") ?? ""
+                            ).split("#");
+
+                            if (districts[0] === "") districts.pop();
+
+                            if (districts.includes(item.name.toString())) {
+                              districts = districts.filter(
+                                (data) => data !== item.name.toString()
+                              );
+                            } else {
+                              districts.push(item.name.toString());
                             }
-                            return setFilter({
-                              ...filter,
-                              districts: [...filter?.districts, item],
+
+                            return router.push({
+                              href: router.asPath,
+                              query: {
+                                ...router.query,
+                                district: districts.join("#"),
+                              },
                             });
                           }}
+                          value={item.name}
+                          checked={
+                            searchParam.get("district")?.includes(item.name)
+                              ? true
+                              : false
+                          }
                           className="rounded"
                         />
-                        <p>{item}</p>
+                        <p>{item.name}</p>
                       </div>
                     );
                   })}
+                  <p
+                    className="self-end underline underline-offset-2 hover:cursor-pointer"
+                    onClick={() => setDistrictsPopup(true)}
+                  >
+                    See more
+                  </p>
+                  {districtPopup && (
+                    <div className="absolute border bottom-0 w-[700px] z-50 h-[100%] bg-white  overflow-clip  shadow-md rounded-md">
+                      <div className="w-full h-[100%] flex flex-col">
+                        <div className="p-5 flex justify-between">
+                          <input
+                            type="text"
+                            name="district"
+                            id="district"
+                            onChange={(e) => setDistrictsSearch(e.target.value)}
+                            value={districtSearch}
+                            placeholder="Search your district..."
+                            className="rounded-md text-sm py-1"
+                          />
+                          <div
+                            className="hover:cursor-pointer"
+                            onClick={() => setDistrictsPopup(false)}
+                          >
+                            <TiDeleteOutline size={30} />
+                          </div>
+                        </div>
+                        <div className="grid grid-cols-3 gap-5 px-5 pb-5 overflow-auto flex-1">
+                          {districts
+                            ?.filter((data) =>
+                              data.name
+                                .toLowerCase()
+                                .includes(districtSearch.toLowerCase())
+                            )
+                            .map((item, i) => {
+                              return (
+                                <div
+                                  key={i}
+                                  className="flex gap-x-2 items-start"
+                                >
+                                  <input
+                                    type="checkbox"
+                                    onChange={() => {
+                                      let districts = (
+                                        searchParam.get("district") ?? ""
+                                      ).split("#");
+
+                                      if (districts[0] === "") districts.pop();
+
+                                      if (
+                                        districts.includes(item.name.toString())
+                                      ) {
+                                        districts = districts.filter(
+                                          (data) =>
+                                            data !== item.name.toString()
+                                        );
+                                      } else {
+                                        districts.push(item.name.toString());
+                                      }
+
+                                      return router.push({
+                                        href: router.asPath,
+                                        query: {
+                                          ...router.query,
+                                          district: districts.join("#"),
+                                        },
+                                      });
+                                    }}
+                                    value={item.name}
+                                    checked={
+                                      searchParam
+                                        .get("district")
+                                        ?.includes(item.name)
+                                        ? true
+                                        : false
+                                    }
+                                    className="rounded"
+                                  />
+                                  <p>{item.name}</p>
+                                </div>
+                              );
+                            })}
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
               <div className="flex flex-col gap-y-2">
@@ -138,16 +280,20 @@ const Search = () => {
                         <span>Rp</span>
                       </div>
                       <input
-                        onChange={(e) => {
-                          setFilter({
-                            ...filter,
-                            price: {
-                              ...filter.price,
-                              min: e.target.value,
+                        ref={inputPriceMinRef}
+                        onBlur={(e) => {
+                          router.push({
+                            href: router.asPath,
+                            query: {
+                              ...router.query,
+                              minPrice: e.target.value,
                             },
                           });
                         }}
-                        value={filter.price.min}
+                        onChange={(e) => {
+                          return setMinPrice(e.target.value);
+                        }}
+                        value={minPrice}
                         type="text"
                         name=""
                         id=""
@@ -162,17 +308,21 @@ const Search = () => {
                         <span>Rp</span>
                       </div>
                       <input
-                        onChange={(e) => {
-                          setFilter({
-                            ...filter,
-                            price: {
-                              ...filter.price,
-                              max: e.target.value,
+                        ref={inputPriceMaxRef}
+                        onBlur={(e) => {
+                          router.push({
+                            href: router.asPath,
+                            query: {
+                              ...router.query,
+                              maxPrice: e.target.value,
                             },
                           });
                         }}
-                        value={filter.price.max}
+                        onChange={(e) => {
+                          return setMaxPrice(e.target.value);
+                        }}
                         type="text"
+                        value={maxPrice}
                         name=""
                         id=""
                         className="w-full focus:border-none border border-[#F3F4F5] rounded-md text-sm pl-10"
@@ -188,33 +338,43 @@ const Search = () => {
                     .fill("")
                     .map((_, i) => {
                       return (
-                        <div key={i} className="flex gap-x-2 items-center">
-                          <input
-                            onChange={(_) => {
-                              if (filter.rating.includes(i + 1)) {
-                                return setFilter({
-                                  ...filter,
-                                  rating: filter.rating.filter(
-                                    (rating) => rating !== i + 1
-                                  ),
-                                });
-                              }
-                              return setFilter({
-                                ...filter,
-                                rating: [...filter.rating, i + 1],
+                        <div
+                          key={i}
+                          className="flex items-center gap-x-2  w-fit"
+                        >
+                          <div
+                            className="flex hover:cursor-pointer"
+                            onClick={(_) => {
+                              router.push({
+                                href: router.asPath,
+                                query: {
+                                  ...router.query,
+                                  minRating: i + 1,
+                                },
                               });
                             }}
-                            type="checkbox"
-                            name=""
-                            id=""
-                            className="rounded"
-                          />
-                          <p className="flex items-center gap-x-1">
-                            <span>
-                              <AiFillStar color={"orange"} size={15} />
-                            </span>
-                            {i + 1 === 5 ? i + 1 : `${i + 1} Above`}
-                          </p>
+                          >
+                            {Array(5)
+                              .fill("")
+                              .map((_, k) => {
+                                return (
+                                  <div
+                                    key={k}
+                                    className="flex gap-x-2 items-center"
+                                  >
+                                    {k <= i ? (
+                                      <AiFillStar size={15} color={"orange"} />
+                                    ) : (
+                                      <AiOutlineStar
+                                        size={15}
+                                        color={"orange"}
+                                      />
+                                    )}
+                                  </div>
+                                );
+                              })}
+                          </div>
+                          <p>{i + 1 !== 5 && <AiOutlineArrowUp size={10} />}</p>
                         </div>
                       );
                     })
@@ -224,22 +384,56 @@ const Search = () => {
               <div className="flex flex-col gap-y-2">
                 <p className="font-bold">Category</p>
                 <div className="flex flex-col gap-y-2">
-                  <div className="flex gap-x-2 items-center">
-                    <input type="checkbox" name="" id="" className="rounded" />
-                    <p>Handphone</p>
-                  </div>
-                  <div className="flex gap-x-2 items-center">
-                    <input type="checkbox" name="" id="" className="rounded" />
-                    <p>Casing</p>
-                  </div>
-                  <div className="flex gap-x-2 items-center">
-                    <input type="checkbox" name="" id="" className="rounded" />
-                    <p>Accessories</p>
-                  </div>
-                  <div className="flex gap-x-2 items-center">
-                    <input type="checkbox" name="" id="" className="rounded" />
-                    <p>Charger</p>
-                  </div>
+                  {searchCategories?.map((id, i) => {
+                    return (
+                      <div key={i} className="flex gap-x-2 items-start">
+                        <input
+                          onChange={(e) => {
+                            let categoryId = (
+                              searchParam.get("categoryId") ?? ""
+                            ).split("#");
+
+                            if (categoryId[0] === "") categoryId.pop();
+
+                            if (categoryId.includes(id.toString())) {
+                              categoryId = categoryId.filter(
+                                (data) => data !== id.toString()
+                              );
+                            } else {
+                              categoryId.push(id.toString());
+                            }
+
+                            return router.push({
+                              href: router.asPath,
+                              query: {
+                                ...router.query,
+                                categoryId: categoryId.join("#"),
+                              },
+                            });
+                          }}
+                          type="checkbox"
+                          name=""
+                          id=""
+                          value={id}
+                          checked={
+                            searchParam
+                              .get("categoryId")
+                              ?.includes(id.toString())
+                              ? true
+                              : false
+                          }
+                          className="rounded"
+                        />
+                        <p>
+                          {
+                            initialSearchProductRes?.data?.find(
+                              (raw) => raw.category_id === id
+                            )?.category_name
+                          }
+                        </p>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
             </div>
@@ -248,7 +442,8 @@ const Search = () => {
             <div className="flex justify-between items-center ">
               <p>
                 Product search result for &quot;
-                <span className="font-bold">{router.query.q}</span>&quot;
+                <span className="font-bold">{searchParam.get("s")}</span>
+                &quot;
               </p>
               <div className="gap-x-5 hidden md:flex">
                 <div className="flex items-center gap-x-2">
@@ -256,11 +451,14 @@ const Search = () => {
                   <select
                     name="sortBy"
                     id="sortBy"
-                    value={filter.sortBy}
+                    value={searchParam.get("sortBy") ?? "price"}
                     onChange={(e) => {
-                      setFilter({
-                        ...filter,
-                        sortBy: e.target.value as ProductSortByType,
+                      router.push({
+                        href: router.asPath,
+                        query: {
+                          ...router.query,
+                          sortBy: e.target.value,
+                        },
                       });
                     }}
                     className="rounded-md border-slate-500 text-sm py-1"
@@ -274,11 +472,14 @@ const Search = () => {
                 <div className="flex items-center gap-x-2">
                   <p className="text-sm">Order: </p>
                   <select
-                    value={filter.sort}
+                    value={searchParam.get("sort") ?? "desc"}
                     onChange={(e) => {
-                      setFilter({
-                        ...filter,
-                        sort: e.target.value as ProductSortType,
+                      router.push({
+                        href: router.asPath,
+                        query: {
+                          ...router.query,
+                          sort: e.target.value,
+                        },
                       });
                     }}
                     name="sort"
@@ -296,13 +497,16 @@ const Search = () => {
                     setIsModal(true);
                     setContentModal(
                       <SortModal
-                        filter={filter}
+                        filter={searchParam}
                         onApply={(data) => {
-                          setFilter({
-                            ...filter,
-                            ...data,
+                          setIsModal(false);
+                          return router.push({
+                            href: router.asPath,
+                            query: {
+                              ...router.query,
+                              ...data,
+                            },
                           });
-                          return setIsModal(false);
                         }}
                       />
                     );
@@ -316,12 +520,17 @@ const Search = () => {
                     setIsModal(true);
                     setContentModal(
                       <FilterModal
-                        data={productsRes!}
-                        filter={filter}
+                        data={initialSearchProductRes!}
+                        districts={districts!}
+                        searchCategories={searchCategories!}
+                        filter={searchParam}
                         onApply={(data) => {
-                          setFilter({
-                            ...filter,
-                            ...data,
+                          setIsModal(false);
+                          return router.push({
+                            href: router.asPath,
+                            query: {
+                              ...data,
+                            },
                           });
                         }}
                       />
@@ -333,22 +542,37 @@ const Search = () => {
                 </div>
               </div>
             </div>
-            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-5 mt-5">
-              {productsRes?.data?.map((item, i) => {
-                return (
-                  <ProductCard
-                    key={i}
-                    showStar={true}
-                    image={item.picture_url}
-                    price={item.price}
-                    order={item.total_sold}
-                    title={item.name}
-                    place={item.district}
-                    star={5}
-                  />
-                );
-              })}
-            </div>
+            {productsRes?.data?.length === 0 ? (
+              <>
+                <div className="flex flex-col items-center mt-10">
+                  <div>
+                    <img src="./images/not_found.png" alt="not_found" />
+                  </div>
+                  <h1 className="text-xl">Oops, Product not found</h1>
+                  <p>Try another keyword</p>
+                </div>
+              </>
+            ) : (
+              <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-5 mt-5">
+                {productsRes?.data?.map((product, i) => {
+                  return (
+                    <ProductCard
+                      onClick={() =>
+                        router.push(`/${product.shop_name}/${product.name}`)
+                      }
+                      key={i}
+                      showStar={true}
+                      image={product.picture_url}
+                      price={product.price}
+                      order={product.total_sold}
+                      title={product.name}
+                      place={product.district}
+                      star={product.rating}
+                    />
+                  );
+                })}
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -358,20 +582,22 @@ const Search = () => {
 };
 
 interface SortModalProps {
-  filter: IProductFilter;
+  filter: ReadonlyURLSearchParams;
   onApply: (data: IProductFilter) => void;
 }
 
 const SortModal = ({ filter, onApply }: SortModalProps) => {
   const { register, handleSubmit } = useForm<IProductFilter>({
     defaultValues: {
-      sort: filter.sort,
-      sortBy: filter.sortBy,
+      sort: (filter.get("sort") as ProductSortType) ?? "desc",
+      sortBy: (filter.get("sortBy") as ProductSortByType) ?? "price",
     },
   });
 
   const onSubmit: SubmitHandler<IProductFilter> = (data) => {
-    return onApply(data);
+    return onApply({
+      ...data,
+    });
   };
 
   return (
@@ -382,7 +608,7 @@ const SortModal = ({ filter, onApply }: SortModalProps) => {
           {...register("sortBy")}
           name="sortBy"
           id="sortBy"
-          className="rounded-md border-slate-500 text-sm py-1"
+          className="roole.log(data);unded-md border-slate-500 text-sm py-1"
         >
           <option value="recommended">Recommended</option>
           <option value="newest">Newest</option>
@@ -412,18 +638,58 @@ const SortModal = ({ filter, onApply }: SortModalProps) => {
 
 interface FilterModalProps extends SortModalProps {
   data: IAPIResponse<IProduct[]>;
+  searchCategories: number[];
+  districts: IDistrict[];
 }
 
-const FilterModal = ({ data, filter, onApply }: FilterModalProps) => {
+const FilterModal = ({
+  data,
+  filter,
+  districts,
+  onApply,
+  searchCategories,
+}: FilterModalProps) => {
+  const [searchDistrict, setSearchDistrict] = useState<string>();
+  const { register, setValue, watch, handleSubmit, getValues } =
+    useForm<IProductFilter>({
+      defaultValues: {
+        s: filter.get("s") ?? "",
+        categoryId: filter.get("categoryId") ?? "",
+        district: filter.get("district") ?? "",
+        maxPrice: filter.get("maxPrice") ?? "",
+        minPrice: filter.get("minPrice") ?? "",
+        minRating: filter.get("minRating") ?? "",
+      },
+    });
+
+  const watchDistricts = watch("district");
+  const watchCategories = watch("categoryId");
+  const onSubmit: SubmitHandler<IProductFilter> = (data) => {
+    return onApply({
+      ...data,
+      sort: (filter.get("sort") as ProductSortType) ?? "desc",
+      sortBy: (filter.get("sortBy") as ProductSortByType) ?? "price",
+    });
+  };
+
   return (
-    <>
-      <div className="overflow-auto text-sm h-[75vh]">
-        <div className="pt-5 flex justify-between items-center">
+    <form onSubmit={handleSubmit(onSubmit)}>
+      <div className="overflow-auto text-sm h-[75vh] px-5">
+        <div className="pt-5 flex justify-between items-center ">
           <div className="flex items-center gap-x-2">
             <FaFilter />
             <p>Filter</p>
           </div>
-          <div>
+          <div
+            onClick={() => {
+              setValue("categoryId", "");
+              setValue("district", "");
+              setValue("minRating", "");
+              setValue("maxPrice", "");
+              setValue("minPrice", "");
+            }}
+            className="hover:cursor-pointer"
+          >
             <p className="text-xs text-red-500">Clear</p>
           </div>
         </div>
@@ -431,22 +697,76 @@ const FilterModal = ({ data, filter, onApply }: FilterModalProps) => {
           <div className="flex flex-col gap-y-2">
             <p className="font-bold">Location</p>
             <div className="flex flex-col gap-y-2">
-              {[...new Set(data?.data?.map((item) => item.district))].map(
-                (item, i) => {
-                  return (
-                    <div key={i} className="flex gap-x-2 items-center">
-                      <input
-                        type="checkbox"
-                        name=""
-                        id=""
-                        onChange={(e) => {}}
-                        className="rounded"
-                      />
-                      <p>{item}</p>
-                    </div>
-                  );
-                }
-              )}
+              <input
+                type="text"
+                name="district"
+                id="district"
+                placeholder="Search your district..."
+                value={searchDistrict}
+                onChange={(e) => setSearchDistrict(e.target.value)}
+                className="rounded-md text-sm py-1"
+              />
+              <div className="flex flex-wrap gap-2">
+                {watchDistricts !== "" &&
+                  watchDistricts.split("#").map((item, i) => {
+                    return (
+                      <div
+                        key={i}
+                        className="bg-slate-200 w-fit rounded-md p-2"
+                        onClick={() => {
+                          setValue(
+                            "district",
+                            watchDistricts
+                              .split("#")
+                              .filter((data) => data !== item)
+                              .join("#")
+                          );
+                        }}
+                      >
+                        <p className="text-xs">{item}</p>
+                      </div>
+                    );
+                  })}
+              </div>
+              {searchDistrict &&
+                districts
+                  ?.filter((data) =>
+                    data.name
+                      .toLowerCase()
+                      .includes(searchDistrict.toLowerCase())
+                  )
+                  .map((item, i) => {
+                    return (
+                      <div key={i} className="flex gap-x-2 items-center">
+                        <input
+                          type="checkbox"
+                          name={`districts.${i}`}
+                          id={`districts.${i}`}
+                          checked={
+                            watchDistricts.includes(item.name) ? true : false
+                          }
+                          onChange={() => {
+                            let districts = (watchDistricts ?? "").split("#");
+
+                            if (districts[0] === "") districts.pop();
+
+                            if (districts.includes(item.name)) {
+                              districts = districts.filter(
+                                (data) =>
+                                  data.toLowerCase() !== item.name.toLowerCase()
+                              );
+                            } else {
+                              districts.push(item.name);
+                            }
+
+                            setValue("district", districts.join("#"));
+                          }}
+                          className="rounded"
+                        />
+                        <p>{item.name}</p>
+                      </div>
+                    );
+                  })}
             </div>
           </div>
           <div className="flex flex-col gap-y-2">
@@ -459,9 +779,10 @@ const FilterModal = ({ data, filter, onApply }: FilterModalProps) => {
                     <span>Rp</span>
                   </div>
                   <input
+                    {...register("minPrice")}
                     type="text"
-                    name=""
-                    id=""
+                    name="minPrice"
+                    id="minPrice"
                     className="w-full focus:border-none border border-[#F3F4F5] rounded-md text-sm pl-10"
                   />
                 </div>
@@ -473,9 +794,10 @@ const FilterModal = ({ data, filter, onApply }: FilterModalProps) => {
                     <span>Rp</span>
                   </div>
                   <input
+                    {...register("maxPrice")}
                     type="text"
-                    name=""
-                    id=""
+                    name="maxPrice"
+                    id="maxPrice"
                     className="w-full focus:border-none border border-[#F3F4F5] rounded-md text-sm pl-10"
                   />
                 </div>
@@ -485,63 +807,83 @@ const FilterModal = ({ data, filter, onApply }: FilterModalProps) => {
           <div className="flex flex-col gap-y-2">
             <p className="font-bold">Rating</p>
             <div className="flex flex-col gap-y-2">
-              <div className="flex gap-x-2 items-center">
-                <input type="checkbox" name="" id="" className="rounded" />
-                <p className="flex items-center gap-x-1">
-                  <span>
-                    <AiFillStar color={"orange"} size={15} />
-                  </span>
-                  4 above
-                </p>
-              </div>
-              <div className="flex gap-x-2 items-center">
-                <input type="checkbox" name="" id="" className="rounded" />
-                <p className="flex items-center gap-x-1">
-                  <span>
-                    <AiFillStar color={"orange"} size={15} />
-                  </span>
-                  3 above
-                </p>
-              </div>
-              <div className="flex gap-x-2 items-center">
-                <input type="checkbox" name="" id="" className="rounded" />
-                <p className="flex items-center gap-x-1">
-                  <span>
-                    <AiFillStar color={"orange"} size={15} />
-                  </span>
-                  2 above
-                </p>
-              </div>
-              <div className="flex gap-x-2 items-center">
-                <input type="checkbox" name="" id="" className="rounded" />
-                <p className="flex items-center gap-x-1">
-                  <span>
-                    <AiFillStar color={"orange"} size={15} />
-                  </span>
-                  1 above
-                </p>
-              </div>
+              {Array(5)
+                .fill("")
+                .map((_, i) => {
+                  return (
+                    <div key={i} className="flex items-center gap-x-2">
+                      <input
+                        {...register("minRating")}
+                        type="radio"
+                        id={`minRating-${i + 1}`}
+                        value={`${i + 1}`}
+                        className="w-3 h-3"
+                      />
+                      <div className="flex hover:cursor-pointer">
+                        {Array(5)
+                          .fill("")
+                          .map((_, k) => {
+                            return (
+                              <div
+                                key={k}
+                                className="flex gap-x-2 items-center"
+                              >
+                                {k <= i ? (
+                                  <AiFillStar size={15} color={"orange"} />
+                                ) : (
+                                  <AiOutlineStar size={15} color={"orange"} />
+                                )}
+                              </div>
+                            );
+                          })}
+                      </div>
+                      <p>{i + 1 !== 5 && <AiOutlineArrowUp size={10} />}</p>
+                    </div>
+                  );
+                })
+                .reverse()}
             </div>
           </div>
           <div className="flex flex-col gap-y-2">
             <p className="font-bold">Category</p>
             <div className="flex flex-col gap-y-2">
-              <div className="flex gap-x-2 items-center">
-                <input type="checkbox" name="" id="" className="rounded" />
-                <p>Handphone</p>
-              </div>
-              <div className="flex gap-x-2 items-center">
-                <input type="checkbox" name="" id="" className="rounded" />
-                <p>Casing</p>
-              </div>
-              <div className="flex gap-x-2 items-center">
-                <input type="checkbox" name="" id="" className="rounded" />
-                <p>Accessories</p>
-              </div>
-              <div className="flex gap-x-2 items-center">
-                <input type="checkbox" name="" id="" className="rounded" />
-                <p>Charger</p>
-              </div>
+              {searchCategories?.map((id, i) => {
+                return (
+                  <div key={i} className="flex gap-x-2 items-start">
+                    <input
+                      onChange={() => {
+                        let categoryId = watchCategories.split("#");
+
+                        if (categoryId[0] === "") categoryId.pop();
+
+                        if (categoryId.includes(id.toString())) {
+                          categoryId = categoryId.filter(
+                            (data) => data !== id.toString()
+                          );
+                        } else {
+                          categoryId.push(id.toString());
+                        }
+
+                        setValue("categoryId", categoryId.join("#"));
+                      }}
+                      type="checkbox"
+                      name=""
+                      id=""
+                      value={id}
+                      checked={
+                        watchCategories.includes(id.toString()) ? true : false
+                      }
+                      className="rounded"
+                    />
+                    <p>
+                      {
+                        data?.data?.find((raw) => raw.category_id === id)
+                          ?.category_name
+                      }
+                    </p>
+                  </div>
+                );
+              })}
             </div>
           </div>
         </div>
@@ -550,7 +892,7 @@ const FilterModal = ({ data, filter, onApply }: FilterModalProps) => {
         text="Apply"
         styling="w-full bg-[#29374e] p-2 mt-5 rounded-md text-white"
       />
-    </>
+    </form>
   );
 };
 
