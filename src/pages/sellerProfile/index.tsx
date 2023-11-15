@@ -205,7 +205,6 @@ function Index({ shop }: IProfileShopProps) {
           `/sellers/${shop.seller_name}/categories/${id}/products`
         );
       } else {
-        // Fetch all products when no category is selected
         res = await API.get(`/sellers/${shop.seller_name}/best-selling
         `);
       }
