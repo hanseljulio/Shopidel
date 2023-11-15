@@ -261,6 +261,7 @@ const CheckoutPage = () => {
   const [walletMoney, setWalletMoney] = useState<number>(0);
   const [additionalNotes, setAdditionalNotes] = useState<string>("");
   const [courierId, setCourierId] = useState<number>(0);
+  const [marketplaceDiscount, setMarketplaceDiscount] = useState<number>(1000);
 
   const [showNoAddress, setShowNoAddress] = useState<boolean>(false);
   const [showNoWallet, setShowNoWallet] = useState<boolean>(false);
@@ -644,6 +645,7 @@ const CheckoutPage = () => {
             merchandise={orderTotal}
             shipping={shippingTotal}
             voucher={voucherTotal}
+            marketplace={marketplaceDiscount}
           />
           <div className="border-2 md:text-right text-[18px] mb-20 md:pr-4 text-center">
             <Button
