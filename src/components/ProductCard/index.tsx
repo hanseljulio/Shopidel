@@ -6,7 +6,7 @@ import { currencyConverter } from "@/utils/utils";
 interface IProductCard {
   image: string;
   price: string;
-  order?: number;
+  order?: string | number;
   title: string;
   place?: string;
   star?: number;

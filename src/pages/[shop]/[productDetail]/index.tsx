@@ -17,6 +17,7 @@ import { currencyConverter } from "@/utils/utils";
 import axios from "axios";
 import { getCookie } from "cookies-next";
 import {
+  GetServerSideProps,
   GetServerSidePropsContext,
   GetStaticProps,
   InferGetServerSidePropsType,
@@ -36,41 +37,20 @@ export interface IAPIProductDetailResponseWithSeller
   seller_name: string;
 }
 
-export const getStaticPaths = async () => {
-  try {
-    const response = await API.get(`/products`);
-    const products = response.data;
+export const getServerSideProps: GetServerSideProps = async (
+  context: GetServerSidePropsContext
+) => {
+  const { params } = context;
+  const shop = params?.shop;
+  const productDetail = params?.productDetail;
+  // let data: IAPIProductDetailResponse | undefined;
 
-    const paths = products.map(
-      (product: { shop_name: string; product_name: string }) => ({
-        params: {
-          shop_name: product.shop_name,
-          product_name: product.product_name,
-        },
-      })
-    );
-    console.log("ada product");
-    return { paths, fallback: true };
-  } catch (error) {
-    console.error("Error fetching product details:", error);
-    return {
-      paths: [],
-      fallback: true,
-    };
-  }
-};
-
-export const getStaticProps: GetStaticProps<IProductDetailProps> = async ({
-  params,
-}) => {
   try {
-    const { shop_name, product_name } = params || {};
-    const response = await API.get(
-      `/products/detail/${shop_name}/${product_name}`
-    );
-    const product = response.data.data;
-    console.log(product);
-    console.log("ada product");
+    const response = await API.get(`/products/detail/${shop}/${productDetail}`);
+    console.log("res", response.data);
+    const product = (response.data as IAPIResponse<IAPIProductDetailResponse>)
+      .data;
+    // const product = response.data;
 
     return {
       props: {
@@ -79,6 +59,7 @@ export const getStaticProps: GetStaticProps<IProductDetailProps> = async ({
     };
   } catch (error) {
     console.error("Error fetching product details:", error);
+    console.log("gagal");
 
     return {
       notFound: true,
@@ -90,8 +71,11 @@ interface IProductDetailProps {
   product: IAPIProductDetailResponse;
 }
 
-const ProductDetail = ({ product }: IProductDetailProps) => {
+const ProductDetail = ({
+  product,
+}: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   const router = useRouter();
+  const { shop_name, product_name } = router.query;
   const [count, setCount] = useState<number>(1);
   const [isHovering, setIsHovering] = useState(false);
   const [isModal, setIsModal] = useState<boolean>(false);
@@ -111,10 +95,16 @@ const ProductDetail = ({ product }: IProductDetailProps) => {
     useState<IAPIResponse<IAPIProductDetailResponseWithSeller[]>>();
 
   useEffect(() => {
-    if (imagesProduct.length > 0) {
+    if (imagesProduct?.length > 0) {
       setVariation(imagesProduct[0]);
     }
   }, [imagesProduct]);
+
+  useEffect(() => {
+    if (product) {
+      setImagesProduct(product.images);
+    }
+  }, [product]);
 
   const getImages = async () => {
     try {
@@ -135,6 +125,8 @@ const ProductDetail = ({ product }: IProductDetailProps) => {
       const res = await API.get(
         `products/${product.id}/reviews?page=1&stars=5&comment=true&image=true&orderBy=newest`
       );
+      console.log("id", product.id);
+
       const data = res.data as IAPIResponse<IReviewProduct[]>;
       setReviews(data);
     } catch (e) {
@@ -193,9 +185,9 @@ const ProductDetail = ({ product }: IProductDetailProps) => {
   }, []);
 
   const calculateSubtotal = () => {
-    const selectedVariant = product?.variants.find((variant) => {
+    const selectedVariant = product?.variants?.find((variant: any) => {
       return Object.keys(selectedVariants).every((optionName) => {
-        return variant.selections.some((selection) => {
+        return variant.selections.some((selection: any) => {
           return (
             selection.selection_variant_name === optionName &&
             selection.selection_name === selectedVariants[optionName]
@@ -256,7 +248,7 @@ const ProductDetail = ({ product }: IProductDetailProps) => {
     if (Object.keys(selectedVariants).length === 0) {
       variant = product?.variants[0];
     } else {
-      variant = product?.variants.find((v) => {
+      variant = product?.variants.find((v: any) => {
         const variantKey = v.selections[0].selection_variant_name;
         return selectedVariants[variantKey] === v.selections[0].selection_name;
       });
@@ -373,7 +365,7 @@ const ProductDetail = ({ product }: IProductDetailProps) => {
                 />
               )}
               <div className="variation justify-center gap-1 mt-2 flex overflow-x-scroll [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none']">
-                {imagesProduct.map((url, index) => {
+                {imagesProduct?.map((url, index) => {
                   return (
                     <img
                       key={index}
@@ -422,7 +414,7 @@ const ProductDetail = ({ product }: IProductDetailProps) => {
                 </div>
               </div>
               <div className="flex flex-col gap-y-3 text-xs text-neutral-600">
-                {product?.variant_options?.map((item, i) => {
+                {product?.variant_options?.map((item: any, i: number) => {
                   return (
                     <div
                       key={i}
@@ -430,7 +422,7 @@ const ProductDetail = ({ product }: IProductDetailProps) => {
                     >
                       <p>{item.variant_option_name}</p>
                       <div className="grid grid-cols-2 gap-2">
-                        {item.childs.map((variant, k) => {
+                        {item.childs.map((variant: any, k: number) => {
                           const optionName = item.variant_option_name;
                           return (
                             <p
@@ -511,27 +503,40 @@ const ProductDetail = ({ product }: IProductDetailProps) => {
                   </p>
                 </div>
                 <p className="productPrice text-2xl font-semibold text-[#f57b29] py-3">
-                  {currencyConverter(parseInt(product?.variants[0].price))}
+                  {currencyConverter(
+                    parseInt(product?.variants?.[0]?.price ?? 0)
+                  )}
                 </p>
               </div>
               <div className="desc pt-5 ">
                 <p className="text-lg font-medium border-b my-4">Description</p>
                 <p className="">
                   {product?.description
-                    .split("\n\n")
-                    .map((paragraph, index) => (
+                    ?.split("\n\n")
+                    .map((paragraph: any, index: number) => (
                       <span key={index} className="line-break">
-                        {paragraph.split("\\n").map(
-                          (
-                            line,
-                            lineIndex // Change '\n' to '\\n'
-                          ) => (
+                        {paragraph
+                          .split("\\n")
+                          .map((line: string, lineIndex: number) => (
                             <React.Fragment key={lineIndex}>
                               {line}
                               <br />
                             </React.Fragment>
-                          )
-                        )}
+                          ))}
+                      </span>
+                    ))}
+                  {product?.description
+                    ?.split("\n\n")
+                    .map((paragraph: any, index: number) => (
+                      <span key={index} className="line-break">
+                        {paragraph
+                          .split("\\n")
+                          .map((line: string, lineIndex: number) => (
+                            <React.Fragment key={lineIndex}>
+                              {line}
+                              <br />
+                            </React.Fragment>
+                          ))}
                       </span>
                     ))}
                 </p>
@@ -626,7 +631,7 @@ const ProductDetail = ({ product }: IProductDetailProps) => {
                         </p>
                         <p className="theReview">{review.comment}</p>
                         <div className="grid grid-cols-4 gap-x-2 mt-3">
-                          {imagesProduct.map((url, index) => {
+                          {imagesProduct?.map((url, index) => {
                             return (
                               <img
                                 key={index}

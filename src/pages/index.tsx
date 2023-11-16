@@ -25,6 +25,7 @@ export default function Home() {
       );
 
       const data = res.data as IAPIResponse<IProduct[]>;
+      console.log("prod", data);
 
       setProductList(data!);
     } catch (e) {
