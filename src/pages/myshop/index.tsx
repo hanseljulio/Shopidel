@@ -10,9 +10,9 @@ import { ICourier } from "@/interfaces/courier_interface";
 import { IAddress } from "@/interfaces/user_interface";
 import { API } from "@/network";
 import { useUserStore } from "@/store/userStore";
-import { clientUnauthorizeHandler } from "@/utils/utils";
+import { checkAuthSSR, clientUnauthorizeHandler } from "@/utils/utils";
 import axios from "axios";
-import { deleteCookie, getCookie } from "cookies-next";
+import { GetServerSidePropsContext } from "next";
 import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
@@ -145,6 +145,18 @@ const RegisterShop = () => {
       }
     }
   };
+
+  useEffect(() => {
+    toast.onChange((data) => {
+      if (data.status === "removed" && data.type === "success") {
+        updateUser({
+          ...user!,
+          is_seller: true,
+        });
+        router.push("/myshop/products");
+      }
+    });
+  }, []);
 
   useEffect(() => {
     getListAddress();
@@ -341,3 +353,51 @@ const RegisterShop = () => {
 };
 
 export default MyShop;
+
+export const getServerSideProps = async (
+  context: GetServerSidePropsContext
+) => {
+  let auth = await checkAuthSSR(context);
+
+  if (auth === null) {
+    return {
+      redirect: {
+        permanent: false,
+        destination: "/login",
+      },
+    };
+  }
+
+  try {
+    const res = await API.get("/accounts/profile", {
+      headers: {
+        Authorization: `Bearer ${auth?.access_token}`,
+      },
+    });
+    const user = (res.data as IAPIResponse<IAPIUserProfileResponse>).data;
+
+    if (user!.is_seller) {
+      console.log("test");
+      return {
+        redirect: {
+          permanent: false,
+          destination: "/myshop/products",
+        },
+        props: {},
+      };
+    }
+  } catch (e) {
+    if (axios.isAxiosError(e)) {
+      return {
+        redirect: {
+          permanent: false,
+          destination: "/login",
+        },
+      };
+    }
+  }
+
+  return {
+    props: {},
+  };
+};
