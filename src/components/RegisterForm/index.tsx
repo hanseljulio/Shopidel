@@ -128,8 +128,8 @@ const RegisterForm = () => {
           </label>
           <input
             {...register("password", {
-              required: "Password is required",
               validate: {
+                required: (v) => v.length !== 0 || "Password is required",
                 minCharacters: (v) =>
                   v.length >= 8 || "Password minimum 8 characters",
                 maxCharacters: (v) =>
@@ -147,11 +147,6 @@ const RegisterForm = () => {
             className="rounded-md border p-2"
             maxLength={20}
           />
-          {errors.password?.type === errors.password?.types?.required && (
-            <p role="alert" className="text-xs text-red-500 mt-1">
-              {errors.password?.message}
-            </p>
-          )}
           {errors.password?.types === errors.password?.types?.validate && (
             <p role="alert" className="text-xs text-red-500 mt-1">
               {errors.password?.message}
@@ -164,8 +159,9 @@ const RegisterForm = () => {
           </label>
           <input
             {...register("confirmPassword", {
-              required: "Confirm password is required",
               validate: {
+                required: (v) =>
+                  v.length !== 0 || "Confirm password is required",
                 matchPassword: (v) =>
                   v === getValues("password") || "Password not match",
               },
@@ -175,12 +171,6 @@ const RegisterForm = () => {
             id="confirmPassword"
             className="rounded-md border p-2"
           />
-          {errors.confirmPassword?.type ===
-            errors.confirmPassword?.types?.required && (
-            <p role="alert" className="text-xs text-red-500 mt-1">
-              {errors.confirmPassword?.message}
-            </p>
-          )}
           {errors.confirmPassword?.types ===
             errors.confirmPassword?.types?.validate && (
             <p role="alert" className="text-xs text-red-500 mt-1">
