@@ -98,7 +98,9 @@ export default function Home() {
             <ProductCard
               key={product.id}
               onClick={() =>
-                router.push(`/${product.shop_name}/${product.name}`)
+                router.push(
+                  `/${product.shop_name}/${encodeURIComponent(product.name)}`
+                )
               }
               image={product.picture_url}
               price={product.price}

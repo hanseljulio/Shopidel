@@ -31,6 +31,7 @@ import { FaHeart, FaRegHeart, FaStar, FaStore } from "react-icons/fa";
 import { FaLocationDot, FaTruckFast } from "react-icons/fa6";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { IAPIProfileShopResponse } from "..";
 
 export interface IAPIProductDetailResponseWithSeller
   extends IAPIProductDetailResponse {
@@ -50,11 +51,17 @@ export const getServerSideProps: GetServerSideProps = async (
     console.log("res", response.data);
     const product = (response.data as IAPIResponse<IAPIProductDetailResponse>)
       .data;
+    const responseSeller = await API.get(`/sellers/${shop}/profile`);
+    const seller = (
+      responseSeller.data as IAPIResponse<IAPIProfileShopResponse>
+    ).data;
     // const product = response.data;
+    console.log("seller", responseSeller);
 
     return {
       props: {
         product,
+        seller,
       },
     };
   } catch (error) {
@@ -67,15 +74,13 @@ export const getServerSideProps: GetServerSideProps = async (
   }
 };
 
-interface IProductDetailProps {
-  product: IAPIProductDetailResponse;
-}
-
 const ProductDetail = ({
   product,
+  seller,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   const router = useRouter();
-  const { shop_name, product_name } = router.query;
+  console.log(product, "ppp");
+
   const [count, setCount] = useState<number>(1);
   const [isHovering, setIsHovering] = useState(false);
   const [isModal, setIsModal] = useState<boolean>(false);
@@ -91,9 +96,11 @@ const ProductDetail = ({
   const [page, setPage] = useState<number>(1);
   const [suggestion, setSuggestion] =
     useState<IAPIResponse<IProductSuggestion[]>>();
-  const [shop, setShop] =
-    useState<IAPIResponse<IAPIProductDetailResponseWithSeller[]>>();
+  const [shopProfile, setShopProfile] = useState<
+    IAPIResponse<IAPIProfileShopResponse> | undefined
+  >();
 
+  console.log(seller, "param");
   useEffect(() => {
     if (imagesProduct?.length > 0) {
       setVariation(imagesProduct[0]);
@@ -157,30 +164,28 @@ const ProductDetail = ({
     }
   };
 
-  // const getShop = async () => {
-  //   try {
-  //     const res = await API.get(
-  //       `/products/${product.}/recommended-products`
-  //     );
+  const getShop = async () => {
+    try {
+      const res = await API.get(`/sellers/${seller.seller_name}/profile`);
 
-  //     const data = res.data as IAPIResponse<
-  //       IAPIProductDetailResponseWithSeller[]
-  //     >;
-  //     setShop(data);
-  //   } catch (e) {
-  //     if (axios.isAxiosError(e)) {
-  //       return toast.error("Error fetching product suggestion", {
-  //         toastId: "errorWishlist",
-  //         autoClose: 1500,
-  //       });
-  //     }
-  //   }
-  // };
+      const data = res.data as IAPIResponse<IAPIProfileShopResponse>;
+      setShopProfile(data);
+      console.log("res shop", data);
+      console.log(res);
+    } catch (e) {
+      if (axios.isAxiosError(e)) {
+        return toast.error("Error fetching product suggestion", {
+          toastId: "errorWishlist",
+          autoClose: 1500,
+        });
+      }
+    }
+  };
 
   useEffect(() => {
     getImages();
     getSuggest();
-    // getShop();
+    getShop();
     getReviewProducts();
   }, []);
 
@@ -555,9 +560,15 @@ const ProductDetail = ({
                 />
                 <div className="flex flex-col md:flex-row gap-y-4 md:gap-x-48">
                   <div className="aboutSeller justify-between w-full md:w-1/2 ">
-                    <p>Nama Toko</p>
+                    <p>{shopProfile?.data?.seller_name}</p>
+
                     <p>
-                      <button className="flex gap-1 md:gap-2 mt-3 text-sm justify-center items-center w-full border border-[#fddf97] hover:shadow-lg   p-1 md:w-36 text-[#fddf97] hover:bg-[#1c2637]  transition-all duration-300">
+                      <button
+                        onClick={() =>
+                          router.push(`/${shopProfile?.data?.seller_name}`)
+                        }
+                        className="flex gap-1 md:gap-2 mt-3 text-sm justify-center items-center w-full border border-[#fddf97] hover:shadow-lg   p-1 md:w-36 text-[#fddf97] hover:bg-[#1c2637]  transition-all duration-300"
+                      >
                         <FaStore /> <p>Visit the store</p>
                       </button>
                     </p>
@@ -565,13 +576,18 @@ const ProductDetail = ({
 
                   <div className="aboutSeller justify-between w-1/2 md:w-full">
                     <p className="flex gap-5 md:gap-12">
-                      Rating
+                      Shipping
                       <span className="flex items-center ">
-                        <FaStar /> 4.8
+                        {` ${shopProfile?.data?.seller_district}`}
                       </span>
                     </p>
                     <p className="flex gap-5 md:gap-14 mt-3">
-                      Product <span>30</span>
+                      Product
+                      <span>
+                        {shopProfile?.data?.seller_products && (
+                          <span>{shopProfile.data.seller_products.length}</span>
+                        )}
+                      </span>
                     </p>
                   </div>
                 </div>
@@ -668,6 +684,11 @@ const ProductDetail = ({
                   (e, i) =>
                     i < 6 && (
                       <ProductCard
+                        onClick={() =>
+                          router.replace(
+                            `${encodeURIComponent(e.product_name)}`
+                          )
+                        }
                         key={i}
                         image={e.product_picture_url}
                         title={e.product_name}

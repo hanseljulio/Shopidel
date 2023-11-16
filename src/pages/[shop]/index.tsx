@@ -27,12 +27,12 @@ interface IBestSelling {
   category: string;
 }
 
-interface ICategoryProduct {
-  category_id: number;
-  category_name: string;
+export interface IEtalase {
+  showcase_id: number;
+  showcase_name: string;
 }
 
-interface IAPIProfileShopResponse {
+export interface IAPIProfileShopResponse {
   seller_id: number;
   seller_name: string;
   seller_picture_url: string;
@@ -70,61 +70,21 @@ interface IProfileShopProps {
   seller: IAPIProfileShopResponse;
 }
 
-// export const getStaticPaths = async () => {
-//   try {
-//     const response = await API.get(`/sellers`);
-//     const products = response.data;
-
-//     const paths = products.map((product: { shop_name: string }) => ({
-//       params: {
-//         shop: `${product.shop_name}`,
-//       },
-//     }));
-
-//     return { paths, fallback: true };
-//   } catch (error) {
-//     console.error("Error fetching product details:", error);
-
-//     return {
-//       paths: [],
-//       fallback: true,
-//     };
-//   }
-// };
-
-// export const getStaticProps: GetStaticProps<IProfileShopProps> = async ({
-//   params,
-// }) => {
-//   try {
-//     const response = await API.get(`/sellers/${params?.shop}/profile`);
-//     const shop = response.data.data;
-
-//     return {
-//       props: {
-//         shop,
-//       },
-//     };
-//   } catch (error) {
-//     console.error("Error fetching shop details:", error);
-
-//     return {
-//       notFound: true,
-//     };
-//   }
-// };
-
 export const getServerSideProps: GetServerSideProps = async (
   context: GetServerSidePropsContext
 ) => {
   const { params } = context;
   const shop = params?.shop;
   // let data: IAPIProductDetailResponse | undefined;
+  console.log(shop, "par");
 
   try {
     const response = await API.get(`/sellers/${shop}/profile`);
     console.log("res", response.data);
     const seller = (response.data as IAPIResponse<IAPIProfileShopResponse>)
       .data;
+    console.log("seller", seller);
+
     // const product = response.data;
 
     return {
@@ -134,7 +94,7 @@ export const getServerSideProps: GetServerSideProps = async (
     };
   } catch (error) {
     console.error("Error fetching product details:", error);
-    console.log("gagal");
+    console.log(error);
 
     return {
       notFound: true,
@@ -146,11 +106,13 @@ function Index({ seller }: IProfileShopProps) {
   const router = useRouter();
   const [showAllProducts, setShowAllProducts] = useState(false);
   const [bestSelling, setBestSelling] = useState<IBestSelling[]>([]);
-  const [categoryList, setCategoryList] = useState<ICategoryProduct[]>([]);
+  const [categoryList, setCategoryList] = useState<IEtalase[]>([]);
   const [productCategory, setProductCategory] = useState<IProduct[]>([]);
   const [activeCategory, setActiveCategory] = useState<number | null>(
-    categoryList.length > 0 ? categoryList[0].category_id : null
+    categoryList.length > 0 ? categoryList[0].showcase_id : null
   );
+
+  console.log("sel", seller);
 
   const getBestSelling = async () => {
     console.log(seller);
@@ -173,10 +135,10 @@ function Index({ seller }: IProfileShopProps) {
     }
   };
 
-  const getCategories = async () => {
+  const getEtalase = async () => {
     try {
-      const res = await API.get(`/sellers/${seller.seller_name}/categories`);
-      const data = res.data as IAPIResponse<ICategoryProduct[]>;
+      const res = await API.get(`/sellers/${seller.seller_name}/showcases`);
+      const data = res.data as IAPIResponse<IEtalase[]>;
 
       if (data.data) {
         setCategoryList(data.data);
@@ -196,18 +158,18 @@ function Index({ seller }: IProfileShopProps) {
   const getProductBasedOnCategory = async (id: number | null) => {
     try {
       let res;
-      let categoryId;
+      let showcaseId;
 
       if (id !== null) {
         res = await API.get(
-          `/sellers/${seller.seller_name}/categories/${id}/products`
+          `/sellers/${seller.seller_name}/showcases/${id}/products`
         );
-        categoryId = id;
+        showcaseId = id;
       } else {
-        categoryId =
-          categoryList.length > 0 ? categoryList[0].category_id : null;
+        showcaseId =
+          categoryList.length > 0 ? categoryList[0].showcase_id : null;
         res = await API.get(
-          `/sellers/${seller.seller_name}/categories/${categoryId}/products`
+          `/sellers/${seller.seller_name}/categories/${showcaseId}/products`
         );
       }
 
@@ -215,7 +177,7 @@ function Index({ seller }: IProfileShopProps) {
 
       if (data.data) {
         setProductCategory(data.data);
-        setActiveCategory(categoryId);
+        setActiveCategory(showcaseId);
         console.log(data, "");
       } else {
         console.error("Data is undefined or null");
@@ -258,7 +220,7 @@ function Index({ seller }: IProfileShopProps) {
 
   useEffect(() => {
     getBestSelling();
-    getCategories();
+    getEtalase();
     getProductBasedOnCategory(null);
   }, []);
 
@@ -266,25 +228,23 @@ function Index({ seller }: IProfileShopProps) {
     <div>
       <Navbar />
       <div className="mx-auto lg:max-w-7xl md:items-center px-4 md:px-0 mb-5">
-        <div className="sellerShop border border-[#364968] rounded-xl text-black flex flex-row gap-y-5 py-3 my-10 gap-10 px-5 ">
+        <div className="sellerShop border border-[#364968] rounded-xl text-black flex flex-col items-center md:items-start md:flex-row :gap-y-5 py-5 my-10 gap-10 px-5 ">
           <img
-            width={90}
-            height={0}
             src={seller?.seller_picture_url}
             alt={seller?.seller_name}
-            className="imgSeller w-20 h-ful "
+            className="imgSeller w-full md:w-36 h-full object-fill "
           />
           <div className="flex flex-col md:flex-row gap-y-4 gap-x-48 w-full">
-            <div className="aboutSeller  md:w-full flex flex-col gap-y-2">
-              <p className="text-lg md:text-xl font-semibold">
+            <div className="aboutSeller  md:w-full flex flex-col gap-y-2 md:gap-y-3">
+              <p className="text-xl md:text-3xl font-semibold">
                 {seller?.seller_name}
               </p>
-              <p className="text-sm flex items-center text-neutral-600">
+              <p className="text-sm md:text-base flex items-center text-neutral-600">
                 <FaLocationDot /> <span>{seller?.seller_district}</span>
               </p>
             </div>
 
-            <div className="flex flex-col md:flex-row justify-start items-start md:justify-between md:w-full md:items-center ">
+            <div className="flex flex-col md:flex-row justify-end items-start md:gap-x-48 gap-y-2  md:w-full md:items-center ">
               <div className="text-center md:justify-center">
                 <p className="flex text-left md:text-center md:items-center font-semibold gap-x-1">
                   <FaStar style={{ color: "#f57b29" }} />
@@ -292,10 +252,15 @@ function Index({ seller }: IProfileShopProps) {
                 </p>
                 <p className=" text-neutral-600 text-sm">Rating</p>
               </div>
-              <div className="text-left md:text-center md:items-center md:justify-center">
-                <p className="font-semibold">30</p>
+              {/* <div className="text-left md:text-center md:items-center md:justify-center">
+                {seller.seller_products && (
+                  <p className="font-semibold">
+                    {seller.seller_products.length}
+                  </p>
+                )}
+
                 <p className=" text-neutral-600 text-sm"> Products</p>
-              </div>
+              </div> */}
               <div className="w-fit md:text-center text-left md:items-center md:justify-center">
                 <p className="font-semibold">{`${seller?.seller_operating_hour.start} - ${seller?.seller_operating_hour.end} WIB`}</p>
                 <p className=" text-neutral-600 text-sm">Operating hours</p>
@@ -313,7 +278,9 @@ function Index({ seller }: IProfileShopProps) {
                 (e, k) =>
                   k < 12 && (
                     <ProductCard
-                      onClick={() => router.push(`/${e.name}`)}
+                      onClick={() =>
+                        router.push(`/${seller.seller_name}/${e.name}`)
+                      }
                       key={k}
                       image={e.picture_url}
                       price={e.price}
@@ -348,7 +315,7 @@ function Index({ seller }: IProfileShopProps) {
             <div>
               <p className="flex items-center gap-1 font-semibold border-b border-b-slate-200 pb-0 md:pb-8">
                 <FaListUl className="hidden md:flex" size={15} />
-                Category
+                Etalase
               </p>
             </div>
             <div>
@@ -357,11 +324,11 @@ function Index({ seller }: IProfileShopProps) {
                   <li
                     key={i}
                     className={`cursor-pointer ${
-                      activeCategory === e.category_id ? "text-[#e09664]" : ""
+                      activeCategory === e.showcase_id ? "text-[#e09664]" : ""
                     }`}
-                    onClick={() => getProductBasedOnCategory(e.category_id)}
+                    onClick={() => getProductBasedOnCategory(e.showcase_id)}
                   >
-                    {e.category_name}
+                    {e.showcase_name}
                   </li>
                 ))}
               </ul>
@@ -386,7 +353,7 @@ function Index({ seller }: IProfileShopProps) {
             <div className="w-full grid grid-cols-2 md:grid-cols-4 gap-3 md:mt-3">
               {productCategory.map((e, k) => (
                 <ProductCard
-                  onClick={() => router.push(`/${e.name}`)}
+                  onClick={() => router.push(`/${encodeURIComponent(e.name)}`)}
                   key={k}
                   image={e.picture_url}
                   price={e.price}
