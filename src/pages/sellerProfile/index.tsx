@@ -95,6 +95,7 @@ interface IAPIProfileShopResponse {
     start: string;
     end: string;
   };
+
   seller_products: [
     {
       name: string;
@@ -128,8 +129,6 @@ export const getServerSideProps = async (
   context: GetServerSidePropsContext
 ) => {
   let data: IAPIProfileShopResponse | undefined = undefined;
-
-  let accessToken = context.req.cookies["accessToken"];
 
   try {
     const res = await API.get(`/sellers/${`Jejak Trendi`}/profile`); //masih hardcode

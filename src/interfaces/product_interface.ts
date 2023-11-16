@@ -30,6 +30,8 @@ export interface IProductSuggestion{
     product_picture_url: string
     product_price: string
     seller_name: string
+    shop_name_slug: string
+    product_name_slug: string
 }
 
 export interface IListCategory{

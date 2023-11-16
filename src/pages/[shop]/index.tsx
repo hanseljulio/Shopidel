@@ -25,6 +25,8 @@ interface IBestSelling {
   stars: string;
   total_sold: string;
   category: string;
+  product_name_slug: string;
+  shop_name_slug: string;
 }
 
 export interface IEtalase {
@@ -41,6 +43,8 @@ export interface IAPIProfileShopResponse {
     start: string;
     end: string;
   };
+  seller_stars: string;
+  shop_name_slug: string;
   seller_products: [
     {
       name: string;
@@ -115,7 +119,9 @@ function Index({ seller }: IProfileShopProps) {
     console.log(seller);
 
     try {
-      const res = await API.get(`/sellers/${seller.seller_name}/best-selling`);
+      const res = await API.get(
+        `/sellers/${seller.shop_name_slug}/best-selling`
+      );
       console.log("test");
       console.log(res);
       const data = res.data as IAPIResponse<IBestSelling[]>;
@@ -134,7 +140,7 @@ function Index({ seller }: IProfileShopProps) {
 
   const getEtalase = async () => {
     try {
-      const res = await API.get(`/sellers/${seller.seller_name}/showcases`);
+      const res = await API.get(`/sellers/${seller.shop_name_slug}/showcases`);
       const data = res.data as IAPIResponse<IEtalase[]>;
 
       if (data.data) {
@@ -156,26 +162,28 @@ function Index({ seller }: IProfileShopProps) {
     try {
       let res;
       let showcaseId;
+      console.log("hahjashjshdas");
 
       if (id !== null) {
         res = await API.get(
-          `/sellers/${seller.seller_name}/showcases/${id}/products`
+          `/sellers/${seller.shop_name_slug}/showcases/${id}/products`
         );
         showcaseId = id;
       } else {
         showcaseId =
           categoryList.length > 0 ? categoryList[0].showcase_id : null;
         res = await API.get(
-          `/sellers/${seller.seller_name}/categories/${showcaseId}/products`
+          `/sellers/${seller.shop_name_slug}/showcases/${showcaseId}/products`
         );
       }
 
       const data = res.data as IAPIResponse<IProduct[]>;
+      console.log(data, "de");
 
       if (data.data) {
         setProductCategory(data.data);
         setActiveCategory(showcaseId);
-        console.log(data, "");
+        console.log(data, "ini dia");
       } else {
         console.error("Data is undefined or null");
       }
@@ -249,15 +257,7 @@ function Index({ seller }: IProfileShopProps) {
                 </p>
                 <p className=" text-neutral-600 text-sm">Rating</p>
               </div>
-              {/* <div className="text-left md:text-center md:items-center md:justify-center">
-                {seller.seller_products && (
-                  <p className="font-semibold">
-                    {seller.seller_products.length}
-                  </p>
-                )}
 
-                <p className=" text-neutral-600 text-sm"> Products</p>
-              </div> */}
               <div className="w-fit md:text-center text-left md:items-center md:justify-center">
                 <p className="font-semibold">{`${seller?.seller_operating_hour.start} - ${seller?.seller_operating_hour.end} WIB`}</p>
                 <p className=" text-neutral-600 text-sm">Operating hours</p>
@@ -276,7 +276,9 @@ function Index({ seller }: IProfileShopProps) {
                   k < 12 && (
                     <ProductCard
                       onClick={() =>
-                        router.push(`/${seller.seller_name}/${e.name}`)
+                        router.push(
+                          `/${seller.shop_name_slug}/${e.product_name_slug}`
+                        )
                       }
                       key={k}
                       image={e.picture_url}
@@ -350,7 +352,11 @@ function Index({ seller }: IProfileShopProps) {
             <div className="w-full grid grid-cols-2 md:grid-cols-4 gap-3 md:mt-3">
               {productCategory.map((e, k) => (
                 <ProductCard
-                  onClick={() => router.push(``)}
+                  onClick={() =>
+                    router.push(
+                      `/${seller.shop_name_slug}/${e.product_name_slug}`
+                    )
+                  }
                   key={k}
                   image={e.picture_url}
                   price={e.price}

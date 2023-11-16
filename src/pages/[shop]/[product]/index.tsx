@@ -27,11 +27,24 @@ import React, { useEffect, useState } from "react";
 import { SubmitHandler } from "react-hook-form";
 import { AiOutlineShoppingCart } from "react-icons/ai";
 import { BsStarFill } from "react-icons/bs";
-import { FaHeart, FaRegHeart, FaStar, FaStore } from "react-icons/fa";
-import { FaLocationDot, FaTruckFast } from "react-icons/fa6";
+import {
+  FaHeart,
+  FaRegHeart,
+  FaShippingFast,
+  FaStar,
+  FaStore,
+} from "react-icons/fa";
+import {
+  FaLocationDot,
+  FaLocationPinLock,
+  FaMapLocationDot,
+  FaTruckFast,
+} from "react-icons/fa6";
+import { GrLocationPin } from "react-icons/gr";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { IAPIProfileShopResponse } from "..";
+import { log } from "console";
 
 export interface IAPIProductDetailResponseWithSeller
   extends IAPIProductDetailResponse {
@@ -84,6 +97,7 @@ const ProductDetail = ({
   const [currentStock, setCurrentStock] = useState<number>(0);
   const [isFavorite, setIsFavorite] = useState(false);
   const [imagesProduct, setImagesProduct] = useState([]);
+  const [imagesReview, setImagesReview] = useState([]);
   const [reviews, setReviews] = useState<IAPIResponse<IReviewProduct[]>>();
   const [page, setPage] = useState<number>(1);
   const [suggestion, setSuggestion] =
@@ -109,7 +123,7 @@ const ProductDetail = ({
     try {
       const res = await API.get(`/products/${product.id}/pictures`);
       const data = res.data.data;
-      setImagesProduct(data);
+      setImagesProduct(data); // Update the state here
     } catch (e) {
       if (axios.isAxiosError(e)) {
         return toast.error(e.message, {
@@ -124,7 +138,8 @@ const ProductDetail = ({
       const res = await API.get(
         `products/${product.id}/reviews?page=1&stars=5&comment=true&image=true&orderBy=newest`
       );
-      console.log("id", product.id);
+      console.log("id rev", product.id);
+      console.log("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
 
       const data = res.data as IAPIResponse<IReviewProduct[]>;
       setReviews(data);
@@ -158,7 +173,7 @@ const ProductDetail = ({
 
   const getShop = async () => {
     try {
-      const res = await API.get(`/sellers/${seller.seller_name}/profile`);
+      const res = await API.get(`/sellers/${seller.shop_name_slug}/profile`);
 
       const data = res.data as IAPIResponse<IAPIProfileShopResponse>;
       setShopProfile(data);
@@ -175,11 +190,15 @@ const ProductDetail = ({
   };
 
   useEffect(() => {
-    getImages();
     getSuggest();
     getShop();
     getReviewProducts();
   }, []);
+
+  useEffect(() => {
+    getImages();
+    getReviewProducts();
+  }, [product.id]);
 
   const calculateSubtotal = () => {
     const selectedVariant = product?.variants?.find((variant: any) => {
@@ -548,21 +567,21 @@ const ProductDetail = ({
           </div>
           <div className="seller flex-col md:flex-row justify-between md:flex gap-10 py-5 px-5 md:px-0">
             <div className="order-1 w-full  md:w-3/4">
-              <div className="sellerShop bg-[#364968] flex flex-row gap-y-5 text-white py-3 my-10 gap-10 px-5 ">
+              <div className="sellerShop bg-[#364968] flex flex-col md:flex-row gap-y-5 text-white py-3 my-10 gap-10 px-5 ">
                 <img
                   src={shopProfile?.data?.seller_picture_url}
                   alt="seller"
-                  className="imgSeller w-28 h-full place-self-center object-fill"
+                  className="imgSeller w-full md:w-32 h-full place-self-center object-fill"
                 />
-                <div className="flex flex-col md:flex-row gap-y-4 md:gap-x-48">
+                <div className="flex flex-col md:flex-row gap-y-4 md:gap-x-48 w-full">
                   <div className="aboutSeller w-full md:w-1/2">
-                    <p className=" text-base md:text-lg font-medium md:font-semibold">
+                    <p className=" text-lg md:text-xl font-medium md:font-semibold text-center md:text-left">
                       {shopProfile?.data?.seller_name}
                     </p>
                     <p>
                       <button
                         onClick={() =>
-                          router.push(`/${shopProfile?.data?.seller_name}`)
+                          router.push(`/${shopProfile?.data?.shop_name_slug}`)
                         }
                         className="flex gap-1 md:gap-2 mt-3 text-sm justify-center items-center w-full border border-[#fddf97] hover:shadow-lg   p-1 md:w-36 text-[#fddf97] hover:bg-[#1c2637]  transition-all duration-300"
                       >
@@ -572,22 +591,25 @@ const ProductDetail = ({
                     </p>
                   </div>
 
-                  <div className="aboutSeller justify-between w-1/2 md:w-full text-sm md:text-base items-center self-center ">
-                    <p className="flex gap-5 md:gap-12 items-center justify-center">
-                      Shipping
-                      <span className="flex items-center ">
-                        {` ${shopProfile?.data?.seller_district}`}
-                      </span>
-                    </p>
-                    <p className="flex gap-5 md:gap-14 mt-3">
-                      Stars <span></span>
-                      {/* <span>
-                        {shopProfile?.data?.seller_products && (
-                          <span>{shopProfile.data.seller_products.length}</span>
-                        )}
-                      </span> */}
-                    </p>
-                  </div>
+                  <table className="aboutSeller w-full  md:w-full text-sm md:text-base  self-center ">
+                    <thead></thead>
+                    <tbody>
+                      <tr className="flex items-center justify-center gap">
+                        <td className="w-full">Shipping from</td>
+                        <td className="w-full flex items-center gap-x-1 font-medium">
+                          <FaLocationDot />
+                          {` ${shopProfile?.data?.seller_district}`}
+                        </td>
+                      </tr>
+                      <tr className="flex mt-3">
+                        <td className="w-full">Stars</td>
+                        <td className="w-full flex gap-x-1 items-center font-medium">
+                          <FaStar style={{ color: "#f57b29" }} />
+                          {shopProfile?.data?.seller_stars}
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
                 </div>
               </div>
               <div className="reviews">
@@ -645,7 +667,7 @@ const ProductDetail = ({
                         </p>
                         <p className="theReview">{review.comment}</p>
                         <div className="grid grid-cols-4 gap-x-2 mt-3">
-                          {imagesProduct?.map((url, index) => {
+                          {imagesReview?.map((url, index) => {
                             return (
                               <img
                                 key={index}
@@ -682,7 +704,11 @@ const ProductDetail = ({
                   (e, i) =>
                     i < 6 && (
                       <ProductCard
-                        onClick={() => router.push(`/${e.product_name}`)}
+                        onClick={() =>
+                          router.push(
+                            `/${seller.shop_name_slug}/${e.product_name_slug}`
+                          )
+                        }
                         key={i}
                         image={e.product_picture_url}
                         title={e.product_name}
