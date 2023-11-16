@@ -1,8 +1,11 @@
 import React from "react";
 import SellerAdminLayout from "@/components/SellerAdminLayout";
 import Button from "@/components/Button";
+import { useRouter } from "next/router";
 
 const SellerAdminProducts = () => {
+  const router = useRouter();
+
   return (
     <SellerAdminLayout currentPage="Products">
       <div className="w-full mx-auto mt-10">
@@ -11,6 +14,7 @@ const SellerAdminProducts = () => {
 
           <Button
             text="Add new product"
+            onClick={() => router.push("/myshop/products/addProduct")}
             styling="bg-[#fddf97] p-3 rounded-[8px] w-[200px] my-4"
           />
         </div>
