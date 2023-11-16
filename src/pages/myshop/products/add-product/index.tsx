@@ -1,11 +1,24 @@
 import React, { useState } from "react";
 import SellerAdminLayout from "@/components/SellerAdminLayout";
 import Input from "@/components/Input";
-import { SubmitHandler, useForm } from "react-hook-form";
+import {
+  SubmitHandler,
+  UseFormGetValues,
+  UseFormRegister,
+  UseFormSetValue,
+  useForm,
+} from "react-hook-form";
 import { API } from "@/network";
 import Button from "@/components/Button";
-import { AiOutlineArrowRight } from "react-icons/ai";
+import { MdDelete } from "react-icons/md";
 import { FaChevronRight } from "react-icons/fa";
+import {
+  IoAdd,
+  IoAddCircle,
+  IoAddCircleOutline,
+  IoAddCircleSharp,
+  IoClose,
+} from "react-icons/io5";
 
 interface IVariants {
   color: string;
@@ -123,7 +136,12 @@ interface IAddProductForm {
   product_name: string;
   category: ICategory;
   description: string;
-  variants: IVariants[];
+  variants: IVariant[];
+}
+
+interface IVariant {
+  name: string;
+  type: string[];
 }
 
 const SellerAddProductPage = () => {
@@ -136,27 +154,18 @@ const SellerAddProductPage = () => {
     formState: { errors },
   } = useForm<IAddProductForm>({
     mode: "onBlur",
+    defaultValues: {
+      variants: [],
+    },
   });
   const [isCategoryOpen, setIsCategoryOpen] = useState<boolean>(false);
   const [category2, setCategory2] = useState<ICategory[]>([]);
   const [category3, setCategory3] = useState<ICategory[]>([]);
 
   const watchCategory = watch("category");
+  const watchVariant = watch("variants");
 
-  const [variantsData, setVariantsData] = useState<IVariants[]>([]);
-
-  const addVariants = (e: any) => {
-    e.preventDefault();
-
-    let newVariant = {
-      color: "Blue",
-      size: "S",
-      quantity: 0,
-      price: 0,
-    };
-
-    setVariantsData([...variantsData, newVariant]);
-  };
+  const addVariants = (e: any) => {};
 
   return (
     <SellerAdminLayout currentPage="Products">
@@ -214,7 +223,7 @@ const SellerAddProductPage = () => {
                   readOnly
                 />
                 {isCategoryOpen && (
-                  <div className="absolute text-sm w-full h-80 flex border border-x-slate-500 border-b-slate-500 shadow-md  bg-white py-3 rounded-bl-md rounded-br-md">
+                  <div className="absolute z-50 text-sm w-full h-80 flex border border-x-slate-500 border-b-slate-500 shadow-md  bg-white py-3 rounded-bl-md rounded-br-md">
                     <div className="flex-1 border-r  overflow-auto">
                       {categoryDummy.map((l1, i) => {
                         return (
@@ -279,97 +288,102 @@ const SellerAddProductPage = () => {
               )}
             </div>
             <div>
-              <h1 className="text-[20px] font-bold">Variants</h1>
-              <div
-                className={`flex flex-col gap-6 ${
-                  variantsData.length !== 0 ? "py-3" : ""
-                }`}
-              >
-                {variantsData.map((_, index) => {
-                  return (
-                    <div
-                      key={index}
-                      className=" bg-slate-300 w-[650px] p-6 border-2 border-gray-400 rounded-md"
-                    >
-                      <div className="flex items-center gap-10">
-                        <div className="flex items-center gap-4">
-                          <p className="font-bold">Product Size</p>
-                          <select
-                            className={`p-4 w-[150px] h-14 rounded`}
-                            name="category-dropdown"
-                            onChange={(e) => {
-                              let currentData = variantsData;
-                              currentData[index].size = e.target.value;
-
-                              setVariantsData(currentData);
-                            }}
-                          >
-                            <option value={"S"}>{"Small"}</option>
-                            <option value={"M"}>{"Medium"}</option>
-                            <option value={"L"}>{"Large"}</option>
-                          </select>
-                        </div>
-                        <div className="flex items-center gap-6">
-                          <p className="font-bold">Product Color</p>
-                          <select
-                            className={`p-4 w-[120px] h-14 rounded`}
-                            name="category-dropdown"
-                            onChange={(e) => {
-                              let currentData = variantsData;
-                              currentData[index].color = e.target.value;
-
-                              setVariantsData(currentData);
-                            }}
-                          >
-                            <option value={"Blue"}>{"Blue"}</option>
-                            <option value={"Black"}>{"Black"}</option>
-                            <option value={"Green"}>{"Green"}</option>
-                          </select>
-                        </div>
-                      </div>
-                      <br />
-
-                      <div className="flex items-center gap-[69px]">
-                        <div className="flex items-center gap-11">
-                          <p className="font-bold">Quantity</p>
-                          <input
-                            type="number"
-                            className={`p-4 w-[120px] h-14 rounded`}
-                            onChange={(e) => {
-                              let currentData = variantsData;
-                              currentData[index].quantity = parseInt(
-                                e.target.value
-                              );
-
-                              setVariantsData(currentData);
-                            }}
-                          />
-                        </div>
-                        <div className="flex items-center gap-6">
-                          <p className="font-bold">Price (Rp)</p>
-                          <input
-                            type="number"
-                            className={`p-4 w-[188px] h-14 rounded`}
-                            onChange={(e) => {
-                              let currentData = variantsData;
-                              currentData[index].price = parseInt(
-                                e.target.value
-                              );
-
-                              setVariantsData(currentData);
-                            }}
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
+              <div className="flex justify-between">
+                <h1 className="text-xl">Variants</h1>
+                <Button
+                  text="Add Variants"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setValue("variants", [
+                      ...watchVariant,
+                      {
+                        name: "",
+                        type: [],
+                      },
+                    ]);
+                  }}
+                  styling="bg-[#364968] rounded-md w-fit p-2 text-white "
+                />
               </div>
-              <Button
-                text="Add Variants"
-                onClick={addVariants}
-                styling="bg-[#364968] p-3 rounded-[8px] w-[150px] text-white my-4"
-              />
+              <div className="mt-3 flex flex-col gap-y-5">
+                {watchVariant &&
+                  watchVariant.map((variant, i) => {
+                    return (
+                      <ProductVariant
+                        key={i}
+                        i={i}
+                        register={register}
+                        watchVariant={watchVariant}
+                        setValue={setValue}
+                        getValues={getValues}
+                      />
+                    );
+                  })}
+              </div>
+              <div className="mt-10">
+                <p className="text-xl">Variant Table</p>
+                <div>
+                  <table className="w-full">
+                    <thead>
+                      <tr>
+                        <th className="text-start">Image</th>
+                        {getValues("variants").map((v, i) => {
+                          return (
+                            <th key={i} className="text-start">
+                              {v.name}
+                            </th>
+                          );
+                        })}
+                        <th className="text-start">Price</th>
+                        <th className="text-start">Stock</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {getValues("variants")
+                        .at(0)
+                        ?.type.map((v0) => {
+                          return getValues("variants")
+                            .at(1)
+                            ?.type.map((v1, i) => {
+                              return (
+                                <tr key={i}>
+                                  <td></td>
+                                  <td>{v0}</td>
+                                  <td>{v1}</td>
+                                  <td>
+                                    <input
+                                      type="text"
+                                      name="price"
+                                      onKeyDown={(e) => {
+                                        if (e.key === "Enter") {
+                                          e.preventDefault();
+                                        }
+                                      }}
+                                      id="price"
+                                      className="py-1 rounded-md text-sm"
+                                    />
+                                  </td>
+                                  <td>
+                                    <input
+                                      type="text"
+                                      name="price"
+                                      onKeyDown={(e) => {
+                                        if (e.key === "Enter") {
+                                          e.preventDefault();
+                                        }
+                                      }}
+                                      id="price"
+                                      className="py-1  rounded-md text-sm"
+                                    />
+                                  </td>
+                                </tr>
+                              );
+                            });
+                        })}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
             </div>
           </form>
         </div>
@@ -379,3 +393,203 @@ const SellerAddProductPage = () => {
 };
 
 export default SellerAddProductPage;
+
+interface IProductVariantProps {
+  register: UseFormRegister<IAddProductForm>;
+  watchVariant: IVariant[];
+  setValue: UseFormSetValue<IAddProductForm>;
+  getValues: UseFormGetValues<IAddProductForm>;
+  i: number;
+}
+const ProductVariant = ({
+  register,
+  setValue,
+  getValues,
+  watchVariant,
+  i,
+}: IProductVariantProps) => {
+  const [variantType, setVariantType] = useState<string>("");
+
+  return (
+    <div>
+      <div className="flex justify-between items-center">
+        <p className="font-bold">Variant {i + 1}</p>
+        <div
+          onClick={() => {
+            let temp = watchVariant;
+            temp.splice(i, 1);
+            setValue(`variants`, temp);
+          }}
+          className="hover:cursor-pointer"
+        >
+          <MdDelete color={"red"} size={25} />
+        </div>
+      </div>
+      <div className="mt-2 flex flex-col gap-y-2">
+        <div className="flex flex-col">
+          <label htmlFor="variant1name" className="text-sm">
+            Variant name
+          </label>
+          <input
+            {...register(`variants.${i}.name`)}
+            type="text"
+            name={`variants.${i}.name`}
+            placeholder="Ex: Color"
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                e.preventDefault();
+                console.log("enter");
+              }
+            }}
+            id={`variants.${i}.name`}
+            className="rounded-md"
+          />
+        </div>
+        <div className="flex flex-col">
+          <label htmlFor="variant1type" className="text-sm">
+            Variant type
+          </label>
+          <div className="relative">
+            <input
+              type="text"
+              placeholder="Ex: Red"
+              value={variantType}
+              onChange={(e) => {
+                setVariantType(e.target.value);
+              }}
+              id="name"
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  setValue(`variants.${i}.type`, [
+                    ...getValues(`variants.${i}.type`),
+                    variantType,
+                  ]);
+                  setVariantType("");
+                }
+              }}
+              className="rounded-md w-full"
+            />
+            {variantType.length !== 0 && (
+              <div
+                onClick={() => {
+                  setValue(`variants.${i}.type`, [
+                    ...getValues(`variants.${i}.type`),
+                    variantType,
+                  ]);
+                  setVariantType("");
+                }}
+                className="absolute w-full border border-slate-500 rounded-b-md bg-white shadow-md p-3 transition hover:bg-slate-100 hover:cursor-pointer"
+              >
+                <div className="flex items-center gap-x-3">
+                  <IoAddCircleOutline size={20} />
+                  <p>Add &quot;{variantType}&quot;</p>
+                </div>
+              </div>
+            )}
+            <div className="flex gap-x-2 mt-2">
+              {watchVariant.at(i)?.type &&
+                watchVariant.at(i)?.type.map((type, i) => {
+                  return (
+                    <div
+                      key={i}
+                      onClick={() => {
+                        setValue(
+                          `variants.${i}.type`,
+                          getValues(`variants.${i}.type`).filter(
+                            (item) => item !== type
+                          )
+                        );
+                      }}
+                      className="p-2 rounded-md bg-slate-200 text-sm hover:cursor-pointer flex items-center gap-x-3"
+                    >
+                      <p>{type}</p>
+                      <IoClose />
+                    </div>
+                  );
+                })}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// {
+//   variantsData.map((_, index) => {
+//     return (
+//       <div
+//         key={index}
+//         className=" bg-slate-300 w-[650px] p-6 border-2 border-gray-400 rounded-md"
+//       >
+//         <div className="flex items-center gap-10">
+//           <div className="flex items-center gap-4">
+//             <p className="font-bold">Product Size</p>
+//             <select
+//               className={`p-4 w-[150px] h-14 rounded`}
+//               name="category-dropdown"
+//               onChange={(e) => {
+//                 let currentData = variantsData;
+//                 currentData[index].size = e.target.value;
+
+//                 setVariantsData(currentData);
+//               }}
+//             >
+//               <option value={"S"}>{"Small"}</option>
+//               <option value={"M"}>{"Medium"}</option>
+//               <option value={"L"}>{"Large"}</option>
+//             </select>
+//           </div>
+//           <div className="flex items-center gap-6">
+//             <p className="font-bold">Product Color</p>
+//             <select
+//               className={`p-4 w-[120px] h-14 rounded`}
+//               name="category-dropdown"
+//               onChange={(e) => {
+//                 let currentData = variantsData;
+//                 currentData[index].color = e.target.value;
+
+//                 setVariantsData(currentData);
+//               }}
+//             >
+//               <option value={"Blue"}>{"Blue"}</option>
+//               <option value={"Black"}>{"Black"}</option>
+//               <option value={"Green"}>{"Green"}</option>
+//             </select>
+//           </div>
+//         </div>
+//         <br />
+
+//         <div className="flex items-center gap-[69px]">
+//           <div className="flex items-center gap-11">
+//             <p className="font-bold">Quantity</p>
+//             <input
+//               type="number"
+//               className={`p-4 w-[120px] h-14 rounded`}
+//               onChange={(e) => {
+//                 let currentData = variantsData;
+//                 currentData[index].quantity = parseInt(e.target.value);
+
+//                 setVariantsData(currentData);
+//               }}
+//             />
+//           </div>
+//           <div className="flex items-center gap-6">
+//             <p className="font-bold">Price (Rp)</p>
+//             <input
+//               type="number"
+//               className={`p-4 w-[188px] h-14 rounded`}
+//               onChange={(e) => {
+//                 let currentData = variantsData;
+//                 currentData[index].price = parseInt(e.target.value);
+
+//                 setVariantsData(currentData);
+//               }}
+//             />
+//           </div>
+//         </div>
+//       </div>
+//     );
+//   });
+// }
