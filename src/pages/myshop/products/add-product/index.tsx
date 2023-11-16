@@ -341,7 +341,41 @@ const SellerAddProductPage = () => {
                     <tbody>
                       {getValues("variants")
                         .at(0)
-                        ?.type.map((v0) => {
+                        ?.type.map((v0, i) => {
+                          if (getValues("variants").length === 1) {
+                            return (
+                              <tr key={i}>
+                                <td></td>
+                                <td>{v0}</td>
+                                <td>
+                                  <input
+                                    type="text"
+                                    name="price"
+                                    onKeyDown={(e) => {
+                                      if (e.key === "Enter") {
+                                        e.preventDefault();
+                                      }
+                                    }}
+                                    id="price"
+                                    className="py-1 rounded-md text-sm"
+                                  />
+                                </td>
+                                <td>
+                                  <input
+                                    type="text"
+                                    name="price"
+                                    onKeyDown={(e) => {
+                                      if (e.key === "Enter") {
+                                        e.preventDefault();
+                                      }
+                                    }}
+                                    id="price"
+                                    className="py-1  rounded-md text-sm"
+                                  />
+                                </td>
+                              </tr>
+                            );
+                          }
                           return getValues("variants")
                             .at(1)
                             ?.type.map((v1, i) => {
