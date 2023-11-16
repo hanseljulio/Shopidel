@@ -293,7 +293,7 @@ function Index({ seller }: IProfileShopProps) {
             {!showAllProducts && (
               <div className="lg:max-w-7xl w-full absolute align-middle justify-end items-center text-right hidden md:flex mt-40">
                 <button
-                  className="p-3 bg-slate-900 text-white  rounded-full absolute justify-center align-middle items-end shadow-xl shadow-slate-600 hover:bg-slate-500 opacity-50"
+                  className="p-3 from-transparent to-white block transform group-hover:animate-shine bg-slate-900 text-white  rounded-full absolute justify-center align-middle items-end shadow-xl shadow-slate-600 hover:bg-slate-500 opacity-50"
                   onClick={() => setShowAllProducts(true)}
                 >
                   <span className="text-xs">View More </span> &gt;
