@@ -1,11 +1,13 @@
 import Button from "@/components/Button";
+import { IAPIResponse } from "@/interfaces/api_interface";
 import { IRegisterForm } from "@/interfaces/auth_interface";
-import * as crypto from "crypto";
-import { GetServerSidePropsContext } from "next";
+import { API } from "@/network";
+import axios from "axios";
 import { useRouter } from "next/router";
-import React from "react";
+import React, { useEffect } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
-import { ToastContainer } from "react-toastify";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const ResetPassword = () => {
   const router = useRouter();
@@ -16,21 +18,59 @@ const ResetPassword = () => {
     formState: { errors },
   } = useForm<Pick<IRegisterForm, "password" | "confirmPassword">>();
 
-  // console.log(decrypt(router.query.id?.toString()!));
-  console.log(process.env);
-
   const onSubmit: SubmitHandler<
     Pick<IRegisterForm, "password" | "confirmPassword">
-  > = (data) => {
-    console.log(data);
+  > = async (data) => {
+    const reqData = {
+      token: router.query.token,
+      password: data.password,
+    };
+
+    try {
+      await toast.promise(
+        API.put("/auth/request-forget-password", reqData),
+        {
+          pending: "Loading",
+          error: {
+            render({ data }) {
+              if (axios.isAxiosError(data)) {
+                return (data.response?.data as IAPIResponse).message;
+              }
+            },
+          },
+          success: "Set new password success",
+        },
+        {
+          autoClose: 1500,
+          position: "top-center",
+        }
+      );
+    } catch (e) {}
   };
+
+  useEffect(() => {
+    toast.onChange((data) => {
+      if (axios.isAxiosError(data.data)) {
+        if (data.status === "removed" && data.data.response?.status === 401) {
+          return router.replace("/login");
+        }
+      } else {
+        if (data.status === "removed") {
+          return router.replace("/login");
+        }
+      }
+    });
+  }, []);
 
   return (
     <div className="h-screen w-screen flex justify-center items-center">
       <ToastContainer />
       <div className="flex flex-col items-center px-5 md:px-0">
         <h1 className="text-xl font-bold">Reset Password</h1>
-        <form onSubmit={handleSubmit(onSubmit)} className="mt-5 w-full md:w-96">
+        <form
+          onSubmit={handleSubmit(onSubmit)}
+          className="mt-5 flex flex-col gap-y-2 w-full md:w-96"
+        >
           <div className="flex flex-col">
             <label htmlFor="email" className="text-sm">
               Password
@@ -45,8 +85,6 @@ const ResetPassword = () => {
                     v.length <= 20 || "Password maximum 20 characters",
                   includeUppercase: (v) =>
                     /[A-Z]/g.test(v) || "Must include uppercase character",
-                  notIncludeUsername: (v) =>
-                    !v.includes("") || "Cannot contain username",
                 },
               })}
               type="password"
@@ -54,9 +92,9 @@ const ResetPassword = () => {
               id="password"
               className="rounded-md border p-2"
             />
-            {errors.password?.type === "validate" && (
+            {errors.password?.types === errors.password?.types?.validate && (
               <p role="alert" className="text-xs text-red-500 mt-1">
-                {errors.password.message}
+                {errors.password?.message}
               </p>
             )}
           </div>
@@ -78,9 +116,10 @@ const ResetPassword = () => {
               id="confirmPassword"
               className="rounded-md border p-2"
             />
-            {errors.confirmPassword?.type === "validate" && (
+            {errors.confirmPassword?.types ===
+              errors.confirmPassword?.types?.validate && (
               <p role="alert" className="text-xs text-red-500 mt-1">
-                {errors.confirmPassword.message}
+                {errors.confirmPassword?.message}
               </p>
             )}
           </div>
