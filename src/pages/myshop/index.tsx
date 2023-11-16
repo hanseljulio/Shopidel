@@ -4,6 +4,7 @@ import Navbar from "@/components/Navbar";
 import {
   IAPIResponse,
   IAPIUserProfileResponse,
+  IAPIWalletResponse,
 } from "@/interfaces/api_interface";
 import { ICourier } from "@/interfaces/courier_interface";
 import { IAddress } from "@/interfaces/user_interface";
@@ -42,10 +43,12 @@ const RegisterShop = () => {
     },
   });
   const { user, updateUser } = useUserStore();
+
   const router = useRouter();
   const [logged, setLogged] = useState<IAPIUserProfileResponse>();
   const [listAddress, setListAddress] = useState<IAddress[]>();
   const [listCourier, setListCourier] = useState<ICourier[]>();
+  const [walletDetail, setWalletDetail] = useState<IAPIWalletResponse>();
   const [isDropdownCourier, setIsDropdownCourier] = useState<boolean>(false);
   const [selectedCourier, setSelectedCourier] = useState<number[]>([]);
 
@@ -125,8 +128,27 @@ const RegisterShop = () => {
     }
   };
 
+  const getWalletDetail = async () => {
+    try {
+      const res = await API.get("/accounts/wallets");
+      let data = (res.data as IAPIResponse<IAPIWalletResponse>).data;
+      setWalletDetail(data);
+    } catch (e) {
+      if (axios.isAxiosError(e)) {
+        if (e.response?.status === 401) {
+          return clientUnauthorizeHandler(router, updateUser);
+        }
+        return toast.error("Error fetching wallet", {
+          toastId: "errorWallet",
+          autoClose: 1500,
+        });
+      }
+    }
+  };
+
   useEffect(() => {
     getListAddress();
+    getWalletDetail();
     getListCourier();
     setLogged(user);
   }, []);
@@ -134,13 +156,10 @@ const RegisterShop = () => {
   return (
     <>
       <Navbar />
-
       <div className="flex h-screen justify-center items-center">
-        {listAddress?.length === 0 ? (
+        {listAddress?.length === 0 || walletDetail?.isActive === false ? (
           <div>
-            <h1 className="text-xl">
-              Please complete your profile and address first
-            </h1>
+            <h1 className="text-xl">Please setup your address and wallet</h1>
             <div className="mt-3">
               <Button
                 text="Go to Profile"
