@@ -471,19 +471,25 @@ const ProductDetail = ({
                 </p>
               </div>
               <div className="btn flex gap-5 mt-10">
-                <button
-                  type="submit"
-                  onClick={handleToCart}
-                  className="flex items-center justify-center gap-1 border border-[#364968] hover:shadow-md bg-[#d6e4f8] p-2 w-36 hover:bg-[#eff6fd]  transition-all duration-300"
-                >
-                  <AiOutlineShoppingCart /> <span>Add to cart</span>
-                </button>
-                <button
-                  type="submit"
-                  className=" bg-[#364968] text-white p-2 w-36 justify-center hover:bg-[#394e6f] hover:shadow-lg"
-                >
-                  Buy now
-                </button>
+                <div>
+                  <button
+                    type="submit"
+                    onClick={handleToCart}
+                    className="flex items-center justify-center gap-1 border border-[#364968] hover:shadow-md bg-[#d6e4f8] p-2 w-36 hover:bg-[#eff6fd]  transition-all duration-300"
+                  >
+                    <AiOutlineShoppingCart /> <span>Add to cart</span>
+                  </button>
+                </div>
+
+                <div onClick={handleToCart}>
+                  <button
+                    onClick={() => router.push(`/cart`)}
+                    type="submit"
+                    className=" bg-[#364968] text-white p-2 w-36 justify-center hover:bg-[#394e6f] hover:shadow-lg"
+                  >
+                    Buy now
+                  </button>
+                </div>
               </div>
             </div>
 
