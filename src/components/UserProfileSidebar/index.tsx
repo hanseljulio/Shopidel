@@ -7,17 +7,9 @@ import { IAPIUserProfileResponse } from "@/interfaces/api_interface";
 
 const UserProfileSidebar = () => {
   const router = useRouter();
-  const { user, updateUser } = useUserStore();
+  const { user } = useUserStore();
 
   const [logged, setLogged] = useState<IAPIUserProfileResponse | undefined>();
-
-  const redirectMyProfile = () => {
-    router.push("/user/profile");
-  };
-
-  const redirectChangePassword = () => {
-    router.push("/user/profile/changePassword");
-  };
 
   useEffect(() => {
     setLogged(user);
@@ -49,7 +41,7 @@ const UserProfileSidebar = () => {
         <ul className="text-[14px] ml-[38px]">
           <li
             className={`py-1 hover:cursor-pointer w-[80px] hover:text-[#92bcff] transition`}
-            onClick={redirectMyProfile}
+            onClick={() => router.push("/user/profile")}
           >
             Profile
           </li>
@@ -61,7 +53,7 @@ const UserProfileSidebar = () => {
           </li>
           <li
             className={`py-1 hover:cursor-pointer w-[150px] hover:text-[#92bcff] transition`}
-            onClick={redirectChangePassword}
+            onClick={() => router.push("/user/profile/change-password")}
           >
             Change Password
           </li>
