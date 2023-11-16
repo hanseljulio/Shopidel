@@ -12,6 +12,7 @@ import {
   GetServerSidePropsContext,
   GetStaticProps,
 } from "next";
+import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
 import { FaListUl, FaStar, FaStore } from "react-icons/fa";
 import { FaLocationDot } from "react-icons/fa6";
@@ -142,6 +143,7 @@ export const getServerSideProps: GetServerSideProps = async (
 };
 
 function Index({ seller }: IProfileShopProps) {
+  const router = useRouter();
   const [showAllProducts, setShowAllProducts] = useState(false);
   const [bestSelling, setBestSelling] = useState<IBestSelling[]>([]);
   const [categoryList, setCategoryList] = useState<ICategoryProduct[]>([]);
@@ -311,6 +313,7 @@ function Index({ seller }: IProfileShopProps) {
                 (e, k) =>
                   k < 12 && (
                     <ProductCard
+                      onClick={() => router.push(`/${e.name}`)}
                       key={k}
                       image={e.picture_url}
                       price={e.price}
@@ -383,6 +386,7 @@ function Index({ seller }: IProfileShopProps) {
             <div className="w-full grid grid-cols-2 md:grid-cols-4 gap-3 md:mt-3">
               {productCategory.map((e, k) => (
                 <ProductCard
+                  onClick={() => router.push(`/${e.name}`)}
                   key={k}
                   image={e.picture_url}
                   price={e.price}
