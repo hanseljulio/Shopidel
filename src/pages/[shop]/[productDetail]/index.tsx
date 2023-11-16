@@ -44,19 +44,13 @@ export const getServerSideProps: GetServerSideProps = async (
   const { params } = context;
   const shop = params?.shop;
   const productDetail = params?.productDetail;
-  // let data: IAPIProductDetailResponse | undefined;
 
   try {
     const response = await API.get(`/products/detail/${shop}/${productDetail}`);
-    console.log("res", response.data);
-    const product = (response.data as IAPIResponse<IAPIProductDetailResponse>)
-      .data;
+    const product = response.data.data;
+
     const responseSeller = await API.get(`/sellers/${shop}/profile`);
-    const seller = (
-      responseSeller.data as IAPIResponse<IAPIProfileShopResponse>
-    ).data;
-    // const product = response.data;
-    console.log("seller", responseSeller);
+    const seller = responseSeller.data.data;
 
     return {
       props: {
@@ -66,7 +60,6 @@ export const getServerSideProps: GetServerSideProps = async (
     };
   } catch (error) {
     console.error("Error fetching product details:", error);
-    console.log("gagal");
 
     return {
       notFound: true,
@@ -79,7 +72,6 @@ const ProductDetail = ({
   seller,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   const router = useRouter();
-  console.log(product, "ppp");
 
   const [count, setCount] = useState<number>(1);
   const [isHovering, setIsHovering] = useState(false);
@@ -402,7 +394,7 @@ const ProductDetail = ({
                 </button>
               </div>
             </div>
-            <div className="order-2 md:order-3 purchaseBox border shadow-inner rounded-sm p-5 h-fit md:w-1/4 md:sticky md:top-0">
+            <div className="order-2 md:order-3 purchaseBox border shadow-inner rounded-sm p-5 h-fit md:w-1/4 pt-2 md:sticky md:top-0">
               <p className="productTitle text-md font-medium pb-3">
                 Set Amounts
               </p>
@@ -497,7 +489,7 @@ const ProductDetail = ({
 
             <div className="order-3 md:order-2 description mt-10 md:mt-0 md:w-2/4">
               <div className="spesification">
-                <p className="productTitle text-2xl font-medium pb-3">
+                <p className="productTitle text-2xl md:text-3xl font-medium pb-3">
                   {product?.name}
                 </p>
                 <div className="historyProduct flex items-center text-xs pb-3">
@@ -552,16 +544,15 @@ const ProductDetail = ({
             <div className="order-1 w-full  md:w-3/4">
               <div className="sellerShop bg-[#364968] flex flex-row gap-y-5 text-white py-3 my-10 gap-10 px-5 ">
                 <img
-                  width={90}
-                  height={0}
-                  src={"/images/defaultuser.png"}
+                  src={shopProfile?.data?.seller_picture_url}
                   alt="seller"
-                  className="imgSeller w-20 h-full place-self-center"
+                  className="imgSeller w-28 h-full place-self-center object-fill"
                 />
                 <div className="flex flex-col md:flex-row gap-y-4 md:gap-x-48">
-                  <div className="aboutSeller justify-between w-full md:w-1/2 ">
-                    <p>{shopProfile?.data?.seller_name}</p>
-
+                  <div className="aboutSeller w-full md:w-1/2">
+                    <p className=" text-base md:text-lg font-medium md:font-semibold">
+                      {shopProfile?.data?.seller_name}
+                    </p>
                     <p>
                       <button
                         onClick={() =>
@@ -569,31 +560,32 @@ const ProductDetail = ({
                         }
                         className="flex gap-1 md:gap-2 mt-3 text-sm justify-center items-center w-full border border-[#fddf97] hover:shadow-lg   p-1 md:w-36 text-[#fddf97] hover:bg-[#1c2637]  transition-all duration-300"
                       >
-                        <FaStore /> <p>Visit the store</p>
+                        <FaStore />
+                        <p className=" text-sm md:text-base">Visit the store</p>
                       </button>
                     </p>
                   </div>
 
-                  <div className="aboutSeller justify-between w-1/2 md:w-full">
-                    <p className="flex gap-5 md:gap-12">
+                  <div className="aboutSeller justify-between w-1/2 md:w-full text-sm md:text-base items-center self-center ">
+                    <p className="flex gap-5 md:gap-12 items-center justify-center">
                       Shipping
                       <span className="flex items-center ">
                         {` ${shopProfile?.data?.seller_district}`}
                       </span>
                     </p>
                     <p className="flex gap-5 md:gap-14 mt-3">
-                      Product
-                      <span>
+                      Stars <span></span>
+                      {/* <span>
                         {shopProfile?.data?.seller_products && (
                           <span>{shopProfile.data.seller_products.length}</span>
                         )}
-                      </span>
+                      </span> */}
                     </p>
                   </div>
                 </div>
               </div>
               <div className="reviews">
-                <div className="">
+                <div>
                   <p className="reviewsProduct text-lg font-semibold">
                     Product Reviews
                   </p>
@@ -684,11 +676,7 @@ const ProductDetail = ({
                   (e, i) =>
                     i < 6 && (
                       <ProductCard
-                        onClick={() =>
-                          router.replace(
-                            `${encodeURIComponent(e.product_name)}`
-                          )
-                        }
+                        onClick={() => router.push(`/${e.product_name}`)}
                         key={i}
                         image={e.product_picture_url}
                         title={e.product_name}
@@ -700,7 +688,9 @@ const ProductDetail = ({
                 <Button
                   text="View More"
                   styling="bg-[#f57b29] rounded-md p-3 shadow-lg text-white hover:bg-[#fc9b5b] col-span-2 md:col-span-1"
-                  onClick={() => router.push(`/`)}
+                  onClick={() =>
+                    router.push(`/${shopProfile?.data?.seller_name}`)
+                  }
                 />
               </div>
             </div>

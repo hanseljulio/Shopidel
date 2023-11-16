@@ -66,6 +66,7 @@ export interface IAPIProfileShopResponse {
     }
   ];
 }
+
 interface IProfileShopProps {
   seller: IAPIProfileShopResponse;
 }
@@ -75,8 +76,6 @@ export const getServerSideProps: GetServerSideProps = async (
 ) => {
   const { params } = context;
   const shop = params?.shop;
-  // let data: IAPIProductDetailResponse | undefined;
-  console.log(shop, "par");
 
   try {
     const response = await API.get(`/sellers/${shop}/profile`);
@@ -84,8 +83,6 @@ export const getServerSideProps: GetServerSideProps = async (
     const seller = (response.data as IAPIResponse<IAPIProfileShopResponse>)
       .data;
     console.log("seller", seller);
-
-    // const product = response.data;
 
     return {
       props: {
@@ -312,14 +309,14 @@ function Index({ seller }: IProfileShopProps) {
         </div>
         <div className="flex flex-col md:flex-row mt-10 w-full gap-x-5">
           <div className="w-full md:w-1/4 flex flex-row md:flex-col gap-5  mt-5 pt-0 md:pt-6">
-            <div>
+            <div className="items-start">
               <p className="flex items-center gap-1 font-semibold border-b border-b-slate-200 pb-0 md:pb-8">
                 <FaListUl className="hidden md:flex" size={15} />
                 Etalase
               </p>
             </div>
-            <div>
-              <ul className="gap-y-5 flex md:flex-col gap-x-3">
+            <div className="w-full">
+              <ul className="gap-y-5 grid grid-cols-4 md:grid-cols-1 w-full text-xs md:text-base justify-between">
                 {categoryList.map((e, i) => (
                   <li
                     key={i}
@@ -353,7 +350,7 @@ function Index({ seller }: IProfileShopProps) {
             <div className="w-full grid grid-cols-2 md:grid-cols-4 gap-3 md:mt-3">
               {productCategory.map((e, k) => (
                 <ProductCard
-                  onClick={() => router.push(`/${encodeURIComponent(e.name)}`)}
+                  onClick={() => router.push(``)}
                   key={k}
                   image={e.picture_url}
                   price={e.price}

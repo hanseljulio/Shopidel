@@ -7,6 +7,9 @@ export interface IProduct {
   picture_url: string;
   rating: number;
   shop_name: string;
+  shop_name_slug: string
+  product_name_slug: string
+  slug: string
   category_name: string;
   category_id: number;
 }
