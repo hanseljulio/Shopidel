@@ -8,7 +8,33 @@ import Modal from "@/components/Modal";
 
 interface IIndividualOrderProps {
   setCancelTransaction: () => void;
+  setOrderDetail: () => void;
 }
+
+const OrderDetailModal = () => {
+  return (
+    <div className="bg-white p-5 rounded-md md:w-[1000px] md:h-[600px] h-[80vh] w-[90vw] overflow-y-auto">
+      <div className="py-3 border-b-2">
+        <h1 className="text-[20px] font-bold">Order Details</h1>
+      </div>
+      <div className="pt-4">
+        <h1>Status: ON PROCESS</h1>
+        <h1>Order Number: {Math.floor(Math.random() * 10000000000)}</h1>
+      </div>
+      <div className="pt-4">
+        <h1 className="font-bold">Delivery Service</h1>
+        <h1>Courier: JNE</h1>
+        <h1>Estimated Time: 2-3 days</h1>
+      </div>
+      <div className="pt-4">
+        <h1 className="font-bold">Payment Information</h1>
+        <h1>Grand Total: {currencyConverter(300000)}</h1>
+        <h1>Order total: {currencyConverter(200000)}</h1>
+        <h1>Shipping total: {currencyConverter(10000)}</h1>
+      </div>
+    </div>
+  );
+};
 
 const CancelOrderModal = () => {
   const router = useRouter();
@@ -48,6 +74,8 @@ const CancelOrderModal = () => {
 // Process order here - receive or cancel. If you cancel you need to give a note
 
 const IndividualOrder = (props: IIndividualOrderProps) => {
+  const [receiveTest, setReceieveTest] = useState<boolean>(false);
+
   return (
     <div className="p-5 rounded-md md:w-[90%] border-2 border-black w-[80%]">
       <div className="pb-3 flex justify-between">
@@ -66,21 +94,39 @@ const IndividualOrder = (props: IIndividualOrderProps) => {
           </div>
         </div>
         <div className="md:text-right flex flex-col gap-3 text-[18px] text-center">
-          <h1 className="text-blue-600 hover:cursor-pointer hover:underline">
+          <h1
+            onClick={props.setOrderDetail}
+            className="text-blue-600 hover:cursor-pointer hover:underline"
+          >
             View Order Detail
           </h1>
-          <div className="flex items-center gap-4">
-            <h1 className="text-orange-400 hover:cursor-pointer hover:underline">
-              PROCESS ORDER
-            </h1>
-            <h1>|</h1>
-            <h1
-              onClick={props.setCancelTransaction}
-              className="text-red-600 hover:cursor-pointer hover:underline"
-            >
-              CANCEL ORDER
-            </h1>
-          </div>
+          {receiveTest ? (
+            <div className="flex items-center gap-4">
+              <div className={`flex gap-4`}>
+                <h1 className="text-blue-600 hover:cursor-pointer hover:underline">
+                  Print Shipping Label
+                </h1>
+                <h1>|</h1>
+              </div>
+              <h1>Status: DELIVERED</h1>
+            </div>
+          ) : (
+            <div className="flex items-center gap-4">
+              <h1
+                onClick={() => setReceieveTest(true)}
+                className="text-orange-400 hover:cursor-pointer hover:underline"
+              >
+                PROCESS ORDER
+              </h1>
+              <h1>|</h1>
+              <h1
+                onClick={props.setCancelTransaction}
+                className="text-red-600 hover:cursor-pointer hover:underline"
+              >
+                CANCEL ORDER
+              </h1>
+            </div>
+          )}
         </div>
       </div>
     </div>
@@ -91,9 +137,17 @@ const SellerOrderListPage = () => {
   const [sortBy, setSortBy] = useState<string>("all");
   const orderStatus = ["All", "Needs Processing", "Canceled"];
   const [showCancelModal, setShowCancelModal] = useState<boolean>(false);
+  const [showDetailModal, setShowDetailModal] = useState<boolean>(false);
 
   return (
     <>
+      {showDetailModal && (
+        <Modal
+          content={<OrderDetailModal />}
+          onClose={() => setShowDetailModal(false)}
+        />
+      )}
+
       {showCancelModal && (
         <Modal
           content={<CancelOrderModal />}
@@ -123,6 +177,7 @@ const SellerOrderListPage = () => {
           <div className="pt-6 flex flex-col items-center gap-8">
             <IndividualOrder
               setCancelTransaction={() => setShowCancelModal(true)}
+              setOrderDetail={() => setShowDetailModal(true)}
             />
           </div>
         </div>
