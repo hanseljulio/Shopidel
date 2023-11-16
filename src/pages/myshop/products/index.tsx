@@ -14,7 +14,7 @@ const SellerAdminProducts = () => {
 
           <Button
             text="Add new product"
-            onClick={() => router.push("/myshop/products/addProduct")}
+            onClick={() => router.push("/myshop/products/add-product")}
             styling="bg-[#fddf97] p-3 rounded-[8px] w-[200px] my-4"
           />
         </div>
