@@ -29,7 +29,6 @@ interface IAddProductForm {
 }
 
 interface IVariant {
-  id: number;
   variant1: {
     name: string;
     value: string;
@@ -69,6 +68,7 @@ const SellerAddProductPage = () => {
 
   const watchCategory = watch("category");
   const watchVariantGroup = watch("variantGroup");
+  const watchVariantTable = watch("variantTable");
 
   const getListCategory = async () => {
     try {
@@ -220,21 +220,23 @@ const SellerAddProductPage = () => {
                   <h1 className="text-xl">Variants</h1>
                   <p className="text-xs">Add your product variant (optional)</p>
                 </div>
-                <Button
-                  text="Add Variant"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    setValue("variantGroup", [
-                      ...watchVariantGroup,
-                      {
-                        name: "",
-                        type: [],
-                      },
-                    ]);
-                    setValue("variantTable", []);
-                  }}
-                  styling="bg-[#364968] rounded-md w-fit p-2 text-white "
-                />
+                {watchVariantGroup.length < 2 && (
+                  <Button
+                    text="Add Variant"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      setValue("variantGroup", [
+                        ...watchVariantGroup,
+                        {
+                          name: "",
+                          type: [],
+                        },
+                      ]);
+                      setValue("variantTable", []);
+                    }}
+                    styling="bg-[#364968] rounded-md w-fit p-2 text-white "
+                  />
+                )}
               </div>
               <div className="mt-3 flex flex-col gap-y-5">
                 {watchVariantGroup &&
@@ -255,8 +257,11 @@ const SellerAddProductPage = () => {
                 <div className="mt-10">
                   <div>
                     <p className="text-xl">Variant Table</p>
+                    <p className="text-xs">
+                      Configure each product variant image, price, and stock
+                    </p>
                   </div>
-                  <div className="">
+                  <div className="mt-2">
                     <table className="w-full">
                       <thead>
                         <tr>
@@ -279,6 +284,7 @@ const SellerAddProductPage = () => {
                             if (getValues("variantGroup").length === 1) {
                               return (
                                 <ProductVariant
+                                  watchVariantTable={watchVariantTable}
                                   key={i}
                                   variant1type={v0}
                                   getValues={getValues}
@@ -292,6 +298,7 @@ const SellerAddProductPage = () => {
                               ?.type.map((v1, i) => {
                                 return (
                                   <ProductVariant
+                                    watchVariantTable={watchVariantTable}
                                     key={i}
                                     getValues={getValues}
                                     setValue={setValue}
@@ -305,6 +312,13 @@ const SellerAddProductPage = () => {
                       </tbody>
                     </table>
                   </div>
+                  <Button
+                    text="Test"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      console.log(watchVariantTable);
+                    }}
+                  />
                 </div>
               )}
             </div>
@@ -454,6 +468,7 @@ interface IProductVariantProps {
   variant1type: string;
   variant2type?: string;
   watchVariantGroup: IVariantGroup[];
+  watchVariantTable: IVariant[];
   setValue: UseFormSetValue<IAddProductForm>;
   getValues: UseFormGetValues<IAddProductForm>;
 }
@@ -464,22 +479,23 @@ const ProductVariant = ({
   watchVariantGroup,
   setValue,
   getValues,
+  watchVariantTable,
 }: IProductVariantProps) => {
   const imageRef = useRef<HTMLInputElement>(null);
   const id = (Math.random() + 1).toString(36).substring(5);
+  const [image, setImage] = useState<File>();
 
   useEffect(() => {
     if (variant2type !== undefined) {
       setValue("variantTable", [
         ...getValues("variantTable"),
         {
-          id: 0,
           variant1: {
             name: watchVariantGroup.at(0)?.name,
             value: variant1type,
           },
           variant2: {
-            name: watchVariantGroup.at(0)?.name,
+            name: watchVariantGroup.at(1)?.name,
             value: variant2type,
           },
           price: "",
@@ -491,7 +507,6 @@ const ProductVariant = ({
       setValue("variantTable", [
         ...getValues("variantTable"),
         {
-          id: 0,
           variant1: {
             name: watchVariantGroup.at(0)?.name,
             value: variant1type,
@@ -511,18 +526,21 @@ const ProductVariant = ({
           ref={imageRef}
           type="file"
           onChange={(e) => {
-            console.log(e.target.files![0]);
+            if (e.target.files !== undefined) {
+              setImage(e.target.files![0]);
+            }
           }}
           name=""
           id=""
           hidden
         />
-        <div
+        <img
+          src={image && URL.createObjectURL(image)}
           onClick={() => {
             imageRef.current?.click();
           }}
           className="w-16 h-16 bg-red-200"
-        ></div>
+        />
       </td>
       <td>{variant1type}</td>
       {variant2type && <td>{variant2type}</td>}
@@ -530,6 +548,19 @@ const ProductVariant = ({
         <input
           type="text"
           name="price"
+          onChange={(e) => {
+            watchVariantTable.find((data) => {
+              if (variant2type !== undefined) {
+                return (
+                  data.variant1.value === variant1type &&
+                  data.variant2?.value === variant2type
+                );
+              }
+              return data.variant1.value === variant1type;
+            })!.price = e.target.value;
+
+            setValue("variantTable", [...watchVariantTable]);
+          }}
           onKeyDown={(e) => {
             if (e.key === "Enter") {
               e.preventDefault();
@@ -543,6 +574,19 @@ const ProductVariant = ({
         <input
           type="text"
           name="price"
+          onChange={(e) => {
+            watchVariantTable.find((data) => {
+              if (variant2type !== undefined) {
+                return (
+                  data.variant1.value === variant1type &&
+                  data.variant2?.value === variant2type
+                );
+              }
+              return data.variant1.value === variant1type;
+            })!.stock = parseInt(e.target.value);
+
+            setValue("variantTable", [...watchVariantTable]);
+          }}
           onKeyDown={(e) => {
             if (e.key === "Enter") {
               e.preventDefault();
