@@ -376,7 +376,6 @@ const ProductVariantGroup = ({
             onKeyDown={(e) => {
               if (e.key === "Enter") {
                 e.preventDefault();
-                console.log("enter");
               }
             }}
             id={`variantGroup.${i}.name`}
@@ -399,11 +398,20 @@ const ProductVariantGroup = ({
               onKeyDown={(e) => {
                 if (e.key === "Enter") {
                   e.preventDefault();
-                  setValue(`variantGroup.${i}.type`, [
-                    ...getValues(`variantGroup.${i}.type`),
-                    variantType,
-                  ]);
-                  setVariantType("");
+                  if (
+                    watchVariantGroup
+                      .at(i)
+                      ?.type.findIndex(
+                        (data) =>
+                          data.toLowerCase() === variantType.toLowerCase()
+                      ) === -1
+                  ) {
+                    setValue(`variantGroup.${i}.type`, [
+                      ...getValues(`variantGroup.${i}.type`),
+                      variantType,
+                    ]);
+                    setVariantType("");
+                  }
                 }
               }}
               className="rounded-md w-full"
@@ -411,17 +419,38 @@ const ProductVariantGroup = ({
             {variantType.length !== 0 && (
               <div
                 onClick={() => {
-                  setValue(`variantGroup.${i}.type`, [
-                    ...getValues(`variantGroup.${i}.type`),
-                    variantType,
-                  ]);
-                  setVariantType("");
+                  if (
+                    watchVariantGroup
+                      .at(i)
+                      ?.type.findIndex(
+                        (data) =>
+                          data.toLowerCase() === variantType.toLowerCase()
+                      ) === -1
+                  ) {
+                    setValue(`variantGroup.${i}.type`, [
+                      ...getValues(`variantGroup.${i}.type`),
+                      variantType,
+                    ]);
+                    setVariantType("");
+                  }
                 }}
                 className="absolute w-full border border-slate-500 rounded-b-md bg-white shadow-md p-3 transition hover:bg-slate-100 hover:cursor-pointer"
               >
                 <div className="flex items-center gap-x-3">
-                  <IoAddCircleOutline size={20} />
-                  <p>Add &quot;{variantType}&quot;</p>
+                  {watchVariantGroup
+                    .at(i)
+                    ?.type.findIndex(
+                      (data) => data.toLowerCase() === variantType.toLowerCase()
+                    ) === -1 ? (
+                    <>
+                      <IoAddCircleOutline size={20} />
+                      <p>Add &quot;{variantType}&quot;</p>
+                    </>
+                  ) : (
+                    <>
+                      <p>No options</p>
+                    </>
+                  )}
                 </div>
               </div>
             )}
