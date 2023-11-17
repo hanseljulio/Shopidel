@@ -12,6 +12,7 @@ import {
   IProductSuggestion,
   IReviewProduct,
 } from "@/interfaces/product_interface";
+import { IAPIProfileShopResponse } from "@/interfaces/seller_interface";
 import { API } from "@/network";
 import { currencyConverter } from "@/utils/utils";
 import axios from "axios";
@@ -27,24 +28,10 @@ import React, { useEffect, useState } from "react";
 import { SubmitHandler } from "react-hook-form";
 import { AiOutlineShoppingCart } from "react-icons/ai";
 import { BsStarFill } from "react-icons/bs";
-import {
-  FaHeart,
-  FaRegHeart,
-  FaShippingFast,
-  FaStar,
-  FaStore,
-} from "react-icons/fa";
-import {
-  FaLocationDot,
-  FaLocationPinLock,
-  FaMapLocationDot,
-  FaTruckFast,
-} from "react-icons/fa6";
-import { GrLocationPin } from "react-icons/gr";
+import { FaHeart, FaRegHeart, FaStar, FaStore } from "react-icons/fa";
+import { FaLocationDot, FaTruckFast } from "react-icons/fa6";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { IAPIProfileShopResponse } from "..";
-import { log } from "console";
 
 export interface IAPIProductDetailResponseWithSeller
   extends IAPIProductDetailResponse {
@@ -57,14 +44,17 @@ export const getServerSideProps: GetServerSideProps = async (
   const { params } = context;
   const shop = params?.shop;
   const productDetail = params?.productDetail;
+  console.log("shop", shop);
+  console.log("prodddu", productDetail);
 
   try {
     const response = await API.get(`/products/detail/${shop}/${productDetail}`);
     const product = response.data.data;
+    console.log("pro", product);
 
     const responseSeller = await API.get(`/sellers/${shop}/profile`);
     const seller = responseSeller.data.data;
-
+    console.log("sell", seller);
     return {
       props: {
         product,

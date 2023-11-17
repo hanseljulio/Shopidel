@@ -4,76 +4,20 @@ import Navbar from "@/components/Navbar";
 import ProductCard from "@/components/ProductCard";
 import { IAPIResponse } from "@/interfaces/api_interface";
 import { IProduct } from "@/interfaces/product_interface";
-import { API } from "@/network";
-import { checkAuthSSR, currencyConverter } from "@/utils/utils";
-import axios from "axios";
 import {
-  GetServerSideProps,
-  GetServerSidePropsContext,
-  GetStaticProps,
-} from "next";
+  IAPIProfileShopResponse,
+  IBestSelling,
+  IEtalase,
+  IProfileShopProps,
+} from "@/interfaces/seller_interface";
+import { API } from "@/network";
+import axios from "axios";
+import { GetServerSideProps, GetServerSidePropsContext } from "next";
 import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
 import { FaListUl, FaStar, FaStore } from "react-icons/fa";
 import { FaLocationDot } from "react-icons/fa6";
 import { toast } from "react-toastify";
-
-interface IBestSelling {
-  name: string;
-  price: string;
-  picture_url: string;
-  stars: string;
-  total_sold: string;
-  category: string;
-  product_name_slug: string;
-  shop_name_slug: string;
-}
-
-export interface IEtalase {
-  showcase_id: number;
-  showcase_name: string;
-}
-
-export interface IAPIProfileShopResponse {
-  seller_id: number;
-  seller_name: string;
-  seller_picture_url: string;
-  seller_district: string;
-  seller_operating_hour: {
-    start: string;
-    end: string;
-  };
-  seller_stars: string;
-  shop_name_slug: string;
-  seller_products: [
-    {
-      name: string;
-      price: string;
-      picture_url: string;
-      stars: string;
-      total_sold: number;
-      created_at: string;
-      category_level_1: string;
-      category_level_2: string;
-      category_level_3: string;
-    },
-    {
-      name: string;
-      price: string;
-      picture_url: string;
-      stars: string;
-      total_sold: number;
-      created_at: string;
-      category_level_1: string;
-      category_level_2: string;
-      category_level_3: string;
-    }
-  ];
-}
-
-interface IProfileShopProps {
-  seller: IAPIProfileShopResponse;
-}
 
 export const getServerSideProps: GetServerSideProps = async (
   context: GetServerSidePropsContext
@@ -83,10 +27,8 @@ export const getServerSideProps: GetServerSideProps = async (
 
   try {
     const response = await API.get(`/sellers/${shop}/profile`);
-    console.log("res", response.data);
     const seller = (response.data as IAPIResponse<IAPIProfileShopResponse>)
       .data;
-    console.log("seller", seller);
 
     return {
       props: {
@@ -95,7 +37,6 @@ export const getServerSideProps: GetServerSideProps = async (
     };
   } catch (error) {
     console.error("Error fetching product details:", error);
-    console.log(error);
 
     return {
       notFound: true,
@@ -113,23 +54,17 @@ function Index({ seller }: IProfileShopProps) {
     categoryList.length > 0 ? categoryList[0].showcase_id : null
   );
 
-  console.log("sel", seller);
-
   const getBestSelling = async () => {
-    console.log(seller);
-
     try {
       const res = await API.get(
         `/sellers/${seller.shop_name_slug}/best-selling`
       );
-      console.log("test");
-      console.log(res);
       const data = res.data as IAPIResponse<IBestSelling[]>;
-      console.log("test");
-      console.log(data);
+      console.log("best", data);
+      console.log(`${seller.shop_name_slug} sl`);
+
       setBestSelling(data.data!);
     } catch (e) {
-      // console.log(e.message);
       if (axios.isAxiosError(e)) {
         toast.error(e.message, {
           autoClose: 1500,
@@ -161,29 +96,24 @@ function Index({ seller }: IProfileShopProps) {
   const getProductBasedOnCategory = async (id: number | null) => {
     try {
       let res;
-      let showcaseId;
-      console.log("hahjashjshdas");
+      console.log("iddddd", id);
 
       if (id !== null) {
         res = await API.get(
           `/sellers/${seller.shop_name_slug}/showcases/${id}/products`
         );
-        showcaseId = id;
+        console.log("yes");
       } else {
-        showcaseId =
-          categoryList.length > 0 ? categoryList[0].showcase_id : null;
-        res = await API.get(
-          `/sellers/${seller.shop_name_slug}/showcases/${showcaseId}/products`
-        );
+        res = await API.get(`/sellers/${seller.shop_name_slug}/products`);
+        console.log("buk");
       }
 
       const data = res.data as IAPIResponse<IProduct[]>;
-      console.log(data, "de");
+      console.log("eta", data);
 
       if (data.data) {
         setProductCategory(data.data);
-        setActiveCategory(showcaseId);
-        console.log(data, "ini dia");
+        setActiveCategory(id);
       } else {
         console.error("Data is undefined or null");
       }
@@ -225,9 +155,11 @@ function Index({ seller }: IProfileShopProps) {
 
   useEffect(() => {
     getBestSelling();
-    getEtalase();
-    getProductBasedOnCategory(null);
   }, []);
+  useEffect(() => {
+    getEtalase();
+    getProductBasedOnCategory(activeCategory);
+  }, [activeCategory]);
 
   return (
     <div>
@@ -241,7 +173,7 @@ function Index({ seller }: IProfileShopProps) {
           />
           <div className="flex flex-col md:flex-row gap-y-4 gap-x-48 w-full">
             <div className="aboutSeller  md:w-full flex flex-col gap-y-2 md:gap-y-3">
-              <p className="text-xl md:text-3xl font-semibold">
+              <p className="text-xl md:text-2xl font-semibold">
                 {seller?.seller_name}
               </p>
               <p className="text-sm md:text-base flex items-center text-neutral-600">
@@ -318,7 +250,15 @@ function Index({ seller }: IProfileShopProps) {
               </p>
             </div>
             <div className="w-full">
-              <ul className="gap-y-5 grid grid-cols-4 md:grid-cols-1 w-full text-xs md:text-base justify-between">
+              <ul className="etalase gap-y-5 grid grid-cols-4 md:grid-cols-1 w-full text-xs md:text-base justify-between">
+                <li
+                  className={`cursor-pointer ${
+                    !activeCategory ? "text-[#e09664]" : ""
+                  }`}
+                  onClick={() => getProductBasedOnCategory(null)}
+                >
+                  All
+                </li>
                 {categoryList.map((e, i) => (
                   <li
                     key={i}
@@ -327,7 +267,7 @@ function Index({ seller }: IProfileShopProps) {
                     }`}
                     onClick={() => getProductBasedOnCategory(e.showcase_id)}
                   >
-                    {e.showcase_name}
+                    {e.showcase_name}, {e.showcase_id}
                   </li>
                 ))}
               </ul>
@@ -351,19 +291,21 @@ function Index({ seller }: IProfileShopProps) {
             </div>
             <div className="w-full grid grid-cols-2 md:grid-cols-4 gap-3 md:mt-3">
               {productCategory.map((e, k) => (
-                <ProductCard
-                  onClick={() =>
-                    router.push(
-                      `/${seller.shop_name_slug}/${e.product_name_slug}`
-                    )
-                  }
-                  key={k}
-                  image={e.picture_url}
-                  price={e.price}
-                  showStar={false}
-                  title={e.name}
-                  order={`${e.total_sold} sold`}
-                />
+                <>
+                  <ProductCard
+                    onClick={() =>
+                      router.push(
+                        `/${seller.shop_name_slug}/${e.product_name_slug}`
+                      )
+                    }
+                    key={k}
+                    image={e.picture_url}
+                    price={e.price}
+                    showStar={false}
+                    title={e.name}
+                    order={`${e.total_sold} sold`}
+                  />
+                </>
               ))}
             </div>
           </div>
