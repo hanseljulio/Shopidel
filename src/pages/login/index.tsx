@@ -142,11 +142,12 @@ const Login = () => {
               <Button
                 text="Login"
                 styling="p-2 bg-[#364968] w-full rounded-md text-white"
-                onClick={() => console.log("login")}
               />
-              <p className="text-xs text-end hover:cursor-pointer mt-1 ">
-                Forget password
-              </p>
+              <div onClick={() => router.push("/forget-password")}>
+                <p className="text-xs text-end hover:cursor-pointer mt-1 ">
+                  Forget password
+                </p>
+              </div>
             </div>
           </form>
           <div className="flex flex-col justify-center items-center px-5">

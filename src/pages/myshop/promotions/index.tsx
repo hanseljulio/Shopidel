@@ -161,17 +161,32 @@ const SellerAdminHome = () => {
   }, [currentPage]);
 
   return (
-    <SellerAdminLayout>
+    <SellerAdminLayout currentPage="Promotions">
       <div className="w-full mx-auto mt-10">
-        <div className="flex items-center justify-between px-[50px]">
+        <div className="flex items-center md:flex-row justify-between px-[50px] md:gap-0 flex-col gap-6">
           <h1 className="text-[30px]">Promotions</h1>
-          <PromotionCategory
-            currentPage={currentPage}
-            moveCategory={moveCategory}
-          />
+          <div className="md:block md:visible hidden invisible">
+            <PromotionCategory
+              currentPage={currentPage}
+              moveCategory={moveCategory}
+            />
+          </div>
+          <div className="flex visible md:hidden md:invisible items-center gap-3">
+            <p className="font-bold">Sort by: </p>
+            <select
+              onChange={(e) => setCurrentPage(e.target.value)}
+              className={`p-4 w-[150px] h-14 rounded`}
+              name="category-dropdown"
+            >
+              <option value={"all"}>{"All"}</option>
+              <option value={"ongoing"}>{"Ongoing"}</option>
+              <option value={"upcoming"}>{"Upcoming"}</option>
+              <option value={"ended"}>{"Ended"}</option>
+            </select>
+          </div>
           <Button
             text="Create new promotion"
-            styling="bg-[#fddf97] p-3 rounded-[8px] w-[200px] mobile:w-[100px] my-4"
+            styling="bg-[#fddf97] p-3 rounded-[8px] w-[200px] my-4"
           />
         </div>
         <div className="text-center">

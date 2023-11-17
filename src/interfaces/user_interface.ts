@@ -53,6 +53,7 @@ export interface ITransactionHistoryData {
 
 export interface ITransactionHistoryProducts {
   product_id: number;
+  product_order_detail_id: string;
   product_name: string;
   quantity: number;
   individual_price: string;
@@ -64,6 +65,7 @@ export interface ITransactionHistoryReview {
   review_id: number;
   review_feedback: string;
   review_rating: number;
+  review_image_url: string;
   created_at: string;
 }
 

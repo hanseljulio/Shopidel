@@ -101,7 +101,6 @@ const ProductDetail = ({
   const [isFavorite, setIsFavorite] = useState(false);
   const [imagesProduct, setImagesProduct] = useState([]);
   const [reviews, setReviews] = useState<IAPIResponse<IReviewProduct[]>>();
-  const [paginationNumber, setPaginationNumber] = useState<number[]>([]);
   const [page, setPage] = useState<number>(1);
   const [suggestion, setSuggestion] =
     useState<IAPIResponse<IProductSuggestion[]>>();
@@ -153,6 +152,8 @@ const ProductDetail = ({
       setSuggestion(data);
     } catch (e) {
       if (axios.isAxiosError(e)) {
+        console.log(e);
+
         return toast.error("Error fetching product suggestion", {
           toastId: "errorSuggestion",
           autoClose: 1500,
@@ -517,12 +518,17 @@ const ProductDetail = ({
                     .split("\n\n")
                     .map((paragraph, index) => (
                       <span key={index} className="line-break">
-                        {paragraph.split("\n").map((line, lineIndex) => (
-                          <React.Fragment key={lineIndex}>
-                            {line}
-                            <br />
-                          </React.Fragment>
-                        ))}
+                        {paragraph.split("\\n").map(
+                          (
+                            line,
+                            lineIndex // Change '\n' to '\\n'
+                          ) => (
+                            <React.Fragment key={lineIndex}>
+                              {line}
+                              <br />
+                            </React.Fragment>
+                          )
+                        )}
                       </span>
                     ))}
                 </p>
@@ -616,6 +622,23 @@ const ProductDetail = ({
                           <span> variation: {review.variant}</span>
                         </p>
                         <p className="theReview">{review.comment}</p>
+                        <div className="grid grid-cols-4 gap-x-2 mt-3">
+                          {imagesProduct.map((url, index) => {
+                            return (
+                              <img
+                                key={index}
+                                className="cursor-pointer w-28 h-full rounded-sm"
+                                width={50}
+                                height={50}
+                                src={url}
+                                alt="image review"
+                                onMouseOver={() => handleMouseOver(url)}
+                                onMouseOut={handleMouseOut}
+                                onClick={handleZoomImage}
+                              />
+                            );
+                          })}
+                        </div>
                       </div>
                     </div>
                   ))}

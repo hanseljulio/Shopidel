@@ -16,7 +16,9 @@ const Navbar = () => {
   const [logged, setLogged] = useState<IAPIUserProfileResponse | undefined>(
     undefined
   );
-  const [query, setQuery] = useState<string>();
+  const [query, setQuery] = useState<string>(
+    router.query.s !== undefined ? router.query.s.toString() : ""
+  );
 
   const logoutHandler = () => {
     deleteCookie("accessToken");
@@ -29,7 +31,10 @@ const Navbar = () => {
     router.push({
       pathname: "/search",
       query: {
-        q: query,
+        s: query,
+        sortBy: "price",
+        sort: "desc",
+        page: 1,
       },
     });
   };
@@ -37,6 +42,10 @@ const Navbar = () => {
   useEffect(() => {
     setLogged(user!);
   }, [user]);
+
+  useEffect(() => {
+    setQuery(router.query.s !== undefined ? router.query.s.toString() : "");
+  }, [router.query]);
 
   return (
     <nav className="w-full bg-[#29374e] shadow px-4 md:px-0">
@@ -110,6 +119,7 @@ const Navbar = () => {
                 className="items-center justify-center w-full md:w-[20rem] lg:w-[50rem] px-3 py-1"
                 type="text"
                 onChange={(e) => setQuery(e.target.value)}
+                value={query}
                 name="search"
                 id="search"
                 placeholder="Search"

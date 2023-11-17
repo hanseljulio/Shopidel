@@ -28,6 +28,7 @@ export interface IAPIUserProfileResponse {
   profile_picture: string;
   wallet_number: string;
   balance: string;
+  is_seller: boolean;
   forget_password_expired_at: string;
 }
 
@@ -43,7 +44,7 @@ export interface IAPIProductDetailResponse {
   stars: string;
   sold: number;
   available: number;
-  images: [];
+  images: null;
   variant_options: [
     {
       variant_option_name: string;
@@ -64,5 +65,5 @@ export interface IAPIProductDetailResponse {
       price: string;
     }
   ];
-  is_favorite: boolean
+  is_favorite: boolean;
 }
