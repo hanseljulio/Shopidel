@@ -144,6 +144,35 @@ const CancelOrderModal = (props: ICancelOrderModal) => {
 
 const IndividualOrder = (props: IIndividualOrderProps) => {
   const [receiveTest, setReceieveTest] = useState<boolean>(false);
+  const [selectedOrderId, setSelectedOrderId] = useState<number>(5);
+
+  const processOrder = async () => {
+    try {
+      toast.promise(
+        API.put(`sellers/orders/${selectedOrderId}/processed`),
+        {
+          pending: "Processing order",
+          success: "Order has been processed",
+          error: {
+            render({ data }) {
+              if (axios.isAxiosError(data)) {
+                return `${(data.response?.data as IAPIResponse).message}`;
+              }
+            },
+          },
+        },
+        {
+          autoClose: 1500,
+        }
+      );
+    } catch (e) {
+      if (axios.isAxiosError(e)) {
+        toast.error(e.message, {
+          autoClose: 1500,
+        });
+      }
+    }
+  };
 
   return (
     <div className="p-5 rounded-md md:w-[90%] border-2 border-black w-[80%]">
@@ -182,7 +211,10 @@ const IndividualOrder = (props: IIndividualOrderProps) => {
           ) : (
             <div className="flex items-center gap-4">
               <h1
-                onClick={() => setReceieveTest(true)}
+                onClick={() => {
+                  setReceieveTest(true);
+                  processOrder();
+                }}
                 className="text-orange-400 hover:cursor-pointer hover:underline"
               >
                 PROCESS ORDER
