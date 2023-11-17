@@ -94,6 +94,7 @@ function Index() {
                     showStar={false}
                     order={product.total_sold}
                     title={product.name}
+                    place={product.district}
                   />
                 </div>
               );
