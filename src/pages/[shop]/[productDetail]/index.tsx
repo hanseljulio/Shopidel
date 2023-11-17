@@ -35,7 +35,8 @@ import {
   FaStar,
   FaStore,
 } from "react-icons/fa";
-import { FaLocationDot, FaTruckFast } from "react-icons/fa6";
+import { FaLocationDot } from "react-icons/fa6";
+import { VscEmptyWindow } from "react-icons/vsc";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -96,13 +97,17 @@ const ProductDetail = ({
   const [imagesReview, setImagesReview] = useState([]);
   const [reviews, setReviews] = useState<IAPIResponse<IReviewProduct[]>>();
   const [page, setPage] = useState<number>(1);
+  const [showAllDescription, setShowAllDescription] = useState(false);
+  const [descriptionLimit, setDescriptionLimit] = useState(1000);
+
   const [suggestion, setSuggestion] =
     useState<IAPIResponse<IProductSuggestion[]>>();
   const [shopProfile, setShopProfile] = useState<
     IAPIResponse<IAPIProfileShopResponse> | undefined
   >();
 
-  console.log(seller, "param");
+  // const showAllDescription = showAllDescription ? product : product.slice(0, 6);
+
   useEffect(() => {
     if (imagesProduct?.length > 0) {
       setVariation(imagesProduct[0]);
@@ -486,22 +491,22 @@ const ProductDetail = ({
                   {currencyConverter(subtotal)}
                 </p>
               </div>
-              <div className="btn flex gap-5 mt-10">
-                <div>
+              <div className="btn flex gap-x-2 justify-between mt-10">
+                <div className="w-full">
                   <button
                     type="submit"
                     onClick={handleToCart}
-                    className="flex items-center justify-center gap-1 border border-[#364968] hover:shadow-md bg-[#d6e4f8] p-2 w-36 hover:bg-[#eff6fd]  transition-all duration-300"
+                    className="flex items-center justify-center gap-1 h-10 border border-[#364968] hover:shadow-md bg-[#d6e4f8] p-2 w-full md:w-32 hover:bg-[#eff6fd]  transition-all duration-300"
                   >
                     <AiOutlineShoppingCart /> <span>Add to cart</span>
                   </button>
                 </div>
 
-                <div onClick={handleToCart}>
+                <div onClick={handleToCart} className="w-full">
                   <button
                     onClick={() => router.push(`/cart`)}
                     type="submit"
-                    className=" bg-[#364968] text-white p-2 w-36 justify-center hover:bg-[#394e6f] hover:shadow-lg"
+                    className=" bg-[#364968] text-white p-2 w-full h-10 md:w-32 justify-center hover:bg-[#394e6f] hover:shadow-lg"
                   >
                     Buy now
                   </button>
@@ -544,7 +549,7 @@ const ProductDetail = ({
                           ))}
                       </span>
                     ))}
-                  {product?.description
+                  {/* {product?.description
                     ?.split("\n\n")
                     .map((paragraph: any, index: number) => (
                       <span key={index} className="line-break">
@@ -557,18 +562,18 @@ const ProductDetail = ({
                             </React.Fragment>
                           ))}
                       </span>
-                    ))}
+                    ))} */}
                 </p>
               </div>
             </div>
           </div>
-          <div className="seller flex-col md:flex-row justify-between md:flex gap-10 py-5 px-5 md:px-0">
-            <div className="order-1 w-full  md:w-3/4">
-              <div className="sellerShop bg-[#364968] flex flex-col md:flex-row gap-y-5 text-white py-3 my-10 gap-10 px-5 ">
+          <div className="seller flex-col md:flex-row justify-between md:flex gap-10 py-5 px-5 md:px-0 ">
+            <div className="order-1 w-full md:w-3/4">
+              <div className="sellerShop rounded-md bg-[#364968] flex flex-col md:flex-row gap-y-5 text-white py-3 my-10 gap-10 px-5 ">
                 <img
                   src={shopProfile?.data?.seller_picture_url}
                   alt="seller"
-                  className="imgSeller w-full md:w-32 h-full place-self-center object-fill"
+                  className="imgSeller w-full md:w-32 h-full place-self-center object-fill rounded-lg"
                 />
                 <div className="flex flex-col md:flex-row gap-y-4 md:gap-x-48 w-full">
                   <div className="aboutSeller w-full md:w-1/2">
@@ -610,8 +615,8 @@ const ProductDetail = ({
                 </div>
               </div>
               <div className="reviews">
-                <div>
-                  <p className="reviewsProduct text-xl font-semibold">
+                <div className="my-5 pt-8">
+                  <p className="reviewsProduct text-xl font-semibold border-b pb-2">
                     Product Reviews
                   </p>
                 </div>
@@ -619,7 +624,7 @@ const ProductDetail = ({
                   {reviews?.data?.map((review, index) => (
                     <div
                       key={index}
-                      className="buyerReviews flex mt-5 py-2  border-y"
+                      className="buyerReviews flex mt-5 py-2  border-b"
                     >
                       <div className="imageCust w-28 h-full pr-4 rounded-full overflow-hidden">
                         <img
@@ -634,9 +639,11 @@ const ProductDetail = ({
                         />
                       </div>
                       <div className="bodyReview w-full flex-row gap-y-5">
-                        <p className="custName">{review.customer_name}</p>
+                        <p className="pb-1 font-medium">
+                          {review.customer_name}
+                        </p>
 
-                        <p className="flex">
+                        <p className="flex pb-1">
                           {Array.from({
                             length: Math.min(parseInt(review.stars), 5),
                           }).map((_, index) => (
@@ -687,7 +694,17 @@ const ProductDetail = ({
                     </div>
                   ))}
                   <div className="flex self-end mt-2 justify-center">
-                    {reviews && (
+                    {reviews?.data === null ? (
+                      <>
+                        <p className="text-center font-semibold text-neutral-500 text-lg justify-center">
+                          <VscEmptyWindow
+                            size={30}
+                            style={{ margin: "0 auto" }}
+                          />{" "}
+                          There are no reviews yet
+                        </p>
+                      </>
+                    ) : (
                       <Pagination
                         data={reviews?.pagination}
                         onNavigate={(navPage: any) => setPage(navPage)}
