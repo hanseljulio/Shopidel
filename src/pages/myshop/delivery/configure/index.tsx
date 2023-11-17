@@ -10,7 +10,7 @@ const SellerConfigurePage = () => {
         <div className="flex items-center justify-between md:flex-row md:mx-[5%] flex-col p-0 md:gap-0 gap-8">
           <h1 className="text-[30px]">Delivery Configuration</h1>
         </div>
-        <div className="pt-6">
+        <div className="pt-6 md:mx-[5%]">
           <div className="flex gap-6 ">
             <h1>Allow users to print shipping label</h1>
             <div>

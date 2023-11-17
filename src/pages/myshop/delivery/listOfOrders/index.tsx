@@ -5,6 +5,13 @@ import Button from "@/components/Button";
 import { useRouter } from "next/router";
 import { useUserStore } from "@/store/userStore";
 import Modal from "@/components/Modal";
+import { FaMapMarkerAlt, FaTag } from "react-icons/fa";
+import { API } from "@/network";
+import axios from "axios";
+import { clientUnauthorizeHandler } from "@/utils/utils";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import { IAPIResponse } from "@/interfaces/api_interface";
 
 interface IIndividualOrderProps {
   setCancelTransaction: () => void;
@@ -13,7 +20,7 @@ interface IIndividualOrderProps {
 
 const OrderDetailModal = () => {
   return (
-    <div className="bg-white p-5 rounded-md md:w-[1000px] md:h-[600px] h-[80vh] w-[90vw] overflow-y-auto">
+    <div className="bg-white p-5 rounded-md md:w-[1000px] md:h-[800px] h-[80vh] w-[90vw] overflow-y-auto">
       <div className="py-3 border-b-2">
         <h1 className="text-[20px] font-bold">Order Details</h1>
       </div>
@@ -32,15 +39,74 @@ const OrderDetailModal = () => {
         <h1>Order total: {currencyConverter(200000)}</h1>
         <h1>Shipping total: {currencyConverter(10000)}</h1>
       </div>
+      <div className="pt-4">
+        <h1 className="font-bold">Delivery Address</h1>
+        <h1>Sopo Del Tower</h1>
+        <h1>SUKAPURA, BOJONGSOANG, KABUPATEN BANDUNG, JAWA BARAT, ID 40851</h1>
+      </div>
+      <div className="pt-4">
+        <h1 className="font-bold">Purchased Products:</h1>
+        <div>
+          <h1 className="font-bold">
+            Kalung 100% Titanium Rollo + Cincin Pria Dan wanita [ Toko Metal ]
+          </h1>
+
+          <p>2 item x {currencyConverter(150000)}</p>
+        </div>
+      </div>
     </div>
   );
 };
 
-const CancelOrderModal = () => {
+interface ICancelOrderModal {
+  orderId: number;
+  exitFunction: () => void;
+}
+
+const CancelOrderModal = (props: ICancelOrderModal) => {
   const router = useRouter();
   const { updateUser } = useUserStore();
 
   const [message, setMessage] = useState<string>("");
+
+  const submit = async (e: any) => {
+    e.preventDefault();
+
+    const sendData = {
+      notes: message,
+    };
+
+    try {
+      toast.promise(
+        API.put(`sellers/orders/${props.orderId}/cancel`, sendData),
+        {
+          pending: "Cancelling order",
+          success: {
+            render() {
+              props.exitFunction();
+              return "Order has been cancelled";
+            },
+          },
+          error: {
+            render({ data }) {
+              if (axios.isAxiosError(data)) {
+                return `${(data.response?.data as IAPIResponse).message}`;
+              }
+            },
+          },
+        },
+        {
+          autoClose: 1500,
+        }
+      );
+    } catch (e) {
+      if (axios.isAxiosError(e)) {
+        toast.error(e.message, {
+          autoClose: 1500,
+        });
+      }
+    }
+  };
 
   return (
     <div className="bg-white p-5 rounded-md md:w-[1000px] md:h-[600px] h-[80vh] w-[90vw] overflow-y-auto">
@@ -58,10 +124,13 @@ const CancelOrderModal = () => {
           onChange={(e) => setMessage(e.target.value)}
         />
       </div>
-
-      <div className="pt-8 flex justify-center">
+      <p className="text-center text-red-600 py-2">
+        WARNING: Once cancelled, the order cannot be restored.
+      </p>
+      <div className=" flex justify-center">
         <Button
           text="Cancel Order"
+          onClick={submit}
           styling="bg-red-600 text-white p-3 rounded-[8px] w-[250px] my-4"
           disabled={message.length < 50}
         />
@@ -150,12 +219,18 @@ const SellerOrderListPage = () => {
 
       {showCancelModal && (
         <Modal
-          content={<CancelOrderModal />}
+          content={
+            <CancelOrderModal
+              orderId={1}
+              exitFunction={() => setShowCancelModal(false)}
+            />
+          }
           onClose={() => setShowCancelModal(false)}
         />
       )}
 
       <SellerAdminLayout currentPage="List of Orders">
+        <ToastContainer />
         <div className="w-full mx-auto mt-6">
           <div className="flex items-center justify-between md:flex-row md:mx-[5%] flex-col p-0 md:gap-0 gap-8">
             <h1 className="text-[30px]">List of Orders</h1>
