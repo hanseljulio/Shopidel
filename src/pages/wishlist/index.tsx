@@ -29,6 +29,21 @@ function Index() {
   const [wishlist, setWishlist] = useState<IAPIResponse<IWishlist[]>>();
   const [paginationNumber, setPaginationNumber] = useState<number[]>([]);
   const [page, setPage] = useState<number>(1);
+  const [query, setQuery] = useState<string>(
+    router.query.s !== undefined ? router.query.s.toString() : ""
+  );
+
+  const searchQueryHandler = () => {
+    router.push({
+      pathname: "/search",
+      query: {
+        s: query,
+        sortBy: "price",
+        sort: "desc",
+        page: 1,
+      },
+    });
+  };
 
   const getWishlist = async () => {
     try {
@@ -74,11 +89,20 @@ function Index() {
           <p className="text-xl md:text-3xl font-bold mt-10">Wishlist</p>
         </div>
         <div className="flex justify-end mt-10 items-center gap-x-5">
-          <input
-            type="text"
-            placeholder="Search in wishlist"
-            className="rounded-md w-full md:w-80"
-          />
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              searchQueryHandler();
+            }}
+          >
+            <input
+              type="text"
+              placeholder="Search in wishlist"
+              className="rounded-md w-full md:w-80"
+              onChange={(e) => setQuery(e.target.value)}
+              value={query}
+            />
+          </form>
         </div>
         <div className="gap-x-4 gap-y-1 grid grid-cols-2 md:grid-cols-6 mt-10">
           {wishlist?.data?.map((product, i) => {
