@@ -28,7 +28,13 @@ import React, { useEffect, useState } from "react";
 import { SubmitHandler } from "react-hook-form";
 import { AiOutlineShoppingCart } from "react-icons/ai";
 import { BsStarFill } from "react-icons/bs";
-import { FaHeart, FaRegHeart, FaStar, FaStore } from "react-icons/fa";
+import {
+  FaHeart,
+  FaRegHeart,
+  FaRegStar,
+  FaStar,
+  FaStore,
+} from "react-icons/fa";
 import { FaLocationDot, FaTruckFast } from "react-icons/fa6";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -642,7 +648,26 @@ const ProductDetail = ({
                         <p className="custName">{review.customer_name}</p>
 
                         <p className="flex">
-                          {Array.from({ length: parseInt(review.stars) }).map(
+                          {Array.from({
+                            length: Math.min(parseInt(review.stars), 5),
+                          }).map((_, index) => (
+                            <FaStar
+                              key={index}
+                              style={{ color: "#f57b29" }}
+                              size={13}
+                            />
+                          ))}
+                          {Array.from({
+                            length: Math.max(5 - parseInt(review.stars), 0),
+                          }).map((_, index) => (
+                            <FaRegStar
+                              key={index}
+                              style={{ color: "#f57b29" }}
+                              size={13}
+                            />
+                          ))}
+
+                          {/* {Array.from({ length: parseInt(review.stars) }).map(
                             (_, index) => (
                               <FaStar
                                 key={index}
@@ -650,7 +675,7 @@ const ProductDetail = ({
                                 size={13}
                               />
                             )
-                          )}
+                          )} */}
                         </p>
                         <p className="dateReview text-sm text-neutral-500 pb-3 items-center">
                           {review.created_at.split("T")[0]} |
