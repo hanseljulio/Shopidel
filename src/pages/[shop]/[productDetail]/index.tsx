@@ -132,10 +132,9 @@ const ProductDetail = ({
   const getReviewProducts = async () => {
     try {
       const res = await API.get(
-        `products/${product.id}/reviews?page=1&stars=5&comment=true&image=true&orderBy=newest`
+        `products/${product.id}/reviews?page=${page}&comment=true&image=true&orderBy=newest`
       );
       console.log("id rev", product.id);
-      console.log("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
 
       const data = res.data as IAPIResponse<IReviewProduct[]>;
       setReviews(data);
@@ -189,13 +188,15 @@ const ProductDetail = ({
   useEffect(() => {
     getSuggest();
     getShop();
-    getReviewProducts();
   }, []);
 
   useEffect(() => {
     getImages();
-    getReviewProducts();
   }, [product.id]);
+
+  useEffect(() => {
+    getReviewProducts();
+  }, [product.id, page]);
 
   const calculateSubtotal = () => {
     const selectedVariant = product?.variants?.find((variant: any) => {
@@ -415,16 +416,15 @@ const ProductDetail = ({
                 Set Amounts
               </p>
 
-              <div className="flex gap-2 md:gap-1 mb-2 text-sm text-neutral-600 py-3 justify-between">
+              <div className="flex gap-x-10 md:gap-1 mb-2 text-sm text-neutral-600 py-3 ">
                 <p className="">Pengiriman</p>
-                <div>
-                  <div className="flex items-center gap-1">
-                    <FaLocationDot /> {"Malang"}
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <FaTruckFast /> {`Jakarta Selatan ${"Rp3000"}`}
-                  </div>
+
+                <div className="flex items-center gap-1">
+                  <FaLocationDot /> {"Malang"}
                 </div>
+                {/* <div className="flex items-center gap-1">
+                    <FaTruckFast /> {`Jakarta Selatan ${"Rp3000"}`}
+                  </div> */}
               </div>
               <div className="flex flex-col gap-y-3 text-xs text-neutral-600">
                 {product?.variant_options?.map((item: any, i: number) => {
@@ -459,11 +459,11 @@ const ProductDetail = ({
 
               <div className="flex text-center items-center mt-5">
                 <div className="quantity flex border border-zinc-600">
-                  <button className="minus w-5" onClick={dec}>
+                  <button className="minus w-3 md:w-5" onClick={dec}>
                     -
                   </button>
                   <input
-                    className="text-center border-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none outline-none"
+                    className="text-center w-14 md:w-20 border-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none outline-none"
                     min={1}
                     max={100}
                     type="number"
@@ -472,7 +472,7 @@ const ProductDetail = ({
                       setCount(parseInt(e.target.value)), e.preventDefault();
                     }}
                   />
-                  <button className="plus w-5" onClick={inc}>
+                  <button className="plus w-3 md:w-5" onClick={inc}>
                     +
                   </button>
                 </div>
@@ -611,19 +611,9 @@ const ProductDetail = ({
               </div>
               <div className="reviews">
                 <div>
-                  <p className="reviewsProduct text-lg font-semibold">
+                  <p className="reviewsProduct text-xl font-semibold">
                     Product Reviews
                   </p>
-                  <div>
-                    <p>{"4.8 dari 5"}</p>
-                    <div className="star flex text-[#fc9b5b]">
-                      <FaStar />
-                      <FaStar />
-                      <FaStar />
-                      <FaStar />
-                      <FaStar />
-                    </div>
-                  </div>
                 </div>
                 <div>
                   {reviews?.data?.map((review, index) => (
@@ -631,10 +621,9 @@ const ProductDetail = ({
                       key={index}
                       className="buyerReviews flex mt-5 py-2  border-y"
                     >
-                      <div className="imageCust pr-4 rounded-full overflow-hidden">
+                      <div className="imageCust w-28 h-full pr-4 rounded-full overflow-hidden">
                         <img
-                          width={100}
-                          height={100}
+                          className="w-full h-full"
                           src={review.customer_picture_url}
                           alt="profile"
                           placeholder="https://cdn4.iconfinder.com/data/icons/web-ui-color/128/Account-512.png"
@@ -644,7 +633,7 @@ const ProductDetail = ({
                           }}
                         />
                       </div>
-                      <div className="bodyReview flex-row gap-y-5">
+                      <div className="bodyReview w-full flex-row gap-y-5">
                         <p className="custName">{review.customer_name}</p>
 
                         <p className="flex">
@@ -682,22 +671,17 @@ const ProductDetail = ({
                           <span> variation: {review.variant}</span>
                         </p>
                         <p className="theReview">{review.comment}</p>
-                        <div className="grid grid-cols-4 gap-x-2 mt-3">
-                          {imagesReview?.map((url, index) => {
-                            return (
+                        <div className="grid grid-cols-2 md:grid-cols-5 gap-2 mt-3 object-fill">
+                          {review.pictures?.map((e, i) => (
+                            <>
                               <img
-                                key={index}
-                                className="cursor-pointer w-28 h-full rounded-sm"
-                                width={50}
-                                height={50}
-                                src={url}
+                                key={i}
+                                className="cursor-pointer w-full h-full rounded-sm"
+                                src={e}
                                 alt="image review"
-                                onMouseOver={() => handleMouseOver(url)}
-                                onMouseOut={handleMouseOut}
-                                onClick={handleZoomImage}
                               />
-                            );
-                          })}
+                            </>
+                          ))}
                         </div>
                       </div>
                     </div>

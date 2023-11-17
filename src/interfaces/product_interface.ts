@@ -16,12 +16,14 @@ export interface IProduct {
 
 export interface IReviewProduct
 {
+    id: number
     customer_name: string,
     customer_picture_url: string
     stars: string,
     comment: string,
     variant: string,
     created_at: string
+    pictures: string[]
 }
 
 export interface IProductSuggestion{
