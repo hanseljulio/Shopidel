@@ -133,6 +133,7 @@ const ProductDetail = ({
 
       const data = res.data as IAPIResponse<IReviewProduct[]>;
       setReviews(data);
+      console.log("data review", data);
     } catch (e) {
       if (axios.isAxiosError(e)) {
         return toast.error("Error fetching review products", {
@@ -710,9 +711,7 @@ const ProductDetail = ({
                 <Button
                   text="View More"
                   styling="bg-[#f57b29] rounded-md p-3 shadow-lg text-white hover:bg-[#fc9b5b] col-span-2 md:col-span-1"
-                  onClick={() =>
-                    router.push(`/${shopProfile?.data?.seller_name}`)
-                  }
+                  onClick={() => router.push(`/${seller.shop_name_slug}`)}
                 />
               </div>
             </div>

@@ -80,6 +80,7 @@ function Index({ seller }: IProfileShopProps) {
 
       if (data.data) {
         setCategoryList(data.data);
+        console.log("etalist", data);
       } else {
         console.error("Data is undefined or null");
       }
@@ -104,7 +105,9 @@ function Index({ seller }: IProfileShopProps) {
         );
         console.log("yes");
       } else {
-        res = await API.get(`/sellers/${seller.shop_name_slug}/products`);
+        res = await API.get(
+          `/sellers/${seller.shop_name_slug}/showcases/0/products`
+        );
         console.log("buk");
       }
 
@@ -267,7 +270,7 @@ function Index({ seller }: IProfileShopProps) {
                     }`}
                     onClick={() => getProductBasedOnCategory(e.showcase_id)}
                   >
-                    {e.showcase_name}, {e.showcase_id}
+                    {e.showcase_name}
                   </li>
                 ))}
               </ul>
