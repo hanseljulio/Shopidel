@@ -69,14 +69,6 @@ const SellerAddProductPage = () => {
 
   const watchCategory = watch("category");
   const watchVariantGroup = watch("variantGroup");
-  const watchVariantTable = watch("variantTable");
-
-  const imageRef = useRef<HTMLInputElement>(null);
-  const variantRef = useRef<IVariant[]>([]);
-
-  const addTest = (data: IVariant) => {
-    variantRef.current.push(data);
-  };
 
   const getListCategory = async () => {
     try {
@@ -97,12 +89,6 @@ const SellerAddProductPage = () => {
   useEffect(() => {
     getListCategory();
   }, []);
-
-  useEffect(() => {
-    if (watchVariantTable !== undefined) {
-      console.log(watchVariantTable);
-    }
-  }, [watchVariantGroup]);
 
   return (
     <SellerAdminLayout currentPage="Products">
@@ -230,9 +216,12 @@ const SellerAddProductPage = () => {
             </div>
             <div>
               <div className="flex justify-between">
-                <h1 className="text-xl">variantGroup</h1>
+                <div>
+                  <h1 className="text-xl">Variants</h1>
+                  <p className="text-xs">Add your product variant (optional)</p>
+                </div>
                 <Button
-                  text="Add variantGroup"
+                  text="Add Variant"
                   onClick={(e) => {
                     e.preventDefault();
                     setValue("variantGroup", [
@@ -249,9 +238,9 @@ const SellerAddProductPage = () => {
               </div>
               <div className="mt-3 flex flex-col gap-y-5">
                 {watchVariantGroup &&
-                  watchVariantGroup.map((variant, i) => {
+                  watchVariantGroup.map((_, i) => {
                     return (
-                      <ProductVariant
+                      <ProductVariantGroup
                         key={i}
                         i={i}
                         register={register}
@@ -262,175 +251,62 @@ const SellerAddProductPage = () => {
                     );
                   })}
               </div>
-              <div className="mt-10">
-                <p className="text-xl">Variant Table</p>
-                <div>
-                  <table className="w-full">
-                    <thead>
-                      <tr>
-                        <th className="text-start">Image</th>
-                        {getValues("variantGroup").map((v, i) => {
-                          return (
-                            <th key={i} className="text-start">
-                              {v.name}
-                            </th>
-                          );
-                        })}
-                        <th className="text-start">Price</th>
-                        <th className="text-start">Stock</th>
-                      </tr>
-                    </thead>
-                    {/* <tbody>
-                      {watchVariantTable &&
-                        watchVariantTable.map((data, i) => {
-                          return (
-                            <tr key={i}>
-                              <td></td>
-                              <td>{data.variant1.value}</td>
-                              <td>{data.variant2?.value}</td>
-                              <td>
-                                <input type="text" name="" id="" />
-                              </td>
-                              <td>
-                                <input type="number" name="" id="" />
-                              </td>
-                            </tr>
-                          );
-                        })}
-                    </tbody> */}
-                    <tbody>
-                      {watchVariantGroup.at(0)?.type.map((v0, i) => {
-                        if (watchVariantGroup.length === 1) {
-                          return (
-                            <tr
-                              key={i}
-                              ref={(element) => {
-                                return addTest({
-                                  id: i,
-                                  imageId: "dsadsa",
-                                  price: "20202",
-                                  stock: 0,
-                                  variant1: {
-                                    name: watchVariantGroup.at(0)?.name ?? "",
-                                    value: v0,
-                                  },
-                                });
-                              }}
-                            >
-                              <td>
-                                <input
-                                  ref={imageRef}
-                                  type="file"
-                                  onChange={(e) => {
-                                    console.log(e.target.files![0]);
-                                  }}
-                                  name=""
-                                  id=""
-                                  hidden
-                                />
-                                <div
-                                  onClick={() => {
-                                    imageRef.current?.click();
-                                  }}
-                                  className="w-16 h-16 bg-red-200"
-                                ></div>
-                              </td>
-                              <td>{v0}</td>
-                              <td>
-                                <input
-                                  type="text"
-                                  name="price"
-                                  onKeyDown={(e) => {
-                                    if (e.key === "Enter") {
-                                      e.preventDefault();
-                                    }
-                                  }}
-                                  id="price"
-                                  className="py-1 rounded-md text-sm"
-                                />
-                              </td>
-                              <td>
-                                <input
-                                  type="text"
-                                  name="price"
-                                  onKeyDown={(e) => {
-                                    if (e.key === "Enter") {
-                                      e.preventDefault();
-                                    }
-                                  }}
-                                  id="price"
-                                  className="py-1  rounded-md text-sm"
-                                />
-                              </td>
-                            </tr>
-                          );
-                        }
-                        return getValues("variantGroup")
-                          .at(1)
-                          ?.type.map((v1, i) => {
+              {watchVariantGroup.length !== 0 && (
+                <div className="mt-10">
+                  <div>
+                    <p className="text-xl">Variant Table</p>
+                  </div>
+                  <div className="">
+                    <table className="w-full">
+                      <thead>
+                        <tr>
+                          <th className="text-start">Image</th>
+                          {getValues("variantGroup").map((v, i) => {
                             return (
-                              <tr key={i}>
-                                <td>
-                                  <input
-                                    ref={imageRef}
-                                    type="file"
-                                    onChange={(e) => {
-                                      console.log(e.target.files![0]);
-                                    }}
-                                    name=""
-                                    id=""
-                                    hidden
-                                  />
-                                  <div
-                                    onClick={() => {
-                                      imageRef.current?.click();
-                                    }}
-                                    className="w-16 h-16 bg-red-200"
-                                  ></div>
-                                </td>
-                                <td>{v0}</td>
-                                <td>{v1}</td>
-                                <td>
-                                  <input
-                                    type="text"
-                                    name="price"
-                                    onKeyDown={(e) => {
-                                      if (e.key === "Enter") {
-                                        e.preventDefault();
-                                      }
-                                    }}
-                                    id="price"
-                                    className="py-1 rounded-md text-sm"
-                                  />
-                                </td>
-                                <td>
-                                  <input
-                                    type="text"
-                                    name="price"
-                                    onKeyDown={(e) => {
-                                      if (e.key === "Enter") {
-                                        e.preventDefault();
-                                      }
-                                    }}
-                                    id="price"
-                                    className="py-1  rounded-md text-sm"
-                                  />
-                                </td>
-                              </tr>
+                              <th key={i} className="text-start">
+                                {v.name}
+                              </th>
                             );
-                          });
-                      })}
-                    </tbody>
-                  </table>
+                          })}
+                          <th className="text-start">Price</th>
+                          <th className="text-start">Stock</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {getValues("variantGroup")
+                          .at(0)
+                          ?.type.map((v0, i) => {
+                            if (getValues("variantGroup").length === 1) {
+                              return (
+                                <ProductVariant
+                                  key={i}
+                                  variant1type={v0}
+                                  getValues={getValues}
+                                  setValue={setValue}
+                                  watchVariantGroup={watchVariantGroup}
+                                />
+                              );
+                            }
+                            return getValues("variantGroup")
+                              .at(1)
+                              ?.type.map((v1, i) => {
+                                return (
+                                  <ProductVariant
+                                    key={i}
+                                    getValues={getValues}
+                                    setValue={setValue}
+                                    watchVariantGroup={watchVariantGroup}
+                                    variant1type={v0}
+                                    variant2type={v1}
+                                  />
+                                );
+                              });
+                          })}
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
-                <div
-                  onClick={() => {
-                    console.log([...new Set(variantRef.current)]);
-                  }}
-                >
-                  coba
-                </div>
-              </div>
+              )}
             </div>
           </form>
         </div>
@@ -441,20 +317,20 @@ const SellerAddProductPage = () => {
 
 export default SellerAddProductPage;
 
-interface IProductVariantProps {
+interface IProductVariantGroupProps {
   register: UseFormRegister<IAddProductForm>;
   watchVariantGroup: IVariantGroup[];
   setValue: UseFormSetValue<IAddProductForm>;
   getValues: UseFormGetValues<IAddProductForm>;
   i: number;
 }
-const ProductVariant = ({
+const ProductVariantGroup = ({
   register,
   setValue,
   getValues,
   watchVariantGroup,
   i,
-}: IProductVariantProps) => {
+}: IProductVariantGroupProps) => {
   const [variantType, setVariantType] = useState<string>("");
 
   return (
@@ -514,39 +390,6 @@ const ProductVariant = ({
                     variantType,
                   ]);
                   setVariantType("");
-                  // if (watchVariantGroup.length === 1) {
-                  //   setValue("variantTable", [
-                  //     ...getValues("variantTable"),
-                  //     {
-                  //       imageId: "dsad",
-                  //       variant1: {
-                  //         name: watchVariantGroup.at(0)?.name,
-                  //         value: variantType,
-                  //       },
-                  //       price: "",
-                  //       stock: 0,
-                  //     } as IVariant,
-                  //   ]);
-                  // } else {
-                  //   watchVariantGroup.at(0)?.type.forEach((type) => {
-                  //     setValue("variantTable", [
-                  //       ...getValues("variantTable"),
-                  //       {
-                  //         imageId: "dsad",
-                  //         variant1: {
-                  //           name: watchVariantGroup.at(0)?.name,
-                  //           value: type,
-                  //         },
-                  //         variant2: {
-                  //           name: watchVariantGroup.at(1)?.name,
-                  //           value: variantType,
-                  //         },
-                  //         price: "",
-                  //         stock: 0,
-                  //       } as IVariant,
-                  //     ]);
-                  //   });
-                  // }
                 }
               }}
               className="rounded-md w-full"
@@ -559,20 +402,6 @@ const ProductVariant = ({
                     variantType,
                   ]);
                   setVariantType("");
-                  // if (watchVariantGroup.length === 1) {
-                  //   setValue("variantTable", [
-                  //     ...getValues("variantTable"),
-                  //     {
-                  //       imageId: "dsad",
-                  //       variant1: {
-                  //         name: watchVariantGroup.at(0)?.name,
-                  //         value: variantType,
-                  //       },
-                  //       price: "",
-                  //       stock: 0,
-                  //     } as IVariant,
-                  //   ]);
-                  // }
                 }}
                 className="absolute w-full border border-slate-500 rounded-b-md bg-white shadow-md p-3 transition hover:bg-slate-100 hover:cursor-pointer"
               >
@@ -596,12 +425,15 @@ const ProductVariant = ({
                             ?.type.filter((v) => v !== type)!
                         );
 
-                        // setValue(
-                        //   "variantTable",
-                        //   getValues("variantTable").filter(
-                        //     (data) => data.variant1.value !== type
-                        //   )
-                        // );
+                        setValue(
+                          "variantTable",
+                          getValues("variantTable").filter((data) => {
+                            if (i === 0) {
+                              return data.variant1.value !== type;
+                            }
+                            return data.variant2?.value !== type;
+                          })
+                        );
                       }}
                       className="p-2 rounded-md bg-slate-200 text-sm hover:cursor-pointer flex items-center gap-x-3"
                     >
@@ -618,80 +450,108 @@ const ProductVariant = ({
   );
 };
 
-// {
-//   variantGroupData.map((_, index) => {
-//     return (
-//       <div
-//         key={index}
-//         className=" bg-slate-300 w-[650px] p-6 border-2 border-gray-400 rounded-md"
-//       >
-//         <div className="flex items-center gap-10">
-//           <div className="flex items-center gap-4">
-//             <p className="font-bold">Product Size</p>
-//             <select
-//               className={`p-4 w-[150px] h-14 rounded`}
-//               name="category-dropdown"
-//               onChange={(e) => {
-//                 let currentData = variantGroupData;
-//                 currentData[index].size = e.target.value;
+interface IProductVariantProps {
+  variant1type: string;
+  variant2type?: string;
+  watchVariantGroup: IVariantGroup[];
+  setValue: UseFormSetValue<IAddProductForm>;
+  getValues: UseFormGetValues<IAddProductForm>;
+}
 
-//                 setvariantGroupData(currentData);
-//               }}
-//             >
-//               <option value={"S"}>{"Small"}</option>
-//               <option value={"M"}>{"Medium"}</option>
-//               <option value={"L"}>{"Large"}</option>
-//             </select>
-//           </div>
-//           <div className="flex items-center gap-6">
-//             <p className="font-bold">Product Color</p>
-//             <select
-//               className={`p-4 w-[120px] h-14 rounded`}
-//               name="category-dropdown"
-//               onChange={(e) => {
-//                 let currentData = variantGroupData;
-//                 currentData[index].color = e.target.value;
+const ProductVariant = ({
+  variant1type,
+  variant2type,
+  watchVariantGroup,
+  setValue,
+  getValues,
+}: IProductVariantProps) => {
+  const imageRef = useRef<HTMLInputElement>(null);
+  const id = (Math.random() + 1).toString(36).substring(5);
 
-//                 setvariantGroupData(currentData);
-//               }}
-//             >
-//               <option value={"Blue"}>{"Blue"}</option>
-//               <option value={"Black"}>{"Black"}</option>
-//               <option value={"Green"}>{"Green"}</option>
-//             </select>
-//           </div>
-//         </div>
-//         <br />
+  useEffect(() => {
+    if (variant2type !== undefined) {
+      setValue("variantTable", [
+        ...getValues("variantTable"),
+        {
+          id: 0,
+          variant1: {
+            name: watchVariantGroup.at(0)?.name,
+            value: variant1type,
+          },
+          variant2: {
+            name: watchVariantGroup.at(0)?.name,
+            value: variant2type,
+          },
+          price: "",
+          imageId: id,
+          stock: 0,
+        } as IVariant,
+      ]);
+    } else {
+      setValue("variantTable", [
+        ...getValues("variantTable"),
+        {
+          id: 0,
+          variant1: {
+            name: watchVariantGroup.at(0)?.name,
+            value: variant1type,
+          },
+          price: "",
+          imageId: id,
+          stock: 0,
+        } as IVariant,
+      ]);
+    }
+  }, []);
 
-//         <div className="flex items-center gap-[69px]">
-//           <div className="flex items-center gap-11">
-//             <p className="font-bold">Quantity</p>
-//             <input
-//               type="number"
-//               className={`p-4 w-[120px] h-14 rounded`}
-//               onChange={(e) => {
-//                 let currentData = variantGroupData;
-//                 currentData[index].quantity = parseInt(e.target.value);
-
-//                 setvariantGroupData(currentData);
-//               }}
-//             />
-//           </div>
-//           <div className="flex items-center gap-6">
-//             <p className="font-bold">Price (Rp)</p>
-//             <input
-//               type="number"
-//               className={`p-4 w-[188px] h-14 rounded`}
-//               onChange={(e) => {
-//                 let currentData = variantGroupData;
-//                 currentData[index].price = parseInt(e.target.value);
-
-//                 setvariantGroupData(currentData);
-//               }}
-//             />
-//           </div>
-//         </div>
-//       </div>
-//     );
-//   });
-// }
+  return (
+    <tr>
+      <td>
+        <input
+          ref={imageRef}
+          type="file"
+          onChange={(e) => {
+            console.log(e.target.files![0]);
+          }}
+          name=""
+          id=""
+          hidden
+        />
+        <div
+          onClick={() => {
+            imageRef.current?.click();
+          }}
+          className="w-16 h-16 bg-red-200"
+        ></div>
+      </td>
+      <td>{variant1type}</td>
+      {variant2type && <td>{variant2type}</td>}
+      <td>
+        <input
+          type="text"
+          name="price"
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              e.preventDefault();
+            }
+          }}
+          id="price"
+          className="py-1 rounded-md text-sm"
+        />
+      </td>
+      <td>
+        <input
+          type="text"
+          name="price"
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              e.preventDefault();
+            }
+          }}
+          id="price"
+          className="py-1  rounded-md text-sm"
+        />
+      </td>
+    </tr>
+  );
+};
