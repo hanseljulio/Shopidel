@@ -20,11 +20,21 @@ import {
   IAPIResponse,
 } from "@/interfaces/api_interface";
 import "react-toastify/dist/ReactToastify.css";
+import { Reorder, useDragControls } from "framer-motion";
+import { AiFillDelete, AiFillPlusCircle } from "react-icons/ai";
 
 interface IAddProductForm {
   product_name: string;
   category: ICategory;
   description: string;
+  is_new: boolean;
+  is_active: boolean;
+  video_url: string;
+  hazardous_material: boolean;
+  internal_sku: string;
+  weight: string;
+  size: string;
+  images: IProductImage[];
   variantGroup: IVariantGroup[];
   variantTable: IVariant[];
 }
@@ -48,28 +58,41 @@ interface IVariantGroup {
   type: string[];
 }
 
+interface IProductImage {
+  id: string;
+  file: File;
+}
+
 const SellerAddProductPage = () => {
   const {
     register,
     setValue,
     handleSubmit,
     watch,
+    setError,
     getValues,
+    clearErrors,
     formState: { errors },
   } = useForm<IAddProductForm>({
-    mode: "onBlur",
     defaultValues: {
       variantGroup: [],
     },
   });
-  const [categories, setCategories] = useState<ICategory[]>();
-  const [isCategoryOpen, setIsCategoryOpen] = useState<boolean>(false);
-  const [category2, setCategory2] = useState<ICategory[]>([]);
-  const [category3, setCategory3] = useState<ICategory[]>([]);
 
   const watchCategory = watch("category");
   const watchVariantGroup = watch("variantGroup");
   const watchVariantTable = watch("variantTable");
+
+  const [categories, setCategories] = useState<ICategory[]>();
+  const [isCategoryOpen, setIsCategoryOpen] = useState<boolean>(false);
+  const [category2, setCategory2] = useState<ICategory[]>([]);
+  const [category3, setCategory3] = useState<ICategory[]>([]);
+  const [video, setVideo] = useState<string>("");
+  const [images, setImages] = useState<Partial<IProductImage>[]>([
+    {
+      id: (Math.random() + 1).toString(36).substring(5),
+    },
+  ]);
 
   const getListCategory = async () => {
     try {
@@ -87,13 +110,76 @@ const SellerAddProductPage = () => {
     }
   };
 
-  const onSubmit: SubmitHandler<IAddProductForm> = (data) => {
-    console.log(data);
-  };
+  const onSubmit: SubmitHandler<IAddProductForm> = async (data) => {
+    if (data.images.findIndex((img) => img.file === undefined) !== -1) {
+      return setError("images", { message: "Photo is required" });
+    }
 
+    const formData = new FormData();
+    try {
+      formData.append("product_name", data.product_name);
+      formData.append("description", data.description);
+      formData.append("hazardous_material", String(data.hazardous_material));
+      formData.append("is_new", String(data.is_new));
+      formData.append("is_active", String(data.is_active));
+      formData.append("internal_sku", data.internal_sku);
+      formData.append("weight", data.weight);
+      formData.append("category_id", String(data.category.id));
+      formData.append("size", data.size);
+      data.images.forEach((img) => {
+        formData.append("images[]", img.file);
+      });
+      if (!data.variantTable) {
+        formData.append(
+          "variants[]",
+          JSON.stringify({
+            variant1: {
+              name: "",
+              value: "",
+            },
+            stock: 0,
+            price: "0",
+            imageId: "",
+          })
+        );
+      } else {
+        data.variantTable.forEach((variant) => {
+          formData.append("variants[]", JSON.stringify(variant));
+        });
+      }
+      if (data.video_url !== "") {
+        formData.append("video_url", data.video_url);
+      }
+
+      for (let data of formData.entries()) {
+        console.log(data);
+      }
+
+      const res = await toast.promise(
+        API.post("/sellers/products", formData),
+        {
+          pending: "Loading",
+          success: "Success",
+          error: "Error add product",
+        },
+        { autoClose: 1500 }
+      );
+
+      console.log(res);
+    } catch (e) {
+      console.log(data);
+      if (axios.isAxiosError(e)) {
+        console.log(e);
+      }
+    }
+  };
   useEffect(() => {
     getListCategory();
   }, []);
+
+  useEffect(() => {
+    setValue("images", images as IProductImage[]);
+  }, [images]);
 
   return (
     <>
@@ -127,7 +213,7 @@ const SellerAddProductPage = () => {
               <div className="flex flex-col">
                 <p>Product Description</p>
                 <textarea
-                  className="w-full rounded-md"
+                  className="w-full h-52 rounded-md"
                   {...register("description", {
                     required: "Product description is required",
                   })}
@@ -139,8 +225,11 @@ const SellerAddProductPage = () => {
                 )}
               </div>
               <div className="flex flex-col">
-                <p>Category</p>
-                <div className="relative w-full">
+                <div>
+                  <h1 className="text-xl">Category</h1>
+                  <p className="text-xs">Select your product category</p>
+                </div>
+                <div className="relative w-full mt-1">
                   <input
                     {...register("category", {
                       required: "Category is required",
@@ -226,6 +315,134 @@ const SellerAddProductPage = () => {
                 )}
               </div>
               <div>
+                <div>
+                  <h1 className="text-xl">Condition</h1>
+                  <p className="text-xs">Product condition</p>
+                </div>
+                <div className="mt-1">
+                  <select
+                    {...register("is_new")}
+                    name="is_new"
+                    id="is_new"
+                    className="rounded-md w-52"
+                  >
+                    <option value="true">New</option>
+                    <option value="false">Used</option>
+                  </select>
+                </div>
+              </div>
+              <div>
+                <div>
+                  <h1 className="text-xl">Product Hazardous</h1>
+                  <p className="text-xs">Product condition</p>
+                </div>
+                <div className="mt-1">
+                  <select
+                    {...register("hazardous_material")}
+                    name="hazardous_material"
+                    id="hazardous_material"
+                    className="rounded-md w-52"
+                  >
+                    <option value="true">Yes</option>
+                    <option value="false">No</option>
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <div className="flex justify-between">
+                  <div>
+                    <h1 className="text-xl">Photo</h1>
+                    <p className="text-xs">Add your product photo</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-x-5">
+                  <div className="w-fit mt-2">
+                    <Reorder.Group
+                      className="flex gap-x-5"
+                      values={images}
+                      onReorder={setImages}
+                      axis="x"
+                    >
+                      {images.map((item) => {
+                        return (
+                          <ProductImage
+                            key={JSON.stringify(item)}
+                            images={images}
+                            id={item.id!}
+                            item={item}
+                            onSet={(data) => {
+                              clearErrors("images");
+                              images.find((img) => img.id === item.id)!.file =
+                                data;
+                              return setImages([...images]);
+                            }}
+                            onDelete={() => {
+                              let data = images.filter(
+                                (img) => img.id !== item.id
+                              );
+                              clearErrors("images");
+                              return setImages(data);
+                            }}
+                          />
+                        );
+                      })}
+                    </Reorder.Group>
+                  </div>
+                  {images.length < 5 && (
+                    <div
+                      className="hover:cursor-pointer"
+                      onClick={() => {
+                        images.push({
+                          id: (Math.random() + 1).toString(36).substring(5),
+                        });
+                        setImages([...images]);
+                      }}
+                    >
+                      <AiFillPlusCircle size={30} />
+                    </div>
+                  )}
+                </div>
+                {errors.images && (
+                  <p role="alert" className="text-xs text-red-500 mt-1">
+                    {errors.images.message}
+                  </p>
+                )}
+              </div>
+              <div>
+                <div>
+                  <h1 className="text-xl">Video</h1>
+                  <p className="text-xs">
+                    Add your product video from YouTube embed url (optional)
+                  </p>
+                  <p className="text-xs">YouTube video should be unlisted</p>
+                </div>
+                <div className="mt-1">
+                  <input
+                    {...register("video_url")}
+                    onBlur={(e) => {
+                      setVideo(e.target.value);
+                    }}
+                    name="video_url"
+                    id="video_url"
+                    type="text"
+                    className="rounded-md w-full"
+                  />
+                </div>
+                {video && (
+                  <div className="mt-2">
+                    <h1>Preview</h1>
+                    <iframe
+                      width="560"
+                      height="315"
+                      src={video}
+                      title="YouTube video player"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                    ></iframe>
+                  </div>
+                )}
+              </div>
+              <div>
                 <div className="flex justify-between">
                   <div>
                     <h1 className="text-xl">Variants</h1>
@@ -247,7 +464,7 @@ const SellerAddProductPage = () => {
                         ]);
                         setValue("variantTable", []);
                       }}
-                      styling="bg-[#364968] rounded-md w-fit p-2 text-white "
+                      styling="bg-[#364968] rounded-md w-fit p-2 h-fit self-end text-white text-sm "
                     />
                   )}
                 </div>
@@ -327,7 +544,100 @@ const SellerAddProductPage = () => {
                     </div>
                   </div>
                 )}
-                <Button text="Test" />
+              </div>
+              <div>
+                <div>
+                  <h1 className="text-xl">SKU (Stock Keeping Unit)</h1>
+                  <p className="text-xs">
+                    internal code that seller usually use to codify their
+                    product
+                  </p>
+                </div>
+                <div className="mt-1">
+                  <input
+                    {...register("internal_sku", {
+                      required: "SKU is required",
+                    })}
+                    name="internal_sku"
+                    id="internal_sku"
+                    type="text"
+                    className="rounded-md w-full"
+                  />
+                </div>
+                {errors.internal_sku && (
+                  <p role="alert" className="text-xs text-red-500 mt-1">
+                    {errors.internal_sku.message}
+                  </p>
+                )}
+              </div>
+              <div>
+                <div>
+                  <h1 className="text-xl">Weight</h1>
+                  <p className="text-xs">Product weight in gram (g)</p>
+                </div>
+                <div className="mt-1">
+                  <input
+                    {...register("weight", {
+                      required: "Weight is required",
+                    })}
+                    name="weight"
+                    id="weight"
+                    type="text"
+                    className="rounded-md w-full"
+                  />
+                </div>
+                {errors.weight && (
+                  <p role="alert" className="text-xs text-red-500 mt-1">
+                    {errors.weight.message}
+                  </p>
+                )}
+              </div>
+              <div>
+                <div>
+                  <h1 className="text-xl">Size</h1>
+                  <p className="text-xs">Product size in centimeter (cm)</p>
+                </div>
+                <div className="mt-1">
+                  <input
+                    {...register("size", {
+                      required: "Size is required",
+                    })}
+                    name="size"
+                    id="size"
+                    type="text"
+                    className="rounded-md w-full"
+                  />
+                </div>
+                {errors.size && (
+                  <p role="alert" className="text-xs text-red-500 mt-1">
+                    {errors.size.message}
+                  </p>
+                )}
+              </div>
+              <div>
+                <div>
+                  <h1 className="text-xl">Active</h1>
+                  <p className="text-xs">
+                    Do you want to list this product to public
+                  </p>
+                </div>
+                <div className="mt-1">
+                  <select
+                    {...register("is_active")}
+                    name="is_active"
+                    id="is_active"
+                    className="rounded-md w-52"
+                  >
+                    <option value="true">Yes</option>
+                    <option value="false">No</option>
+                  </select>
+                </div>
+              </div>
+              <div className="mt-16 text-end">
+                <Button
+                  text="Add Product"
+                  styling="bg-[#364968] p-2 text-white rounded-md text-sm"
+                />
               </div>
             </form>
           </div>
@@ -501,6 +811,89 @@ const ProductVariantGroup = ({
   );
 };
 
+interface IProductImageProps {
+  images: Partial<IProductImage>[];
+  item: Partial<IProductImage>;
+  id: string;
+
+  onSet: (data: File) => void;
+  onDelete: () => void;
+}
+const ProductImage = ({
+  item,
+  onSet,
+  onDelete,
+  images,
+}: IProductImageProps) => {
+  const [isDrag, setIsDrag] = useState<boolean>(false);
+  const [isHover, setIsHover] = useState<boolean>(false);
+  const imageRef = useRef<HTMLInputElement>(null);
+  const controls = useDragControls();
+  return (
+    <Reorder.Item
+      className="w-32 h-32 bg-red-200 relative flex items-center justify-center group hover:cursor-pointer"
+      value={item}
+      dragControls={controls}
+      dragListener={isDrag}
+      onDragEnd={() => {
+        imageRef.current!.disabled = false;
+      }}
+      onDrag={() => {
+        imageRef.current!.disabled = true;
+      }}
+      onClick={() => {
+        if (isHover !== true) {
+          imageRef.current?.click();
+        }
+      }}
+    >
+      <input
+        type="file"
+        hidden
+        ref={imageRef}
+        onChange={(e) => {
+          if (e.target.files !== null && e.target.files.length !== 0) {
+            onSet(e.target.files[0]);
+            setIsDrag(true);
+          } else {
+            console.log("test");
+          }
+        }}
+      />
+      {item.file ? (
+        <img
+          src={item.file && URL.createObjectURL(item.file)}
+          className="h-full w-full absolute z-20 object-contain hover:cursor-pointer "
+          draggable={false}
+        />
+      ) : (
+        <div>
+          <p className="text-xs">+ Add photo</p>
+        </div>
+      )}
+
+      {images.length !== 1 && (
+        <div
+          onPointerDown={(e) => controls.start(e)}
+          className="absolute z-20 transition opacity-0 group-hover:opacity-100  bg-slate-500/50  w-full h-full flex items-end justify-end"
+        >
+          <div
+            onMouseEnter={() => (imageRef.current!.disabled = true)}
+            onMouseLeave={() => (imageRef.current!.disabled = false)}
+            onClick={() => {
+              setIsHover(true);
+              onDelete();
+            }}
+            className="p-2 bg-slate-200/50 rounded-md"
+          >
+            <AiFillDelete />
+          </div>
+        </div>
+      )}
+    </Reorder.Item>
+  );
+};
+
 interface IProductVariantProps {
   variant1type: string;
   variant2type?: string;
@@ -519,10 +912,12 @@ const ProductVariant = ({
   watchVariantTable,
 }: IProductVariantProps) => {
   const imageRef = useRef<HTMLInputElement>(null);
-  const id = (Math.random() + 1).toString(36).substring(5);
   const [image, setImage] = useState<File>();
+  const [variant, setVariant] = useState<IVariant>();
+  const [id, setId] = useState<string>("");
 
   useEffect(() => {
+    const id = (Math.random() + 1).toString(36).substring(5);
     if (variant2type !== undefined) {
       setValue("variantTable", [
         ...getValues("variantTable"),
@@ -541,6 +936,7 @@ const ProductVariant = ({
         } as IVariant,
       ]);
     } else {
+      console.log(id);
       setValue("variantTable", [
         ...getValues("variantTable"),
         {
@@ -554,6 +950,7 @@ const ProductVariant = ({
         } as IVariant,
       ]);
     }
+    setId(id);
   }, []);
 
   return (
@@ -579,10 +976,7 @@ const ProductVariant = ({
                   }
                 );
 
-                console.log(res.data);
                 setImage(e.target.files![0]);
-
-                console.log("success");
               } catch (e) {}
             }
           }}
