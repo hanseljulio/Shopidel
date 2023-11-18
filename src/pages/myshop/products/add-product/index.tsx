@@ -22,6 +22,7 @@ import {
 import "react-toastify/dist/ReactToastify.css";
 import { Reorder, useDragControls } from "framer-motion";
 import { AiFillDelete, AiFillPlusCircle } from "react-icons/ai";
+import { useRouter } from "next/router";
 
 interface IAddProductForm {
   product_name: string;
@@ -34,9 +35,11 @@ interface IAddProductForm {
   internal_sku: string;
   weight: string;
   size: string;
+  price?: string;
+  stock?: number;
   images: IProductImage[];
   variantGroup: IVariantGroup[];
-  variantTable: IVariant[];
+  variantTable?: IVariant[];
 }
 
 interface IVariant {
@@ -78,6 +81,7 @@ const SellerAddProductPage = () => {
       variantGroup: [],
     },
   });
+  const router = useRouter();
 
   const watchCategory = watch("category");
   const watchVariantGroup = watch("variantGroup");
@@ -137,8 +141,8 @@ const SellerAddProductPage = () => {
               name: "",
               value: "",
             },
-            stock: 0,
-            price: "0",
+            stock: Number(data.stock),
+            price: data.price,
             imageId: "",
           })
         );
@@ -151,11 +155,7 @@ const SellerAddProductPage = () => {
         formData.append("video_url", data.video_url);
       }
 
-      for (let data of formData.entries()) {
-        console.log(data);
-      }
-
-      const res = await toast.promise(
+      await toast.promise(
         API.post("/sellers/products", formData),
         {
           pending: "Loading",
@@ -165,7 +165,7 @@ const SellerAddProductPage = () => {
         { autoClose: 1500 }
       );
 
-      console.log(res);
+      router.back();
     } catch (e) {
       console.log(data);
       if (axios.isAxiosError(e)) {
@@ -514,7 +514,7 @@ const SellerAddProductPage = () => {
                               if (getValues("variantGroup").length === 1) {
                                 return (
                                   <ProductVariant
-                                    watchVariantTable={watchVariantTable}
+                                    watchVariantTable={watchVariantTable!}
                                     key={i}
                                     variant1type={v0}
                                     getValues={getValues}
@@ -528,7 +528,7 @@ const SellerAddProductPage = () => {
                                 ?.type.map((v1, i) => {
                                   return (
                                     <ProductVariant
-                                      watchVariantTable={watchVariantTable}
+                                      watchVariantTable={watchVariantTable!}
                                       key={i}
                                       getValues={getValues}
                                       setValue={setValue}
@@ -545,11 +545,59 @@ const SellerAddProductPage = () => {
                   </div>
                 )}
               </div>
+              {watchVariantGroup.length === 0 && (
+                <>
+                  <div>
+                    <div>
+                      <h1 className="text-xl">Product Price</h1>
+                      <p className="text-xs">Your product price</p>
+                    </div>
+                    <div className="mt-1">
+                      <input
+                        {...register("price", {
+                          required: "Product price is required",
+                        })}
+                        type="text"
+                        name="price"
+                        id="price"
+                        className="w-full rounded-md"
+                      />
+                    </div>
+                    {errors.price && (
+                      <p role="alert" className="text-xs text-red-500 mt-1">
+                        {errors.price.message}
+                      </p>
+                    )}
+                  </div>
+                  <div>
+                    <div>
+                      <h1 className="text-xl">Product Stock</h1>
+                      <p className="text-xs">Your product stock</p>
+                    </div>
+                    <div className="mt-1">
+                      <input
+                        {...register("stock", {
+                          required: "Product stock is required",
+                        })}
+                        type="text"
+                        name="stock"
+                        id="stock"
+                        className="w-full rounded-md"
+                      />
+                    </div>
+                    {errors.stock && (
+                      <p role="alert" className="text-xs text-red-500 mt-1">
+                        {errors.stock.message}
+                      </p>
+                    )}
+                  </div>
+                </>
+              )}
               <div>
                 <div>
                   <h1 className="text-xl">SKU (Stock Keeping Unit)</h1>
                   <p className="text-xs">
-                    internal code that seller usually use to codify their
+                    Internal code that seller usually use to codify their
                     product
                   </p>
                 </div>
@@ -788,7 +836,7 @@ const ProductVariantGroup = ({
 
                         setValue(
                           "variantTable",
-                          getValues("variantTable").filter((data) => {
+                          getValues("variantTable")?.filter((data) => {
                             if (i === 0) {
                               return data.variant1.value !== type;
                             }
@@ -855,8 +903,6 @@ const ProductImage = ({
           if (e.target.files !== null && e.target.files.length !== 0) {
             onSet(e.target.files[0]);
             setIsDrag(true);
-          } else {
-            console.log("test");
           }
         }}
       />
@@ -920,7 +966,7 @@ const ProductVariant = ({
     const id = (Math.random() + 1).toString(36).substring(5);
     if (variant2type !== undefined) {
       setValue("variantTable", [
-        ...getValues("variantTable"),
+        ...getValues("variantTable")!,
         {
           variant1: {
             name: watchVariantGroup.at(0)?.name,
@@ -936,9 +982,8 @@ const ProductVariant = ({
         } as IVariant,
       ]);
     } else {
-      console.log(id);
       setValue("variantTable", [
-        ...getValues("variantTable"),
+        ...getValues("variantTable")!,
         {
           variant1: {
             name: watchVariantGroup.at(0)?.name,
@@ -960,7 +1005,7 @@ const ProductVariant = ({
           ref={imageRef}
           type="file"
           onChange={async (e) => {
-            if (e.target.files !== undefined) {
+            if (e.target.files !== null && e.target.files.length !== 0) {
               try {
                 const formData = new FormData();
                 formData.append("image_id", id);
