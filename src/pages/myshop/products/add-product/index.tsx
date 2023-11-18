@@ -13,12 +13,13 @@ import { MdDelete } from "react-icons/md";
 import { FaChevronRight } from "react-icons/fa";
 import { IoAddCircleOutline, IoClose } from "react-icons/io5";
 import axios from "axios";
-import { toast } from "react-toastify";
+import { ToastContainer, toast } from "react-toastify";
 import { ICategory } from "@/interfaces/product_interface";
 import {
   IAPICategoriesResponse,
   IAPIResponse,
 } from "@/interfaces/api_interface";
+import "react-toastify/dist/ReactToastify.css";
 
 interface IAddProductForm {
   product_name: string;
@@ -86,246 +87,253 @@ const SellerAddProductPage = () => {
     }
   };
 
+  const onSubmit: SubmitHandler<IAddProductForm> = (data) => {
+    console.log(data);
+  };
+
   useEffect(() => {
     getListCategory();
   }, []);
 
   return (
-    <SellerAdminLayout currentPage="Products">
-      <div className="p-5">
-        <div className="flex items-center md:flex-row justify-between  md:gap-0 flex-col gap-6">
-          <h1 className="text-[30px]">Add Products</h1>
-        </div>
-        <div className="mt-10">
-          <form action="" className="flex flex-col gap-y-5 w-[75%]">
-            <div className="flex flex-col">
-              <p>Product name</p>
-              <input
-                className="rounded-md w-full"
-                {...register("product_name", {
-                  required: "Product name is required",
-                })}
-                type="text"
-              />
-              {errors.product_name?.type === "required" && (
-                <p role="alert" className="text-xs text-red-500 mt-1">
-                  {errors.product_name.message}
-                </p>
-              )}
-            </div>
-            <div className="flex flex-col">
-              <p>Product Description</p>
-              <textarea
-                className="w-full rounded-md"
-                {...register("description", {
-                  required: "Product description is required",
-                })}
-              />
-              {errors.description?.type === "required" && (
-                <p role="alert" className="text-xs text-red-500 mt-1">
-                  Product description is required
-                </p>
-              )}
-            </div>
-            <div className="flex flex-col">
-              <p>Category</p>
-              <div className="relative w-full">
+    <>
+      <ToastContainer />
+      <SellerAdminLayout currentPage="Products">
+        <div className="p-5">
+          <div className="flex items-center md:flex-row justify-between  md:gap-0 flex-col gap-6">
+            <h1 className="text-[30px]">Add Products</h1>
+          </div>
+          <div className="mt-10">
+            <form
+              action=""
+              className="flex flex-col gap-y-5 w-[75%]"
+              onSubmit={handleSubmit(onSubmit)}
+            >
+              <div className="flex flex-col">
+                <p>Product name</p>
                 <input
-                  {...register("category", {
-                    required: "Category is required",
+                  className="rounded-md w-full"
+                  {...register("product_name", {
+                    required: "Product name is required",
                   })}
                   type="text"
-                  name="category"
-                  id="category"
-                  className={`${
-                    isCategoryOpen ? "rounded-t-md" : "rounded-md"
-                  } hover:cursor-pointer w-full`}
-                  placeholder="Select category"
-                  value={watchCategory && watchCategory.name}
-                  onClick={() => setIsCategoryOpen(!isCategoryOpen)}
-                  readOnly
                 />
-                {isCategoryOpen && (
-                  <div className="absolute z-50 text-sm w-full h-80 flex border border-x-slate-500 border-b-slate-500 shadow-md  bg-white py-3 rounded-bl-md rounded-br-md">
-                    <div className="flex-1 border-r  overflow-auto">
-                      {categories?.map((l1, i) => {
-                        return (
-                          <div
-                            key={i}
-                            className={`py-1 px-3 hover:cursor-pointer flex items-center justify-between hover:bg-slate-100 hover:rounded transition`}
-                            onClick={() => {
-                              setCategory2(l1.children!);
-                              setCategory3([]);
-                            }}
-                          >
-                            <p>{l1.name}</p>
-                            <FaChevronRight size={10} />
-                          </div>
-                        );
-                      })}
-                    </div>
-                    {category2.length !== 0 && (
-                      <div className="flex-1 border-r overflow-auto">
-                        {category2.map((l2, i) => {
-                          return (
-                            <div
-                              key={i}
-                              className="py-1 px-3 hover:cursor-pointer flex items-center justify-between hover:bg-slate-100 hover:rounded transition"
-                              onClick={() => {
-                                if (l2.children !== undefined) {
-                                  return setCategory3(l2.children!);
-                                }
-                                setValue("category", l2);
-                                return setIsCategoryOpen(false);
-                              }}
-                            >
-                              <p>{l2.name}</p>
-                              {l2.children && <FaChevronRight size={10} />}
-                            </div>
-                          );
-                        })}
-                      </div>
-                    )}
-
-                    {category3.length !== 0 && (
-                      <div className="flex-1 overflow-auto">
-                        {category3.map((l3, i) => {
-                          return (
-                            <div
-                              key={i}
-                              className="py-1 px-3 hover:cursor-pointer hover:bg-slate-100 hover:rounded transition"
-                              onClick={() => {
-                                setValue("category", l3);
-                                setIsCategoryOpen(false);
-                              }}
-                            >
-                              {l3.name}
-                            </div>
-                          );
-                        })}
-                      </div>
-                    )}
-                  </div>
+                {errors.product_name?.type === "required" && (
+                  <p role="alert" className="text-xs text-red-500 mt-1">
+                    {errors.product_name.message}
+                  </p>
                 )}
               </div>
-              {errors.category?.type === "required" && (
-                <p role="alert" className="text-xs text-red-500 mt-1">
-                  {errors.category.message}
-                </p>
-              )}
-            </div>
-            <div>
-              <div className="flex justify-between">
-                <div>
-                  <h1 className="text-xl">Variants</h1>
-                  <p className="text-xs">Add your product variant (optional)</p>
-                </div>
-                {watchVariantGroup.length < 2 && (
-                  <Button
-                    text="Add Variant"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      setValue("variantGroup", [
-                        ...watchVariantGroup,
-                        {
-                          name: "",
-                          type: [],
-                        },
-                      ]);
-                      setValue("variantTable", []);
-                    }}
-                    styling="bg-[#364968] rounded-md w-fit p-2 text-white "
-                  />
-                )}
-              </div>
-              <div className="mt-3 flex flex-col gap-y-5">
-                {watchVariantGroup &&
-                  watchVariantGroup.map((_, i) => {
-                    return (
-                      <ProductVariantGroup
-                        key={i}
-                        i={i}
-                        register={register}
-                        watchVariantGroup={watchVariantGroup}
-                        setValue={setValue}
-                        getValues={getValues}
-                      />
-                    );
+              <div className="flex flex-col">
+                <p>Product Description</p>
+                <textarea
+                  className="w-full rounded-md"
+                  {...register("description", {
+                    required: "Product description is required",
                   })}
+                />
+                {errors.description?.type === "required" && (
+                  <p role="alert" className="text-xs text-red-500 mt-1">
+                    Product description is required
+                  </p>
+                )}
               </div>
-              {watchVariantGroup.length !== 0 && (
-                <div className="mt-10">
-                  <div>
-                    <p className="text-xl">Variant Table</p>
-                    <p className="text-xs">
-                      Configure each product variant image, price, and stock
-                    </p>
-                  </div>
-                  <div className="mt-2">
-                    <table className="w-full">
-                      <thead>
-                        <tr>
-                          <th className="text-start">Image</th>
-                          {getValues("variantGroup").map((v, i) => {
+              <div className="flex flex-col">
+                <p>Category</p>
+                <div className="relative w-full">
+                  <input
+                    {...register("category", {
+                      required: "Category is required",
+                    })}
+                    type="text"
+                    name="category"
+                    id="category"
+                    className={`${
+                      isCategoryOpen ? "rounded-t-md" : "rounded-md"
+                    } hover:cursor-pointer w-full`}
+                    placeholder="Select category"
+                    value={watchCategory && watchCategory.name}
+                    onClick={() => setIsCategoryOpen(!isCategoryOpen)}
+                    readOnly
+                  />
+                  {isCategoryOpen && (
+                    <div className="absolute z-50 text-sm w-full h-80 flex border border-x-slate-500 border-b-slate-500 shadow-md  bg-white py-3 rounded-bl-md rounded-br-md">
+                      <div className="flex-1 border-r  overflow-auto">
+                        {categories?.map((l1, i) => {
+                          return (
+                            <div
+                              key={i}
+                              className={`py-1 px-3 hover:cursor-pointer flex items-center justify-between hover:bg-slate-100 hover:rounded transition`}
+                              onClick={() => {
+                                setCategory2(l1.children!);
+                                setCategory3([]);
+                              }}
+                            >
+                              <p>{l1.name}</p>
+                              <FaChevronRight size={10} />
+                            </div>
+                          );
+                        })}
+                      </div>
+                      {category2.length !== 0 && (
+                        <div className="flex-1 border-r overflow-auto">
+                          {category2.map((l2, i) => {
                             return (
-                              <th key={i} className="text-start">
-                                {v.name}
-                              </th>
+                              <div
+                                key={i}
+                                className="py-1 px-3 hover:cursor-pointer flex items-center justify-between hover:bg-slate-100 hover:rounded transition"
+                                onClick={() => {
+                                  if (l2.children !== undefined) {
+                                    return setCategory3(l2.children!);
+                                  }
+                                  setValue("category", l2);
+                                  return setIsCategoryOpen(false);
+                                }}
+                              >
+                                <p>{l2.name}</p>
+                                {l2.children && <FaChevronRight size={10} />}
+                              </div>
                             );
                           })}
-                          <th className="text-start">Price</th>
-                          <th className="text-start">Stock</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {getValues("variantGroup")
-                          .at(0)
-                          ?.type.map((v0, i) => {
-                            if (getValues("variantGroup").length === 1) {
+                        </div>
+                      )}
+
+                      {category3.length !== 0 && (
+                        <div className="flex-1 overflow-auto">
+                          {category3.map((l3, i) => {
+                            return (
+                              <div
+                                key={i}
+                                className="py-1 px-3 hover:cursor-pointer hover:bg-slate-100 hover:rounded transition"
+                                onClick={() => {
+                                  setValue("category", l3);
+                                  setIsCategoryOpen(false);
+                                }}
+                              >
+                                {l3.name}
+                              </div>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+                {errors.category?.type === "required" && (
+                  <p role="alert" className="text-xs text-red-500 mt-1">
+                    {errors.category.message}
+                  </p>
+                )}
+              </div>
+              <div>
+                <div className="flex justify-between">
+                  <div>
+                    <h1 className="text-xl">Variants</h1>
+                    <p className="text-xs">
+                      Add your product variant (optional)
+                    </p>
+                  </div>
+                  {watchVariantGroup.length < 2 && (
+                    <Button
+                      text="Add Variant"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        setValue("variantGroup", [
+                          ...watchVariantGroup,
+                          {
+                            name: "",
+                            type: [],
+                          },
+                        ]);
+                        setValue("variantTable", []);
+                      }}
+                      styling="bg-[#364968] rounded-md w-fit p-2 text-white "
+                    />
+                  )}
+                </div>
+                <div className="mt-3 flex flex-col gap-y-5">
+                  {watchVariantGroup &&
+                    watchVariantGroup.map((_, i) => {
+                      return (
+                        <ProductVariantGroup
+                          key={i}
+                          i={i}
+                          register={register}
+                          watchVariantGroup={watchVariantGroup}
+                          setValue={setValue}
+                          getValues={getValues}
+                        />
+                      );
+                    })}
+                </div>
+                {watchVariantGroup.length !== 0 && (
+                  <div className="mt-10">
+                    <div>
+                      <p className="text-xl">Variant Table</p>
+                      <p className="text-xs">
+                        Configure each product variant image, price, and stock
+                      </p>
+                    </div>
+                    <div className="mt-2">
+                      <table className="w-full">
+                        <thead>
+                          <tr>
+                            <th className="text-start">Image</th>
+                            {getValues("variantGroup").map((v, i) => {
                               return (
-                                <ProductVariant
-                                  watchVariantTable={watchVariantTable}
-                                  key={i}
-                                  variant1type={v0}
-                                  getValues={getValues}
-                                  setValue={setValue}
-                                  watchVariantGroup={watchVariantGroup}
-                                />
+                                <th key={i} className="text-start">
+                                  {v.name}
+                                </th>
                               );
-                            }
-                            return getValues("variantGroup")
-                              .at(1)
-                              ?.type.map((v1, i) => {
+                            })}
+                            <th className="text-start">Price</th>
+                            <th className="text-start">Stock</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {getValues("variantGroup")
+                            .at(0)
+                            ?.type.map((v0, i) => {
+                              if (getValues("variantGroup").length === 1) {
                                 return (
                                   <ProductVariant
                                     watchVariantTable={watchVariantTable}
                                     key={i}
+                                    variant1type={v0}
                                     getValues={getValues}
                                     setValue={setValue}
                                     watchVariantGroup={watchVariantGroup}
-                                    variant1type={v0}
-                                    variant2type={v1}
                                   />
                                 );
-                              });
-                          })}
-                      </tbody>
-                    </table>
+                              }
+                              return getValues("variantGroup")
+                                .at(1)
+                                ?.type.map((v1, i) => {
+                                  return (
+                                    <ProductVariant
+                                      watchVariantTable={watchVariantTable}
+                                      key={i}
+                                      getValues={getValues}
+                                      setValue={setValue}
+                                      watchVariantGroup={watchVariantGroup}
+                                      variant1type={v0}
+                                      variant2type={v1}
+                                    />
+                                  );
+                                });
+                            })}
+                        </tbody>
+                      </table>
+                    </div>
                   </div>
-                  <Button
-                    text="Test"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      console.log(watchVariantTable);
-                    }}
-                  />
-                </div>
-              )}
-            </div>
-          </form>
+                )}
+                <Button text="Test" />
+              </div>
+            </form>
+          </div>
         </div>
-      </div>
-    </SellerAdminLayout>
+      </SellerAdminLayout>
+    </>
   );
 };
 
@@ -554,9 +562,28 @@ const ProductVariant = ({
         <input
           ref={imageRef}
           type="file"
-          onChange={(e) => {
+          onChange={async (e) => {
             if (e.target.files !== undefined) {
-              setImage(e.target.files![0]);
+              try {
+                const formData = new FormData();
+                formData.append("image_id", id);
+                formData.append("image", e.target.files![0]);
+                const res = await toast.promise(
+                  API.post("/sellers/products/upload", formData),
+                  {
+                    pending: "Loading",
+                    error: "Error uploading photo",
+                  },
+                  {
+                    autoClose: 1500,
+                  }
+                );
+
+                console.log(res.data);
+                setImage(e.target.files![0]);
+
+                console.log("success");
+              } catch (e) {}
             }
           }}
           name=""
