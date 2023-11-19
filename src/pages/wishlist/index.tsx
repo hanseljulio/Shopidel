@@ -8,7 +8,6 @@ import axios from "axios";
 import Button from "@/components/Button";
 import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
-import { FaRegTrashAlt } from "react-icons/fa";
 import { useRouter } from "next/router";
 import { useUserStore } from "@/store/userStore";
 
@@ -39,7 +38,7 @@ function Index() {
       router.push({
         pathname: "/wishlist",
         query: {
-          ...(query.trim() !== "" ? { s: query } : {}), // Include search parameter only if query is not empty
+          ...(query.trim() !== "" ? { s: query } : {}),
           page: 1,
         },
       });
@@ -51,8 +50,6 @@ function Index() {
   const handleQueryChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newQuery = e.target.value;
     setQuery(newQuery);
-
-    // Check if the new query is empty, if yes, reload wishlist without search parameter
     if (newQuery.trim() === "") {
       searchQueryHandler();
     }
