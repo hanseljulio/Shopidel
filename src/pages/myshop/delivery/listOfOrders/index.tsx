@@ -19,6 +19,7 @@ import {
 import Pagination from "@/components/Pagination";
 import ReactToPrint from "react-to-print";
 import { IAddress } from "@/interfaces/user_interface";
+import { BsTypeH1 } from "react-icons/bs";
 
 interface IIndividualOrderProps {
   setCancelTransaction: (orderId: number) => void;
@@ -261,6 +262,8 @@ const IndividualOrder = (props: IIndividualOrderProps) => {
               </div>
               <h1>Status: {props.data.status}</h1>
             </div>
+          ) : props.data.status === "Canceled" ? (
+            <h1 className="text-red-600">Status: Cancelled</h1>
           ) : (
             <div className="flex items-center gap-4">
               <h1
@@ -446,7 +449,7 @@ const SellerOrderListPage = () => {
     if (sellerAddressData.id === 0) {
       getSellerAddress();
     }
-  }, [page]);
+  }, [sortBy, page]);
 
   return (
     <>
