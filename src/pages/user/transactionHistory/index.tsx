@@ -24,6 +24,7 @@ interface IIndividualOrderProps {
   setCurrentTransaction: (transactionId: number) => void;
   setCurrentReview: (review: ITransactionHistoryReview) => void;
   setProductReviewId: (id: number, name: string) => void;
+  confirmReceive: () => void;
 }
 
 interface IDetailModalProps {
@@ -39,6 +40,10 @@ interface IAddReviewModal {
   name: string;
   orderId: number;
   successSubmitFunction: () => void;
+}
+
+interface IConfirmReceiveModal {
+  exitFunction: () => void;
 }
 
 const AddReviewModal = (props: IAddReviewModal) => {
@@ -407,7 +412,40 @@ const IndividualOrder = (props: IIndividualOrderProps) => {
             View Transaction Detail
           </h1>
           <h1 className="">Status: {props.data.status.toUpperCase()}</h1>
+          {props.data.status === "Delivered" && (
+            <Button
+              onClick={props.confirmReceive}
+              text="I have received the order"
+              styling="bg-[#364968] p-3 rounded-[8px] w-[250px] text-white "
+            />
+          )}
         </div>
+      </div>
+    </div>
+  );
+};
+
+const ConfirmReceiveModal = (props: IConfirmReceiveModal) => {
+  return (
+    <div className="bg-white p-5 rounded-md md:w-[1000px] md:max-h-[600px] max-h-[80vh] w-[90vw] overflow-y-auto">
+      <div className="py-3 border-b-2">
+        <h1 className="text-[20px] font-bold">Confirm Receipt</h1>
+      </div>
+      <div className="pt-4">
+        <h1>
+          By clicking confirm, you acknowledge that you have received the
+          product.
+        </h1>
+        <h1>
+          The seller will receive your money and this order will be marked as
+          complete.
+        </h1>
+      </div>
+      <div className="flex justify-center pt-8">
+        <Button
+          text="CONFIRM"
+          styling="bg-[#364968] p-3 rounded-[8px] w-[250px] text-white "
+        />
       </div>
     </div>
   );
@@ -442,6 +480,8 @@ const TransactionHistory = () => {
   const [selectedProductName, setSelectedProductName] = useState<string>("");
   const [selectedOrderId, setSelectedOrderId] = useState<number>(0);
 
+  const [showConfirmReceive, setShowConfirmReceive] = useState<boolean>(false);
+
   const getTransactionData = async () => {
     try {
       const response = await API.get(
@@ -473,6 +513,20 @@ const TransactionHistory = () => {
 
   return (
     <>
+      {showConfirmReceive && (
+        <Modal
+          content={
+            <ConfirmReceiveModal
+              exitFunction={() => {
+                setShowConfirmReceive(false);
+                getTransactionData();
+              }}
+            />
+          }
+          onClose={() => setShowConfirmReceive(false)}
+        />
+      )}
+
       {showAddReviewModal && (
         <Modal
           content={
@@ -547,6 +601,7 @@ const TransactionHistory = () => {
                         setSelectedProductName(name);
                         setShowAddReviewModal(true);
                       }}
+                      confirmReceive={() => setShowConfirmReceive(true)}
                     />
                   ))}
                 </div>
