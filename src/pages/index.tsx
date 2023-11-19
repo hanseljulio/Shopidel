@@ -25,6 +25,7 @@ export default function Home() {
       );
 
       const data = res.data as IAPIResponse<IProduct[]>;
+      console.log("prod", data);
 
       setProductList(data!);
     } catch (e) {
@@ -94,18 +95,22 @@ export default function Home() {
         </div>
         <div className="justify-between gap-x-4 gap-y-4 grid grid-cols-2 md:grid-cols-5">
           {productList.data?.map((product) => (
-            <ProductCard
-              key={product.id}
-              onClick={() =>
-                router.push(`/${product.shop_name}/${product.name}`)
-              }
-              image={product.picture_url}
-              price={product.price}
-              showStar={false}
-              title={product.name}
-              place={product.district}
-              order={product.total_sold}
-            />
+            <>
+              <ProductCard
+                key={product.id}
+                onClick={() =>
+                  router.push(
+                    `/${product.shop_name_slug}/${product.product_name_slug}`
+                  )
+                }
+                image={product.picture_url}
+                price={product.price}
+                showStar={false}
+                title={product.name}
+                place={product.district}
+                order={product.total_sold}
+              />
+            </>
           ))}
         </div>
       </div>

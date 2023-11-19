@@ -6,7 +6,7 @@ import { currencyConverter } from "@/utils/utils";
 interface IProductCard {
   image: string;
   price: string;
-  order?: number;
+  order?: string | number;
   title: string;
   place?: string;
   star?: number;
@@ -29,7 +29,7 @@ const ProductCard = ({
     <div
       onClick={onClick}
       className={classNames([
-        "w-full h-auto md:w-full object-cover md:h-auto bg-white overflow-hidden shadow-md hover:shadow-none cursor-pointer rounded-md flex flex-col items-center align-middle justify-center transition-all duration-500 ease-in-out text-left",
+        "w-full transform  hover:scale-95 h-auto md:w-full object-cover md:h-auto bg-white overflow-hidden shadow-md hover:shadow-none cursor-pointer rounded-md flex flex-col items-center align-middle justify-center transition-all duration-500 ease-in-out text-left",
       ])}
     >
       <div className={"relative h-full w-full md "}>
