@@ -558,7 +558,9 @@ const Search = () => {
                   return (
                     <ProductCard
                       onClick={() =>
-                        router.push(`/${product.shop_name}/${product.name}`)
+                        router.push(
+                          `/${product.shop_name_slug}/${product.product_name_slug}`
+                        )
                       }
                       key={i}
                       showStar={true}
