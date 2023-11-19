@@ -1,13 +1,15 @@
 import Dropdown from "@/components/Dropdown";
 import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar";
+import Pagination from "@/components/Pagination";
 import ProductCard from "@/components/ProductCard";
 import { IAPIResponse } from "@/interfaces/api_interface";
-import { IProduct } from "@/interfaces/product_interface";
+import { IProduct, IProductPagination } from "@/interfaces/product_interface";
 import {
   IAPIProfileShopResponse,
   IBestSelling,
   IEtalase,
+  IEtalaseSeller,
   IProfileShopProps,
 } from "@/interfaces/seller_interface";
 import { API } from "@/network";
@@ -48,8 +50,10 @@ function Index({ seller }: IProfileShopProps) {
   const router = useRouter();
   const [showAllProducts, setShowAllProducts] = useState(false);
   const [bestSelling, setBestSelling] = useState<IBestSelling[]>([]);
-  const [categoryList, setCategoryList] = useState<IEtalase[]>([]);
-  const [productCategory, setProductCategory] = useState<IProduct[]>([]);
+  const [categoryList, setCategoryList] = useState<IEtalaseSeller[]>([]);
+  const [productCategory, setProductCategory] = useState<IProductPagination>();
+  const [showPage, setShowPage] = useState<IAPIResponse<IEtalaseSeller[]>>();
+  const [page, setPage] = useState<number>(1);
   const [activeCategory, setActiveCategory] = useState<number | null>(
     categoryList.length > 0 ? categoryList[0].showcase_id : null
   );
@@ -76,10 +80,10 @@ function Index({ seller }: IProfileShopProps) {
   const getEtalase = async () => {
     try {
       const res = await API.get(`/sellers/${seller.shop_name_slug}/showcases`);
-      const data = res.data as IAPIResponse<IEtalase[]>;
-
+      const data = res.data as IAPIResponse<IEtalaseSeller[]>;
       if (data.data) {
         setCategoryList(data.data);
+        setShowPage(data);
         console.log("etalist", data);
       } else {
         console.error("Data is undefined or null");
@@ -101,21 +105,20 @@ function Index({ seller }: IProfileShopProps) {
 
       if (id !== null) {
         res = await API.get(
-          `/sellers/${seller.shop_name_slug}/showcases/${id}/products`
+          `/sellers/${seller.shop_name_slug}/showcases/${id}/products?page=${page}`
         );
         console.log("yes");
       } else {
         res = await API.get(
-          `/sellers/${seller.shop_name_slug}/showcases/0/products`
+          `/sellers/${seller.shop_name_slug}/showcases/0/products?page=${page}`
         );
         console.log("buk");
       }
 
-      const data = res.data as IAPIResponse<IProduct[]>;
+      const data = res.data;
       console.log("eta", data);
-
       if (data.data) {
-        setProductCategory(data.data);
+        setProductCategory(data);
         setActiveCategory(id);
       } else {
         console.error("Data is undefined or null");
@@ -161,8 +164,10 @@ function Index({ seller }: IProfileShopProps) {
   }, []);
   useEffect(() => {
     getEtalase();
-    getProductBasedOnCategory(activeCategory);
   }, [activeCategory]);
+  useEffect(() => {
+    getProductBasedOnCategory(activeCategory);
+  }, [activeCategory, page]);
 
   return (
     <div>
@@ -247,7 +252,7 @@ function Index({ seller }: IProfileShopProps) {
         <div className="flex flex-col md:flex-row mt-10 w-full gap-x-5">
           <div className="w-full md:w-1/4 flex flex-row md:flex-col gap-5  mt-5 pt-0 md:pt-6">
             <div className="items-start">
-              <p className="flex items-center gap-1 font-semibold border-b border-b-slate-200 pb-0 md:pb-8">
+              <p className="flex items-center gap-1 font-semibold border-b border-b-slate-2 00 pb-0 md:pb-8">
                 <FaListUl className="hidden md:flex" size={15} />
                 Etalase
               </p>
@@ -281,7 +286,7 @@ function Index({ seller }: IProfileShopProps) {
               <Dropdown
                 label="Sort"
                 labelStyle="w-0 m-0 p-0"
-                width="w-[250px]"
+                width="w-250px h-15"
                 //   value={}
                 flexLabel="flex md:items-center md:gap-[77px] pl-2 md:flex-row flex-col gap-2 items-start"
                 options={[
@@ -293,7 +298,7 @@ function Index({ seller }: IProfileShopProps) {
               />
             </div>
             <div className="w-full grid grid-cols-2 md:grid-cols-4 gap-3 md:mt-3">
-              {productCategory.map((e, k) => (
+              {productCategory?.data.map((e, k) => (
                 <>
                   <ProductCard
                     onClick={() =>
@@ -310,6 +315,12 @@ function Index({ seller }: IProfileShopProps) {
                   />
                 </>
               ))}
+              <div className="col-span-2 md:col-span-4 text-center mt-5">
+                <Pagination
+                  data={productCategory?.pagination}
+                  onNavigate={(navPage: any) => setPage(navPage)}
+                />
+              </div>
             </div>
           </div>
         </div>

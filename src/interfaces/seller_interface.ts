@@ -9,9 +9,19 @@ export interface IBestSelling {
     shop_name_slug: string;
   }
   
-  export interface IEtalase {
+  export interface IEtalaseSeller {
     showcase_id: number;
     showcase_name: string;
+  }
+
+  export interface IEtalase{
+    data: IEtalaseSeller[];
+    pagination: {
+      total_page: number;
+      total_item: number;
+      current_page: number;
+      limit: number;
+    };
   }
   
   export interface IAPIProfileShopResponse {

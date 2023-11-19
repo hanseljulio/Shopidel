@@ -1,3 +1,5 @@
+import { IAPIPagination } from "./api_interface";
+
 export interface IProduct {
   id: number;
   name: string;
@@ -12,6 +14,16 @@ export interface IProduct {
   slug: string
   category_name: string;
   category_id: number;
+}
+
+export interface IProductPagination{
+  data: IProduct[]
+  pagination: {
+    total_page: number;
+    total_item: number;
+    current_page: number;
+    limit: number;
+  };
 }
 
 export interface IReviewProduct
