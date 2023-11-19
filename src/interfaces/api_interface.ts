@@ -1,3 +1,5 @@
+import { ICategory } from "./product_interface";
+
 export interface IAPIResponse<T = Object | []> {
   data?: T;
   message?: string;
@@ -66,4 +68,8 @@ export interface IAPIProductDetailResponse {
     }
   ];
   is_favorite: boolean;
+}
+
+export interface IAPICategoriesResponse {
+  categories: ICategory[];
 }
