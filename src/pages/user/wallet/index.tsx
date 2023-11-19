@@ -175,11 +175,12 @@ const ChangePinModal = () => {
   const { updateUser } = useUserStore();
   const [isValid, setIsValid] = useState<boolean>(false);
   const [password, setPassword] = useState<string>("");
+
   const passwordValidation = () => {
     try {
       toast.promise(
         API.post("/accounts/check-password", {
-          password: "123",
+          password: password,
         }),
         {
           pending: "Loading",
