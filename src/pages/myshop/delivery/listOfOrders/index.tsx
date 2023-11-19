@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import SellerAdminLayout from "@/components/SellerAdminLayout";
 import { currencyConverter } from "@/utils/utils";
 import Button from "@/components/Button";
@@ -17,12 +17,15 @@ import {
   ISellerOrderHistoryData,
 } from "@/interfaces/seller_interface";
 import Pagination from "@/components/Pagination";
+import ReactToPrint from "react-to-print";
+import { IAddress } from "@/interfaces/user_interface";
 
 interface IIndividualOrderProps {
   setCancelTransaction: (orderId: number) => void;
   data: ISellerOrderHistoryData;
   setOrderDetail: () => void;
   refreshFunction: () => void;
+  sellerAddressData: IAddress;
 }
 
 interface IOrderDetailModalProps {
@@ -199,6 +202,8 @@ const IndividualOrder = (props: IIndividualOrderProps) => {
     }
   };
 
+  const componentRef = useRef<HTMLDivElement>(null);
+
   return (
     <div className="p-5 rounded-md md:w-[90%] border-2 border-black w-[80%]">
       <div className="pb-3 flex justify-between">
@@ -240,9 +245,18 @@ const IndividualOrder = (props: IIndividualOrderProps) => {
                   props.data.status === "Completed" ? "hidden invisible" : ""
                 }`}
               >
-                <h1 className="text-blue-600 hover:cursor-pointer hover:underline">
-                  Print Shipping Label
-                </h1>
+                <ReactToPrint
+                  trigger={() => (
+                    <h1 className="text-blue-600 hover:cursor-pointer hover:underline">
+                      Print Shipping Label
+                    </h1>
+                  )}
+                  content={() => componentRef.current}
+                />
+                <div ref={componentRef} className="hidden print:block">
+                  <ShippingLabel sellerAddressData={props.sellerAddressData} />
+                </div>
+
                 <h1>|</h1>
               </div>
               <h1>Status: {props.data.status}</h1>
@@ -272,6 +286,65 @@ const IndividualOrder = (props: IIndividualOrderProps) => {
   );
 };
 
+interface IShippingLabelProps {
+  sellerAddressData: IAddress;
+}
+
+const ShippingLabel = (props: IShippingLabelProps) => {
+  return (
+    <div className="flex flex-col gap-6 p-[100px]">
+      <div>
+        <h1>Ship Date: {new Date().toLocaleString()}</h1>
+      </div>
+      <div className="">
+        <h1>{props.sellerAddressData.detail}</h1>
+        <h1>{`${props.sellerAddressData.kelurahan.toUpperCase()}, ${props.sellerAddressData.sub_district.toUpperCase()}, ${props.sellerAddressData.district.toUpperCase()}, ${props.sellerAddressData.province.toUpperCase()}, ID ${
+          props.sellerAddressData.zip_code
+        }`}</h1>
+      </div>
+      <div>
+        <h1 className="font-bold">SHIP TO:</h1>
+        <h1>{props.sellerAddressData.detail}</h1>
+        <h1>{`${props.sellerAddressData.kelurahan.toUpperCase()}, ${props.sellerAddressData.sub_district.toUpperCase()}, ${props.sellerAddressData.district.toUpperCase()}, ${props.sellerAddressData.province.toUpperCase()}, ID ${
+          props.sellerAddressData.zip_code
+        }`}</h1>
+      </div>
+      <div>
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          version="1.0"
+          width="250.000000pt"
+          height="250.000000pt"
+          viewBox="0 0 1026.000000 1026.000000"
+          preserveAspectRatio="xMidYMid meet"
+        >
+          <g
+            transform="translate(0.000000,1026.000000) scale(0.100000,-0.100000)"
+            fill="#000000"
+            stroke="none"
+          >
+            <path d="M380 8550 l0 -1330 1330 0 1330 0 0 1330 0 1330 -1330 0 -1330 0 0 -1330z m2280 0 l0 -950 -950 0 -950 0 0 950 0 950 950 0 950 0 0 -950z" />
+            <path d="M1140 8550 l0 -570 570 0 570 0 0 570 0 570 -570 0 -570 0 0 -570z" />
+            <path d="M3420 9690 l0 -190 190 0 190 0 0 -190 0 -190 -190 0 -190 0 0 -570 0 -570 190 0 190 0 0 190 0 190 380 0 380 0 0 -190 0 -190 -190 0 -190 0 0 -950 0 -950 -190 0 -190 0 0 -760 0 -760 190 0 190 0 0 190 0 190 190 0 190 0 0 -570 0 -570 190 0 190 0 0 -190 0 -190 190 0 190 0 0 190 0 190 -190 0 -190 0 0 380 0 380 190 0 190 0 0 190 0 190 190 0 190 0 0 190 0 190 190 0 190 0 0 -380 0 -380 190 0 190 0 0 190 0 190 190 0 190 0 0 -380 0 -380 -190 0 -190 0 0 -190 0 -190 -190 0 -190 0 0 190 0 190 -190 0 -190 0 0 -380 0 -380 380 0 380 0 0 -760 0 -760 190 0 190 0 0 -190 0 -190 -190 0 -190 0 0 -190 0 -190 -190 0 -190 0 0 190 0 190 -190 0 -190 0 0 -190 0 -190 -570 0 -570 0 0 570 0 570 190 0 190 0 0 190 0 190 -190 0 -190 0 0 190 0 190 -190 0 -190 0 0 380 0 380 -190 0 -190 0 0 -190 0 -190 -190 0 -190 0 0 570 0 570 -380 0 -380 0 0 -190 0 -190 190 0 190 0 0 -190 0 -190 -190 0 -190 0 0 -190 0 -190 380 0 380 0 0 -190 0 -190 190 0 190 0 0 -190 0 -190 380 0 380 0 0 -190 0 -190 -190 0 -190 0 0 -570 0 -570 -190 0 -190 0 0 380 0 380 -190 0 -190 0 0 -760 0 -760 760 0 760 0 0 190 0 190 760 0 760 0 0 190 0 190 190 0 190 0 0 -190 0 -190 190 0 190 0 0 -190 0 -190 1330 0 1330 0 0 190 0 190 -380 0 -380 0 0 190 0 190 190 0 190 0 0 190 0 190 190 0 190 0 0 190 0 190 -190 0 -190 0 0 190 0 190 -190 0 -190 0 0 -190 0 -190 -190 0 -190 0 0 -190 0 -190 -190 0 -190 0 0 570 0 570 760 0 760 0 0 760 0 760 -190 0 -190 0 0 190 0 190 190 0 190 0 0 380 0 380 -380 0 -380 0 0 190 0 190 -380 0 -380 0 0 190 0 190 -190 0 -190 0 0 190 0 190 570 0 570 0 0 -190 0 -190 190 0 190 0 0 190 0 190 190 0 190 0 0 190 0 190 -190 0 -190 0 0 -190 0 -190 -190 0 -190 0 0 190 0 190 -570 0 -570 0 0 -190 0 -190 -190 0 -190 0 0 -570 0 -570 -190 0 -190 0 0 -190 0 -190 -190 0 -190 0 0 570 0 570 190 0 190 0 0 380 0 380 -190 0 -190 0 0 -190 0 -190 -190 0 -190 0 0 -380 0 -380 -190 0 -190 0 0 570 0 570 190 0 190 0 0 190 0 190 190 0 190 0 0 190 0 190 -190 0 -190 0 0 -190 0 -190 -190 0 -190 0 0 760 0 760 -190 0 -190 0 0 190 0 190 190 0 190 0 0 190 0 190 -190 0 -190 0 0 190 0 190 -380 0 -380 0 0 -190 0 -190 -190 0 -190 0 0 190 0 190 -190 0 -190 0 0 -190 0 -190 -190 0 -190 0 0 190 0 190 -190 0 -190 0 0 -190z m1900 -760 l0 -190 190 0 190 0 0 -190 0 -190 -190 0 -190 0 0 190 0 190 -190 0 -190 0 0 -190 0 -190 -190 0 -190 0 0 380 0 380 380 0 380 0 0 -190z m0 -1140 l0 -190 190 0 190 0 0 -190 0 -190 190 0 190 0 0 -190 0 -190 -190 0 -190 0 0 -570 0 -570 -190 0 -190 0 0 -190 0 -190 -190 0 -190 0 0 -190 0 -190 -190 0 -190 0 0 380 0 380 380 0 380 0 0 950 0 950 -190 0 -190 0 0 -380 0 -380 -190 0 -190 0 0 380 0 380 190 0 190 0 0 190 0 190 190 0 190 0 0 -190z m-380 -1520 l0 -190 -190 0 -190 0 0 190 0 190 190 0 190 0 0 -190z m3040 -1140 l0 -190 -190 0 -190 0 0 190 0 190 190 0 190 0 0 -190z m760 0 l0 -190 380 0 380 0 0 -190 0 -190 -380 0 -380 0 0 -190 0 -190 380 0 380 0 0 -190 0 -190 -380 0 -380 0 0 190 0 190 -190 0 -190 0 0 -190 0 -190 -760 0 -760 0 0 190 0 190 760 0 760 0 0 570 0 570 190 0 190 0 0 -190z m-760 -2280 l0 -570 -570 0 -570 0 0 570 0 570 570 0 570 0 0 -570z m1520 380 l0 -190 -570 0 -570 0 0 190 0 190 570 0 570 0 0 -190z m-1520 -1520 l0 -190 -190 0 -190 0 0 190 0 190 190 0 190 0 0 -190z m0 -760 l0 -190 -190 0 -190 0 0 190 0 190 190 0 190 0 0 -190z m760 0 l0 -190 -190 0 -190 0 0 190 0 190 190 0 190 0 0 -190z" />
+            <path d="M7220 2850 l0 -190 190 0 190 0 0 190 0 190 -190 0 -190 0 0 -190z" />
+            <path d="M6460 9500 l0 -380 190 0 190 0 0 380 0 380 -190 0 -190 0 0 -380z" />
+            <path d="M7220 8550 l0 -1330 1330 0 1330 0 0 1330 0 1330 -1330 0 -1330 0 0 -1330z m2280 0 l0 -950 -950 0 -950 0 0 950 0 950 950 0 950 0 0 -950z" />
+            <path d="M7980 8550 l0 -570 570 0 570 0 0 570 0 570 -570 0 -570 0 0 -570z" />
+            <path d="M6460 8170 l0 -190 190 0 190 0 0 190 0 190 -190 0 -190 0 0 -190z" />
+            <path d="M3420 7410 l0 -190 190 0 190 0 0 190 0 190 -190 0 -190 0 0 -190z" />
+            <path d="M380 6460 l0 -380 190 0 190 0 0 190 0 190 190 0 190 0 0 -190 0 -190 190 0 190 0 0 -190 0 -190 -380 0 -380 0 0 -190 0 -190 -190 0 -190 0 0 -190 0 -190 760 0 760 0 0 -570 0 -570 -190 0 -190 0 0 -190 0 -190 380 0 380 0 0 950 0 950 190 0 190 0 0 -190 0 -190 190 0 190 0 0 190 0 190 -190 0 -190 0 0 190 0 190 380 0 380 0 0 190 0 190 -380 0 -380 0 0 190 0 190 190 0 190 0 0 190 0 190 -190 0 -190 0 0 -190 0 -190 -380 0 -380 0 0 190 0 190 -760 0 -760 0 0 -380z m2280 -570 l0 -190 -190 0 -190 0 0 190 0 190 190 0 190 0 0 -190z" />
+            <path d="M3420 6650 l0 -190 190 0 190 0 0 190 0 190 -190 0 -190 0 0 -190z" />
+            <path d="M760 4370 l0 -190 -190 0 -190 0 0 -190 0 -190 190 0 190 0 0 190 0 190 380 0 380 0 0 190 0 190 -380 0 -380 0 0 -190z" />
+            <path d="M380 1710 l0 -1330 1330 0 1330 0 0 1330 0 1330 -1330 0 -1330 0 0 -1330z m2280 0 l0 -950 -950 0 -950 0 0 950 0 950 950 0 950 0 0 -950z" />
+            <path d="M1140 1710 l0 -570 570 0 570 0 0 570 0 570 -570 0 -570 0 0 -570z" />
+            <path d="M5320 2470 l0 -570 380 0 380 0 0 570 0 570 -380 0 -380 0 0 -570z" />
+          </g>
+        </svg>
+      </div>
+    </div>
+  );
+};
+
 const SellerOrderListPage = () => {
   const [sortBy, setSortBy] = useState<string>("all");
   const orderStatus = [
@@ -286,6 +359,20 @@ const SellerOrderListPage = () => {
   const [orderData, setOrderData] = useState<ISellerOrderHistory>();
   const [page, setPage] = useState<number>(1);
   const [cancelOrderId, setCancelOrderId] = useState<number>(0);
+  const [sellerAddressData, setSellerAddressData] = useState<IAddress>({
+    id: 0,
+    full_address: "",
+    detail: "",
+    zip_code: "",
+    kelurahan: "",
+    sub_district: "",
+    district_id: 0,
+    district: "",
+    province_id: 0,
+    province: "",
+    is_buyer_default: false,
+    is_seller_default: false,
+  });
   const [selectedOrderData, setSelectedOrderData] =
     useState<ISellerOrderHistoryData>({
       order_id: 0,
@@ -308,8 +395,6 @@ const SellerOrderListPage = () => {
       total_payment: "",
       created_at: "",
     });
-
-  // console.log(orderData?.data);
 
   const router = useRouter();
   const { updateUser } = useUserStore();
@@ -334,8 +419,33 @@ const SellerOrderListPage = () => {
     }
   };
 
+  const getSellerAddress = async () => {
+    try {
+      const response = await API.get(`accounts/address`);
+
+      for (let i = 0; i < response.data.data.length; i++) {
+        if (response.data.data[i].is_seller_default) {
+          setSellerAddressData(response.data.data[i]);
+          break;
+        }
+      }
+    } catch (e) {
+      if (axios.isAxiosError(e)) {
+        if (e.response?.status === 401) {
+          return clientUnauthorizeHandler(router, updateUser);
+        }
+        return toast.error(e.message, {
+          autoClose: 1500,
+        });
+      }
+    }
+  };
+
   useEffect(() => {
     getOrderData();
+    if (sellerAddressData.id === 0) {
+      getSellerAddress();
+    }
   }, [page]);
 
   return (
@@ -399,6 +509,7 @@ const SellerOrderListPage = () => {
                       setShowDetailModal(true);
                     }}
                     data={data}
+                    sellerAddressData={sellerAddressData}
                   />
                 ))}
               </div>
