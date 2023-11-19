@@ -122,7 +122,7 @@ const SellerAddProductPage = () => {
     const formData = new FormData();
     try {
       formData.append("product_name", data.product_name);
-      formData.append("description", data.description);
+      formData.append("description", data.description.replace(/\n/g, "\\n"));
       formData.append("hazardous_material", String(data.hazardous_material));
       formData.append("is_new", String(data.is_new));
       formData.append("is_active", String(data.is_active));
