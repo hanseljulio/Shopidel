@@ -33,21 +33,39 @@ function Index() {
     router.query.s !== undefined ? router.query.s.toString() : ""
   );
 
-  const searchQueryHandler = () => {
-    router.push({
-      pathname: "/search",
-      query: {
-        s: query,
-        sortBy: "price",
-        sort: "desc",
-        page: 1,
-      },
-    });
+  const searchQueryHandler = async () => {
+    try {
+      await getWishlist();
+      router.push({
+        pathname: "/wishlist",
+        query: {
+          ...(query.trim() !== "" ? { s: query } : {}), // Include search parameter only if query is not empty
+          page: 1,
+        },
+      });
+    } catch (error) {
+      console.error("Error during search:", error);
+    }
+  };
+
+  const handleQueryChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newQuery = e.target.value;
+    setQuery(newQuery);
+
+    // Check if the new query is empty, if yes, reload wishlist without search parameter
+    if (newQuery.trim() === "") {
+      searchQueryHandler();
+    }
   };
 
   const getWishlist = async () => {
     try {
-      const res = await API.get("/products/favorites");
+      const res = await API.get(`/products/favorites`, {
+        params: {
+          s: query,
+          page: page,
+        },
+      });
       console.log(res);
       const data = res.data as IAPIResponse<IWishlist[]>;
       setWishlist(data);
@@ -76,7 +94,6 @@ function Index() {
       console.log("salah");
     }
   };
-
   useEffect(() => {
     getWishlist();
   }, []);
@@ -99,8 +116,9 @@ function Index() {
               type="text"
               placeholder="Search in wishlist"
               className="rounded-md w-full md:w-80"
-              onChange={(e) => setQuery(e.target.value)}
+              onChange={handleQueryChange}
               value={query}
+              onBlur={searchQueryHandler}
             />
           </form>
         </div>
