@@ -460,7 +460,7 @@ const ProductDetail = ({
                           return (
                             <p
                               key={k}
-                              className={`px-2 py-1 border text-center rounded-md cursor-pointer hover:bg-[#d6e4f8] hover:border hover:border-[#364968] ${
+                              className={`px-1 py-1 border text-center rounded-md cursor-pointer hover:bg-[#d6e4f8] hover:border hover:border-[#364968] row-span-2 w-full text-ellipsis line-clamp-2 h-10 ${
                                 selectedVariants[optionName] === variant
                                   ? "bg-[#d6e4f8] border border-[#364968]"
                                   : ""
@@ -487,6 +487,7 @@ const ProductDetail = ({
                     min={1}
                     max={100}
                     type="number"
+                    readOnly={true}
                     value={count}
                     onChange={(e: any) => {
                       setCount(parseInt(e.target.value)), e.preventDefault();
