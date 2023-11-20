@@ -105,10 +105,11 @@ export default function Home() {
                 }
                 image={product.picture_url}
                 price={product.price}
-                showStar={false}
+                showStar={true}
+                star={product.rating}
                 title={product.name}
                 place={product.district}
-                order={product.total_sold}
+                order={`${product.total_sold} sold`}
               />
             </>
           ))}

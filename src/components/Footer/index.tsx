@@ -1,18 +1,15 @@
 import React from "react";
 import {
-  AiFillInstagram,
   AiFillYoutube,
-  AiOutlineInsertRowRight,
   AiOutlineInstagram,
   AiOutlineTwitter,
 } from "react-icons/ai";
 import { FaFacebookF } from "react-icons/fa";
-import Image from "next/image";
 
 const Footer = () => {
   return (
     <>
-      <div className=" bg-[#29374e]">
+      <div className=" bg-[#29374e] bottom-0">
         <div className="max-w-7xl mx-auto text-white py-10">
           <div className="text-center">
             <h3 className="text-3xl mb-3"> Download our app </h3>

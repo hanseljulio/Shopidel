@@ -15,6 +15,14 @@ interface IProductCard {
   selected?: boolean;
   onSelect?: () => void;
 }
+
+const abbreviatePlace = (place: string): string => {
+  if (place && place.startsWith("Kabupaten ")) {
+    return place.replace("Kabupaten ", "Kab. ");
+  }
+  return place;
+};
+
 const ProductCard = ({
   image,
   price,
@@ -25,16 +33,21 @@ const ProductCard = ({
   onClick,
   showStar,
 }: IProductCard) => {
+  const abbreviatedPlace = place ? abbreviatePlace(place) : place;
   return (
     <div
       onClick={onClick}
       className={classNames([
-        "w-full transform  hover:scale-95 h-auto md:w-full object-cover md:h-80 bg-white overflow-hidden shadow-md hover:shadow-none cursor-pointer rounded-md flex flex-col items-center align-middle justify-center transition-all duration-500 ease-in-out text-left",
+        "w-full transform items-start justify-start  hover:scale-95 h-fit md:w-full object-cover md:h-80 bg-white overflow-hidden shadow-md hover:shadow-none cursor-pointer rounded-md flex flex-col align-middle  transition-all duration-500 ease-in-out text-left",
       ])}
     >
-      <div className={"relative h-full w-full md "}>
-        <div className={" h-auto md:h-48 w-auto overflow-hidden"}>
-          <img src={image} className={"object-cover w-full h-full"} alt="" />
+      <div className={"relative h-48 w-full"}>
+        <div className={" h-auto md:h-full w-auto overflow-hidden top-0"}>
+          <img
+            src={image}
+            className={"object-fill w-full h-full top-0"}
+            alt=""
+          />
         </div>
         {showStar === true && (
           <div className={"absolute bottom-0 left-0 -mb-4 ml-3 flex flex-row"}>
@@ -46,7 +59,7 @@ const ProductCard = ({
               <BsStarFill />
               <span
                 className={classNames(
-                  "text-gray-500 ml-2 group-hover:text-white"
+                  "text-gray-500 ml-2 group-hover:text-white items-center"
                 )}
               >
                 {star}
@@ -56,21 +69,23 @@ const ProductCard = ({
         )}
       </div>
 
-      <div className="pt-3 pb-3 md:pt-5  md:pb-6 w-full px-4 ">
-        <p className=" tracking-wider text-black text-sm md:text-base pt-2">
-          {title?.length > 20 ? `${title.substring(0, 23)}...` : title}
+      <div className="pt-3 pb-3 md:pt-4 md:pb-6 w-full px-2 gap-y-2 flex flex-col ">
+        <p className=" tracking-wider text-black text-sm md:text-base pt-2 row-span-2 w-full overflow-hidden overflow-ellipsis whitespace-nowrap">
+          {title?.length > 20 ? `${title.substring(0, 20)}...` : title}
         </p>
         <p className=" tracking-wider text-[#f57b29] text-sm md:text-base">
           {currencyConverter(parseInt(price))}
         </p>
 
-        <div className="flex justify-between text-xs md:text-sm pt-2">
-          {place !== undefined && (
+        <div className="flex justify-between text-gray-500 text-xs md:text-sm pt-1">
+          {abbreviatedPlace && (
             <p className="text-gray-500 ">
-              {place?.length > 15 ? `${place.substring(0, 12)}...` : place}
+              {abbreviatedPlace.length > 15
+                ? `${abbreviatedPlace.substring(0, 12)}...`
+                : abbreviatedPlace}
             </p>
           )}
-          {order !== undefined && <p className={`text-gray-500`}>{order}</p>}
+          {order !== undefined && <td className={`text-gray-500`}>{order}</td>}
         </div>
       </div>
     </div>
