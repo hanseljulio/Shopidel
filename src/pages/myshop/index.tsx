@@ -153,7 +153,11 @@ const RegisterShop = () => {
           ...user!,
           is_seller: true,
         });
-        router.push("/myshop/products");
+        router.push("/myshop/products", {
+          query: {
+            page: 1,
+          },
+        });
       }
     });
   }, []);
@@ -381,7 +385,7 @@ export const getServerSideProps = async (
       return {
         redirect: {
           permanent: false,
-          destination: "/myshop/products",
+          destination: "/myshop/products?page=1",
         },
         props: {},
       };
