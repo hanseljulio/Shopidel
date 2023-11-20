@@ -21,7 +21,6 @@ import {
   setAuthCookie,
 } from "@/utils/utils";
 import { useRouter } from "next/router";
-import { getCookie } from "cookies-next";
 import { IWalletTransaction } from "@/interfaces/wallet_interface";
 import { useUserStore } from "@/store/userStore";
 import Pagination from "@/components/Pagination";

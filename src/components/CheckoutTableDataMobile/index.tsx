@@ -9,6 +9,7 @@ interface ICartTableDataProps {
   price: number;
   quantity: number;
   productName: string;
+  productImage: string;
 }
 
 const CheckoutTableDataMobile = (props: ICartTableDataProps) => {
@@ -18,7 +19,10 @@ const CheckoutTableDataMobile = (props: ICartTableDataProps) => {
         {
           <div>
             <div className="pb-4">
-              <CartProduct productName={props.productName} />
+              <CartProduct
+                productImage={props.productImage}
+                productName={props.productName}
+              />
             </div>
             <div className="flex justify-between w-full items-center">
               <div className="left">
