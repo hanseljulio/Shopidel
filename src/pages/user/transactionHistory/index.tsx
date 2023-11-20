@@ -44,6 +44,7 @@ interface IAddReviewModal {
 
 interface IConfirmReceiveModal {
   exitFunction: () => void;
+  orderId: number;
 }
 
 const AddReviewModal = (props: IAddReviewModal) => {
@@ -426,6 +427,46 @@ const IndividualOrder = (props: IIndividualOrderProps) => {
 };
 
 const ConfirmReceiveModal = (props: IConfirmReceiveModal) => {
+  const router = useRouter();
+  const { updateUser } = useUserStore();
+  const confirmReceipt = async () => {
+    try {
+      toast.promise(
+        API.put(`orders/${props.orderId}/complete-order`, {
+          orderId: props.orderId,
+        }),
+        {
+          pending: "COnfirming delivery...",
+          success: {
+            render() {
+              props.exitFunction();
+              return "This order is now marked complete. Thank you!";
+            },
+          },
+          error: {
+            render({ data }) {
+              if (axios.isAxiosError(data)) {
+                return `${(data.response?.data as IAPIResponse).message}`;
+              }
+            },
+          },
+        },
+        {
+          autoClose: 1500,
+        }
+      );
+    } catch (e) {
+      if (axios.isAxiosError(e)) {
+        if (e.response?.status === 401) {
+          return clientUnauthorizeHandler(router, updateUser);
+        }
+        return toast.error(e.message, {
+          autoClose: 1500,
+        });
+      }
+    }
+  };
+
   return (
     <div className="bg-white p-5 rounded-md md:w-[1000px] md:max-h-[600px] max-h-[80vh] w-[90vw] overflow-y-auto">
       <div className="py-3 border-b-2">
@@ -444,6 +485,7 @@ const ConfirmReceiveModal = (props: IConfirmReceiveModal) => {
       <div className="flex justify-center pt-8">
         <Button
           text="CONFIRM"
+          onClick={confirmReceipt}
           styling="bg-[#364968] p-3 rounded-[8px] w-[250px] text-white "
         />
       </div>
@@ -517,6 +559,7 @@ const TransactionHistory = () => {
         <Modal
           content={
             <ConfirmReceiveModal
+              orderId={selectedOrderId}
               exitFunction={() => {
                 setShowConfirmReceive(false);
                 getTransactionData();
@@ -601,7 +644,10 @@ const TransactionHistory = () => {
                         setSelectedProductName(name);
                         setShowAddReviewModal(true);
                       }}
-                      confirmReceive={() => setShowConfirmReceive(true)}
+                      confirmReceive={() => {
+                        setSelectedOrderId(data.order_id);
+                        setShowConfirmReceive(true);
+                      }}
                     />
                   ))}
                 </div>
