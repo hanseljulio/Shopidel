@@ -98,7 +98,7 @@ const SellerAdminProducts = () => {
                   })}
                 </thead>
               </table>
-              <div className="border">
+              <div className="border md:hidden">
                 {products.map((product, i) => {
                   return (
                     <div
