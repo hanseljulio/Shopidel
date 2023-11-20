@@ -220,6 +220,38 @@ const IndividualOrder = (props: IIndividualOrderProps) => {
 
   const componentRef = useRef<HTMLDivElement>(null);
 
+  const withdrawMoney = async () => {
+    try {
+      toast.promise(
+        API.post(`sellers/orders/${props.data.order_id}/withdraw`),
+        {
+          pending: "Withdrawing money...",
+          success: {
+            render() {
+              return "Money has been added to your wallet!";
+            },
+          },
+          error: {
+            render({ data }) {
+              if (axios.isAxiosError(data)) {
+                return `${(data.response?.data as IAPIResponse).message}`;
+              }
+            },
+          },
+        },
+        {
+          autoClose: 1500,
+        }
+      );
+    } catch (e) {
+      if (axios.isAxiosError(e)) {
+        toast.error(e.message, {
+          autoClose: 1500,
+        });
+      }
+    }
+  };
+
   return (
     <div className="p-5 rounded-md md:w-[90%] border-2 border-black w-[80%]">
       <div className="pb-3 flex justify-between">
@@ -283,6 +315,7 @@ const IndividualOrder = (props: IIndividualOrderProps) => {
                 {props.data.status === "Completed" &&
                   !props.data.is_withdrawn && (
                     <Button
+                      onClick={withdrawMoney}
                       text="Receive money"
                       styling="bg-[#364968] p-3 rounded-[8px] w-[250px] text-white "
                     />
