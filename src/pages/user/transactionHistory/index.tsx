@@ -356,12 +356,12 @@ const IndividualOrder = (props: IIndividualOrderProps) => {
       <div className="pb-3 flex justify-between">
         <h1 className="text-[20px] ">{props.data.shop_name}</h1>
 
-        <h1 className="text-[20px] ">
+        <h1 className="text-[28px]">
           {currencyConverter(parseInt(props.data.total_payment))}
         </h1>
       </div>
       <div className="flex justify-between items-center md:flex-row flex-col">
-        <div>
+        <div className="">
           {props.data.products.map((data, index) => {
             return (
               <div key={index} className="py-3 flex justify-between">
@@ -404,7 +404,7 @@ const IndividualOrder = (props: IIndividualOrderProps) => {
             );
           })}
         </div>
-        <div className="md:text-right flex flex-col gap-3 text-[18px] text-center">
+        <div className="md:text-right flex flex-col gap-3 text-[18px] text-center justify-end">
           <h1
             onClick={() => props.setCurrentTransaction(props.data.order_id)}
             className="text-blue-600 hover:cursor-pointer hover:underline"

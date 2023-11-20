@@ -19,7 +19,6 @@ import {
 import Pagination from "@/components/Pagination";
 import ReactToPrint from "react-to-print";
 import { IAddress } from "@/interfaces/user_interface";
-import { BsTypeH1 } from "react-icons/bs";
 
 interface IIndividualOrderProps {
   setCancelTransaction: (orderId: number) => void;
@@ -209,7 +208,7 @@ const IndividualOrder = (props: IIndividualOrderProps) => {
     <div className="p-5 rounded-md md:w-[90%] border-2 border-black w-[80%]">
       <div className="pb-3 flex justify-between">
         <h1 className="text-[20px] ">{props.data.buter_name}</h1>
-        <h1 className="text-[20px] ">
+        <h1 className="text-[28px]">
           {currencyConverter(parseInt(props.data.total_payment))}
         </h1>
       </div>
@@ -524,12 +523,6 @@ const SellerOrderListPage = () => {
               </div>
             </div>
           )}
-          {/* <div className="pt-6 flex flex-col items-center gap-8">
-            <IndividualOrder
-              setCancelTransaction={() => setShowCancelModal(true)}
-              setOrderDetail={() => setShowDetailModal(true)}
-            />
-          </div> */}
         </div>
       </SellerAdminLayout>
     </>
