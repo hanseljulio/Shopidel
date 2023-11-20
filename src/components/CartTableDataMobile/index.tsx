@@ -7,6 +7,7 @@ import Button from "../Button";
 interface ICartTableDataProps {
   id: number;
   index: number;
+  productImage: string;
   price: number;
   quantity: number;
   isChecked: boolean;
@@ -32,7 +33,10 @@ const CartTableDataMobile = (props: ICartTableDataProps) => {
         {
           <div>
             <div className="pb-4">
-              <CartProduct productName={props.productName} />
+              <CartProduct
+                productImage={props.productImage}
+                productName={props.productName}
+              />
             </div>
             <div className="flex justify-between">
               <div className="left">

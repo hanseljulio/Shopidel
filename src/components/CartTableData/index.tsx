@@ -8,6 +8,7 @@ interface ICartTableDataProps {
   id: number;
   index: number;
   price: number;
+  productImage: string;
   quantity: number;
   isChecked: boolean;
   productName: string;
@@ -29,7 +30,12 @@ const CartTableData = (props: ICartTableDataProps) => {
         />
       </td>
       <td className="px-[20px] py-[10px] text-center">
-        {<CartProduct productName={props.productName} />}
+        {
+          <CartProduct
+            productImage={props.productImage}
+            productName={props.productName}
+          />
+        }
       </td>
       <td className="px-[20px] py-[10px] text-center">
         {currencyConverter(props.price)}

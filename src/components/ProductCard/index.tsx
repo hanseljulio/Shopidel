@@ -34,11 +34,7 @@ const ProductCard = ({
     >
       <div className={"relative h-full w-full md "}>
         <div className={" h-auto md:h-48 w-auto overflow-hidden"}>
-          <img
-            src={image}
-            className={"object-cover w-full h-full md:h-full "}
-            alt=""
-          />
+          <img src={image} className={"object-cover w-full h-full"} alt="" />
         </div>
         {showStar === true && (
           <div className={"absolute bottom-0 left-0 -mb-4 ml-3 flex flex-row"}>

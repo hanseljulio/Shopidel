@@ -12,7 +12,7 @@ function Category({ src, alt, text, onClick }: ICategoryProps) {
       <img
         src={src}
         alt={alt}
-        className="rounded-full w-14 h-14 md:w-20 md:h-20 object-cover flex mx-auto"
+        className="rounded-full w-14 h-14 md:w-20 md:h-20 object-cover flex mx-auto cursor-pointer"
         placeholder="https://upload.wikimedia.org/wikipedia/commons/d/d1/Image_not_available.png"
         onError={(e) => {
           (e.target as HTMLInputElement).src =

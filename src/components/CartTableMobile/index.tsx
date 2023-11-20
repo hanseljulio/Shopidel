@@ -39,6 +39,7 @@ const CartTableMobile = (props: ICartTableProps) => {
               key={index}
               index={props.index}
               id={data.product_id}
+              productImage={data.product_image_url}
               price={parseInt(data.product_unit_price)}
               quantity={data.product_quantity}
               isChecked={data.isChecked}
