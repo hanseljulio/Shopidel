@@ -69,7 +69,12 @@ const SellerAdminProducts = () => {
                         key={i}
                         className={`${(i + 1) % 2 == 0 && "bg-slate-100"}`}
                       >
-                        <td className="p-2">{i + 1}</td>
+                        <td className="p-2">
+                          {pagination?.current_page! * pagination?.limit! -
+                            pagination?.limit! +
+                            i +
+                            1}
+                        </td>
                         <td className="p-2">{product.name}</td>
                         <td className="p-2">
                           {new Date(product.created_at).toLocaleString()}
