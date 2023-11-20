@@ -73,3 +73,7 @@ export interface IAPIProductDetailResponse {
 export interface IAPICategoriesResponse {
   categories: ICategory[];
 }
+
+export interface IAPIPinValidationResponse {
+  isCorrect: boolean;
+}
