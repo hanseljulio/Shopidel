@@ -8,9 +8,9 @@ import axios from "axios";
 import Button from "@/components/Button";
 import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
-import { FaRegTrashAlt } from "react-icons/fa";
 import { useRouter } from "next/router";
 import { useUserStore } from "@/store/userStore";
+import Pagination from "@/components/Pagination";
 
 interface IWishlist {
   id: number;
@@ -39,7 +39,7 @@ function Index() {
       router.push({
         pathname: "/wishlist",
         query: {
-          ...(query.trim() !== "" ? { s: query } : {}), // Include search parameter only if query is not empty
+          ...(query.trim() !== "" ? { s: query } : {}),
           page: 1,
         },
       });
@@ -51,8 +51,6 @@ function Index() {
   const handleQueryChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newQuery = e.target.value;
     setQuery(newQuery);
-
-    // Check if the new query is empty, if yes, reload wishlist without search parameter
     if (newQuery.trim() === "") {
       searchQueryHandler();
     }
@@ -146,60 +144,10 @@ function Index() {
           })}
         </div>
         <div className="text-center my-10 justify-center flex">
-          <div className="flex self-end mt-2">
-            {wishlist?.pagination?.current_page !== 1 && (
-              <button
-                onClick={() => {
-                  if (
-                    wishlist?.pagination?.current_page ===
-                    paginationNumber[0] + 1
-                  ) {
-                    setPaginationNumber(
-                      Array.from(paginationNumber, (x) => x - 1)
-                    );
-                  }
-                  setPage(wishlist?.pagination?.current_page! - 1);
-                }}
-                className="px-2 py-1 border text-sm rounded-bl-md rounded-tl-md"
-              >
-                Prev
-              </button>
-            )}
-            {paginationNumber.map((i) => {
-              return (
-                <Button
-                  key={i}
-                  text={(i + 1).toString()}
-                  styling={`px-3 py-1 border ${
-                    wishlist?.pagination?.current_page === i + 1 &&
-                    "bg-slate-200 "
-                  }`}
-                  onClick={() => setPage(i + 1)}
-                />
-              );
-            })}
-            {wishlist?.pagination?.current_page !==
-              wishlist?.pagination?.total_page && (
-              <button
-                onClick={() => {
-                  if (
-                    paginationNumber[paginationNumber.length - 1] <
-                    wishlist?.pagination?.current_page!
-                  ) {
-                    paginationNumber.shift();
-                    paginationNumber.push(
-                      paginationNumber[paginationNumber.length - 1] + 1
-                    );
-                    setPaginationNumber(paginationNumber);
-                  }
-                  setPage(wishlist?.pagination?.current_page! + 1);
-                }}
-                className="px-2 py-1 border text-sm rounded-br-md rounded-tr-md"
-              >
-                Next
-              </button>
-            )}
-          </div>
+          <Pagination
+            data={wishlist?.pagination}
+            onNavigate={(navPage: any) => setPage(navPage)}
+          />
         </div>
       </div>
       <Footer />
