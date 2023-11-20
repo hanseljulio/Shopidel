@@ -41,7 +41,7 @@ const Pagination = ({ data, onNavigate, limit = 5 }: IPagination) => {
                   onNavigate(data?.total_page!);
                   return onNavigate(1);
                 }}
-                className="px-2 py-1 border text-sm "
+                className="px-2 py-1 border text-sm rounded-bl-md rounded-tl-md"
               >
                 &lt;&lt;
               </button>
@@ -53,7 +53,7 @@ const Pagination = ({ data, onNavigate, limit = 5 }: IPagination) => {
               }
               onNavigate(data?.current_page! - 1);
             }}
-            className="px-2 py-1 border text-sm rounded-bl-md rounded-tl-md "
+            className="px-2 py-1 border text-sm"
           >
             Prev
           </button>
@@ -87,7 +87,7 @@ const Pagination = ({ data, onNavigate, limit = 5 }: IPagination) => {
               }
               onNavigate(data?.current_page! + 1);
             }}
-            className="px-2 py-1 border text-sm rounded-br-md rounded-tr-md"
+            className="px-2 py-1 border text-sm"
           >
             Next
           </button>
@@ -96,7 +96,7 @@ const Pagination = ({ data, onNavigate, limit = 5 }: IPagination) => {
               (page) => page + 1 === data?.total_page!
             ) === -1 && (
               <button
-                className="px-2 py-1 border text-sm"
+                className="px-2 py-1 border text-sm rounded-br-md rounded-tr-md"
                 onClick={() => {
                   const temp = [];
                   for (
