@@ -7,8 +7,6 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { API } from "@/network";
 import {
-  IAPIPagination,
-  IAPIPinValidationRespone,
   IAPIPinValidationResponse,
   IAPIResponse,
   IAPIWalletResponse,
