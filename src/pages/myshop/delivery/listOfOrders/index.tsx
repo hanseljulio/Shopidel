@@ -13,6 +13,7 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { IAPIResponse } from "@/interfaces/api_interface";
 import {
+  ISellerOrderBuyerAddress,
   ISellerOrderHistory,
   ISellerOrderHistoryData,
 } from "@/interfaces/seller_interface";
@@ -44,26 +45,41 @@ const OrderDetailModal = (props: IOrderDetailModalProps) => {
           <span className="font-bold">{props.data.status.toUpperCase()}</span>
         </h1>
         <h1>Order Number: {props.data.order_id}</h1>
-        <h1>Buyer: {props.data.buter_name}</h1>
+        <h1>Buyer: {props.data.buyer_name}</h1>
       </div>
       <div className="pt-4">
         <h1 className="font-bold text-[20px]">Delivery Service</h1>
-        <h1>Courier: JNE</h1>
-        <h1>Estimated Time: 2-3 days</h1>
+        <h1>Courier: {props.data.courier_name.toUpperCase()}</h1>
       </div>
       <div className="pt-4">
         <h1 className="font-bold text-[20px]">Payment Information</h1>
         <h1>
           Order Total: {currencyConverter(parseInt(props.data.total_payment))}
         </h1>
-        <h1>Shipping total: {currencyConverter(10000)}</h1>
+        <h1>
+          Shipping total: {currencyConverter(parseInt(props.data.delivery_fee))}
+        </h1>
+        {props.data.promotion.shop_voucher !== "" && (
+          <h1>
+            Voucher Total:{" "}
+            {currencyConverter(parseInt(props.data.promotion.shop_voucher))}
+          </h1>
+        )}
+        {props.data.promotion.marketplace_voucher !== "" && (
+          <h1>
+            Marketplace Total:{" "}
+            {currencyConverter(
+              parseInt(props.data.promotion.marketplace_voucher)
+            )}
+          </h1>
+        )}
       </div>
       <div className="pt-4">
         <h1 className="font-bold text-[20px]">Delivery Address</h1>
-        {/* <h1>{props.data.shipping.detail}</h1>
+        <h1>{props.data.shipping.detail}</h1>
         <h1>{`${props.data.shipping.kelurahan.toUpperCase()}, ${props.data.shipping.sub_district.toUpperCase()}, ${props.data.shipping.district.toUpperCase()}, ${props.data.shipping.province.toUpperCase()}, ID ${
           props.data.shipping.zip_code
-        }`}</h1> */}
+        }`}</h1>
       </div>
       <div className="pt-4">
         <h1 className="font-bold text-[20px]">Purchased Products:</h1>
@@ -207,7 +223,7 @@ const IndividualOrder = (props: IIndividualOrderProps) => {
   return (
     <div className="p-5 rounded-md md:w-[90%] border-2 border-black w-[80%]">
       <div className="pb-3 flex justify-between">
-        <h1 className="text-[20px] ">{props.data.buter_name}</h1>
+        <h1 className="text-[20px] ">{props.data.buyer_name}</h1>
         <h1 className="text-[28px]">
           {currencyConverter(parseInt(props.data.total_payment))}
         </h1>
@@ -254,12 +270,24 @@ const IndividualOrder = (props: IIndividualOrderProps) => {
                   content={() => componentRef.current}
                 />
                 <div ref={componentRef} className="hidden print:block">
-                  <ShippingLabel sellerAddressData={props.sellerAddressData} />
+                  <ShippingLabel
+                    sellerAddressData={props.sellerAddressData}
+                    buyerAddress={props.data.shipping}
+                  />
                 </div>
 
                 <h1>|</h1>
               </div>
-              <h1>Status: {props.data.status}</h1>
+              <div className="flex flex-col gap-3">
+                <h1>Status: {props.data.status}</h1>
+                {props.data.status === "Completed" &&
+                  !props.data.is_withdrawn && (
+                    <Button
+                      text="Receive money"
+                      styling="bg-[#364968] p-3 rounded-[8px] w-[250px] text-white "
+                    />
+                  )}
+              </div>
             </div>
           ) : props.data.status === "Canceled" ? (
             <h1 className="text-red-600">Status: Cancelled</h1>
@@ -290,6 +318,7 @@ const IndividualOrder = (props: IIndividualOrderProps) => {
 
 interface IShippingLabelProps {
   sellerAddressData: IAddress;
+  buyerAddress: ISellerOrderBuyerAddress;
 }
 
 const ShippingLabel = (props: IShippingLabelProps) => {
@@ -306,9 +335,9 @@ const ShippingLabel = (props: IShippingLabelProps) => {
       </div>
       <div>
         <h1 className="font-bold">SHIP TO:</h1>
-        <h1>{props.sellerAddressData.detail}</h1>
-        <h1>{`${props.sellerAddressData.kelurahan.toUpperCase()}, ${props.sellerAddressData.sub_district.toUpperCase()}, ${props.sellerAddressData.district.toUpperCase()}, ${props.sellerAddressData.province.toUpperCase()}, ID ${
-          props.sellerAddressData.zip_code
+        <h1>{props.buyerAddress.detail}</h1>
+        <h1>{`${props.buyerAddress.kelurahan.toUpperCase()}, ${props.buyerAddress.sub_district.toUpperCase()}, ${props.buyerAddress.district.toUpperCase()}, ${props.buyerAddress.province.toUpperCase()}, ID ${
+          props.buyerAddress.zip_code
         }`}</h1>
       </div>
       <div>
@@ -378,14 +407,15 @@ const SellerOrderListPage = () => {
   const [selectedOrderData, setSelectedOrderData] =
     useState<ISellerOrderHistoryData>({
       order_id: 0,
-      buter_name: "",
+      buyer_name: "",
       status: "",
       products: [],
-      promotions: {
+      promotion: {
         marketplace_voucher: "",
         shop_voucher: "",
       },
       delivery_fee: "",
+      courier_name: "",
       shipping: {
         province: "",
         district: "",
@@ -396,6 +426,7 @@ const SellerOrderListPage = () => {
       },
       total_payment: "",
       created_at: "",
+      is_withdrawn: false,
     });
 
   const router = useRouter();

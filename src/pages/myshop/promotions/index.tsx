@@ -7,71 +7,6 @@ interface IPromotionCategoryProps {
   moveCategory: (newPage: string) => void;
 }
 
-const PromotionCategory = (props: IPromotionCategoryProps) => {
-  return (
-    <div className="flex border-2 items-center">
-      <h1
-        onClick={() => {
-          props.currentPage === "all" ? {} : props.moveCategory("all");
-        }}
-        className={`${
-          props.currentPage === "all" ? "bg-slate-400" : ""
-        } border-2 px-4 py-1 ${
-          props.currentPage === "all"
-            ? "hover:cursor-default"
-            : "hover:bg-[#364968] hover:text-white hover:cursor-pointer transition-colors duration-300 ease-in-out"
-        }`}
-      >
-        ALL
-      </h1>
-      <h1
-        onClick={() => {
-          props.currentPage === "ongoing" ? {} : props.moveCategory("ongoing");
-        }}
-        className={`${
-          props.currentPage === "ongoing" ? "bg-slate-400" : ""
-        } border-2 px-4 py-1 ${
-          props.currentPage === "ongoing"
-            ? "hover:cursor-default"
-            : "hover:bg-[#364968] hover:text-white hover:cursor-pointer transition-colors duration-300 ease-in-out "
-        }`}
-      >
-        ONGOING
-      </h1>
-      <h1
-        onClick={() => {
-          props.currentPage === "upcoming"
-            ? {}
-            : props.moveCategory("upcoming");
-        }}
-        className={`${
-          props.currentPage === "upcoming" ? "bg-slate-400" : ""
-        } border-2 px-4 py-1 ${
-          props.currentPage === "upcoming"
-            ? "hover:cursor-default"
-            : "hover:bg-[#364968] hover:text-white hover:cursor-pointer transition-colors duration-300 ease-in-out"
-        }`}
-      >
-        UPCOMING
-      </h1>
-      <h1
-        onClick={() => {
-          props.currentPage === "ended" ? {} : props.moveCategory("ended");
-        }}
-        className={`${
-          props.currentPage === "ended" ? "bg-slate-400" : ""
-        } border-2 px-4 py-1 ${
-          props.currentPage === "ended"
-            ? "hover:cursor-default"
-            : "hover:bg-[#364968] hover:text-white hover:cursor-pointer transition-colors duration-300 ease-in-out"
-        }`}
-      >
-        ENDED
-      </h1>
-    </div>
-  );
-};
-
 interface IPromotionTest {
   id: number;
   startDate: string;
@@ -165,13 +100,7 @@ const SellerAdminHome = () => {
       <div className="w-full mx-auto mt-10">
         <div className="flex items-center md:flex-row justify-between px-[50px] md:gap-0 flex-col gap-6">
           <h1 className="text-[30px]">Promotions</h1>
-          <div className="md:block md:visible hidden invisible">
-            <PromotionCategory
-              currentPage={currentPage}
-              moveCategory={moveCategory}
-            />
-          </div>
-          <div className="flex visible md:hidden md:invisible items-center gap-3">
+          <div className="flex items-center gap-3">
             <p className="font-bold">Sort by: </p>
             <select
               onChange={(e) => setCurrentPage(e.target.value)}
