@@ -88,7 +88,7 @@ const ProductDetail = ({
   }>({});
   const [subtotal, setSubtotal] = useState<number>(0);
   const [currentStock, setCurrentStock] = useState<number>(0);
-  const [isFavorite, setIsFavorite] = useState(false);
+  const [isFavorite, setIsFavorite] = useState(product?.is_favorite || false);
   const [imagesProduct, setImagesProduct] = useState([]);
   const [imagesReview, setImagesReview] = useState([]);
   const [reviews, setReviews] = useState<IAPIResponse<IReviewProduct[]>>();
@@ -102,7 +102,53 @@ const ProductDetail = ({
     IAPIResponse<IAPIProfileShopResponse> | undefined
   >();
 
-  // const showAllDescription = showAllDescription ? product : product.slice(0, 6);
+  const isYouTubeVideo = (url: string) => {
+    // Regex to check if the URL is a YouTube video URL
+    const youtubeRegex =
+      /^(https?:\/\/)?(www\.)?(youtube\.com\/(.*\/)?|youtu\.be\/)(.+)$/;
+
+    return youtubeRegex.test(url);
+  };
+
+  const renderContent = () => {
+    if (isHovering) {
+      if (isYouTubeVideo(variation)) {
+        return (
+          <iframe
+            title="YouTube Video"
+            width="560"
+            height="315"
+            src={variation}
+            allowFullScreen
+            className="bigImage w-full cursor-pointer rounded-md"
+            onClick={handleZoomImage}
+          ></iframe>
+        );
+      } else {
+        return (
+          <img
+            width={200}
+            height={200}
+            src={variation}
+            alt=""
+            className="bigImage w-full cursor-pointer rounded-md"
+            onClick={handleZoomImage}
+          />
+        );
+      }
+    } else {
+      return (
+        <img
+          width={100}
+          height={100}
+          src={variation}
+          alt=""
+          className="bigImage w-full cursor-pointer rounded-md"
+          onClick={handleZoomImage}
+        />
+      );
+    }
+  };
 
   useEffect(() => {
     if (imagesProduct?.length > 0) {
@@ -315,7 +361,7 @@ const ProductDetail = ({
 
       if (response.status === 200) {
         toast.success("Added to wishlist", { autoClose: 1500 });
-        setIsFavorite(true);
+        setIsFavorite(true); // Set isFavorite to true when successfully added to wishlist
       } else {
         toast.error("Failed to add to wishlist", { autoClose: 1500 });
       }
@@ -350,25 +396,8 @@ const ProductDetail = ({
         <div className="mx-auto lg:max-w-7xl px-4 md:px-0">
           <div className="flex-col md:flex-row justify-between md:flex gap-10 py-5 px-5 md:px-0">
             <div className="order-1 md:order-1 imageProduct w-full md:w-1/4 rounded-md overflow-hidden">
-              {isHovering == true ? (
-                <img
-                  width={200}
-                  height={200}
-                  src={variation}
-                  alt=""
-                  className="bigImage w-full cursor-pointer rounded-md"
-                  onClick={handleZoomImage}
-                />
-              ) : (
-                <img
-                  width={100}
-                  height={100}
-                  src={variation}
-                  alt=""
-                  className="bigImage w-full cursor-pointer rounded-md"
-                  onClick={handleZoomImage}
-                />
-              )}
+              {renderContent()}
+
               <div className="variation gap-1 mt-2 flex overflow-x-scroll [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none']">
                 {imagesProduct?.map((url, index) => {
                   return (
@@ -388,7 +417,7 @@ const ProductDetail = ({
               </div>
               <div className="favorite-icon mt-5 text-right">
                 <button onClick={() => handleWishlist(product)}>
-                  {isFavorite || product?.is_favorite ? (
+                  {isFavorite ? (
                     <div className="flex items-center gap-1">
                       <FaHeart style={{ color: "red" }} />
                       <p>Favorite</p>
@@ -520,7 +549,7 @@ const ProductDetail = ({
               </div>
               <div className="desc pt-5 ">
                 <p className="text-lg font-medium border-b my-4">Description</p>
-                {product.description}
+
                 <p className="">
                   {product?.description
                     ?.split("\n\n")
@@ -536,20 +565,6 @@ const ProductDetail = ({
                           ))}
                       </span>
                     ))}
-                  {/* {product?.description
-                    ?.split("\n\n")
-                    .map((paragraph: any, index: number) => (
-                      <span key={index} className="line-break">
-                        {paragraph
-                          .split("\\n")
-                          .map((line: string, lineIndex: number) => (
-                            <React.Fragment key={lineIndex}>
-                              {line}
-                              <br />
-                            </React.Fragment>
-                          ))}
-                      </span>
-                    ))} */}
                 </p>
               </div>
             </div>
