@@ -14,6 +14,8 @@ export interface IProduct {
   slug: string;
   category_name: string;
   category_id: number;
+  updated_at: string;
+  created_at: string;
 }
 
 export interface IProductPagination {
