@@ -12,7 +12,7 @@ const Pagination = ({ data, onNavigate, limit = 5 }: IPagination) => {
   const [paginationNumber, setPaginationNumber] = useState<number[]>([]);
 
   const setPaginationLimit = () => {
-    if (data?.total_page! <= 5) {
+    if (data?.total_page! <= limit) {
       return setPaginationNumber(Array.from(Array(data?.total_page).keys()));
     }
 
@@ -29,12 +29,12 @@ const Pagination = ({ data, onNavigate, limit = 5 }: IPagination) => {
     <>
       {data?.current_page !== 1 && (
         <>
-          {data?.total_page! > 5 &&
+          {data?.total_page! > limit &&
             paginationNumber.findIndex((page) => page + 1 === 1) === -1 && (
               <button
                 onClick={() => {
                   const temp = [];
-                  for (let i = 0; i > 5; i--) {
+                  for (let i = 0; i > limit; i--) {
                     temp.push(i);
                   }
                   setPaginationNumber(temp.reverse());
@@ -91,7 +91,7 @@ const Pagination = ({ data, onNavigate, limit = 5 }: IPagination) => {
           >
             Next
           </button>
-          {data?.total_page! > 5 &&
+          {data?.total_page! > limit &&
             paginationNumber.findIndex(
               (page) => page + 1 === data?.total_page!
             ) === -1 && (
@@ -101,7 +101,7 @@ const Pagination = ({ data, onNavigate, limit = 5 }: IPagination) => {
                   const temp = [];
                   for (
                     let i = data?.total_page!;
-                    i > data?.total_page! - 5;
+                    i > data?.total_page! - limit;
                     i--
                   ) {
                     temp.push(i - 1);
