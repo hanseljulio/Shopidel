@@ -316,7 +316,7 @@ const CheckoutPage = () => {
     try {
       const response = await API.get("/accounts/address");
 
-      if (response.data.data === 0) {
+      if (response.data.data.length === 0) {
         setShowNoAddress(true);
         return;
       }
