@@ -40,26 +40,14 @@ const SellerAdminProducts = () => {
   };
 
   const deleteProduct = async () => {
-    try {
-      if (selectedProduct.length === 1) {
-        toast.promise(
-          API.delete(`/sellers/products/${selectedProduct[0]}`),
-          {
-            pending: "Loading",
-            success: "Product removed",
-          },
-          {
-            autoClose: 1500,
-          }
-        );
-        return setSelectedProduct(
-          selectedProduct.filter((id) => id !== selectedProduct[0])
-        );
-      }
-    } catch (e) {
-      if (axios.isAxiosError(e)) {
-        console.log(e);
-        return toast.error("Error delete product");
+    for (let product of selectedProduct) {
+      try {
+        await API.delete(`/sellers/products/${product}`);
+      } catch (e) {
+        if (axios.isAxiosError(e)) {
+          console.log(e);
+          return toast.error("Error delete product");
+        }
       }
     }
   };
@@ -76,7 +64,25 @@ const SellerAdminProducts = () => {
           content={
             <DeleteProductModal
               selectedProduct={selectedProduct}
-              onDelete={deleteProduct}
+              onDelete={async () => {
+                try {
+                  await toast.promise(
+                    deleteProduct,
+                    {
+                      pending: "Loading",
+                      success: "Delete success",
+                      error: "An error occured",
+                    },
+                    {
+                      autoClose: 1500,
+                    }
+                  );
+                  await getSellerProducts();
+                  return setIsModal(false);
+                } catch (e) {
+                  console.log(e);
+                }
+              }}
               onCancel={() => setIsModal(false)}
             />
           }
