@@ -124,7 +124,7 @@ const ProductDetail = ({
     try {
       const res = await API.get(`/products/${product.id}/pictures`);
       const data = res.data.data;
-      setImagesProduct(data); // Update the state here
+      setImagesProduct(data);
     } catch (e) {
       if (axios.isAxiosError(e)) {
         return toast.error(e.message, {
@@ -383,7 +383,7 @@ const ProductDetail = ({
                   onClick={handleZoomImage}
                 />
               )}
-              <div className="variation justify-center gap-1 mt-2 flex overflow-x-scroll [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none']">
+              <div className="variation gap-1 mt-2 flex overflow-x-scroll [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none']">
                 {imagesProduct?.map((url, index) => {
                   return (
                     <img
@@ -534,6 +534,7 @@ const ProductDetail = ({
               </div>
               <div className="desc pt-5 ">
                 <p className="text-lg font-medium border-b my-4">Description</p>
+                {product.description}
                 <p className="">
                   {product?.description
                     ?.split("\n\n")
