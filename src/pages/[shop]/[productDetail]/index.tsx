@@ -51,17 +51,13 @@ export const getServerSideProps: GetServerSideProps = async (
   const { params } = context;
   const shop = params?.shop;
   const productDetail = params?.productDetail;
-  console.log("shop", shop);
-  console.log("prodddu", productDetail);
 
   try {
     const response = await API.get(`/products/detail/${shop}/${productDetail}`);
     const product = response.data.data;
-    console.log("pro", product);
 
     const responseSeller = await API.get(`/sellers/${shop}/profile`);
     const seller = responseSeller.data.data;
-    console.log("sell", seller);
     return {
       props: {
         product,
@@ -92,7 +88,7 @@ const ProductDetail = ({
   }>({});
   const [subtotal, setSubtotal] = useState<number>(0);
   const [currentStock, setCurrentStock] = useState<number>(0);
-  const [isFavorite, setIsFavorite] = useState(false);
+  const [isFavorite, setIsFavorite] = useState(product?.is_favorite || false);
   const [imagesProduct, setImagesProduct] = useState([]);
   const [imagesReview, setImagesReview] = useState([]);
   const [reviews, setReviews] = useState<IAPIResponse<IReviewProduct[]>>();
@@ -106,7 +102,53 @@ const ProductDetail = ({
     IAPIResponse<IAPIProfileShopResponse> | undefined
   >();
 
-  // const showAllDescription = showAllDescription ? product : product.slice(0, 6);
+  const isYouTubeVideo = (url: string) => {
+    // Regex to check if the URL is a YouTube video URL
+    const youtubeRegex =
+      /^(https?:\/\/)?(www\.)?(youtube\.com\/(.*\/)?|youtu\.be\/)(.+)$/;
+
+    return youtubeRegex.test(url);
+  };
+
+  const renderContent = () => {
+    if (isHovering) {
+      if (isYouTubeVideo(variation)) {
+        return (
+          <iframe
+            title="YouTube Video"
+            width="560"
+            height="315"
+            src={variation}
+            allowFullScreen
+            className="bigImage w-full cursor-pointer rounded-md"
+            onClick={handleZoomImage}
+          ></iframe>
+        );
+      } else {
+        return (
+          <img
+            width={200}
+            height={200}
+            src={variation}
+            alt=""
+            className="bigImage w-full cursor-pointer rounded-md"
+            onClick={handleZoomImage}
+          />
+        );
+      }
+    } else {
+      return (
+        <img
+          width={100}
+          height={100}
+          src={variation}
+          alt=""
+          className="bigImage w-full cursor-pointer rounded-md"
+          onClick={handleZoomImage}
+        />
+      );
+    }
+  };
 
   useEffect(() => {
     if (imagesProduct?.length > 0) {
@@ -124,7 +166,7 @@ const ProductDetail = ({
     try {
       const res = await API.get(`/products/${product.id}/pictures`);
       const data = res.data.data;
-      setImagesProduct(data); // Update the state here
+      setImagesProduct(data);
     } catch (e) {
       if (axios.isAxiosError(e)) {
         return toast.error(e.message, {
@@ -139,11 +181,9 @@ const ProductDetail = ({
       const res = await API.get(
         `products/${product.id}/reviews?page=${page}&comment=true&image=true&orderBy=newest`
       );
-      console.log("id rev", product.id);
 
       const data = res.data as IAPIResponse<IReviewProduct[]>;
       setReviews(data);
-      console.log("data review", data);
     } catch (e) {
       if (axios.isAxiosError(e)) {
         return toast.error("Error fetching review products", {
@@ -162,8 +202,6 @@ const ProductDetail = ({
       setSuggestion(data);
     } catch (e) {
       if (axios.isAxiosError(e)) {
-        console.log(e);
-
         return toast.error("Error fetching product suggestion", {
           toastId: "errorSuggestion",
           autoClose: 1500,
@@ -178,8 +216,6 @@ const ProductDetail = ({
 
       const data = res.data as IAPIResponse<IAPIProfileShopResponse>;
       setShopProfile(data);
-      console.log("res shop", data);
-      console.log(res);
     } catch (e) {
       if (axios.isAxiosError(e)) {
         return toast.error("Error fetching product suggestion", {
@@ -294,7 +330,6 @@ const ProductDetail = ({
       } else {
         toast.error("Failed to add to cart", { autoClose: 1500 });
       }
-      console.log(response.data);
     } catch (error) {
       if (axios.isAxiosError(error)) {
         toast.error(error.response?.data.message, { autoClose: 1500 });
@@ -326,12 +361,10 @@ const ProductDetail = ({
 
       if (response.status === 200) {
         toast.success("Added to wishlist", { autoClose: 1500 });
-        setIsFavorite(true);
+        setIsFavorite(true); // Set isFavorite to true when successfully added to wishlist
       } else {
         toast.error("Failed to add to wishlist", { autoClose: 1500 });
       }
-      console.log("yes");
-      console.log(response.data);
     } catch (error) {
       if (axios.isAxiosError(error)) {
         toast.error(error.response?.data.message, { autoClose: 1500 });
@@ -340,7 +373,6 @@ const ProductDetail = ({
           autoClose: 1500,
         });
       }
-      console.log("no");
     }
   };
 
@@ -364,26 +396,9 @@ const ProductDetail = ({
         <div className="mx-auto lg:max-w-7xl px-4 md:px-0">
           <div className="flex-col md:flex-row justify-between md:flex gap-10 py-5 px-5 md:px-0">
             <div className="order-1 md:order-1 imageProduct w-full md:w-1/4 rounded-md overflow-hidden">
-              {isHovering == true ? (
-                <img
-                  width={200}
-                  height={200}
-                  src={variation}
-                  alt=""
-                  className="bigImage w-full cursor-pointer rounded-md"
-                  onClick={handleZoomImage}
-                />
-              ) : (
-                <img
-                  width={100}
-                  height={100}
-                  src={variation}
-                  alt=""
-                  className="bigImage w-full cursor-pointer rounded-md"
-                  onClick={handleZoomImage}
-                />
-              )}
-              <div className="variation justify-center gap-1 mt-2 flex overflow-x-scroll [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none']">
+              {renderContent()}
+
+              <div className="variation gap-1 mt-2 flex overflow-x-scroll [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none']">
                 {imagesProduct?.map((url, index) => {
                   return (
                     <img
@@ -402,7 +417,7 @@ const ProductDetail = ({
               </div>
               <div className="favorite-icon mt-5 text-right">
                 <button onClick={() => handleWishlist(product)}>
-                  {isFavorite || product?.is_favorite ? (
+                  {isFavorite ? (
                     <div className="flex items-center gap-1">
                       <FaHeart style={{ color: "red" }} />
                       <p>Favorite</p>
@@ -445,7 +460,7 @@ const ProductDetail = ({
                           return (
                             <p
                               key={k}
-                              className={`px-2 py-1 border text-center rounded-md cursor-pointer ${
+                              className={`px-2 py-1 border text-center rounded-md cursor-pointer hover:bg-[#d6e4f8] hover:border hover:border-[#364968] ${
                                 selectedVariants[optionName] === variant
                                   ? "bg-[#d6e4f8] border border-[#364968]"
                                   : ""
@@ -521,7 +536,7 @@ const ProductDetail = ({
                 </p>
                 <div className="historyProduct flex items-center text-xs pb-3">
                   <p className="pr-3">{`Sold ${product?.sold}`} </p>
-                  <p className="px-3 border-l border-slate-600 flex-row  md:flex flex gap-1 items-center justify-center ">
+                  <p className="px-3 border-l border-slate-600 flex-row flex md:flex gap-x-1 items-center justify-center ">
                     <BsStarFill style={{ color: "#f57b29" }} />
                     <span className="items-center">{product?.stars}</span>
                   </p>
@@ -534,6 +549,7 @@ const ProductDetail = ({
               </div>
               <div className="desc pt-5 ">
                 <p className="text-lg font-medium border-b my-4">Description</p>
+
                 <p className="">
                   {product?.description
                     ?.split("\n\n")
@@ -549,20 +565,6 @@ const ProductDetail = ({
                           ))}
                       </span>
                     ))}
-                  {/* {product?.description
-                    ?.split("\n\n")
-                    .map((paragraph: any, index: number) => (
-                      <span key={index} className="line-break">
-                        {paragraph
-                          .split("\\n")
-                          .map((line: string, lineIndex: number) => (
-                            <React.Fragment key={lineIndex}>
-                              {line}
-                              <br />
-                            </React.Fragment>
-                          ))}
-                      </span>
-                    ))} */}
                 </p>
               </div>
             </div>
@@ -662,16 +664,6 @@ const ProductDetail = ({
                               size={13}
                             />
                           ))}
-
-                          {/* {Array.from({ length: parseInt(review.stars) }).map(
-                            (_, index) => (
-                              <FaStar
-                                key={index}
-                                style={{ color: "#f57b29" }}
-                                size={13}
-                              />
-                            )
-                          )} */}
                         </p>
                         <p className="dateReview text-sm text-neutral-500 pb-3 items-center">
                           {review.created_at.split("T")[0]} |
@@ -700,7 +692,7 @@ const ProductDetail = ({
                           <VscEmptyWindow
                             size={30}
                             style={{ margin: "0 auto" }}
-                          />{" "}
+                          />
                           There are no reviews yet
                         </p>
                       </>

@@ -87,7 +87,10 @@ const UserProfileSidebar = () => {
           </h1>
         </div>
         <div className="pl-[26px] border-slate-300 border-b-2 pb-[20px]">
-          <h1 className="text-[20px] flex items-center gap-4 mt-[20px] hover:cursor-pointer transition w-[200px] hover:text-[#92bcff]">
+          <h1
+            onClick={() => router.push("/wishlist")}
+            className="text-[20px] flex items-center gap-4 mt-[20px] hover:cursor-pointer transition w-[200px] hover:text-[#92bcff]"
+          >
             <FaStar />
             Wishlist
           </h1>

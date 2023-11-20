@@ -25,7 +25,6 @@ export default function Home() {
       );
 
       const data = res.data as IAPIResponse<IProduct[]>;
-      console.log("prod", data);
 
       setProductList(data!);
     } catch (e) {
@@ -44,7 +43,6 @@ export default function Home() {
       const data = res.data as IAPIResponse<IListCategory[]>;
 
       setListCategory(data!);
-      console.log("data", data);
     } catch (e) {
       if (axios.isAxiosError(e)) {
         return toast.error(e.message, {
@@ -105,7 +103,8 @@ export default function Home() {
                 }
                 image={product.picture_url}
                 price={product.price}
-                showStar={false}
+                showStar={true}
+                star={product.rating}
                 title={product.name}
                 place={product.district}
                 order={product.total_sold}
