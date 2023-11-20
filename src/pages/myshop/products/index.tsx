@@ -41,18 +41,20 @@ const SellerAdminProducts = () => {
   return (
     <SellerAdminLayout currentPage="Products">
       <div className="p-5 flex flex-col">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col md:flex-row  md:items-center md:justify-between">
           <h1 className="text-[30px]">My Products</h1>
-          <Button
-            text="Add new product"
-            onClick={() => router.push("/myshop/products/add-product")}
-            styling="bg-[#364968] text-white p-2 rounded-md text-sm px-3"
-          />
+          <div className="mt-2">
+            <Button
+              text="Add new product"
+              onClick={() => router.push("/myshop/products/add-product")}
+              styling="bg-[#364968] text-white p-2 rounded-md text-sm px-3"
+            />
+          </div>
         </div>
         {products.length !== 0 ? (
           <div className="flex flex-col">
             <div className="mt-5 h-[500px]">
-              <table className="w-full border-collapse border">
+              <table className="w-full hidden md:inline-table border-collapse border">
                 <thead>
                   <tr>
                     <th className="text-start p-2 border-b">No</th>
@@ -96,6 +98,39 @@ const SellerAdminProducts = () => {
                   })}
                 </thead>
               </table>
+              <div className="border">
+                {products.map((product, i) => {
+                  return (
+                    <div
+                      key={i}
+                      className={`${
+                        (i + 1) % 2 == 0 && "bg-slate-100"
+                      } flex items-start gap-x-2 p-2`}
+                    >
+                      <input
+                        type="checkbox"
+                        name=""
+                        id=""
+                        className="rounded"
+                      />
+                      <div>
+                        <h1 className="text-sm">{product.name}</h1>
+
+                        <div>
+                          <p className="text-xs mt-5">
+                            Created at:{" "}
+                            {new Date(product.created_at).toLocaleString()}
+                          </p>
+                          <p className="text-xs">
+                            Updated at:{" "}
+                            {new Date(product.updated_at).toLocaleString()}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
             <div className="self-end">
               <Pagination
