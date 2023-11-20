@@ -31,7 +31,9 @@ const Pagination = ({ data, onNavigate, limit = 5 }: IPagination) => {
         <>
           {data?.total_page! > limit &&
             paginationNumber.findIndex((page) => page + 1 === 1) === -1 && (
-              <button
+              <Button
+                text="&lt;&lt;"
+                styling="px-2 py-1 border text-sm rounded-bl-md rounded-tl-md"
                 onClick={() => {
                   const temp = [];
                   for (let i = 0; i > limit; i--) {
@@ -41,22 +43,18 @@ const Pagination = ({ data, onNavigate, limit = 5 }: IPagination) => {
                   onNavigate(data?.total_page!);
                   return onNavigate(1);
                 }}
-                className="px-2 py-1 border text-sm "
-              >
-                &lt;&lt;
-              </button>
+              />
             )}
-          <button
+          <Button
+            text="Prev"
+            styling="px-2 py-1 border text-sm"
             onClick={() => {
               if (data?.current_page === paginationNumber[0] + 1) {
                 setPaginationNumber(Array.from(paginationNumber, (x) => x - 1));
               }
               onNavigate(data?.current_page! - 1);
             }}
-            className="px-2 py-1 border text-sm rounded-bl-md rounded-tl-md "
-          >
-            Prev
-          </button>
+          />
         </>
       )}
       {paginationNumber.map((i, _) => {
@@ -73,7 +71,9 @@ const Pagination = ({ data, onNavigate, limit = 5 }: IPagination) => {
       })}
       {data?.current_page !== data?.total_page && (
         <>
-          <button
+          <Button
+            text="Next"
+            styling="px-2 py-1 border text-sm"
             onClick={() => {
               if (
                 paginationNumber[paginationNumber.length - 1] <
@@ -87,16 +87,15 @@ const Pagination = ({ data, onNavigate, limit = 5 }: IPagination) => {
               }
               onNavigate(data?.current_page! + 1);
             }}
-            className="px-2 py-1 border text-sm rounded-br-md rounded-tr-md"
-          >
-            Next
-          </button>
+          />
+
           {data?.total_page! > limit &&
             paginationNumber.findIndex(
               (page) => page + 1 === data?.total_page!
             ) === -1 && (
-              <button
-                className="px-2 py-1 border text-sm"
+              <Button
+                text="&gt;&gt;"
+                styling="px-2 py-1 border text-sm rounded-br-md rounded-tr-md"
                 onClick={() => {
                   const temp = [];
                   for (
@@ -109,9 +108,7 @@ const Pagination = ({ data, onNavigate, limit = 5 }: IPagination) => {
                   setPaginationNumber(temp.reverse());
                   return onNavigate(data?.total_page!);
                 }}
-              >
-                &gt;&gt;
-              </button>
+              />
             )}
         </>
       )}
