@@ -38,7 +38,7 @@ const ProductCard = ({
     <div
       onClick={onClick}
       className={classNames([
-        "w-full transform items-start justify-start  hover:scale-95 h-fit md:w-full object-cover md:h-80 bg-white overflow-hidden shadow-md hover:shadow-none cursor-pointer rounded-md flex flex-col align-middle  transition-all duration-500 ease-in-out text-left",
+        "w-full  transform items-start justify-start  hover:scale-95 h-fit md:w-full object-cover overflow-hidden shadow-md hover:shadow-none cursor-pointer rounded-md flex flex-col align-middle  transition-all duration-500 ease-in-out text-left",
       ])}
     >
       <div className={"relative h-48 w-full"}>
@@ -69,15 +69,15 @@ const ProductCard = ({
         )}
       </div>
 
-      <div className="pt-3 pb-3 md:pt-4 md:pb-6 w-full px-2 gap-y-2 flex flex-col ">
-        <p className=" tracking-wider text-black text-sm md:text-base pt-2 row-span-2 w-full overflow-hidden overflow-ellipsis whitespace-nowrap">
-          {title?.length > 20 ? `${title.substring(0, 20)}...` : title}
+      <div className="pt-3 pb-3 md:pt-5 w-full px-2 gap-y-2 flex flex-col ">
+        <p className="text-black text-sm md:text-base pt-2 row-span-2 w-full line-clamp-2">
+          {title}
         </p>
-        <p className=" tracking-wider text-[#f57b29] text-sm md:text-base">
+        <p className="text-[#f57b29] text-sm md:text-xl">
           {currencyConverter(parseInt(price))}
         </p>
 
-        <div className="flex justify-between text-gray-500 text-xs md:text-sm pt-1">
+        <div className="flex justify-between text-gray-500 text-xs md:text-sm items-end">
           {abbreviatedPlace && (
             <p className="text-gray-500 ">
               {abbreviatedPlace.length > 15
@@ -85,7 +85,9 @@ const ProductCard = ({
                 : abbreviatedPlace}
             </p>
           )}
-          {order !== undefined && <td className={`text-gray-500`}>{order}</td>}
+          {order !== undefined && (
+            <td className={`text-gray-500`}>{order} Sold</td>
+          )}
         </div>
       </div>
     </div>

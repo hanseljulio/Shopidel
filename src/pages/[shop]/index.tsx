@@ -225,6 +225,7 @@ function Index({ seller }: IProfileShopProps) {
                       price={e.price}
                       showStar={true}
                       title={e.name}
+                      order={e.total_sold}
                       star={parseInt(e.stars)}
                     />
                   )
@@ -311,7 +312,7 @@ function Index({ seller }: IProfileShopProps) {
                     price={e.price}
                     showStar={false}
                     title={e.name}
-                    order={`${e.total_sold} sold`}
+                    order={e.total_sold}
                   />
                 </>
               ))}

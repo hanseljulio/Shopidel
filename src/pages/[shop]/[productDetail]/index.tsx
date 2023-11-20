@@ -51,17 +51,13 @@ export const getServerSideProps: GetServerSideProps = async (
   const { params } = context;
   const shop = params?.shop;
   const productDetail = params?.productDetail;
-  console.log("shop", shop);
-  console.log("prodddu", productDetail);
 
   try {
     const response = await API.get(`/products/detail/${shop}/${productDetail}`);
     const product = response.data.data;
-    console.log("pro", product);
 
     const responseSeller = await API.get(`/sellers/${shop}/profile`);
     const seller = responseSeller.data.data;
-    console.log("sell", seller);
     return {
       props: {
         product,
@@ -139,11 +135,9 @@ const ProductDetail = ({
       const res = await API.get(
         `products/${product.id}/reviews?page=${page}&comment=true&image=true&orderBy=newest`
       );
-      console.log("id rev", product.id);
 
       const data = res.data as IAPIResponse<IReviewProduct[]>;
       setReviews(data);
-      console.log("data review", data);
     } catch (e) {
       if (axios.isAxiosError(e)) {
         return toast.error("Error fetching review products", {
@@ -162,8 +156,6 @@ const ProductDetail = ({
       setSuggestion(data);
     } catch (e) {
       if (axios.isAxiosError(e)) {
-        console.log(e);
-
         return toast.error("Error fetching product suggestion", {
           toastId: "errorSuggestion",
           autoClose: 1500,
@@ -178,8 +170,6 @@ const ProductDetail = ({
 
       const data = res.data as IAPIResponse<IAPIProfileShopResponse>;
       setShopProfile(data);
-      console.log("res shop", data);
-      console.log(res);
     } catch (e) {
       if (axios.isAxiosError(e)) {
         return toast.error("Error fetching product suggestion", {
@@ -294,7 +284,6 @@ const ProductDetail = ({
       } else {
         toast.error("Failed to add to cart", { autoClose: 1500 });
       }
-      console.log(response.data);
     } catch (error) {
       if (axios.isAxiosError(error)) {
         toast.error(error.response?.data.message, { autoClose: 1500 });
@@ -330,8 +319,6 @@ const ProductDetail = ({
       } else {
         toast.error("Failed to add to wishlist", { autoClose: 1500 });
       }
-      console.log("yes");
-      console.log(response.data);
     } catch (error) {
       if (axios.isAxiosError(error)) {
         toast.error(error.response?.data.message, { autoClose: 1500 });
@@ -340,7 +327,6 @@ const ProductDetail = ({
           autoClose: 1500,
         });
       }
-      console.log("no");
     }
   };
 
@@ -445,7 +431,7 @@ const ProductDetail = ({
                           return (
                             <p
                               key={k}
-                              className={`px-2 py-1 border text-center rounded-md cursor-pointer ${
+                              className={`px-2 py-1 border text-center rounded-md cursor-pointer hover:bg-[#d6e4f8] hover:border hover:border-[#364968] ${
                                 selectedVariants[optionName] === variant
                                   ? "bg-[#d6e4f8] border border-[#364968]"
                                   : ""
@@ -521,7 +507,7 @@ const ProductDetail = ({
                 </p>
                 <div className="historyProduct flex items-center text-xs pb-3">
                   <p className="pr-3">{`Sold ${product?.sold}`} </p>
-                  <p className="px-3 border-l border-slate-600 flex-row  md:flex flex gap-1 items-center justify-center ">
+                  <p className="px-3 border-l border-slate-600 flex-row flex md:flex gap-x-1 items-center justify-center ">
                     <BsStarFill style={{ color: "#f57b29" }} />
                     <span className="items-center">{product?.stars}</span>
                   </p>
@@ -663,16 +649,6 @@ const ProductDetail = ({
                               size={13}
                             />
                           ))}
-
-                          {/* {Array.from({ length: parseInt(review.stars) }).map(
-                            (_, index) => (
-                              <FaStar
-                                key={index}
-                                style={{ color: "#f57b29" }}
-                                size={13}
-                              />
-                            )
-                          )} */}
                         </p>
                         <p className="dateReview text-sm text-neutral-500 pb-3 items-center">
                           {review.created_at.split("T")[0]} |
@@ -701,7 +677,7 @@ const ProductDetail = ({
                           <VscEmptyWindow
                             size={30}
                             style={{ margin: "0 auto" }}
-                          />{" "}
+                          />
                           There are no reviews yet
                         </p>
                       </>
