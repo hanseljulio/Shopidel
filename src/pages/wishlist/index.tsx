@@ -7,7 +7,7 @@ import { clientUnauthorizeHandler } from "@/utils/utils";
 import axios from "axios";
 import Button from "@/components/Button";
 import React, { useEffect, useState } from "react";
-import { toast } from "react-toastify";
+import { ToastContainer, toast } from "react-toastify";
 import { useRouter } from "next/router";
 import { useUserStore } from "@/store/userStore";
 import Pagination from "@/components/Pagination";
@@ -32,6 +32,10 @@ function Index() {
   const [query, setQuery] = useState<string>(
     router.query.s !== undefined ? router.query.s.toString() : ""
   );
+
+  const wishlistIsEmpty = () => {
+    return !wishlist || !wishlist.data || wishlist.data.length === 0;
+  };
 
   const searchQueryHandler = async () => {
     try {
@@ -99,6 +103,7 @@ function Index() {
   return (
     <div>
       <Navbar />
+      <ToastContainer />
       <div className="mx-auto lg:max-w-7xl md:items-center px-4 md:px-0">
         <div>
           <p className="text-xl md:text-3xl font-bold mt-10">Wishlist</p>
@@ -120,29 +125,43 @@ function Index() {
             />
           </form>
         </div>
-        <div className="gap-x-4 gap-y-1 grid grid-cols-2 md:grid-cols-6 mt-10">
-          {wishlist?.data?.map((product, i) => {
-            if (wishlist.data?.length !== 0) {
-              return (
-                <div
-                  key={i}
-                  className="hover:border hover:border-[#364968] rounded-md"
-                >
-                  <ProductCard
-                    image={product.picture_url}
-                    price={product.price}
-                    showStar={false}
-                    order={product.total_sold}
-                    title={product.name}
-                    place={product.district}
-                  />
-                </div>
-              );
-            } else {
-              <img src="/vm2/images/emptycart.png" alt="" />;
-            }
-          })}
-        </div>
+        {wishlistIsEmpty() ? (
+          <>
+            <img
+              alt="cart pic"
+              src={"/vm2/images/emptycart.png"}
+              className="w-64 h-64 object-cover py-3"
+            />
+            <p className="text-lg font-semibold text-center py-2">
+              There is no favorite product
+            </p>
+            <Button
+              text="Find your favorite product"
+              styling="bg-[#364968] p-3 rounded-[8px] w-[300px] text-white my-4"
+              onClick={() => router.push("/")}
+            />
+          </>
+        ) : (
+          <div className="gap-x-4 gap-y-1 grid grid-cols-2 md:grid-cols-6 mt-10">
+            {wishlist?.data?.map((product, i) => (
+              <div
+                key={i}
+                className="hover:border hover:border-[#364968] rounded-md"
+              >
+                <ProductCard
+                  image={product.picture_url}
+                  price={product.price}
+                  showStar={false}
+                  order={product.total_sold}
+                  title={product.name}
+                  place={product.district}
+                />
+              </div>
+            ))}
+            <div className="empty-card-div flex items-center justify-center mt-[30px]"></div>
+          </div>
+        )}
+
         <div className="text-center my-10 justify-center flex">
           <Pagination
             data={wishlist?.pagination}
