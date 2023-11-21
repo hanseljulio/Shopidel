@@ -257,11 +257,11 @@ const CheckoutPage = () => {
   const [orderTotal, setOrderTotal] = useState<number>(0);
   const [shippingTotal, setShippingTotal] = useState<number>(0);
   const [shippingOption, setShippingOption] = useState<string>("");
-  const [voucherTotal, setVoucherTotal] = useState<number>(50000);
+  const [voucherTotal, setVoucherTotal] = useState<number>(0);
   const [walletMoney, setWalletMoney] = useState<number>(0);
   const [additionalNotes, setAdditionalNotes] = useState<string>("");
   const [courierId, setCourierId] = useState<number>(0);
-  const [marketplaceDiscount, setMarketplaceDiscount] = useState<number>(1000);
+  const [marketplaceDiscount, setMarketplaceDiscount] = useState<number>(0);
 
   const [showNoAddress, setShowNoAddress] = useState<boolean>(false);
   const [showNoWallet, setShowNoWallet] = useState<boolean>(false);
@@ -316,7 +316,7 @@ const CheckoutPage = () => {
     try {
       const response = await API.get("/accounts/address");
 
-      if (response.data.data === 0) {
+      if (response.data.data.length === 0) {
         setShowNoAddress(true);
         return;
       }
@@ -578,6 +578,7 @@ const CheckoutPage = () => {
                                 quantity={item.product_quantity}
                                 price={parseInt(item.product_unit_price)}
                                 productName={item.product_name}
+                                productImage={item.product_image_url}
                               />
                             );
                           }
@@ -607,6 +608,7 @@ const CheckoutPage = () => {
                                 quantity={item.product_quantity}
                                 price={parseInt(item.product_unit_price)}
                                 productName={item.product_name}
+                                productImage={item.product_image_url}
                               />
                             );
                           }
