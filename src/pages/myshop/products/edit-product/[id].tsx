@@ -23,6 +23,9 @@ import "react-toastify/dist/ReactToastify.css";
 import { Reorder, useDragControls } from "framer-motion";
 import { AiFillDelete, AiFillPlusCircle } from "react-icons/ai";
 import { useRouter } from "next/router";
+import { ISellerEditProduct } from "@/interfaces/seller_interface";
+import { GetServerSidePropsContext, InferGetServerSidePropsType } from "next";
+import { checkAuthSSR } from "@/utils/utils";
 
 interface IAddProductForm {
   product_name: string;
@@ -42,7 +45,7 @@ interface IAddProductForm {
   variantTable?: IVariant[];
 }
 
-export interface IVariant {
+interface IVariant {
   variant1: {
     name: string;
     value: string;
@@ -66,7 +69,41 @@ interface IProductImage {
   file: File;
 }
 
-const SellerAddProductPage = () => {
+export const getServerSideProps = async (
+  context: GetServerSidePropsContext
+) => {
+  const { id } = context.query;
+  let auth = await checkAuthSSR(context);
+
+  if (auth === null) {
+    context.res.writeHead(301, { location: "/login" });
+    context.res.end();
+  }
+
+  try {
+    console.log(id);
+    const res = await API.get(`/sellers/products/${id}`, {
+      headers: {
+        Authorization: `Bearer ${auth?.access_token}`,
+      },
+    });
+    console.log(res.data.data);
+    return {
+      props: {
+        product: res.data.data,
+      },
+    };
+  } catch (e) {
+    if (axios.isAxiosError(e)) {
+      console.log(e);
+    }
+  }
+};
+
+const SellerEditProductPage = ({
+  product,
+}: InferGetServerSidePropsType<typeof getServerSideProps>) => {
+  const [data, setData] = useState<IAddProductForm>();
   const {
     register,
     setValue,
@@ -78,7 +115,7 @@ const SellerAddProductPage = () => {
     formState: { errors },
   } = useForm<IAddProductForm>({
     defaultValues: {
-      variantGroup: [],
+      ...product,
     },
   });
   const router = useRouter();
@@ -173,6 +210,7 @@ const SellerAddProductPage = () => {
       }
     }
   };
+
   useEffect(() => {
     getListCategory();
   }, []);
@@ -187,7 +225,7 @@ const SellerAddProductPage = () => {
       <SellerAdminLayout currentPage="Products">
         <div className="p-5">
           <div className="flex items-center md:flex-row justify-between  md:gap-0 flex-col gap-6">
-            <h1 className="text-[30px]">Add Products</h1>
+            <h1 className="text-[30px]">Edit Product</h1>
           </div>
           <div className="mt-10">
             <form
@@ -450,7 +488,7 @@ const SellerAddProductPage = () => {
                       Add your product variant (optional)
                     </p>
                   </div>
-                  {watchVariantGroup.length < 2 && (
+                  {watchVariantGroup?.length < 2 && (
                     <Button
                       text="Add Variant"
                       onClick={(e) => {
@@ -483,7 +521,7 @@ const SellerAddProductPage = () => {
                       );
                     })}
                 </div>
-                {watchVariantGroup.length !== 0 && (
+                {watchVariantGroup?.length !== 0 && (
                   <div className="mt-10">
                     <div>
                       <p className="text-xl">Variant Table</p>
@@ -496,7 +534,7 @@ const SellerAddProductPage = () => {
                         <thead>
                           <tr>
                             <th className="text-start">Image</th>
-                            {getValues("variantGroup").map((v, i) => {
+                            {getValues("variantGroup")?.map((v, i) => {
                               return (
                                 <th key={i} className="text-start">
                                   {v.name}
@@ -509,7 +547,7 @@ const SellerAddProductPage = () => {
                         </thead>
                         <tbody>
                           {getValues("variantGroup")
-                            .at(0)
+                            ?.at(0)
                             ?.type.map((v0, i) => {
                               if (getValues("variantGroup").length === 1) {
                                 return (
@@ -545,7 +583,7 @@ const SellerAddProductPage = () => {
                   </div>
                 )}
               </div>
-              {watchVariantGroup.length === 0 && (
+              {watchVariantGroup?.length === 0 && (
                 <>
                   <div>
                     <div>
@@ -695,7 +733,7 @@ const SellerAddProductPage = () => {
   );
 };
 
-export default SellerAddProductPage;
+export default SellerEditProductPage;
 
 interface IProductVariantGroupProps {
   register: UseFormRegister<IAddProductForm>;

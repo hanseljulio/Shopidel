@@ -1,3 +1,5 @@
+import { ICategory } from "./product_interface";
+
 export interface IBestSelling {
   name: string;
   price: string;
@@ -119,4 +121,34 @@ export interface ISellerOrderHistoryReview {
 export interface ITransactionHistoryPromotions {
   marketplace_voucher: string;
   shop_voucher: string;
+}
+
+export interface ISellerEditProduct {
+  id: number;
+  product_name: string;
+  description: string;
+  hazardous_material: boolean;
+  is_new: boolean;
+  internal_sku: string;
+  weight: string;
+  size: string;
+  is_active: boolean;
+  video_url: string;
+  category: ICategory;
+  images: string[];
+  variant_options: [];
+  variants: [
+    {
+      variant_id: 1000;
+      image_url: "";
+      selections: [
+        {
+          selection_variant_name: "default_reserved_keyword";
+          selection_name: "default_reserved_keyword";
+        }
+      ];
+      stock: 3213;
+      price: "2131231";
+    }
+  ];
 }
