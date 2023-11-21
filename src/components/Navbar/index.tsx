@@ -15,7 +15,6 @@ import { clientUnauthorizeHandler } from "@/utils/utils";
 import { toast } from "react-toastify";
 import { useCartStore } from "@/store/cartStore";
 import CartProduct from "../CartProduct";
-import { ICartTableDataProps } from "../CartTableDataMobile";
 
 const Navbar = () => {
   const cartStore = useCartStore();
@@ -46,10 +45,13 @@ const Navbar = () => {
     },
   ]);
 
+  const { cart, updateCart } = useCartStore();
+
   const logoutHandler = () => {
     deleteCookie("accessToken");
     deleteCookie("refreshToken");
     updateUser(undefined);
+    updateCart(undefined);
     router.push("/");
   };
 
@@ -110,7 +112,10 @@ const Navbar = () => {
               </div>
             </>
           ))}
-        <button className="bg-[#e09664]" onClick={() => router.push("/cart")}>
+        <button
+          className="bg-[#f57b29] w-full py-2 text-white "
+          onClick={() => router.push("/cart")}
+        >
           See More
         </button>
       </div>
