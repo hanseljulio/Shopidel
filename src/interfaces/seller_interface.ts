@@ -64,6 +64,18 @@ export interface IAPIProfileShopResponse {
 export interface IProfileShopProps {
   seller: IAPIProfileShopResponse;
 }
+
+export interface ISellerPromotion {
+  name: string;
+  quota: number;
+  startDate: string;
+  endDate: string;
+  minItems: number;
+  maxItems: number;
+  discountPercentage: number;
+  selectedProducts: number[];
+}
+
 export interface ISellerOrderHistory {
   data: ISellerOrderHistoryData[];
   pagination: {
