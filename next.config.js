@@ -1,4 +1,4 @@
-/** @type {import('next').NextConfig} */
+//** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: false,
   images: {
@@ -10,9 +10,10 @@ const nextConfig = {
       {
         protocol: "https",
         hostname: "down-id.img.susercontent.com",
-      }
+      },
     ],
   },
+  basePath: "/vm2",
 };
 
 module.exports = nextConfig;

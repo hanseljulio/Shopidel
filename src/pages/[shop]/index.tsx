@@ -178,6 +178,11 @@ function Index({ seller }: IProfileShopProps) {
             src={seller?.seller_picture_url}
             alt={seller?.seller_name}
             className="imgSeller w-full md:w-36 h-full object-fill "
+            placeholder="https://cdn4.iconfinder.com/data/icons/web-ui-color/128/Account-512.png"
+            onError={(e) => {
+              (e.target as HTMLInputElement).src =
+                "https://cdn4.iconfinder.com/data/icons/web-ui-color/128/Account-512.png";
+            }}
           />
           <div className="flex flex-col md:flex-row gap-y-4 gap-x-48 w-full">
             <div className="aboutSeller  md:w-full flex flex-col gap-y-2 md:gap-y-3">

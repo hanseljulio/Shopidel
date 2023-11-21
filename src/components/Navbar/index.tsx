@@ -1,5 +1,5 @@
 import { useUserStore } from "@/store/userStore";
-import { deleteCookie } from "cookies-next";
+import { deleteCookie, getCookie } from "cookies-next";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
@@ -8,8 +8,17 @@ import Button from "../Button";
 import { BiLogOut } from "react-icons/bi";
 import { IoSettingsSharp } from "react-icons/io5";
 import { IAPIUserProfileResponse } from "@/interfaces/api_interface";
+import { ICartData } from "@/interfaces/cart_interface";
+import { API } from "@/network";
+import axios from "axios";
+import { clientUnauthorizeHandler } from "@/utils/utils";
+import { toast } from "react-toastify";
+import { useCartStore } from "@/store/cartStore";
+import CartProduct from "../CartProduct";
+import { ICartTableDataProps } from "../CartTableDataMobile";
 
 const Navbar = () => {
+  const cartStore = useCartStore();
   const [navbar, setNavbar] = useState(false);
   const router = useRouter();
   const { user, updateUser } = useUserStore();
@@ -19,6 +28,23 @@ const Navbar = () => {
   const [query, setQuery] = useState<string>(
     router.query.s !== undefined ? router.query.s.toString() : ""
   );
+  const [cartData, setCartData] = useState<ICartData[]>([
+    {
+      shop_id: 0,
+      shop_name: "",
+      cart_items: [
+        {
+          product_id: 0,
+          product_image_url: "",
+          product_name: "",
+          product_unit_price: "",
+          product_quantity: 0,
+          product_total_price: "",
+          isChecked: false,
+        },
+      ],
+    },
+  ]);
 
   const logoutHandler = () => {
     deleteCookie("accessToken");
@@ -37,6 +63,58 @@ const Navbar = () => {
         page: 1,
       },
     });
+  };
+
+  const getCartData = async () => {
+    const token = getCookie("accessToken");
+    try {
+      const res = await API.get("/accounts/carts");
+
+      if (cartStore.cart !== undefined) {
+        setCartData(cartStore.cart);
+      } else {
+        setCartData(res.data.data.cart_shops);
+      }
+    } catch (e) {
+      if (axios.isAxiosError(e)) {
+        if (e.response?.status === 401) {
+          return clientUnauthorizeHandler(router, updateUser);
+        }
+        return toast.error(e.message, {
+          autoClose: 1500,
+        });
+      }
+    }
+  };
+
+  useEffect(() => {
+    getCartData();
+  }, []);
+
+  const renderCartProducts = () => {
+    const maxProductsToShow = 5;
+
+    return cartData.map((shop, shopIndex) => (
+      <div key={shopIndex} className="mb-3">
+        {shop.cart_items
+          .slice(0, maxProductsToShow)
+          .map((product, productIndex) => (
+            <>
+              <div className="py-2 ">
+                <CartProduct
+                  key={productIndex}
+                  productImage={product.product_image_url}
+                  productName={product.product_name}
+                />
+                <hr />
+              </div>
+            </>
+          ))}
+        <button className="bg-[#e09664]" onClick={() => router.push("/cart")}>
+          See More
+        </button>
+      </div>
+    ));
   };
 
   useEffect(() => {
@@ -174,10 +252,10 @@ const Navbar = () => {
             >
               <AiOutlineShoppingCart size={30} />
             </button>
-            <div className="invisible opacity-0 group-hover:opacity-100 group-hover:visible transition-all duration-150 w-72 bg-white absolute top-[53px] right-0 z-50 rounded-bl-md rounded-br-md overflow-hidden shadow-lg">
-              <div className="px-5 pt-5 text-center">
-                <h1 className="font-bold w-full">My cart</h1>
-                <h1 className="p-3">Your cart is empty!</h1>
+            <div className="invisible opacity-0 group-hover:opacity-100 group-hover:visible transition-all duration-150 w-96 bg-white absolute top-[53px] right-0 z-50 rounded-bl-md rounded-br-md overflow-hidden shadow-lg">
+              <div className="px-5 pt-5 text-center opacity-80">
+                <h1 className="font-bold w-full text-xl pb-2">My cart </h1>
+                {renderCartProducts()}
               </div>
             </div>
           </div>

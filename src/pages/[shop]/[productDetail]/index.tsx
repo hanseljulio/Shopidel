@@ -39,6 +39,7 @@ import { FaLocationDot } from "react-icons/fa6";
 import { VscEmptyWindow } from "react-icons/vsc";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import YouTube from "react-youtube";
 
 export interface IAPIProductDetailResponseWithSeller
   extends IAPIProductDetailResponse {
@@ -73,6 +74,18 @@ export const getServerSideProps: GetServerSideProps = async (
   }
 };
 
+const getYoutubeVideoId = (url: string) => {
+  const youtubeRegex =
+    /^(https?:\/\/)?(www\.)?(youtube\.com\/(.*\/)?|youtu\.be\/)(.+)$/;
+  const match = url.match(youtubeRegex);
+
+  if (match && match[5]) {
+    return match[5];
+  }
+
+  return null;
+};
+
 const ProductDetail = ({
   product,
   seller,
@@ -103,44 +116,53 @@ const ProductDetail = ({
   >();
 
   const isYouTubeVideo = (url: string) => {
-    // Regex to check if the URL is a YouTube video URL
     const youtubeRegex =
       /^(https?:\/\/)?(www\.)?(youtube\.com\/(.*\/)?|youtu\.be\/)(.+)$/;
-
     return youtubeRegex.test(url);
   };
 
   const renderContent = () => {
     if (isHovering) {
-      if (isYouTubeVideo(variation)) {
-        return (
-          <iframe
-            title="YouTube Video"
-            width="560"
-            height="315"
-            src={variation}
-            allowFullScreen
-            className="bigImage w-full cursor-pointer rounded-md"
-            onClick={handleZoomImage}
-          ></iframe>
-        );
-      } else {
-        return (
-          <img
-            width={200}
-            height={200}
-            src={variation}
-            alt=""
-            className="bigImage w-full cursor-pointer rounded-md"
-            onClick={handleZoomImage}
-          />
-        );
-      }
+      return (
+        <img
+          width={200}
+          height={200}
+          src={variation}
+          alt=""
+          className="bigImage w-full cursor-pointer rounded-md"
+          onClick={handleZoomImage}
+        />
+      );
     } else {
       return (
         <img
           width={100}
           height={100}
+          src={variation}
+          alt=""
+          className="bigImage w-full cursor-pointer rounded-md"
+          onClick={handleZoomImage}
+        />
+      );
+    }
+  };
+
+  const renderBigImage = () => {
+    if (isYouTubeVideo(variation)) {
+      return (
+        <div className="bigImage w-full cursor-pointer rounded-md">
+          <YouTube
+            videoId={getYoutubeVideoId(variation) ?? ""}
+            opts={{ width: "100%", height: 315 }}
+            onReady={(event) => event.target.pauseVideo()}
+          />
+        </div>
+      );
+    } else {
+      return (
+        <img
+          width={200}
+          height={200}
           src={variation}
           alt=""
           className="bigImage w-full cursor-pointer rounded-md"
@@ -167,6 +189,7 @@ const ProductDetail = ({
       const res = await API.get(`/products/${product.id}/pictures`);
       const data = res.data.data;
       setImagesProduct(data);
+      console.log("img", data);
     } catch (e) {
       if (axios.isAxiosError(e)) {
         return toast.error(e.message, {
@@ -361,7 +384,7 @@ const ProductDetail = ({
 
       if (response.status === 200) {
         toast.success("Added to wishlist", { autoClose: 1500 });
-        setIsFavorite(true); // Set isFavorite to true when successfully added to wishlist
+        setIsFavorite(true);
       } else {
         toast.error("Failed to add to wishlist", { autoClose: 1500 });
       }
@@ -395,26 +418,41 @@ const ProductDetail = ({
         <Navbar />
         <div className="mx-auto lg:max-w-7xl px-4 md:px-0">
           <div className="flex-col md:flex-row justify-between md:flex gap-10 py-5 px-5 md:px-0">
-            <div className="order-1 md:order-1 imageProduct w-full md:w-1/4 rounded-md overflow-hidden">
-              {renderContent()}
+            <div className="order-1 md:order-1 imageProduct w-full md:w-1/4 rounded-md overflow-hidden flex flex-col">
+              {isYouTubeVideo(variation) ? renderBigImage() : renderContent()}
 
-              <div className="variation gap-1 mt-2 flex overflow-x-scroll [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none']">
-                {imagesProduct?.map((url, index) => {
-                  return (
-                    <img
-                      key={index}
-                      className="cursor-pointer w-[90px] h-full rounded-md"
-                      width={50}
-                      height={50}
-                      src={url}
-                      alt="images"
-                      onMouseOver={() => handleMouseOver(url)}
-                      onMouseOut={handleMouseOut}
-                      onClick={handleZoomImage}
-                    />
-                  );
-                })}
+              <div className="variation gap-1 mt-2 flex flex-row overflow-auto whitespace-nowrap scrollbar-thin scrollbar-thumb-gray-300 [&::-webkit-scrollbar-thumb] [&::-webkit-scrollbar-track] [-ms-overflow-style:'none'] [scrollbar-width:'none']">
+                {imagesProduct?.map((url, index) => (
+                  <div
+                    key={index}
+                    className="flex-shrink-0 cursor-pointer w-[100px] h-[100px] rounded-md mr-2"
+                    onClick={() => {
+                      setVariation(url);
+                      setIsHovering(false);
+                    }}
+                  >
+                    {isYouTubeVideo(url) ? (
+                      <img
+                        src={`https://img.youtube.com/vi/${getYoutubeVideoId(
+                          url
+                        )}/0.jpg`}
+                        className="w-full h-full rounded-md"
+                        alt="variation image"
+                      />
+                    ) : (
+                      <img
+                        className="cursor-pointer w-full h-full rounded-md"
+                        src={url}
+                        alt="images"
+                        onMouseOver={() => handleMouseOver(url)}
+                        onMouseOut={handleMouseOut}
+                        onClick={handleZoomImage}
+                      />
+                    )}
+                  </div>
+                ))}
               </div>
+
               <div className="favorite-icon mt-5 text-right">
                 <button onClick={() => handleWishlist(product)}>
                   {isFavorite ? (
@@ -442,9 +480,6 @@ const ProductDetail = ({
                 <div className="flex items-center gap-1">
                   <FaLocationDot /> {"Malang"}
                 </div>
-                {/* <div className="flex items-center gap-1">
-                    <FaTruckFast /> {`Jakarta Selatan ${"Rp3000"}`}
-                  </div> */}
               </div>
               <div className="flex flex-col gap-y-3 text-xs text-neutral-600">
                 {product?.variant_options?.map((item: any, i: number) => {
@@ -460,7 +495,7 @@ const ProductDetail = ({
                           return (
                             <p
                               key={k}
-                              className={`px-1 py-1 border text-center rounded-md cursor-pointer hover:bg-[#d6e4f8] hover:border hover:border-[#364968] row-span-2 w-full text-ellipsis line-clamp-2 h-10 ${
+                              className={`px-1 py-1 justify-center items-center flex border text-center rounded-md cursor-pointer hover:bg-[#d6e4f8] hover:border hover:border-[#364968] row-span-2 w-full text-ellipsis line-clamp-2 h-10 ${
                                 selectedVariants[optionName] === variant
                                   ? "bg-[#d6e4f8] border border-[#364968]"
                                   : ""
@@ -577,6 +612,11 @@ const ProductDetail = ({
                   src={shopProfile?.data?.seller_picture_url}
                   alt="seller"
                   className="imgSeller w-full md:w-32 h-full place-self-center object-fill rounded-lg"
+                  placeholder="https://cdn4.iconfinder.com/data/icons/web-ui-color/128/Account-512.png"
+                  onError={(e) => {
+                    (e.target as HTMLInputElement).src =
+                      "https://cdn4.iconfinder.com/data/icons/web-ui-color/128/Account-512.png";
+                  }}
                 />
                 <div className="flex flex-col md:flex-row gap-y-4 md:gap-x-48 w-full">
                   <div className="aboutSeller w-full md:w-1/2">
