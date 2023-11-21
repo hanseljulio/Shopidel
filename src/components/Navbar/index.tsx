@@ -7,15 +7,17 @@ import { AiOutlineShoppingCart } from "react-icons/ai";
 import Button from "../Button";
 import { BiLogOut } from "react-icons/bi";
 import { IoSettingsSharp } from "react-icons/io5";
-import { IAPIUserProfileResponse } from "@/interfaces/api_interface";
-import { ICartData } from "@/interfaces/cart_interface";
+import {
+  IAPIResponse,
+  IAPIUserProfileResponse,
+} from "@/interfaces/api_interface";
+import { ICartData, ICartItems } from "@/interfaces/cart_interface";
 import { API } from "@/network";
 import axios from "axios";
 import { clientUnauthorizeHandler } from "@/utils/utils";
 import { toast } from "react-toastify";
 import { useCartStore } from "@/store/cartStore";
 import CartProduct from "../CartProduct";
-import EmptyCart from "../EmptyCart";
 
 const Navbar = () => {
   const cartStore = useCartStore();
@@ -69,7 +71,6 @@ const Navbar = () => {
   };
 
   const getCartData = async () => {
-    const token = getCookie("accessToken");
     try {
       const res = await API.get("/accounts/carts");
 
@@ -111,30 +112,52 @@ const Navbar = () => {
   const renderCartProducts = () => {
     const maxProductsToShow = 5;
 
-    return cartData.map((shop, shopIndex) => (
-      <div key={shopIndex} className="mb-3">
-        {shop.cart_items
-          .slice(0, maxProductsToShow)
-          .map((product, productIndex) => (
+    const products: ICartItems[] = cartData.reduce<ICartItems[]>(
+      (acc, cart) => {
+        acc.push(...cart.cart_items);
+        return acc;
+      },
+      []
+    );
+
+    const topProducts: ICartItems[] = cartData
+      .reduce<ICartItems[]>((acc, cart) => {
+        acc.push(...cart.cart_items);
+        return acc;
+      }, [])
+      .slice(0, maxProductsToShow);
+
+    const uniqueProductIds = new Set(products.map((item) => item.product_id));
+    const totalProductsInCart = uniqueProductIds.size;
+
+    return (
+      <div className="mb-3">
+        <div className="py-2">
+          {topProducts.map((item, j) => (
             <>
-              <div className="py-2 ">
-                <CartProduct
-                  key={productIndex}
-                  productImage={product.product_image_url}
-                  productName={product.product_name}
-                />
-                <hr />
-              </div>
+              <CartProduct
+                key={j}
+                productImage={item.product_image_url || ""}
+                productName={item.product_name || ""}
+              />
+              <hr className="py-1" />
             </>
           ))}
-        <button
-          className="bg-[#f57b29] hover:bg-[#f39252] w-full py-2 text-white "
-          onClick={() => router.push("/cart")}
-        >
-          See More
-        </button>
+        </div>
+
+        <div className="flex justify-between items-center">
+          <p className="text-sm text-neutral-500 ">
+            {totalProductsInCart} products in your cart
+          </p>
+          <button
+            className="bg-[#f57b29] hover:bg-[#f39252] w-36 py-2 text-white"
+            onClick={() => router.push("/cart")}
+          >
+            See More
+          </button>
+        </div>
       </div>
-    ));
+    );
   };
 
   useEffect(() => {
@@ -272,7 +295,7 @@ const Navbar = () => {
             >
               <AiOutlineShoppingCart size={30} />
             </button>
-            <div className="invisible opacity-0 group-hover:opacity-100 group-hover:visible transition-all duration-150 w-96 bg-white absolute top-[53px] right-0 z-50 rounded-bl-md rounded-br-md overflow-hidden shadow-lg">
+            <div className="invisible opacity-0 group-hover:opacity-100 group-hover:visible transition-all duration-150 w-[500px] bg-white absolute top-[53px] right-0 z-50 rounded-bl-md rounded-br-md overflow-hidden shadow-lg">
               <div className="px-5 pt-5 text-center">
                 <h1 className="font-bold w-full text-xl pb-2">My cart </h1>
                 {cartIsEmpty() ? (

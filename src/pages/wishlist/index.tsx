@@ -126,48 +126,46 @@ function Index() {
           </form>
         </div>
         {wishlistIsEmpty() ? (
-          <>
+          <div className="text-center my-3">
             <img
               alt="cart pic"
               src={"/vm2/images/emptycart.png"}
-              className="w-64 h-64 object-cover py-3"
+              className="w-80 h-80 object-cover py-3 mx-auto"
             />
-            <p className="text-lg font-semibold text-center py-2">
+            <p className="text-lg font-semibold text-center py-2 text-neutral-500">
               There is no favorite product
             </p>
             <Button
               text="Find your favorite product"
-              styling="bg-[#364968] p-3 rounded-[8px] w-[300px] text-white my-4"
+              styling="bg-[#364968] p-3 rounded-[8px] w-[300px] text-white my-4 hover:bg-[#587299]"
               onClick={() => router.push("/")}
             />
-          </>
-        ) : (
-          <div className="gap-x-4 gap-y-1 grid grid-cols-2 md:grid-cols-6 mt-10">
-            {wishlist?.data?.map((product, i) => (
-              <div
-                key={i}
-                className="hover:border hover:border-[#364968] rounded-md"
-              >
-                <ProductCard
-                  image={product.picture_url}
-                  price={product.price}
-                  showStar={false}
-                  order={product.total_sold}
-                  title={product.name}
-                  place={product.district}
-                />
-              </div>
-            ))}
-            <div className="empty-card-div flex items-center justify-center mt-[30px]"></div>
           </div>
+        ) : (
+          <>
+            <div className="gap-x-4 gap-y-1 grid grid-cols-2 md:grid-cols-6 mt-10">
+              {wishlist?.data?.map((product, i) => (
+                <div key={i} className=" rounded-md">
+                  <ProductCard
+                    image={product.picture_url}
+                    price={product.price}
+                    showStar={false}
+                    order={product.total_sold}
+                    title={product.name}
+                    place={product.district}
+                  />
+                </div>
+              ))}
+              <div className="empty-card-div flex items-center justify-center mt-[30px]"></div>
+            </div>
+            <div className="text-center my-10 justify-center flex">
+              <Pagination
+                data={wishlist?.pagination}
+                onNavigate={(navPage: any) => setPage(navPage)}
+              />
+            </div>
+          </>
         )}
-
-        <div className="text-center my-10 justify-center flex">
-          <Pagination
-            data={wishlist?.pagination}
-            onNavigate={(navPage: any) => setPage(navPage)}
-          />
-        </div>
       </div>
       <Footer />
     </div>
