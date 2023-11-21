@@ -70,7 +70,7 @@ const ProductCard = ({
       </div>
 
       <div className="pt-3 pb-3 md:pt-5 w-full px-2 gap-y-2 flex flex-col ">
-        <p className="text-black text-sm md:text-base pt-2 row-span-2 w-full line-clamp-2">
+        <p className="text-black text-sm md:text-base pt-2 row-span-2 w-full line-clamp-2 h-12 md:h-14">
           {title}
         </p>
         <p className="text-[#f57b29] text-sm md:text-xl">

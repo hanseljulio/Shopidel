@@ -15,6 +15,7 @@ import { clientUnauthorizeHandler } from "@/utils/utils";
 import { toast } from "react-toastify";
 import { useCartStore } from "@/store/cartStore";
 import CartProduct from "../CartProduct";
+import EmptyCart from "../EmptyCart";
 
 const Navbar = () => {
   const cartStore = useCartStore();
@@ -89,6 +90,20 @@ const Navbar = () => {
     }
   };
 
+  const cartIsEmpty = () => {
+    if (cartData.length === 0) {
+      return true;
+    }
+
+    for (let i = 0; i < cartData.length; i++) {
+      if (cartData[i].cart_items.length !== 0) {
+        return false;
+      }
+    }
+
+    return true;
+  };
+
   useEffect(() => {
     getCartData();
   }, []);
@@ -113,7 +128,7 @@ const Navbar = () => {
             </>
           ))}
         <button
-          className="bg-[#f57b29] w-full py-2 text-white "
+          className="bg-[#f57b29] hover:bg-[#f39252] w-full py-2 text-white "
           onClick={() => router.push("/cart")}
         >
           See More
@@ -258,9 +273,25 @@ const Navbar = () => {
               <AiOutlineShoppingCart size={30} />
             </button>
             <div className="invisible opacity-0 group-hover:opacity-100 group-hover:visible transition-all duration-150 w-96 bg-white absolute top-[53px] right-0 z-50 rounded-bl-md rounded-br-md overflow-hidden shadow-lg">
-              <div className="px-5 pt-5 text-center opacity-80">
+              <div className="px-5 pt-5 text-center">
                 <h1 className="font-bold w-full text-xl pb-2">My cart </h1>
-                {renderCartProducts()}
+                {cartIsEmpty() ? (
+                  <div className="items-center justify-center">
+                    <img
+                      alt="cart pic"
+                      src={"/vm2/images/emptycart.png"}
+                      width={250}
+                      height={250}
+                      className="w-32 h-32 object-cover items-center justify-center"
+                    />
+
+                    <h1 className="text-center">
+                      Your shopping cart looks empty!
+                    </h1>
+                  </div>
+                ) : (
+                  renderCartProducts()
+                )}
               </div>
             </div>
           </div>
