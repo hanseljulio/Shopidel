@@ -212,7 +212,7 @@ const SellerAdminProducts = () => {
                 className="flex flex-col h-full
              items-center gap-y-5"
               >
-                <img className="w-80" src="/images/create-product.png" />
+                <img className="w-80" src="/vm2/images/create-product.png" />
                 <h1 className="text-2xl font-bold">
                   Create your first product!
                 </h1>
