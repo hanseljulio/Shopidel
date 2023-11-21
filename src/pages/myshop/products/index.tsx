@@ -91,9 +91,9 @@ const SellerAdminProducts = () => {
       )}
       <SellerAdminLayout currentPage="Products">
         <div className="p-5 flex flex-col">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between">
             <h1 className="text-[30px]">My Products</h1>
-            <div className="flex gap-x-2">
+            <div className="flex gap-x-2 mt-2 md:mt-0">
               {selectedProduct.length > 1 && (
                 <Button
                   text="Delete"
@@ -110,8 +110,8 @@ const SellerAdminProducts = () => {
           </div>
           {products.length !== 0 ? (
             <div className="flex flex-col">
-              <div className="mt-5 h-[500px]">
-                <table className="w-full border-collapse border">
+              <div className="mt-5 md:h-[500px]">
+                <table className="w-full hidden md:inline-table border-collapse border">
                   <thead>
                     <tr>
                       <th className="text-start p-2 border-b w-2"></th>
@@ -191,8 +191,72 @@ const SellerAdminProducts = () => {
                     })}
                   </thead>
                 </table>
+                <div className="flex flex-col border md:hidden">
+                  {products.map((product, i) => {
+                    return (
+                      <div
+                        key={i}
+                        className={`p-2 flex gap-x-3 items-center  ${
+                          (i + 1) % 2 === 0 && "bg-slate-100"
+                        }`}
+                      >
+                        <input
+                          type="checkbox"
+                          name=""
+                          id=""
+                          checked={
+                            selectedProduct.includes(product.id) ? true : false
+                          }
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              return setSelectedProduct([
+                                ...selectedProduct,
+                                product.id,
+                              ]);
+                            }
+                            return setSelectedProduct(
+                              selectedProduct.filter((id) => id !== product.id)
+                            );
+                          }}
+                          className="rounded"
+                        />
+                        <div className="flex-1">
+                          <h1 className="truncate text-ellipsis w-60">
+                            {product.name}
+                          </h1>
+                          <div className="mt-2">
+                            <p className="text-sm">
+                              Created at:{" "}
+                              {new Date(product.created_at).toLocaleString()}
+                            </p>
+                            <p className="text-sm">
+                              Updated at:{" "}
+                              {new Date(product.updated_at).toLocaleString()}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex gap-x-2">
+                          <div>
+                            <AiFillEdit className="hover:cursor-pointer" />
+                          </div>
+                          <div
+                            onClick={() => {
+                              setSelectedProduct([product.id]);
+                              setIsModal(true);
+                            }}
+                          >
+                            <AiFillDelete
+                              color={"red"}
+                              className="hover:cursor-pointer"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
-              <div className="self-end">
+              <div className="self-end mt-5 md:mt-0">
                 <Pagination
                   data={pagination}
                   onNavigate={(page) =>
