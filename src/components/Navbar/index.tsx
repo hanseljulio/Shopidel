@@ -8,6 +8,7 @@ import Button from "../Button";
 import { BiLogOut } from "react-icons/bi";
 import { IoSettingsSharp } from "react-icons/io5";
 import { IAPIUserProfileResponse } from "@/interfaces/api_interface";
+import { useCartStore } from "@/store/cartStore";
 
 const Navbar = () => {
   const [navbar, setNavbar] = useState(false);
@@ -20,10 +21,13 @@ const Navbar = () => {
     router.query.s !== undefined ? router.query.s.toString() : ""
   );
 
+  const { cart, updateCart } = useCartStore();
+
   const logoutHandler = () => {
     deleteCookie("accessToken");
     deleteCookie("refreshToken");
     updateUser(undefined);
+    updateCart(undefined);
     router.push("/");
   };
 

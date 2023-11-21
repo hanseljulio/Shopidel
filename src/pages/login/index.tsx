@@ -16,6 +16,7 @@ import {
 } from "@/interfaces/api_interface";
 import { useUserStore } from "@/store/userStore";
 import { clientUnauthorizeHandler, setAuthCookie } from "@/utils/utils";
+import { useCartStore } from "@/store/cartStore";
 
 const Login = () => {
   const {
@@ -25,6 +26,7 @@ const Login = () => {
   } = useForm<ILoginForm>();
   const { updateUser } = useUserStore();
   const router = useRouter();
+  const { updateCart } = useCartStore();
 
   const getUserData = async (token: string) => {
     try {
@@ -53,6 +55,7 @@ const Login = () => {
             render({ data }) {
               const res = data?.data as IAPIResponse<IAPILoginResponse>;
               setAuthCookie(res.data!);
+              updateCart(undefined);
               return res.message;
             },
           },

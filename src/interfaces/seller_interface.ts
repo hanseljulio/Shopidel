@@ -76,21 +76,25 @@ export interface ISellerOrderHistory {
 
 export interface ISellerOrderHistoryData {
   order_id: number;
-  buter_name: string;
+  buyer_name: string;
   status: string;
   products: ISellerOrderHistoryProducts[];
-  promotions: ITransactionHistoryPromotions;
+  promotion: ITransactionHistoryPromotions;
   delivery_fee: string;
-  shipping: {
-    province: string;
-    district: string;
-    zip_code: string;
-    sub_district: string;
-    kelurahan: string;
-    detail: string;
-  };
+  courier_name: string;
+  shipping: ISellerOrderBuyerAddress;
   total_payment: string;
   created_at: string;
+  is_withdrawn: boolean;
+}
+
+export interface ISellerOrderBuyerAddress {
+  province: string;
+  district: string;
+  zip_code: string;
+  sub_district: string;
+  kelurahan: string;
+  detail: string;
 }
 
 export interface ISellerOrderHistoryProducts {
