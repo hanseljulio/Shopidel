@@ -149,6 +149,10 @@ const SellerPromotionCreate = () => {
                 <input
                   {...register("quota", {
                     required: "Promotion quota is required",
+                    validate: {
+                      greaterThanZero: (v) =>
+                        v > 0 || "Quota must be greater than 0",
+                    },
                   })}
                   type="number"
                   name="quota"

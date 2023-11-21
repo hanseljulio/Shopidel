@@ -66,6 +66,206 @@ const OrderDetailModal = () => {
   );
 };
 
+const EditPromo = () => {
+  return (
+    <div className="bg-white p-5 rounded-md md:w-[1000px] md:h-[800px] h-[80vh] w-[90vw] overflow-y-auto">
+      <div className="py-3 border-b-2">
+        <h1 className="text-[20px] font-bold">Edit Promotion</h1>
+      </div>
+      <div className=" pt-6">
+        <form>
+          <div className="flex flex-col">
+            <label htmlFor="username" className="text-sm">
+              Promotion Name
+            </label>
+            <input
+              // {...register("name", {
+              //   required: "Promotion name is required",
+              // })}
+              type="text"
+              name="name"
+              id="name"
+              className="rounded-md border p-2"
+            />
+            {/* {errors.name?.type === "required" && (
+              <p role="alert" className="text-xs text-red-500 mt-1">
+                {errors.name.message}
+              </p>
+            )} */}
+          </div>
+          <div className="flex md:flex-row justify-between pt-6 md:gap-10">
+            <div className="flex flex-col md:basis-[33.3%]">
+              <label htmlFor="quota" className="text-sm">
+                Promotion quota
+              </label>
+              <input
+                // {...register("quota", {
+                //   required: "Promotion quota is required",
+                //   validate: {
+                //     greaterThanZero: (v) =>
+                //       v > 0 || "Quota must be greater than 0",
+                //   },
+                // })}
+                type="number"
+                name="quota"
+                id="quota"
+                className="rounded-md border p-2 "
+              />
+              {/* {errors.quota?.type === "required" && (
+                <p role="alert" className="text-xs text-red-500 mt-1">
+                  {errors.quota.message}
+                </p>
+              )} */}
+            </div>
+            <div className="flex flex-col md:basis-[33.3%]">
+              <label htmlFor="startDate" className="text-sm">
+                Start Date
+              </label>
+              <input
+                // {...register("startDate", {
+                //   required: "Start date is required",
+                // })}
+                type="date"
+                name="startDate"
+                id="startDate"
+                className="rounded-md border p-2"
+              />
+              {/* {errors.startDate?.type === "required" && (
+                <p role="alert" className="text-xs text-red-500 mt-1">
+                  {errors.startDate.message}
+                </p>
+              )} */}
+            </div>
+            <div className="flex flex-col md:basis-[33.3%]">
+              <label htmlFor="endDate" className="text-sm">
+                End date
+              </label>
+              <input
+                // {...register("endDate", {
+                //   required: "End date is required",
+                // })}
+                type="date"
+                name="endDate"
+                id="endDate"
+                className="rounded-md border p-2"
+              />
+              {/* {errors.endDate?.type === "required" && (
+                <p role="alert" className="text-xs text-red-500 mt-1">
+                  {errors.endDate.message}
+                </p>
+              )} */}
+            </div>
+          </div>
+          <div className="flex md:flex-row justify-between pt-6 md:gap-10">
+            <div className="flex flex-col md:basis-[33.3%]">
+              <label htmlFor="minItems" className="text-sm">
+                Minimum items
+              </label>
+              <input
+                // {...register("minItems", {
+                //   required: "Minimum items is required",
+                // })}
+                type="number"
+                name="minItems"
+                id="minItems"
+                className="rounded-md border p-2 "
+              />
+              {/* {errors.minItems?.type === "required" && (
+                <p role="alert" className="text-xs text-red-500 mt-1">
+                  {errors.minItems.message}
+                </p>
+              )} */}
+            </div>
+            <div className="flex flex-col md:basis-[33.3%]">
+              <label htmlFor="maxItems" className="text-sm">
+                Maximum items
+              </label>
+              <input
+                // {...register("maxItems", {
+                //   required: "Maximum items is required",
+                // })}
+                type="number"
+                name="maxItems"
+                id="maxItems"
+                className="rounded-md border p-2"
+              />
+              {/* {errors.maxItems?.type === "required" && (
+                <p role="alert" className="text-xs text-red-500 mt-1">
+                  {errors.maxItems.message}
+                </p>
+              )} */}
+            </div>
+            <div className="flex flex-col md:basis-[33.3%]">
+              <label htmlFor="discountPercentage" className="text-sm">
+                Discount percentage
+              </label>
+              <div className="relative">
+                <input
+                  // {...register("discountPercentage", {
+                  //   required: "Discount percentage is required",
+                  // })}
+                  type="number"
+                  name="discountPercentage"
+                  id="discountPercentage"
+                  className="rounded-md border p-2 w-full"
+                />
+                <div className="absolute right-0 bg-[#F3F4F5] border border-slate-500 h-full flex items-center px-2 rounded-tr-md rounded-br-md top-0">
+                  <span className="">%</span>
+                </div>
+              </div>
+              {/* {errors.discountPercentage?.type === "required" && (
+                <p role="alert" className="text-xs text-red-500 mt-1">
+                  {errors.discountPercentage.message}
+                </p>
+              )} */}
+            </div>
+          </div>
+
+          <div className="">
+            <div className="flex justify-between items-center ">
+              <h1 className="text-[25px] py-6">Select Products</h1>
+              <div className="flex items-center gap-6">
+                <input
+                  type="checkbox"
+                  className="hover:cursor-pointer"
+                  // onClick={handleCheckAll}
+                  name="allselect"
+                />
+                <p>Select all</p>
+              </div>
+            </div>
+            <div className="bg-slate-300 h-[300px] overflow-y-scroll flex flex-col items-center">
+              {/* {props.shopItems.map((product, index) => {
+                return (
+                  <div
+                    key={index}
+                    className="bg-white border-2 rounded-md  p-6 flex gap-6 items-center my-3 w-[95%]"
+                  >
+                    <input
+                      // onClick={(e) => handleCheck(e, product.id)}
+                      type="checkbox"
+                      className="hover:cursor-pointer"
+                      // checked={product.isChecked}
+                    />
+                    <h1>{product.name}</h1>
+                  </div>
+                );
+              })} */}
+            </div>
+          </div>
+
+          <div className="flex justify-center pt-6 py-10">
+            <Button
+              text="Edit promotion"
+              styling="p-3 bg-[#364968] w-[300px] rounded-md text-white"
+            />
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+};
+
 const SellerAdminHome = () => {
   const [currentPage, setCurrentPage] = useState<string>("all");
   const [promotionData, setPromotionData] = useState<ISellerPromotion[]>([
@@ -94,6 +294,7 @@ const SellerAdminHome = () => {
 
   const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false);
   const [showDetailModal, setShowDetailModal] = useState<boolean>(false);
+  const [showEditModal, setShowEditModal] = useState<boolean>(false);
 
   const getPromotionData = () => {
     const currentData = promotionData;
@@ -129,8 +330,19 @@ const SellerAdminHome = () => {
     getPromotionData();
   }, [currentPage]);
 
+  const deletePromo = async (id: number) => {
+    // Delete here
+  };
+
   return (
     <>
+      {showEditModal && (
+        <Modal
+          content={<EditPromo />}
+          onClose={() => setShowEditModal(false)}
+        />
+      )}
+
       {showDetailModal && (
         <Modal
           content={<OrderDetailModal />}
@@ -195,7 +407,10 @@ const SellerAdminHome = () => {
                     <div className="text-right flex flex-col md:gap-3 items-end gap-6">
                       <h1 className="text-[20px]">{data.quota} remaining</h1>
                       <div className="flex justify-end gap-2 ">
-                        <h1 className="text-blue-600 hover:cursor-pointer hover:underline">
+                        <h1
+                          onClick={() => setShowEditModal(true)}
+                          className="text-blue-600 hover:cursor-pointer hover:underline"
+                        >
                           Edit
                         </h1>
                         <h1>|</h1>
