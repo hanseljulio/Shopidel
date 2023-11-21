@@ -298,7 +298,7 @@ const SellerPromotionCreate = () => {
               </div>
             </div>
 
-            <div className="flex justify-center pt-6">
+            <div className="flex justify-center pt-6 py-10">
               <Button
                 text="Create new promotion"
                 styling="p-3 bg-[#364968] w-[300px] rounded-md text-white"
