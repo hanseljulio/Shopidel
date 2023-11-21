@@ -285,6 +285,20 @@ const ProductDetail = ({
       ...selectedVariants,
       [optionName]: variant,
     });
+    const selectedVariant = product?.variants?.find((v: any) => {
+      return Object.keys(selectedVariants).every((option) => {
+        return v.selections.some((selection: any) => {
+          return (
+            selection.selection_variant_name === option &&
+            selection.selection_name === selectedVariants[option]
+          );
+        });
+      });
+    });
+
+    if (selectedVariant) {
+      setVariation(selectedVariant.selections[0].selection_name);
+    }
   };
 
   const handleMouseOver = (src: string) => {
@@ -421,41 +435,6 @@ const ProductDetail = ({
     }
   };
 
-  // const handleWishlist: SubmitHandler<IAPIProductDetailResponse> = async (
-  //   data
-  // ) => {
-  //   let favData: Pick<IAPIProductDetailResponse, "id"> = {
-  //     id: data.id,
-  //   };
-
-  //   try {
-  //     const response = await API.post(
-  //       `/products/${data.id}/favorites/add-favorite`,
-  //       favData,
-  //       {
-  //         headers: {
-  //           Authorization: `Bearer ${getCookie("accessToken")}`,
-  //         },
-  //       }
-  //     );
-
-  //     if (response.status === 200) {
-  //       toast.success("Added to wishlist", { autoClose: 1500 });
-  //       checkIsFavorite();
-  //     } else {
-  //       toast.error("Failed to add to wishlist", { autoClose: 1500 });
-  //     }
-  //   } catch (error) {
-  //     if (axios.isAxiosError(error)) {
-  //       toast.error(error.response?.data.message, { autoClose: 1500 });
-  //     } else {
-  //       toast.error("An error occurred while adding to wishlist", {
-  //         autoClose: 1500,
-  //       });
-  //     }
-  //   }
-  // };
-
   if (product === null) {
     return <div>Loading...</div>;
   }
@@ -557,19 +536,30 @@ const ProductDetail = ({
                       <div className="grid grid-cols-2 gap-2">
                         {item.childs.map((variant: any, k: number) => {
                           const optionName = item.variant_option_name;
-                          return (
-                            <p
-                              key={k}
-                              className={`px-1 py-1 justify-center items-center flex border text-center rounded-md cursor-pointer hover:bg-[#d6e4f8] hover:border hover:border-[#364968] row-span-2 w-full text-ellipsis line-clamp-2 h-10 ${
-                                selectedVariants[optionName] === variant
-                                  ? "bg-[#d6e4f8] border border-[#364968]"
-                                  : ""
-                              }`}
-                              onClick={() => handleClick(variant, optionName)}
-                            >
-                              {variant}
-                            </p>
-                          );
+                          if (
+                            item.pictures &&
+                            Array.isArray(item.pictures) &&
+                            k < item.pictures.length
+                          ) {
+                            return (
+                              <p
+                                key={k}
+                                className={`px-1 py-1 justify-center items-center flex border text-center rounded-md cursor-pointer hover:bg-[#d6e4f8] hover:border hover:border-[#364968] row-span-2 w-full text-ellipsis line-clamp-2 h-10 ${
+                                  selectedVariants[optionName] === variant
+                                    ? "bg-[#d6e4f8] border border-[#364968]"
+                                    : ""
+                                }`}
+                                onMouseOver={() =>
+                                  handleMouseOver(item.pictures[k])
+                                }
+                                onClick={() => handleClick(variant, optionName)}
+                              >
+                                {variant}
+                              </p>
+                            );
+                          } else {
+                            return null;
+                          }
                         })}
                       </div>
                     </div>
