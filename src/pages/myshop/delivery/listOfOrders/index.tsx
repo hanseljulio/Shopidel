@@ -228,6 +228,7 @@ const IndividualOrder = (props: IIndividualOrderProps) => {
           pending: "Withdrawing money...",
           success: {
             render() {
+              props.refreshFunction();
               return "Money has been added to your wallet!";
             },
           },
