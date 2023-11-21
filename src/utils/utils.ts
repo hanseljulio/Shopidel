@@ -28,6 +28,28 @@ export const emailConverter = (email: string) => {
   return emailArray.join("@");
 };
 
+export const dateConverter = (date: string) => {
+  const dateArray = date.split("-");
+  const months = [
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December",
+  ];
+
+  return `${dateArray[2]} ${months[parseInt(dateArray[1]) - 1]} ${
+    dateArray[0]
+  }`;
+};
+
 export const checkAuthSSR = async (context: GetServerSidePropsContext) => {
   let accessToken = context.req.cookies["accessToken"];
   let refreshToken = context.req.cookies["refreshToken"];

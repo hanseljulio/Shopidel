@@ -4,6 +4,7 @@ import Button from "@/components/Button";
 import { useRouter } from "next/router";
 import { ISellerPromotion } from "@/interfaces/seller_interface";
 import Modal from "@/components/Modal";
+import { dateConverter } from "@/utils/utils";
 
 interface IDeletePromoModal {
   closeFunction: () => void;
@@ -45,6 +46,7 @@ const OrderDetailModal = () => {
       </div>
       <div className="pt-4">
         <h1>Start date: 20 November 2023</h1>
+
         <h1>End date: 27 November 2023</h1>
       </div>
       <div className="pt-4">
@@ -177,9 +179,9 @@ const SellerAdminHome = () => {
                       <h1 className="text-[25px]">{data.name}</h1>
                       <br />
 
-                      <h1>
-                        {data.startDate.substring(0, 10)} to{" "}
-                        {data.endDate.substring(0, 10)}
+                      <h1 className="font-bold">
+                        {dateConverter(data.startDate.substring(0, 10))} to{" "}
+                        {dateConverter(data.endDate.substring(0, 10))}
                       </h1>
                       <h1>
                         Min items:{" "}
