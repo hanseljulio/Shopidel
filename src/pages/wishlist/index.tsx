@@ -139,7 +139,7 @@ function Index() {
                 </div>
               );
             } else {
-              <img src="/images/emptycart.png" alt="" />;
+              <img src="/vm2/images/emptycart.png" alt="" />;
             }
           })}
         </div>

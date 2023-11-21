@@ -132,9 +132,9 @@ const UserProfile = ({
                 <img
                   src={`${
                     imageFile === null
-                      ? "/images/defaultuser.png"
+                      ? "/vm2/images/defaultuser.png"
                       : imageFile === undefined
-                      ? "/images/defaultuser.png"
+                      ? "/vm2/images/defaultuser.png"
                       : URL.createObjectURL(imageFile)
                   }`}
                   alt="Nothing"

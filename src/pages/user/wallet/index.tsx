@@ -309,7 +309,7 @@ const ChangePinModal = () => {
       <div>
         {isValid ? (
           <div className="flex flex-col justify-center items-center">
-            <img src="/images/activate_wallet_pin.png" className="w-36" />
+            <img src="/vm2/images/activate_wallet_pin.png" className="w-36" />
             <p>Input your new PIN</p>
             <div className="mt-3">
               <PinCode onSubmit={(pin) => updatePinHandler(pin)} />
@@ -398,7 +398,7 @@ const ActivateWalletModal = () => {
   return (
     <div className="bg-white p-5 rounded-md flex flex-col items-center">
       <img
-        src={"/images/activate_wallet_pin.png"}
+        src={"/vm2/images/activate_wallet_pin.png"}
         width={150}
         height={150}
         alt="activate_wallet_pin"
@@ -437,7 +437,7 @@ const ActivateWallet = ({ onOpenDialog }: IActivateWalletProps) => {
     <div className="flex justify-center items-center h-full">
       <div className="flex flex-col items-center">
         <img
-          src={"/images/no_wallet.png"}
+          src={"/vm2/images/no_wallet.png"}
           width={250}
           height={250}
           alt="no_wallet"
