@@ -14,13 +14,14 @@ import {
 } from "@/interfaces/product_interface";
 import { IAPIProfileShopResponse } from "@/interfaces/seller_interface";
 import { API } from "@/network";
-import { currencyConverter } from "@/utils/utils";
+import { IWishlist } from "@/pages/wishlist";
+import { useUserStore } from "@/store/userStore";
+import { clientUnauthorizeHandler, currencyConverter } from "@/utils/utils";
 import axios from "axios";
 import { getCookie } from "cookies-next";
 import {
   GetServerSideProps,
   GetServerSidePropsContext,
-  GetStaticProps,
   InferGetServerSidePropsType,
 } from "next";
 import { useRouter } from "next/router";
@@ -76,14 +77,10 @@ export const getServerSideProps: GetServerSideProps = async (
 
 const getYoutubeVideoId = (url: string) => {
   const youtubeRegex =
-    /^(https?:\/\/)?(www\.)?(youtube\.com\/(.*\/)?|youtu\.be\/)(.+)$/;
+    /^(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/;
   const match = url.match(youtubeRegex);
 
-  if (match && match[5]) {
-    return match[5];
-  }
-
-  return null;
+  return match?.[1] || null;
 };
 
 const ProductDetail = ({
@@ -91,7 +88,7 @@ const ProductDetail = ({
   seller,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   const router = useRouter();
-
+  const { updateUser } = useUserStore();
   const [count, setCount] = useState<number>(1);
   const [isHovering, setIsHovering] = useState(false);
   const [isModal, setIsModal] = useState<boolean>(false);
@@ -103,11 +100,9 @@ const ProductDetail = ({
   const [currentStock, setCurrentStock] = useState<number>(0);
   const [isFavorite, setIsFavorite] = useState(product?.is_favorite || false);
   const [imagesProduct, setImagesProduct] = useState([]);
-  const [imagesReview, setImagesReview] = useState([]);
   const [reviews, setReviews] = useState<IAPIResponse<IReviewProduct[]>>();
   const [page, setPage] = useState<number>(1);
-  const [showAllDescription, setShowAllDescription] = useState(false);
-  const [descriptionLimit, setDescriptionLimit] = useState(1000);
+  const [wishlist, setWishlist] = useState<IAPIResponse<IWishlist[]>>();
 
   const [suggestion, setSuggestion] =
     useState<IAPIResponse<IProductSuggestion[]>>();
@@ -364,6 +359,33 @@ const ProductDetail = ({
     }
   };
 
+  const getWishlist = async () => {
+    try {
+      const res = await API.get(`/products/favorites`);
+      console.log(res);
+      const data = res.data as IAPIResponse<IWishlist[]>;
+      setWishlist(data);
+      console.log(data.data);
+
+      console.log("betul");
+    } catch (e) {
+      if (axios.isAxiosError(e)) {
+        if (e.response?.status === 401) {
+          return clientUnauthorizeHandler(router, updateUser);
+        }
+        return toast.error("Error fetching wishlist", {
+          toastId: "errorWishlist",
+          autoClose: 1500,
+        });
+      }
+      console.log("salah");
+    }
+  };
+
+  useEffect(() => {
+    getWishlist();
+  }, []);
+
   const handleWishlist: SubmitHandler<IAPIProductDetailResponse> = async (
     data
   ) => {
@@ -384,7 +406,7 @@ const ProductDetail = ({
 
       if (response.status === 200) {
         toast.success("Added to wishlist", { autoClose: 1500 });
-        setIsFavorite(true);
+        setIsFavorite(!isFavorite);
       } else {
         toast.error("Failed to add to wishlist", { autoClose: 1500 });
       }
@@ -398,6 +420,41 @@ const ProductDetail = ({
       }
     }
   };
+
+  // const handleWishlist: SubmitHandler<IAPIProductDetailResponse> = async (
+  //   data
+  // ) => {
+  //   let favData: Pick<IAPIProductDetailResponse, "id"> = {
+  //     id: data.id,
+  //   };
+
+  //   try {
+  //     const response = await API.post(
+  //       `/products/${data.id}/favorites/add-favorite`,
+  //       favData,
+  //       {
+  //         headers: {
+  //           Authorization: `Bearer ${getCookie("accessToken")}`,
+  //         },
+  //       }
+  //     );
+
+  //     if (response.status === 200) {
+  //       toast.success("Added to wishlist", { autoClose: 1500 });
+  //       checkIsFavorite();
+  //     } else {
+  //       toast.error("Failed to add to wishlist", { autoClose: 1500 });
+  //     }
+  //   } catch (error) {
+  //     if (axios.isAxiosError(error)) {
+  //       toast.error(error.response?.data.message, { autoClose: 1500 });
+  //     } else {
+  //       toast.error("An error occurred while adding to wishlist", {
+  //         autoClose: 1500,
+  //       });
+  //     }
+  //   }
+  // };
 
   if (product === null) {
     return <div>Loading...</div>;
@@ -421,7 +478,7 @@ const ProductDetail = ({
             <div className="order-1 md:order-1 imageProduct w-full md:w-1/4 rounded-md overflow-hidden flex flex-col">
               {isYouTubeVideo(variation) ? renderBigImage() : renderContent()}
 
-              <div className="variation gap-1 mt-2 flex flex-row overflow-auto whitespace-nowrap scrollbar-thin scrollbar-thumb-gray-300 [&::-webkit-scrollbar-thumb] [&::-webkit-scrollbar-track] [-ms-overflow-style:'none'] [scrollbar-width:'none']">
+              <div className="variation gap-1 mt-2 flex flex-row overflow-auto whitespace-nowrap scrollbar-thin scrollbar-thumb-gray-300   [&::-webkit-scrollbar-thumb] [&::-webkit-scrollbar-track] [-ms-overflow-style:'none'] [scrollbar-width:'none']">
                 {imagesProduct?.map((url, index) => (
                   <div
                     key={index}
@@ -455,15 +512,22 @@ const ProductDetail = ({
 
               <div className="favorite-icon mt-5 text-right">
                 <button onClick={() => handleWishlist(product)}>
-                  {isFavorite ? (
+                  {isFavorite &&
+                  wishlist?.data?.map(
+                    (e) => e.product_id === product.product_id
+                  ) ? (
                     <div className="flex items-center gap-1">
                       <FaHeart style={{ color: "red" }} />
-                      <p>Favorite</p>
+                      <p>
+                        Favorite <span>{`(total user)`}</span>
+                      </p>
                     </div>
                   ) : (
                     <div className="flex items-center gap-1">
                       <FaRegHeart style={{ color: "red" }} />
-                      <p>Favorite</p>
+                      <p>
+                        Favorite <span>{`(total user)`}</span>
+                      </p>
                     </div>
                   )}
                 </button>
@@ -478,7 +542,8 @@ const ProductDetail = ({
                 <p className="">Pengiriman</p>
 
                 <div className="flex items-center gap-1">
-                  <FaLocationDot /> {"Malang"}
+                  <FaLocationDot />
+                  {shopProfile?.data?.seller_district}
                 </div>
               </div>
               <div className="flex flex-col gap-y-3 text-xs text-neutral-600">

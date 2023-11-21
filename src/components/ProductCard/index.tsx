@@ -41,16 +41,16 @@ const ProductCard = ({
         "w-full  transform items-start justify-start  hover:scale-95 h-fit md:w-full object-cover overflow-hidden shadow-md hover:shadow-none cursor-pointer rounded-md flex flex-col align-middle  transition-all duration-500 ease-in-out text-left",
       ])}
     >
-      <div className={"relative h-48 w-full"}>
+      <div className={"relative h-44 md:h-48 w-full"}>
         <div className={" h-auto md:h-full w-auto overflow-hidden top-0"}>
           <img
             src={image}
-            className={"object-fill w-full h-full top-0"}
+            className={"object-fill w-full h-44 md:h-48 top-0"}
             alt=""
           />
         </div>
         {showStar === true && (
-          <div className={"absolute bottom-0 left-0 -mb-4 ml-3 flex flex-row"}>
+          <div className={"absolute bottom-0 left-0 -mb-4  ml-3 flex flex-row"}>
             <div
               className={classNames(
                 "h-10 w-fit px-2 flex items-center justify-center text-sm bg-white hover:shadow-none text-[#f57b29]  rounded-2xl shadow-xl"
@@ -70,7 +70,7 @@ const ProductCard = ({
       </div>
 
       <div className="pt-3 pb-3 md:pt-5 w-full px-2 gap-y-2 flex flex-col ">
-        <p className="text-black text-sm md:text-base pt-2 row-span-2 w-full line-clamp-2 h-12 md:h-14">
+        <p className="text-black text-sm md:text-base pt-2 row-span-2 w-full line-clamp-2 md:h-14">
           {title}
         </p>
         <p className="text-[#f57b29] text-sm md:text-xl">

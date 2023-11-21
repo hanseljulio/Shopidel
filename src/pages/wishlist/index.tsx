@@ -11,8 +11,10 @@ import { ToastContainer, toast } from "react-toastify";
 import { useRouter } from "next/router";
 import { useUserStore } from "@/store/userStore";
 import Pagination from "@/components/Pagination";
+import { FaTrash } from "react-icons/fa";
+import { getCookie } from "cookies-next";
 
-interface IWishlist {
+export interface IWishlist {
   id: number;
   product_id: number;
   name: string;
@@ -28,6 +30,7 @@ function Index() {
   const router = useRouter();
   const [wishlist, setWishlist] = useState<IAPIResponse<IWishlist[]>>();
   const [paginationNumber, setPaginationNumber] = useState<number[]>([]);
+
   const [page, setPage] = useState<number>(1);
   const [query, setQuery] = useState<string>(
     router.query.s !== undefined ? router.query.s.toString() : ""
@@ -71,7 +74,7 @@ function Index() {
       console.log(res);
       const data = res.data as IAPIResponse<IWishlist[]>;
       setWishlist(data);
-      console.log(data.data);
+      console.log("dd", data.data);
 
       if (data.pagination?.total_page! <= 5) {
         return setPaginationNumber(
@@ -99,6 +102,38 @@ function Index() {
   useEffect(() => {
     getWishlist();
   }, []);
+  const handleDelete = async (productId: number) => {
+    try {
+      const response = await API.delete(`/products/favorites/${productId}`, {
+        headers: {
+          Authorization: `Bearer ${getCookie("accessToken")}`,
+        },
+      });
+
+      if (response.status === 200) {
+        toast.success("Product removed from wishlist", { autoClose: 1500 });
+        // You may want to update the wishlist after successful deletion
+        getWishlist();
+      } else {
+        toast.error("Failed to remove product from wishlist", {
+          autoClose: 1500,
+        });
+      }
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        if (error.response?.status === 401) {
+          return clientUnauthorizeHandler(router, updateUser);
+        }
+        toast.error(error.response?.data.message || "Error deleting product", {
+          autoClose: 1500,
+        });
+      } else {
+        toast.error("An error occurred while deleting the product", {
+          autoClose: 1500,
+        });
+      }
+    }
+  };
 
   return (
     <div>
@@ -145,15 +180,28 @@ function Index() {
           <>
             <div className="gap-x-4 gap-y-1 grid grid-cols-2 md:grid-cols-6 mt-10">
               {wishlist?.data?.map((product, i) => (
-                <div key={i} className=" rounded-md">
-                  <ProductCard
-                    image={product.picture_url}
-                    price={product.price}
-                    showStar={false}
-                    order={product.total_sold}
-                    title={product.name}
-                    place={product.district}
-                  />
+                <div key={i} className="rounded-md flex">
+                  <div className="relative">
+                    <ProductCard
+                      image={product.picture_url}
+                      price={product.price}
+                      showStar={false}
+                      order={product.total_sold}
+                      title={product.name}
+                      place={product.district}
+                      // onClick={() =>
+                      //   router.push(
+                      //     `/${product.}/${product.product_name_slug}`
+                      //   )
+                      // }
+                    />
+                  </div>
+                  <div className="absolute text-red-600 p-2 cursor-pointer">
+                    <FaTrash
+                      size={20}
+                      onClick={() => handleDelete(product.id)}
+                    />
+                  </div>
                 </div>
               ))}
               <div className="empty-card-div flex items-center justify-center mt-[30px]"></div>
