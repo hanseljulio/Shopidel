@@ -9,7 +9,7 @@ import { useRouter } from "next/router";
 import { useUserStore } from "@/store/userStore";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { ISellerPromotion } from "@/interfaces/seller_interface";
+import { ISellerPromotionData } from "@/interfaces/seller_interface";
 import { IAPIResponse } from "@/interfaces/api_interface";
 
 interface ISellerProductSelect {
@@ -28,7 +28,7 @@ const SellerPromotionCreate = () => {
     handleSubmit,
     getValues,
     formState: { errors },
-  } = useForm<ISellerPromotion>({
+  } = useForm<ISellerPromotionData>({
     mode: "onBlur",
   });
 
@@ -92,7 +92,7 @@ const SellerPromotionCreate = () => {
     getSellerProducts();
   }, []);
 
-  const submit: SubmitHandler<ISellerPromotion> = async (data) => {
+  const submit: SubmitHandler<ISellerPromotionData> = async (data) => {
     const selectedProducts = [];
 
     for (let i = 0; i < sellerProducts.length; i++) {

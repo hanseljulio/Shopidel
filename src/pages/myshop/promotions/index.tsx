@@ -2,7 +2,10 @@ import SellerAdminLayout from "@/components/SellerAdminLayout";
 import React, { useEffect, useState } from "react";
 import Button from "@/components/Button";
 import { useRouter } from "next/router";
-import { ISellerPromotion } from "@/interfaces/seller_interface";
+import {
+  ISellerPromotionData,
+  ISellerPromotion,
+} from "@/interfaces/seller_interface";
 import Modal from "@/components/Modal";
 import { currencyConverter, dateConverter } from "@/utils/utils";
 import { API } from "@/network";
@@ -13,6 +16,7 @@ import axios from "axios";
 import { useUserStore } from "@/store/userStore";
 import { IAPIResponse } from "@/interfaces/api_interface";
 import { SubmitHandler, useForm } from "react-hook-form";
+import Pagination from "@/components/Pagination";
 
 interface IDeletePromoModal {
   closeFunction: () => void;
@@ -236,7 +240,7 @@ const EditPromo = (props: IEditPromoProps) => {
     handleSubmit,
     reset,
     formState: { errors },
-  } = useForm<ISellerPromotion>({
+  } = useForm<ISellerPromotionData>({
     mode: "onBlur",
     defaultValues: {},
   });
@@ -275,7 +279,7 @@ const EditPromo = (props: IEditPromoProps) => {
     getSellerProducts();
   }, [sellerProducts.length]);
 
-  const submit: SubmitHandler<ISellerPromotion> = async (data) => {
+  const submit: SubmitHandler<ISellerPromotionData> = async (data) => {
     const selectedProducts = [];
 
     for (let i = 0; i < sellerProducts.length; i++) {
@@ -532,7 +536,7 @@ const EditPromo = (props: IEditPromoProps) => {
 
 const SellerAdminHome = () => {
   const [currentPage, setCurrentPage] = useState<string>("all");
-  const [promotionData, setPromotionData] = useState<ISellerPromotion[]>([]);
+  const [promotionData, setPromotionData] = useState<ISellerPromotion>();
   const router = useRouter();
   const { user, updateUser } = useUserStore();
 
@@ -541,10 +545,12 @@ const SellerAdminHome = () => {
   const [showEditModal, setShowEditModal] = useState<boolean>(false);
 
   const [selectedPromoId, setSelectedPromoId] = useState<number>(0);
+  const [page, setPage] = useState<number>(1);
 
   const getPromotionData = async () => {
     try {
-      const response = await API.get(`shop-promotions`);
+      const response = await API.get(`/shop-promotions?page=${page}&limit=10`);
+      // setPromotionData(response.data);
 
       const currentData = response.data.data;
 
@@ -555,24 +561,28 @@ const SellerAdminHome = () => {
           let startTime = new Date(data.start_date).getTime();
           return currentTime <= endTime && currentTime >= startTime;
         });
-        setPromotionData(updatedData);
+        response.data.data = updatedData;
+        setPromotionData(response.data);
       } else if (currentPage === "upcoming") {
         const updatedData = currentData.filter((data: any) => {
           let currentTime = new Date().getTime();
           let startTime = new Date(data.start_date).getTime();
           return currentTime <= startTime;
         });
-        setPromotionData(updatedData);
+        response.data.data = updatedData;
+        setPromotionData(response.data);
       } else if (currentPage === "ended") {
         const updatedData = currentData.filter((data: any) => {
           let currentTime = new Date().getTime();
           let endTime = new Date(data.end_date).getTime();
           return endTime <= currentTime;
         });
-        setPromotionData(updatedData);
+        response.data.data = updatedData;
+        setPromotionData(response.data);
       } else {
-        setPromotionData(currentData);
+        setPromotionData(response.data);
       }
+      console.log(response.data);
     } catch (e) {
       if (axios.isAxiosError(e)) {
         if (e.response?.status === 401) {
@@ -585,6 +595,8 @@ const SellerAdminHome = () => {
     }
   };
 
+  const filterData = () => {};
+
   useEffect(() => {
     if (user !== undefined && !user.is_seller) {
       router.push("/myshop");
@@ -593,7 +605,7 @@ const SellerAdminHome = () => {
 
   useEffect(() => {
     getPromotionData();
-  }, [currentPage]);
+  }, [currentPage, page]);
 
   const duplicatePromo = async () => {
     let currentData;
@@ -752,86 +764,95 @@ const SellerAdminHome = () => {
               styling="bg-[#fddf97] p-3 rounded-[8px] w-[200px] my-4"
             />
           </div>
-          <div className="mx-[5%] flex flex-col gap-6 pt-4">
-            {promotionData.length === 0 && (
+          <div className="mx-[5%] ">
+            {!promotionData || promotionData.data.length === 0 ? (
               <h1 className="font-bold text-[25px] text-center pt-4">
                 You have no promotions at the moment.
               </h1>
-            )}
-            {promotionData.map((data, index) => {
-              return (
-                <div key={index} className="border-2 border-black p-6">
-                  <div className="flex justify-between items-center md:flex-row flex-col">
-                    <div>
-                      <h1 className="text-[25px]">{data.name}</h1>
-                      <br />
+            ) : (
+              <div className="flex flex-col gap-6 pt-4">
+                {promotionData?.data.map((data, index) => {
+                  return (
+                    <div key={index} className="border-2 border-black p-6">
+                      <div className="flex justify-between items-center md:flex-row flex-col">
+                        <div>
+                          <h1 className="text-[25px]">{data.name}</h1>
+                          <br />
 
-                      <h1 className="font-bold ">
-                        {dateConverter(data.start_date.substring(0, 10))} to{" "}
-                        {dateConverter(data.end_date.substring(0, 10))}
-                      </h1>
-                      <h1>
-                        Min items:{" "}
-                        {data.min_purchase_amount === "0"
-                          ? "None"
-                          : data.min_purchase_amount}
-                      </h1>
-                      <h1>
-                        Max items:{" "}
-                        {data.max_purchase_amount === "0"
-                          ? "None"
-                          : data.max_purchase_amount}
-                      </h1>
-                    </div>
-                    <div className="md:text-right flex flex-col md:gap-3 md:items-end gap-6 text-center md:pt-0 pt-10">
-                      <h1 className="text-[20px]">
-                        {data.quota} remaining | {data.total_used} used
-                      </h1>
-                      <div className="flex justify-end gap-2 ">
-                        <h1
-                          onClick={() => {
-                            setSelectedPromoId(data.id);
-                            setShowEditModal(true);
-                          }}
-                          className="text-blue-600 hover:cursor-pointer hover:underline"
-                        >
-                          Edit
-                        </h1>
-                        <h1>|</h1>
-                        <h1
-                          onClick={() => {
-                            setSelectedPromoId(data.id);
-                            duplicatePromo();
-                          }}
-                          className="text-blue-600 hover:cursor-pointer hover:underline"
-                        >
-                          Duplicate
-                        </h1>
-                        <h1>|</h1>
-                        <h1
-                          onClick={() => {
-                            setSelectedPromoId(data.id);
-                            setShowDeleteModal(true);
-                          }}
-                          className="text-blue-600 hover:cursor-pointer hover:underline"
-                        >
-                          Delete
-                        </h1>
+                          <h1 className="font-bold ">
+                            {dateConverter(data.start_date.substring(0, 10))} to{" "}
+                            {dateConverter(data.end_date.substring(0, 10))}
+                          </h1>
+                          <h1>
+                            Min items:{" "}
+                            {data.min_purchase_amount === "0"
+                              ? "None"
+                              : data.min_purchase_amount}
+                          </h1>
+                          <h1>
+                            Max items:{" "}
+                            {data.max_purchase_amount === "0"
+                              ? "None"
+                              : data.max_purchase_amount}
+                          </h1>
+                        </div>
+                        <div className="md:text-right flex flex-col md:gap-3 md:items-end gap-6 text-center md:pt-0 pt-10">
+                          <h1 className="text-[20px]">
+                            {data.quota} remaining | {data.total_used} used
+                          </h1>
+                          <div className="flex justify-end gap-2 ">
+                            <h1
+                              onClick={() => {
+                                setSelectedPromoId(data.id);
+                                setShowEditModal(true);
+                              }}
+                              className="text-blue-600 hover:cursor-pointer hover:underline"
+                            >
+                              Edit
+                            </h1>
+                            <h1>|</h1>
+                            <h1
+                              onClick={() => {
+                                setSelectedPromoId(data.id);
+                                duplicatePromo();
+                              }}
+                              className="text-blue-600 hover:cursor-pointer hover:underline"
+                            >
+                              Duplicate
+                            </h1>
+                            <h1>|</h1>
+                            <h1
+                              onClick={() => {
+                                setSelectedPromoId(data.id);
+                                setShowDeleteModal(true);
+                              }}
+                              className="text-blue-600 hover:cursor-pointer hover:underline"
+                            >
+                              Delete
+                            </h1>
+                          </div>
+                          <h1
+                            onClick={() => {
+                              setSelectedPromoId(data.id);
+                              setShowDetailModal(true);
+                            }}
+                            className="text-orange-600 hover:cursor-pointer hover:underline"
+                          >
+                            View Promotion Detail
+                          </h1>
+                        </div>
                       </div>
-                      <h1
-                        onClick={() => {
-                          setSelectedPromoId(data.id);
-                          setShowDetailModal(true);
-                        }}
-                        className="text-orange-600 hover:cursor-pointer hover:underline"
-                      >
-                        View Promotion Detail
-                      </h1>
                     </div>
-                  </div>
+                  );
+                })}
+                <div className="flex justify-center py-10">
+                  <Pagination
+                    data={promotionData.pagination}
+                    onNavigate={(navPage) => setPage(navPage)}
+                  />
                 </div>
-              );
-            })}
+              </div>
+            )}
           </div>
         </div>
       </SellerAdminLayout>

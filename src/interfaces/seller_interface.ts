@@ -75,6 +75,16 @@ export interface ICheckoutPromotions {
 }
 
 export interface ISellerPromotion {
+  data: ISellerPromotionData[];
+  pagination: {
+    total_page: number;
+    total_item: number;
+    current_page: number;
+    limit: number;
+  };
+}
+
+export interface ISellerPromotionData {
   id: number;
   name: string;
   quota: number;
