@@ -181,9 +181,6 @@ const CancelOrderModal = (props: ICancelOrderModal) => {
   );
 };
 
-// Update order status here - On Delivery
-// Process order here - receive or cancel. If you cancel you need to give a note
-
 const IndividualOrder = (props: IIndividualOrderProps) => {
   const processOrder = async (orderId: number) => {
     try {
