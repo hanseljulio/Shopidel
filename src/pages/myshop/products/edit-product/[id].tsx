@@ -123,7 +123,12 @@ const SellerEditProductPage = ({
     defaultValues: {
       ...product,
       variantGroup: product.variant_options as IVariantGroup[],
-      variantTable: product.variants as IVariant[],
+      variantTable:
+        product.variant_options.length !== 0
+          ? (product.variants as IVariant[])
+          : [],
+      price: product.variant_options.length === 0 && product.variants[0].price,
+      stock: product.variant_options.length === 0 && product.variants[0].stock,
     },
   });
   const router = useRouter();
@@ -160,6 +165,10 @@ const SellerEditProductPage = ({
     }
   }, [watchVariantTable]);
 
+  useEffect(() => {
+    console.log(images);
+  }, [images]);
+
   const getListCategory = async () => {
     try {
       const res = await API.get("/categories");
@@ -177,10 +186,13 @@ const SellerEditProductPage = ({
   };
 
   const onSubmit: SubmitHandler<IAddProductForm> = async (data) => {
+    console.log(data);
     if (
-      data.images.findIndex(
-        (img) => (img as IProductImage).file === undefined
-      ) !== -1
+      data.images.findIndex((img) => {
+        if (typeof img !== "string") {
+          return (img as IProductImage).file === undefined;
+        }
+      }) !== -1
     ) {
       return setError("images", { message: "Photo is required" });
     }
@@ -197,9 +209,10 @@ const SellerEditProductPage = ({
       formData.append("category_id", String(data.category.id));
       formData.append("size", data.size);
       data.images.forEach((img) => {
+        console.log(img);
         formData.append("images[]", typeof img === "string" ? img : img.file);
       });
-      if (!data.variantTable) {
+      if (!data.variantTable || data.variantTable.length === 0) {
         formData.append(
           "variants[]",
           JSON.stringify({
@@ -221,12 +234,16 @@ const SellerEditProductPage = ({
         formData.append("video_url", data.video_url);
       }
 
+      for (const data of formData) {
+        console.log(data);
+      }
+
       await toast.promise(
-        API.post("/sellers/products", formData),
+        API.put(`/sellers/products/${product.id}`, formData),
         {
           pending: "Loading",
           success: "Success",
-          error: "Error add product",
+          error: "Error edit product",
         },
         { autoClose: 1500 }
       );
@@ -760,7 +777,7 @@ const SellerEditProductPage = ({
               </div>
               <div className="mt-16 text-end">
                 <Button
-                  text="Add Product"
+                  text="Update Product"
                   styling="bg-[#364968] p-2 text-white rounded-md text-sm"
                 />
               </div>
@@ -1050,6 +1067,7 @@ const ProductVariant = ({
 
   useEffect(() => {
     const id = (Math.random() + 1).toString(36).substring(5);
+
     if (variant2type !== undefined) {
       setValue("variantTable", [
         ...getValues("variantTable")!,
@@ -1082,6 +1100,9 @@ const ProductVariant = ({
       ]);
     }
 
+    // if (watchVariantTable.at(index)?.image_url) {
+    //   watchVariantTable.at(index)!.imageId = id;
+    // }
     setId(id);
   }, []);
 
@@ -1107,7 +1128,7 @@ const ProductVariant = ({
                     autoClose: 1500,
                   }
                 );
-
+                watchVariantTable.at(index)!.imageId = id;
                 setImage(e.target.files![0]);
               } catch (e) {}
             }
@@ -1135,7 +1156,17 @@ const ProductVariant = ({
         <input
           type="text"
           name="price"
-          value={watchVariantTable?.at(index)?.price}
+          value={
+            watchVariantTable.find((data) => {
+              if (variant2type !== undefined) {
+                return (
+                  data.variant1.value === variant1type &&
+                  data.variant2?.value === variant2type
+                );
+              }
+              return data.variant1.value === variant1type;
+            })?.price
+          }
           onChange={(e) => {
             watchVariantTable.find((data) => {
               if (variant2type !== undefined) {
@@ -1162,7 +1193,17 @@ const ProductVariant = ({
         <input
           type="text"
           name="stock"
-          value={watchVariantTable?.at(index)?.stock}
+          value={
+            watchVariantTable.find((data) => {
+              if (variant2type !== undefined) {
+                return (
+                  data.variant1.value === variant1type &&
+                  data.variant2?.value === variant2type
+                );
+              }
+              return data.variant1.value === variant1type;
+            })?.stock
+          }
           onChange={(e) => {
             watchVariantTable.find((data) => {
               if (variant2type !== undefined) {
