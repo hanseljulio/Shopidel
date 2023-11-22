@@ -78,6 +78,7 @@ export interface ISellerPromotion {
   id: number;
   name: string;
   quota: number;
+  total_used: number;
   start_date: string;
   end_date: string;
   min_purchase_amount: string;

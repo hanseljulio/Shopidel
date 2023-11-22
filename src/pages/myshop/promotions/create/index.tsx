@@ -124,7 +124,7 @@ const SellerPromotionCreate = () => {
           success: {
             render() {
               router.push("/myshop/promotions");
-              return "Promotion successfully updated!";
+              return "Promotion successfully created!";
             },
           },
           error: {

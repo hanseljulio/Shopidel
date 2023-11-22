@@ -12,6 +12,7 @@ import "react-toastify/dist/ReactToastify.css";
 import axios from "axios";
 import { useUserStore } from "@/store/userStore";
 import { IAPIResponse } from "@/interfaces/api_interface";
+import { SubmitHandler, useForm } from "react-hook-form";
 
 interface IDeletePromoModal {
   closeFunction: () => void;
@@ -153,19 +154,20 @@ const OrderDetailModal = (props: IOrderDetailModalProps) => {
 
 interface IEditPromoProps {
   promoId: number;
+  exitFunction: () => void;
 }
 
 const EditPromo = (props: IEditPromoProps) => {
   const [sellerProducts, setSellerProducts] = useState<ISellerProductSelect[]>([
-    // {
-    //   id: 23,
-    //   name: "TAS SLING BAG CANVAS 2 SIZE MEDIUM & LARGE",
-    //   category_id: 936,
-    //   created_at: "2023-11-21T05:36:43.520268Z",
-    //   updated_at: "2023-11-21T05:36:43.520268Z",
-    //   deleted_at: "0001-01-01T00:00:00Z",
-    //   isChecked: false,
-    // },
+    {
+      id: 0,
+      name: "",
+      category_id: 936,
+      created_at: "2023-11-21T05:36:43.520268Z",
+      updated_at: "2023-11-21T05:36:43.520268Z",
+      deleted_at: "0001-01-01T00:00:00Z",
+      isChecked: false,
+    },
   ]);
 
   const handleCheckAll = (e: any) => {
@@ -199,6 +201,18 @@ const EditPromo = (props: IEditPromoProps) => {
   const getSellerProducts = async () => {
     try {
       const response = await API.get(`sellers/products`);
+      const selectedProducts = promoDetail?.selected_products.map(
+        (data) => data.product_id
+      );
+
+      response.data.data.map((data: any) => {
+        if (selectedProducts?.includes(data.id)) {
+          data.isChecked = true;
+        } else {
+          data.isChecked = false;
+        }
+      });
+
       setSellerProducts(response.data.data);
     } catch (e) {
       if (axios.isAxiosError(e)) {
@@ -214,10 +228,33 @@ const EditPromo = (props: IEditPromoProps) => {
 
   const [promoDetail, setPromoDetail] = useState<IPromoDetails>();
 
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm<ISellerPromotion>({
+    mode: "onBlur",
+    defaultValues: {},
+  });
+
   const getPromoData = async () => {
     try {
       const response = await API.get(`shop-promotions/${props.promoId}`);
       setPromoDetail(response.data.data);
+
+      const currentData = {
+        id: response.data.data.id,
+        name: response.data.data.name,
+        quota: response.data.data.quota,
+        start_date: response.data.data.start_date.substring(0, 10),
+        end_date: response.data.data.end_date.substring(0, 10),
+        min_purchase_amount: response.data.data.min_purchase_amount,
+        max_purchase_amount: response.data.data.max_purchase_amount,
+        discount_percentage: response.data.data.discount_percentage,
+      };
+
+      reset({ ...currentData });
     } catch (e) {
       if (axios.isAxiosError(e)) {
         if (e.response?.status === 401) {
@@ -230,15 +267,66 @@ const EditPromo = (props: IEditPromoProps) => {
     }
   };
 
-  console.log(promoDetail);
-
   useEffect(() => {
     getPromoData();
-  }, []);
-
-  useEffect(() => {
     getSellerProducts();
-  }, []);
+  }, [sellerProducts.length]);
+
+  const submit: SubmitHandler<ISellerPromotion> = async (data) => {
+    const selectedProducts = [];
+
+    for (let i = 0; i < sellerProducts.length; i++) {
+      if (sellerProducts[i].isChecked) {
+        selectedProducts.push(sellerProducts[i].id);
+      }
+    }
+
+    if (selectedProducts.length === 0) {
+      toast.error("Please select items that will have the promotion.");
+    }
+
+    const sendData = {
+      name: data.name,
+      quota: parseInt(data.quota.toString()),
+      start_date: new Date(data.start_date).toISOString(),
+      end_date: new Date(data.end_date).toISOString(),
+      min_purchase_amount: data.min_purchase_amount,
+      max_purchase_amount: data.max_purchase_amount,
+      discount_percentage: data.discount_percentage,
+      selected_products_id: selectedProducts,
+    };
+
+    try {
+      toast.promise(
+        API.put(`/shop-promotions/${props.promoId}`, sendData),
+        {
+          pending: "Updating promotion...",
+          success: {
+            render() {
+              props.exitFunction();
+              return "Promotion successfully updated!";
+            },
+          },
+          error: {
+            render({ data }) {
+              if (axios.isAxiosError(data)) {
+                return `${(data.response?.data as IAPIResponse).message}`;
+              }
+            },
+          },
+        },
+        {
+          autoClose: 1500,
+        }
+      );
+    } catch (e) {
+      if (axios.isAxiosError(e)) {
+        toast.error(e.message, {
+          autoClose: 1500,
+        });
+      }
+    }
+  };
 
   return (
     <div className="bg-white p-5 rounded-md md:w-[1000px] md:h-[800px] h-[80vh] w-[90vw] overflow-y-auto">
@@ -246,25 +334,25 @@ const EditPromo = (props: IEditPromoProps) => {
         <h1 className="text-[20px] font-bold">Edit Promotion</h1>
       </div>
       <div className=" pt-6">
-        <form>
+        <form onSubmit={handleSubmit(submit)}>
           <div className="flex flex-col">
             <label htmlFor="username" className="text-sm">
               Promotion Name
             </label>
             <input
-              // {...register("name", {
-              //   required: "Promotion name is required",
-              // })}
+              {...register("name", {
+                required: "Promotion name is required",
+              })}
               type="text"
               name="name"
               id="name"
               className="rounded-md border p-2"
             />
-            {/* {errors.name?.type === "required" && (
+            {errors.name?.type === "required" && (
               <p role="alert" className="text-xs text-red-500 mt-1">
                 {errors.name.message}
               </p>
-            )} */}
+            )}
           </div>
           <div className="flex md:flex-row justify-between pt-6 md:gap-10 flex-col gap-6">
             <div className="flex flex-col md:basis-[33.3%]">
@@ -272,101 +360,101 @@ const EditPromo = (props: IEditPromoProps) => {
                 Promotion quota
               </label>
               <input
-                // {...register("quota", {
-                //   required: "Promotion quota is required",
-                //   validate: {
-                //     greaterThanZero: (v) =>
-                //       v > 0 || "Quota must be greater than 0",
-                //   },
-                // })}
+                {...register("quota", {
+                  required: "Promotion quota is required",
+                  validate: {
+                    greaterThanZero: (v) =>
+                      v > 0 || "Quota must be greater than 0",
+                  },
+                })}
                 type="number"
                 name="quota"
                 id="quota"
                 className="rounded-md border p-2 "
               />
-              {/* {errors.quota?.type === "required" && (
+              {errors.quota?.type === "required" && (
                 <p role="alert" className="text-xs text-red-500 mt-1">
                   {errors.quota.message}
                 </p>
-              )} */}
+              )}
             </div>
             <div className="flex flex-col md:basis-[33.3%]">
               <label htmlFor="start_date" className="text-sm">
                 Start Date
               </label>
               <input
-                // {...register("start_date", {
-                //   required: "Start date is required",
-                // })}
+                {...register("start_date", {
+                  required: "Start date is required",
+                })}
                 type="date"
                 name="start_date"
                 id="start_date"
                 className="rounded-md border p-2"
               />
-              {/* {errors.start_date?.type === "required" && (
+              {errors.start_date?.type === "required" && (
                 <p role="alert" className="text-xs text-red-500 mt-1">
                   {errors.start_date.message}
                 </p>
-              )} */}
+              )}
             </div>
             <div className="flex flex-col md:basis-[33.3%]">
               <label htmlFor="end_date" className="text-sm">
                 End date
               </label>
               <input
-                // {...register("end_date", {
-                //   required: "End date is required",
-                // })}
+                {...register("end_date", {
+                  required: "End date is required",
+                })}
                 type="date"
                 name="end_date"
                 id="end_date"
                 className="rounded-md border p-2"
               />
-              {/* {errors.end_date?.type === "required" && (
+              {errors.end_date?.type === "required" && (
                 <p role="alert" className="text-xs text-red-500 mt-1">
                   {errors.end_date.message}
                 </p>
-              )} */}
+              )}
             </div>
           </div>
           <div className="flex md:flex-row justify-between pt-6 md:gap-10 flex-col gap-6">
             <div className="flex flex-col md:basis-[33.3%]">
               <label htmlFor="min_purchase_amount" className="text-sm">
-                Minimum items
+                Minimum purchase amount
               </label>
               <input
-                // {...register("min_purchase_amount", {
-                //   required: "Minimum items is required",
-                // })}
+                {...register("min_purchase_amount", {
+                  required: "Minimum purchase amount is required",
+                })}
                 type="number"
                 name="min_purchase_amount"
                 id="min_purchase_amount"
                 className="rounded-md border p-2 "
               />
-              {/* {errors.min_purchase_amount?.type === "required" && (
+              {errors.min_purchase_amount?.type === "required" && (
                 <p role="alert" className="text-xs text-red-500 mt-1">
                   {errors.min_purchase_amount.message}
                 </p>
-              )} */}
+              )}
             </div>
             <div className="flex flex-col md:basis-[33.3%]">
               <label htmlFor="max_purchase_amount" className="text-sm">
-                Maximum items
+                Maximum purchase amount
               </label>
               <input
-                // {...register("max_purchase_amount", {
-                //   required: "Maximum items is required",
-                // })}
+                {...register("max_purchase_amount", {
+                  required: "Maximum purchase amount is required",
+                })}
                 type="number"
                 name="max_purchase_amount"
                 id="max_purchase_amount"
                 className="rounded-md border p-2"
               />
-              {/* {errors.max_purchase_amount?.type === "required" && (
+              {errors.max_purchase_amount?.type === "required" && (
                 <p role="alert" className="text-xs text-red-500 mt-1">
                   {errors.max_purchase_amount.message}
                 </p>
-              )} */}
+              )}
             </div>
             <div className="flex flex-col md:basis-[33.3%]">
               <label htmlFor="discountPercentage" className="text-sm">
@@ -374,9 +462,9 @@ const EditPromo = (props: IEditPromoProps) => {
               </label>
               <div className="relative">
                 <input
-                  // {...register("discountPercentage", {
-                  //   required: "Discount percentage is required",
-                  // })}
+                  {...register("discount_percentage", {
+                    required: "Discount percentage is required",
+                  })}
                   type="number"
                   name="discountPercentage"
                   id="discountPercentage"
@@ -386,11 +474,11 @@ const EditPromo = (props: IEditPromoProps) => {
                   <span className="">%</span>
                 </div>
               </div>
-              {/* {errors.discountPercentage?.type === "required" && (
+              {errors.discount_percentage?.type === "required" && (
                 <p role="alert" className="text-xs text-red-500 mt-1">
-                  {errors.discountPercentage.message}
+                  {errors.discount_percentage.message}
                 </p>
-              )} */}
+              )}
             </div>
           </div>
 
@@ -512,7 +600,15 @@ const SellerAdminHome = () => {
     <>
       {showEditModal && (
         <Modal
-          content={<EditPromo promoId={selectedPromoId} />}
+          content={
+            <EditPromo
+              promoId={selectedPromoId}
+              exitFunction={() => {
+                setShowEditModal(false);
+                getPromotionData();
+              }}
+            />
+          }
           onClose={() => setShowEditModal(false)}
         />
       )}
@@ -589,7 +685,9 @@ const SellerAdminHome = () => {
                       </h1>
                     </div>
                     <div className="md:text-right flex flex-col md:gap-3 md:items-end gap-6 text-center md:pt-0 pt-10">
-                      <h1 className="text-[20px]">{data.quota} remaining</h1>
+                      <h1 className="text-[20px]">
+                        {data.quota} remaining | {data.total_used} used
+                      </h1>
                       <div className="flex justify-end gap-2 ">
                         <h1
                           onClick={() => {
