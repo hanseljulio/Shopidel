@@ -550,7 +550,6 @@ const SellerAdminHome = () => {
   const getPromotionData = async () => {
     try {
       const response = await API.get(`/shop-promotions?page=${page}&limit=10`);
-      // setPromotionData(response.data);
 
       const currentData = response.data.data;
 
@@ -582,7 +581,6 @@ const SellerAdminHome = () => {
       } else {
         setPromotionData(response.data);
       }
-      console.log(response.data);
     } catch (e) {
       if (axios.isAxiosError(e)) {
         if (e.response?.status === 401) {
@@ -594,8 +592,6 @@ const SellerAdminHome = () => {
       }
     }
   };
-
-  const filterData = () => {};
 
   useEffect(() => {
     if (user !== undefined && !user.is_seller) {
@@ -611,6 +607,8 @@ const SellerAdminHome = () => {
     let currentData;
     try {
       const response = await API.get(`shop-promotions/${selectedPromoId}`);
+      console.log("HERE");
+      console.log(response.data.data);
       currentData = response.data.data;
     } catch (e) {
       if (axios.isAxiosError(e)) {
