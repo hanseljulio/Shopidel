@@ -23,6 +23,7 @@ import "react-toastify/dist/ReactToastify.css";
 import { Reorder, useDragControls } from "framer-motion";
 import { AiFillDelete, AiFillPlusCircle } from "react-icons/ai";
 import { useRouter } from "next/router";
+import { useUserStore } from "@/store/userStore";
 
 interface IAddProductForm {
   product_name: string;
@@ -82,6 +83,7 @@ const SellerAddProductPage = () => {
     },
   });
   const router = useRouter();
+  const { user } = useUserStore();
 
   const watchCategory = watch("category");
   const watchVariantGroup = watch("variantGroup");
@@ -173,6 +175,13 @@ const SellerAddProductPage = () => {
       }
     }
   };
+
+  useEffect(() => {
+    if (user !== undefined && !user.is_seller) {
+      router.push("/myshop");
+    }
+  }, [user]);
+
   useEffect(() => {
     getListCategory();
   }, []);

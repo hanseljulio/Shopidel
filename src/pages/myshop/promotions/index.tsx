@@ -346,7 +346,7 @@ const SellerAdminHome = () => {
   const [currentPage, setCurrentPage] = useState<string>("all");
   const [promotionData, setPromotionData] = useState<ISellerPromotion[]>([]);
   const router = useRouter();
-  const { updateUser } = useUserStore();
+  const { user, updateUser } = useUserStore();
 
   const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false);
   const [showDetailModal, setShowDetailModal] = useState<boolean>(false);
@@ -394,6 +394,12 @@ const SellerAdminHome = () => {
       }
     }
   };
+
+  useEffect(() => {
+    if (user !== undefined && !user.is_seller) {
+      router.push("/myshop");
+    }
+  }, [user]);
 
   useEffect(() => {
     getPromotionData();
