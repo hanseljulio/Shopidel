@@ -20,7 +20,7 @@ const Footer = () => {
                   <img
                     width={10}
                     height={10}
-                    src="/vm2/images/googleplay.png"
+                    src="/images/googleplay.png"
                     className="w-6 md:w-7"
                     alt="google play"
                   />
@@ -33,7 +33,7 @@ const Footer = () => {
                   <img
                     width={10}
                     height={10}
-                    src="/vm2/images/applestore.png"
+                    src="/images/applestore.png"
                     className="w-6 md:w-7"
                     alt="apple store"
                   />
