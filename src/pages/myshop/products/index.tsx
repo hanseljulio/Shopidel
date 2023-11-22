@@ -11,6 +11,7 @@ import Pagination from "@/components/Pagination";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Modal from "@/components/Modal";
+import { useUserStore } from "@/store/userStore";
 
 const SellerAdminProducts = () => {
   const [products, setProducts] = useState<IProduct[]>([]);
@@ -18,6 +19,7 @@ const SellerAdminProducts = () => {
   const [selectedProduct, setSelectedProduct] = useState<number[]>([]);
   const [isModal, setIsModal] = useState<boolean>(false);
   const router = useRouter();
+  const { user } = useUserStore();
 
   const getSellerProducts = async () => {
     try {
@@ -51,6 +53,12 @@ const SellerAdminProducts = () => {
       }
     }
   };
+
+  useEffect(() => {
+    if (user !== undefined && !user.is_seller) {
+      router.push("/myshop");
+    }
+  }, [user]);
 
   useEffect(() => {
     getSellerProducts();
