@@ -592,6 +592,67 @@ const SellerAdminHome = () => {
     getPromotionData();
   }, [currentPage]);
 
+  const duplicatePromo = async () => {
+    let currentData;
+    try {
+      const response = await API.get(`shop-promotions/${selectedPromoId}`);
+      currentData = response.data.data;
+    } catch (e) {
+      if (axios.isAxiosError(e)) {
+        if (e.response?.status === 401) {
+          return clientUnauthorizeHandler(router, updateUser);
+        }
+        return toast.error(e.message, {
+          autoClose: 1500,
+        });
+      }
+    }
+
+    const sendData = {
+      name: currentData.name,
+      quota: currentData.quota,
+      start_date: currentData.start_date,
+      end_date: currentData.end_date,
+      min_purchase_amount: currentData.min_purchase_amount,
+      max_purchase_amount: currentData.max_purchase_amount,
+      discount_percentage: currentData.discount_percentage,
+      selected_products_id: currentData.selected_products.map(
+        (data: any) => data.product_id
+      ),
+    };
+
+    try {
+      toast.promise(
+        API.post("/shop-promotions", sendData),
+        {
+          pending: "Duplicating promotion...",
+          success: {
+            render() {
+              getPromotionData();
+              return "Promotion successfully duplicated!";
+            },
+          },
+          error: {
+            render({ data }) {
+              if (axios.isAxiosError(data)) {
+                return `${(data.response?.data as IAPIResponse).message}`;
+              }
+            },
+          },
+        },
+        {
+          autoClose: 1500,
+        }
+      );
+    } catch (e) {
+      if (axios.isAxiosError(e)) {
+        toast.error(e.message, {
+          autoClose: 1500,
+        });
+      }
+    }
+  };
+
   const deletePromo = async (id: number) => {
     // Delete here
   };
@@ -699,7 +760,13 @@ const SellerAdminHome = () => {
                           Edit
                         </h1>
                         <h1>|</h1>
-                        <h1 className="text-blue-600 hover:cursor-pointer hover:underline">
+                        <h1
+                          onClick={() => {
+                            setSelectedPromoId(data.id);
+                            duplicatePromo();
+                          }}
+                          className="text-blue-600 hover:cursor-pointer hover:underline"
+                        >
                           Duplicate
                         </h1>
                         <h1>|</h1>
