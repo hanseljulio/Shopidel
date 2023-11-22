@@ -83,7 +83,6 @@ export interface ISellerPromotion {
   min_purchase_amount: string;
   max_purchase_amount: string;
   discount_percentage: string;
-  // selectedProducts: number[];
 }
 
 export interface ISellerOrderHistory {

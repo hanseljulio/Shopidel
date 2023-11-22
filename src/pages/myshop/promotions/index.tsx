@@ -141,7 +141,7 @@ const OrderDetailModal = (props: IOrderDetailModalProps) => {
         <h1 className="font-bold text-[20px]">
           Promotion available on these products:
         </h1>
-        <ul className="flex flex-col gap-3">
+        <ul className="flex flex-col gap-3 pt-4">
           {promoDetail?.selected_products.map((product, index) => {
             return <li key={index}>&gt; {product.product_name}</li>;
           })}
@@ -151,17 +151,21 @@ const OrderDetailModal = (props: IOrderDetailModalProps) => {
   );
 };
 
-const EditPromo = () => {
+interface IEditPromoProps {
+  promoId: number;
+}
+
+const EditPromo = (props: IEditPromoProps) => {
   const [sellerProducts, setSellerProducts] = useState<ISellerProductSelect[]>([
-    {
-      id: 23,
-      name: "TAS SLING BAG CANVAS 2 SIZE MEDIUM & LARGE",
-      category_id: 936,
-      created_at: "2023-11-21T05:36:43.520268Z",
-      updated_at: "2023-11-21T05:36:43.520268Z",
-      deleted_at: "0001-01-01T00:00:00Z",
-      isChecked: false,
-    },
+    // {
+    //   id: 23,
+    //   name: "TAS SLING BAG CANVAS 2 SIZE MEDIUM & LARGE",
+    //   category_id: 936,
+    //   created_at: "2023-11-21T05:36:43.520268Z",
+    //   updated_at: "2023-11-21T05:36:43.520268Z",
+    //   deleted_at: "0001-01-01T00:00:00Z",
+    //   isChecked: false,
+    // },
   ]);
 
   const handleCheckAll = (e: any) => {
@@ -207,6 +211,30 @@ const EditPromo = () => {
       }
     }
   };
+
+  const [promoDetail, setPromoDetail] = useState<IPromoDetails>();
+
+  const getPromoData = async () => {
+    try {
+      const response = await API.get(`shop-promotions/${props.promoId}`);
+      setPromoDetail(response.data.data);
+    } catch (e) {
+      if (axios.isAxiosError(e)) {
+        if (e.response?.status === 401) {
+          return clientUnauthorizeHandler(router, updateUser);
+        }
+        return toast.error(e.message, {
+          autoClose: 1500,
+        });
+      }
+    }
+  };
+
+  console.log(promoDetail);
+
+  useEffect(() => {
+    getPromoData();
+  }, []);
 
   useEffect(() => {
     getSellerProducts();
@@ -484,7 +512,7 @@ const SellerAdminHome = () => {
     <>
       {showEditModal && (
         <Modal
-          content={<EditPromo />}
+          content={<EditPromo promoId={selectedPromoId} />}
           onClose={() => setShowEditModal(false)}
         />
       )}
@@ -564,7 +592,10 @@ const SellerAdminHome = () => {
                       <h1 className="text-[20px]">{data.quota} remaining</h1>
                       <div className="flex justify-end gap-2 ">
                         <h1
-                          onClick={() => setShowEditModal(true)}
+                          onClick={() => {
+                            setSelectedPromoId(data.id);
+                            setShowEditModal(true);
+                          }}
                           className="text-blue-600 hover:cursor-pointer hover:underline"
                         >
                           Edit
