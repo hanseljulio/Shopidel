@@ -242,11 +242,11 @@ const SellerPromotionCreate = () => {
             <div className="flex md:flex-row justify-between pt-6 md:gap-10 flex-col gap-6">
               <div className="flex flex-col md:basis-[33.3%]">
                 <label htmlFor="min_purchase_amount" className="text-sm">
-                  Minimum items
+                  Minimum purchase amount
                 </label>
                 <input
                   {...register("min_purchase_amount", {
-                    required: "Minimum items is required",
+                    required: "Minimum purchase amount is required",
                   })}
                   type="number"
                   name="min_purchase_amount"
@@ -261,11 +261,11 @@ const SellerPromotionCreate = () => {
               </div>
               <div className="flex flex-col md:basis-[33.3%]">
                 <label htmlFor="max_purchase_amount" className="text-sm">
-                  Maximum items
+                  Maximum purchase amount
                 </label>
                 <input
                   {...register("max_purchase_amount", {
-                    required: "Maximum items is required",
+                    required: "Maximum purchase amount is required",
                   })}
                   type="number"
                   name="max_purchase_amount"

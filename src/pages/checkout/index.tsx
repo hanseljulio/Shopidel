@@ -398,8 +398,6 @@ const CheckoutPage = () => {
     getCheckoutData();
   }, []);
 
-  console.log(sellerId);
-
   const submit = async () => {
     const sendData: ISendData = {
       seller_id: sellerId,
@@ -518,6 +516,7 @@ const CheckoutPage = () => {
             <CheckoutVoucherModal
               updateVoucher={changeSelectedVoucher}
               selectedVoucher={selectedVoucher}
+              voucherData={promotions}
               submitVoucherFunction={useVoucher}
             />
           }

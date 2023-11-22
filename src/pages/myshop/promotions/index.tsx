@@ -4,7 +4,7 @@ import Button from "@/components/Button";
 import { useRouter } from "next/router";
 import { ISellerPromotion } from "@/interfaces/seller_interface";
 import Modal from "@/components/Modal";
-import { dateConverter } from "@/utils/utils";
+import { currencyConverter, dateConverter } from "@/utils/utils";
 import { API } from "@/network";
 import { clientUnauthorizeHandler } from "@/utils/utils";
 import { ToastContainer, toast } from "react-toastify";
@@ -50,33 +50,102 @@ const DeletePromoModal = (props: IDeletePromoModal) => {
   );
 };
 
-const OrderDetailModal = () => {
+interface IOrderDetailModalProps {
+  promoId: number;
+}
+
+interface ISelectedProducts {
+  product_id: number;
+  product_name: string;
+  created_at: string;
+}
+
+interface IPromoDetails {
+  id: number;
+  name: string;
+  min_purchase_amount: string;
+  max_purchase_amount: string;
+  discount_percentage: string;
+  quota: number;
+  start_date: string;
+  end_date: "2024-01-01T01:01:01+07:00";
+  selected_products: ISelectedProducts[];
+  created_at: string;
+}
+
+const OrderDetailModal = (props: IOrderDetailModalProps) => {
+  const [promoDetail, setPromoDetail] = useState<IPromoDetails>();
+  const router = useRouter();
+  const { updateUser } = useUserStore();
+
+  const getPromoData = async () => {
+    try {
+      const response = await API.get(`shop-promotions/${props.promoId}`);
+      setPromoDetail(response.data.data);
+    } catch (e) {
+      if (axios.isAxiosError(e)) {
+        if (e.response?.status === 401) {
+          return clientUnauthorizeHandler(router, updateUser);
+        }
+        return toast.error(e.message, {
+          autoClose: 1500,
+        });
+      }
+    }
+  };
+
+  useEffect(() => {
+    getPromoData();
+  }, []);
+
   return (
     <div className="bg-white p-5 rounded-md md:w-[1000px] md:h-[800px] h-[80vh] w-[90vw] overflow-y-auto">
       <div className="py-3 border-b-2">
         <h1 className="text-[20px] font-bold">Promotion Details</h1>
       </div>
       <div className="pt-4">
-        <h1>Name: Promotion 1</h1>
-        <h1>Available quota: 10</h1>
+        <h1>Name: {promoDetail?.name}</h1>
+        <h1>Available quota: {promoDetail?.quota}</h1>
       </div>
       <div className="pt-4">
-        <h1>Start date: 20 November 2023</h1>
+        <h1>
+          Start date:{" "}
+          {dateConverter(
+            promoDetail ? promoDetail.start_date.substring(0, 10) : "1970-01-01"
+          )}
+        </h1>
 
-        <h1>End date: 27 November 2023</h1>
+        <h1>
+          End date:{" "}
+          {dateConverter(
+            promoDetail ? promoDetail.end_date.substring(0, 10) : "1970-01-01"
+          )}
+        </h1>
       </div>
       <div className="pt-4">
-        <h1>Minimum items: 1</h1>
-        <h1>Maximum items: None</h1>
-        <h1>Discount percentage: 10%</h1>
+        <h1>
+          Minimum purchase:{" "}
+          {currencyConverter(
+            promoDetail ? parseInt(promoDetail?.min_purchase_amount) : 0
+          )}
+        </h1>
+        <h1>
+          Maximum purchase:{" "}
+          {currencyConverter(
+            promoDetail ? parseInt(promoDetail?.max_purchase_amount) : 0
+          )}
+        </h1>
+        <h1>Discount percentage: {promoDetail?.discount_percentage}%</h1>
       </div>
       <div className="pt-4">
         <h1 className="font-bold text-[20px]">
           Promotion available on these products:
         </h1>
-        <h1>Product 1</h1>
-        <h1>Product 2</h1>
-        <h1>Product 3</h1>
+        <ul className="flex flex-col gap-3">
+          {promoDetail?.selected_products.map((product, index) => {
+            return <li key={index}>&gt; {product.product_name}</li>;
+          })}
+        </ul>
       </div>
     </div>
   );
@@ -352,6 +421,8 @@ const SellerAdminHome = () => {
   const [showDetailModal, setShowDetailModal] = useState<boolean>(false);
   const [showEditModal, setShowEditModal] = useState<boolean>(false);
 
+  const [selectedPromoId, setSelectedPromoId] = useState<number>(0);
+
   const getPromotionData = async () => {
     try {
       const response = await API.get(`shop-promotions`);
@@ -420,7 +491,7 @@ const SellerAdminHome = () => {
 
       {showDetailModal && (
         <Modal
-          content={<OrderDetailModal />}
+          content={<OrderDetailModal promoId={selectedPromoId} />}
           onClose={() => setShowDetailModal(false)}
         />
       )}
@@ -511,7 +582,10 @@ const SellerAdminHome = () => {
                         </h1>
                       </div>
                       <h1
-                        onClick={() => setShowDetailModal(true)}
+                        onClick={() => {
+                          setSelectedPromoId(data.id);
+                          setShowDetailModal(true);
+                        }}
                         className="text-orange-600 hover:cursor-pointer hover:underline"
                       >
                         View Promotion Detail
