@@ -1,6 +1,8 @@
 import SellerAdminLayout from "@/components/SellerAdminLayout";
 import React, { useEffect, useState } from "react";
 import Button from "@/components/Button";
+import { useUserStore } from "@/store/userStore";
+import { useRouter } from "next/router";
 
 interface IPromotionCategoryProps {
   currentPage?: string;
@@ -56,6 +58,8 @@ export const promotionDataTest = [
 const SellerAdminHome = () => {
   const [currentPage, setCurrentPage] = useState<string>("all");
   const [promotionData, setPromotionData] = useState<IPromotionTest[]>([]);
+  const router = useRouter();
+  const { user } = useUserStore();
 
   const moveCategory = (newPage: string) => {
     setCurrentPage(newPage);
@@ -90,6 +94,12 @@ const SellerAdminHome = () => {
       setPromotionData(currentData);
     }
   };
+
+  useEffect(() => {
+    if (user !== undefined && !user.is_seller) {
+      router.push("/myshop");
+    }
+  }, [user]);
 
   useEffect(() => {
     getPromotionData();

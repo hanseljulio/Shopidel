@@ -464,7 +464,7 @@ const SellerOrderListPage = () => {
     });
 
   const router = useRouter();
-  const { updateUser } = useUserStore();
+  const { user, updateUser } = useUserStore();
 
   const getOrderData = async () => {
     try {
@@ -507,6 +507,12 @@ const SellerOrderListPage = () => {
       }
     }
   };
+
+  useEffect(() => {
+    if (user !== undefined && !user.is_seller) {
+      router.push("/myshop");
+    }
+  }, [user]);
 
   useEffect(() => {
     getOrderData();
