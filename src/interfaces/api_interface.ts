@@ -51,6 +51,7 @@ export interface IAPIProductDetailResponse {
     {
       variant_option_name: string;
       childs: [];
+      pictures:[]
     }
   ];
   variants: [

@@ -13,6 +13,7 @@ import { useUserStore } from "@/store/userStore";
 import Pagination from "@/components/Pagination";
 import { FaTrash } from "react-icons/fa";
 import { getCookie } from "cookies-next";
+import "react-toastify/dist/ReactToastify.css";
 
 export interface IWishlist {
   id: number;
@@ -23,6 +24,8 @@ export interface IWishlist {
   price: string;
   picture_url: string;
   created_at: string | Date;
+  product_name_slug: string;
+  shop_name_slug: string;
 }
 
 function Index() {
@@ -112,7 +115,6 @@ function Index() {
 
       if (response.status === 200) {
         toast.success("Product removed from wishlist", { autoClose: 1500 });
-        // You may want to update the wishlist after successful deletion
         getWishlist();
       } else {
         toast.error("Failed to remove product from wishlist", {
@@ -189,11 +191,11 @@ function Index() {
                       order={product.total_sold}
                       title={product.name}
                       place={product.district}
-                      // onClick={() =>
-                      //   router.push(
-                      //     `/${product.}/${product.product_name_slug}`
-                      //   )
-                      // }
+                      onClick={() =>
+                        router.push(
+                          `/${product.shop_name_slug}/${product.product_name_slug}`
+                        )
+                      }
                     />
                   </div>
                   <div className="absolute text-red-600 p-2 cursor-pointer">

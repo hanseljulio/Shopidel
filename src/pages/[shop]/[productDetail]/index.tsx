@@ -42,9 +42,26 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import YouTube from "react-youtube";
 
-export interface IAPIProductDetailResponseWithSeller
-  extends IAPIProductDetailResponse {
-  seller_name: string;
+interface IVariantSelection {
+  selection_variant_name: string;
+  selection_name: string;
+}
+
+interface IVariant {
+  variant_id: string;
+  price: string;
+  stock: number;
+  selections: IVariantSelection[];
+}
+
+interface IProduct {
+  variants: IVariant[];
+  variant_options: any[];
+}
+
+interface IChoosedVariant {
+  variant1: string;
+  variant2?: string;
 }
 
 export const getServerSideProps: GetServerSideProps = async (
@@ -89,20 +106,29 @@ const ProductDetail = ({
 }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   const router = useRouter();
   const { updateUser } = useUserStore();
-  const [count, setCount] = useState<number>(1);
+  const [count, setCount] = useState<number>(0);
   const [isHovering, setIsHovering] = useState(false);
   const [isModal, setIsModal] = useState<boolean>(false);
   const [variation, setVariation] = useState<string>("");
-  const [selectedVariants, setSelectedVariants] = useState<{
-    [key: string]: string;
-  }>({});
-  const [subtotal, setSubtotal] = useState<number>(0);
   const [currentStock, setCurrentStock] = useState<number>(0);
+  const [subtotal, setSubtotal] = useState<number>(0);
+  const [varIndex, setVarIndex] = useState<number>(0);
+
   const [isFavorite, setIsFavorite] = useState(product?.is_favorite || false);
   const [imagesProduct, setImagesProduct] = useState([]);
   const [reviews, setReviews] = useState<IAPIResponse<IReviewProduct[]>>();
   const [page, setPage] = useState<number>(1);
   const [wishlist, setWishlist] = useState<IAPIResponse<IWishlist[]>>();
+
+  const [isExpanded, setIsExpanded] = useState<boolean>(false);
+
+  const handleSeeMore = () => {
+    setIsExpanded(true);
+  };
+
+  const handleSeeLess = () => {
+    setIsExpanded(false);
+  };
 
   const [suggestion, setSuggestion] =
     useState<IAPIResponse<IProductSuggestion[]>>();
@@ -110,23 +136,81 @@ const ProductDetail = ({
     IAPIResponse<IAPIProfileShopResponse> | undefined
   >();
 
+  console.log(product);
+
+  const [choosedVariant, setChoosedVariant] = useState<IChoosedVariant>(
+    product.variant_options.length === 1
+      ? {
+          variant1: product.variants[0].selections[0].selection_name,
+        }
+      : {
+          variant1: product.variants[0].selections[0].selection_name,
+          variant2: product.variants[0].selections[1].selection_name,
+        }
+  );
+
+  const choosedVariantHandler = () => {
+    const variant = product.variants.find((v: any) => {
+      if (product.variant_options.length === 1) {
+        return v.selections[0].selection_name === choosedVariant.variant1;
+      }
+      return (
+        v.selections[0].selection_name === choosedVariant.variant1 &&
+        v.selections[1].selection_name === choosedVariant.variant2
+      );
+    });
+
+    const price = parseInt(variant.price);
+    if (count >= 1) {
+      setSubtotal(price * count);
+    } else {
+      if (currentStock >= 1) {
+        setSubtotal(price);
+      } else {
+        setSubtotal(0);
+      }
+    }
+
+    console.log("cou", count);
+    console.log("bb", subtotal);
+
+    setVarIndex(variant.variant_id);
+
+    console.log("var index", varIndex);
+    if (currentStock < 1) {
+      setCurrentStock(variant.stock);
+      setCount(0);
+    } else {
+      setCurrentStock(variant.stock - count);
+    }
+
+    console.log("cc", currentStock);
+  };
+
   const isYouTubeVideo = (url: string) => {
     const youtubeRegex =
       /^(https?:\/\/)?(www\.)?(youtube\.com\/(.*\/)?|youtu\.be\/)(.+)$/;
     return youtubeRegex.test(url);
   };
 
+  useEffect(() => {
+    choosedVariantHandler();
+  }, [choosedVariant, count]);
+
   const renderContent = () => {
     if (isHovering) {
       return (
-        <img
-          width={200}
-          height={200}
-          src={variation}
-          alt=""
-          className="bigImage w-full cursor-pointer rounded-md"
-          onClick={handleZoomImage}
-        />
+        <>
+          <p>dsddsds</p>
+          <img
+            width={200}
+            height={200}
+            src={variation}
+            alt=""
+            className="bigImage w-full cursor-pointer rounded-md"
+            onClick={handleZoomImage}
+          />
+        </>
       );
     } else {
       return (
@@ -156,8 +240,6 @@ const ProductDetail = ({
     } else {
       return (
         <img
-          width={200}
-          height={200}
           src={variation}
           alt=""
           className="bigImage w-full cursor-pointer rounded-md"
@@ -257,50 +339,6 @@ const ProductDetail = ({
     getReviewProducts();
   }, [product.id, page]);
 
-  const calculateSubtotal = () => {
-    const selectedVariant = product?.variants?.find((variant: any) => {
-      return Object.keys(selectedVariants).every((optionName) => {
-        return variant.selections.some((selection: any) => {
-          return (
-            selection.selection_variant_name === optionName &&
-            selection.selection_name === selectedVariants[optionName]
-          );
-        });
-      });
-    });
-
-    if (selectedVariant) {
-      const price = parseInt(selectedVariant.price);
-      setSubtotal(price * count);
-      setCurrentStock(selectedVariant.stock);
-    }
-  };
-
-  useEffect(() => {
-    calculateSubtotal();
-  }, [selectedVariants, count]);
-
-  const handleClick = (variant: string, optionName: string) => {
-    setSelectedVariants({
-      ...selectedVariants,
-      [optionName]: variant,
-    });
-    const selectedVariant = product?.variants?.find((v: any) => {
-      return Object.keys(selectedVariants).every((option) => {
-        return v.selections.some((selection: any) => {
-          return (
-            selection.selection_variant_name === option &&
-            selection.selection_name === selectedVariants[option]
-          );
-        });
-      });
-    });
-
-    if (selectedVariant) {
-      setVariation(selectedVariant.selections[0].selection_name);
-    }
-  };
-
   const handleMouseOver = (src: string) => {
     setIsHovering(true);
     setVariation(src);
@@ -318,6 +356,11 @@ const ProductDetail = ({
     if (count >= 0 && count <= currentStock - 1) {
       setCount(count + 1);
     }
+    // if (currentStock > 0) {
+    //   setCurrentStock(currentStock - count);
+    // } else {
+    //   setCurrentStock(0);
+    // }
   };
 
   const dec = () => {
@@ -327,49 +370,44 @@ const ProductDetail = ({
   };
 
   const handleToCart = async () => {
-    if (count < 1) {
-      return;
-    }
-
-    let variant;
-    if (Object.keys(selectedVariants).length === 0) {
-      variant = product?.variants[0];
-    } else {
-      variant = product?.variants.find((v: any) => {
-        const variantKey = v.selections[0].selection_variant_name;
-        return selectedVariants[variantKey] === v.selections[0].selection_name;
-      });
-    }
-
-    if (!variant) {
-      return;
-    }
-
     const data = {
-      product_id: variant.variant_id,
+      product_id: varIndex,
       quantity: count,
     };
-
-    try {
-      const response = await API.post(`/accounts/carts`, data, {
-        headers: {
-          Authorization: `Bearer ${getCookie("accessToken")}`,
-        },
-      });
-
-      if (response.status === 200) {
-        toast.success("Added to cart", { autoClose: 1500 });
-      } else {
-        toast.error("Failed to add to cart", { autoClose: 1500 });
-      }
-    } catch (error) {
-      if (axios.isAxiosError(error)) {
-        toast.error(error.response?.data.message, { autoClose: 1500 });
-      } else {
-        toast.error("An error occurred while adding to cart", {
-          autoClose: 1500,
+    if (count >= 1 && currentStock >= 1) {
+      try {
+        const response = await API.post(`/accounts/carts`, data, {
+          headers: {
+            Authorization: `Bearer ${getCookie("accessToken")}`,
+          },
         });
+
+        if (response.status === 200) {
+          toast.success("Added to cart", { autoClose: 1500 });
+          console.log("yes", response.data);
+        } else {
+          toast.error("Failed to add to cart", { autoClose: 1500 });
+          console.log("no", response.data);
+        }
+      } catch (error) {
+        if (axios.isAxiosError(error)) {
+          toast.error(error.response?.data.message, { autoClose: 1500 });
+        } else {
+          toast.error("An error occurred while adding to cart", {
+            autoClose: 1500,
+          });
+        }
       }
+    }
+    if (currentStock < 1) {
+      toast.error("Out of stock", {
+        autoClose: 1500,
+      });
+    }
+    if (count < 1) {
+      toast.error("Add quantity first", {
+        autoClose: 1500,
+      });
     }
   };
 
@@ -435,6 +473,41 @@ const ProductDetail = ({
     }
   };
 
+  const renderDescription = () => {
+    const descriptionToShow = isExpanded
+      ? product?.description
+      : product?.description.slice(0, 250);
+
+    return (
+      <div>
+        {descriptionToShow
+          ?.split("\\n")
+          .map((paragraph: string, index: number) => (
+            <span key={index} className="line-break">
+              {paragraph}
+              <br />
+            </span>
+          ))}
+        {!isExpanded && product?.description.length > 450 && (
+          <p
+            className="text-center text-[#f57b29] cursor-pointer"
+            onClick={handleSeeMore}
+          >
+            &#812; See more
+          </p>
+        )}
+        {isExpanded && (
+          <p
+            className="text-center text-[#f57b29] cursor-pointer"
+            onClick={handleSeeLess}
+          >
+            &#813; See less
+          </p>
+        )}
+      </div>
+    );
+  };
+
   if (product === null) {
     return <div>Loading...</div>;
   }
@@ -443,50 +516,56 @@ const ProductDetail = ({
     <>
       <ToastContainer />
       {isModal && (
-        <div className="z-50 fixed">
-          <Modal
-            content={<img width={800} height={800} src={variation} alt="..." />}
-            onClose={() => setIsModal(false)}
-          />
-        </div>
+        <Modal
+          content={<img className="h-[50vh]" src={variation} alt="..." />}
+          onClose={() => setIsModal(false)}
+        />
       )}
       <div>
         <Navbar />
-        <div className="mx-auto lg:max-w-7xl px-4 md:px-0">
+        <div className="mx-auto lg:max-w-7xl px-4 md:px-0 ">
           <div className="flex-col md:flex-row justify-between md:flex gap-10 py-5 px-5 md:px-0">
             <div className="order-1 md:order-1 imageProduct w-full md:w-1/4 rounded-md overflow-hidden flex flex-col">
               {isYouTubeVideo(variation) ? renderBigImage() : renderContent()}
 
               <div className="variation gap-1 mt-2 flex flex-row overflow-auto whitespace-nowrap scrollbar-thin scrollbar-thumb-gray-300   [&::-webkit-scrollbar-thumb] [&::-webkit-scrollbar-track] [-ms-overflow-style:'none'] [scrollbar-width:'none']">
+                <button className="absolute my-auto bg-white p-2">&#60;</button>
                 {imagesProduct?.map((url, index) => (
                   <div
                     key={index}
-                    className="flex-shrink-0 cursor-pointer w-[100px] h-[100px] rounded-md mr-2"
+                    className="flex-shrink-0 cursor-pointer w-28 h-28 rounded-md mr-2 flex"
                     onClick={() => {
                       setVariation(url);
                       setIsHovering(false);
                     }}
                   >
                     {isYouTubeVideo(url) ? (
-                      <img
-                        src={`https://img.youtube.com/vi/${getYoutubeVideoId(
-                          url
-                        )}/0.jpg`}
-                        className="w-full h-full rounded-md"
-                        alt="variation image"
-                      />
+                      <>
+                        <img
+                          src={`https://img.youtube.com/vi/${getYoutubeVideoId(
+                            url
+                          )}/0.jpg`}
+                          className="w-full h-full rounded-md"
+                          alt="variation image"
+                        />
+                      </>
                     ) : (
-                      <img
-                        className="cursor-pointer w-full h-full rounded-md"
-                        src={url}
-                        alt="images"
-                        onMouseOver={() => handleMouseOver(url)}
-                        onMouseOut={handleMouseOut}
-                        onClick={handleZoomImage}
-                      />
+                      <>
+                        <img
+                          className="cursor-pointer w-full h-full rounded-md"
+                          src={url}
+                          alt="images"
+                          onMouseOver={() => handleMouseOver(url)}
+                          onMouseOut={handleMouseOut}
+                          onClick={handleZoomImage}
+                        />
+                      </>
                     )}
                   </div>
                 ))}
+                <button className="absolute  bg-red-500 mt-10 p-2 flex">
+                  &gt;
+                </button>
               </div>
 
               <div className="favorite-icon mt-5 text-right">
@@ -535,31 +614,39 @@ const ProductDetail = ({
                       <p>{item.variant_option_name}</p>
                       <div className="grid grid-cols-2 gap-2">
                         {item.childs.map((variant: any, k: number) => {
-                          const optionName = item.variant_option_name;
-                          if (
-                            item.pictures &&
-                            Array.isArray(item.pictures) &&
-                            k < item.pictures.length
-                          ) {
-                            return (
-                              <p
-                                key={k}
-                                className={`px-1 py-1 justify-center items-center flex border text-center rounded-md cursor-pointer hover:bg-[#d6e4f8] hover:border hover:border-[#364968] row-span-2 w-full text-ellipsis line-clamp-2 h-10 ${
-                                  selectedVariants[optionName] === variant
-                                    ? "bg-[#d6e4f8] border border-[#364968]"
-                                    : ""
-                                }`}
-                                onMouseOver={() =>
-                                  handleMouseOver(item.pictures[k])
-                                }
-                                onClick={() => handleClick(variant, optionName)}
-                              >
-                                {variant}
-                              </p>
-                            );
-                          } else {
-                            return null;
-                          }
+                          return (
+                            <p
+                              key={k}
+                              className={`px-1 py-1 justify-center items-center flex border text-center rounded-md cursor-pointer hover:bg-[#d6e4f8] hover:border hover:border-[#364968] row-span-2 w-full text-ellipsis line-clamp-2 h-10 
+                              ${
+                                i === 0
+                                  ? choosedVariant.variant1 === variant &&
+                                    "bg-[#d6e4f8] border border-[#364968]"
+                                  : choosedVariant.variant2 === variant &&
+                                    "bg-[#d6e4f8] border border-[#364968]"
+                              }`}
+                              onMouseEnter={
+                                i === 0
+                                  ? () => handleMouseOver(item.pictures[k])
+                                  : undefined
+                              }
+                              onClick={() => {
+                                setChoosedVariant(
+                                  i === 0
+                                    ? {
+                                        ...choosedVariant,
+                                        variant1: variant,
+                                      }
+                                    : {
+                                        ...choosedVariant,
+                                        variant2: variant,
+                                      }
+                                );
+                              }}
+                            >
+                              {variant}
+                            </p>
+                          );
                         })}
                       </div>
                     </div>
@@ -575,12 +662,12 @@ const ProductDetail = ({
                   <input
                     className="text-center w-14 md:w-20 border-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none outline-none"
                     min={1}
-                    max={100}
+                    max={currentStock}
                     type="number"
-                    readOnly={true}
                     value={count}
                     onChange={(e: any) => {
                       setCount(parseInt(e.target.value)), e.preventDefault();
+                      console.log("counter", count);
                     }}
                   />
                   <button className="plus w-3 md:w-5" onClick={inc}>
@@ -594,29 +681,53 @@ const ProductDetail = ({
               <div className="flex text-sm text-neutral-600 py-3 justify-between">
                 <p className="">Subtotal</p>
                 <p className="subTotal text-lg font-semibold text-neutral-800">
-                  {currencyConverter(subtotal)}
+                  {subtotal}
                 </p>
               </div>
               <div className="btn flex gap-x-2 justify-between mt-10">
                 <div className="w-full">
-                  <button
-                    type="submit"
-                    onClick={handleToCart}
-                    className="flex items-center justify-center gap-1 h-10 border border-[#364968] hover:shadow-md bg-[#d6e4f8] p-2 w-full md:w-32 hover:bg-[#eff6fd]  transition-all duration-300"
-                  >
-                    <AiOutlineShoppingCart /> <span>Add to cart</span>
-                  </button>
+                  {currentStock >= 1 ? (
+                    <button
+                      type="submit"
+                      onClick={handleToCart}
+                      className="flex items-center justify-center gap-1 h-10 border border-[#364968] hover:shadow-md bg-[#d6e4f8] p-2 w-full md:w-32 hover:bg-[#eff6fd]  transition-all duration-300"
+                    >
+                      <AiOutlineShoppingCart /> <span>Add to cart</span>
+                    </button>
+                  ) : (
+                    <button
+                      disabled
+                      type="submit"
+                      onClick={handleToCart}
+                      className="flex items-center justify-center gap-1 h-10  bg-[#d6e4f8] p-2 w-full md:w-32  transition-all duration-300"
+                    >
+                      <AiOutlineShoppingCart /> <span>Add to cart</span>
+                    </button>
+                  )}
                 </div>
 
-                <div onClick={handleToCart} className="w-full">
-                  <button
-                    onClick={() => router.push(`/cart`)}
-                    type="submit"
-                    className=" bg-[#364968] text-white p-2 w-full h-10 md:w-32 justify-center hover:bg-[#394e6f] hover:shadow-lg"
-                  >
-                    Buy now
-                  </button>
-                </div>
+                {currentStock >= 1 ? (
+                  <div onClick={handleToCart} className="w-full">
+                    <button
+                      onClick={() => router.push(`/cart`)}
+                      type="submit"
+                      className=" bg-[#364968] text-white p-2 w-full h-10 md:w-32 justify-center hover:bg-[#394e6f] hover:shadow-lg"
+                    >
+                      Buy now
+                    </button>
+                  </div>
+                ) : (
+                  <div onClick={handleToCart} className="w-full">
+                    <button
+                      disabled
+                      onClick={() => router.push(`/cart`)}
+                      type="submit"
+                      className=" bg-[#7b94bd] text-white p-2 w-full h-10 md:w-32 justify-center "
+                    >
+                      Buy now
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
 
@@ -640,23 +751,7 @@ const ProductDetail = ({
               </div>
               <div className="desc pt-5 ">
                 <p className="text-lg font-medium border-b my-4">Description</p>
-
-                <p className="">
-                  {product?.description
-                    ?.split("\n\n")
-                    .map((paragraph: any, index: number) => (
-                      <span key={index} className="line-break">
-                        {paragraph
-                          .split("\\n")
-                          .map((line: string, lineIndex: number) => (
-                            <React.Fragment key={lineIndex}>
-                              {line}
-                              <br />
-                            </React.Fragment>
-                          ))}
-                      </span>
-                    ))}
-                </p>
+                <div>{renderDescription()}</div>
               </div>
             </div>
           </div>
