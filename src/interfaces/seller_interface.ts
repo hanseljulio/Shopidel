@@ -65,15 +65,25 @@ export interface IProfileShopProps {
   seller: IAPIProfileShopResponse;
 }
 
+export interface ICheckoutPromotions {
+  id: number;
+  name: string;
+  min_purchase_amount: string;
+  max_purchase_amount: string;
+  discount_percentage: string;
+  selected_products: number[];
+}
+
 export interface ISellerPromotion {
+  id: number;
   name: string;
   quota: number;
-  startDate: string;
-  endDate: string;
-  minItems: number;
-  maxItems: number;
-  discountPercentage: number;
-  selectedProducts: number[];
+  start_date: string;
+  end_date: string;
+  min_purchase_amount: string;
+  max_purchase_amount: string;
+  discount_percentage: string;
+  // selectedProducts: number[];
 }
 
 export interface ISellerOrderHistory {

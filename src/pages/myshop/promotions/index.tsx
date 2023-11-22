@@ -11,6 +11,7 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import axios from "axios";
 import { useUserStore } from "@/store/userStore";
+import { IAPIResponse } from "@/interfaces/api_interface";
 
 interface IDeletePromoModal {
   closeFunction: () => void;
@@ -168,7 +169,7 @@ const EditPromo = () => {
               </p>
             )} */}
           </div>
-          <div className="flex md:flex-row justify-between pt-6 md:gap-10">
+          <div className="flex md:flex-row justify-between pt-6 md:gap-10 flex-col gap-6">
             <div className="flex flex-col md:basis-[33.3%]">
               <label htmlFor="quota" className="text-sm">
                 Promotion quota
@@ -193,80 +194,80 @@ const EditPromo = () => {
               )} */}
             </div>
             <div className="flex flex-col md:basis-[33.3%]">
-              <label htmlFor="startDate" className="text-sm">
+              <label htmlFor="start_date" className="text-sm">
                 Start Date
               </label>
               <input
-                // {...register("startDate", {
+                // {...register("start_date", {
                 //   required: "Start date is required",
                 // })}
                 type="date"
-                name="startDate"
-                id="startDate"
+                name="start_date"
+                id="start_date"
                 className="rounded-md border p-2"
               />
-              {/* {errors.startDate?.type === "required" && (
+              {/* {errors.start_date?.type === "required" && (
                 <p role="alert" className="text-xs text-red-500 mt-1">
-                  {errors.startDate.message}
+                  {errors.start_date.message}
                 </p>
               )} */}
             </div>
             <div className="flex flex-col md:basis-[33.3%]">
-              <label htmlFor="endDate" className="text-sm">
+              <label htmlFor="end_date" className="text-sm">
                 End date
               </label>
               <input
-                // {...register("endDate", {
+                // {...register("end_date", {
                 //   required: "End date is required",
                 // })}
                 type="date"
-                name="endDate"
-                id="endDate"
+                name="end_date"
+                id="end_date"
                 className="rounded-md border p-2"
               />
-              {/* {errors.endDate?.type === "required" && (
+              {/* {errors.end_date?.type === "required" && (
                 <p role="alert" className="text-xs text-red-500 mt-1">
-                  {errors.endDate.message}
+                  {errors.end_date.message}
                 </p>
               )} */}
             </div>
           </div>
-          <div className="flex md:flex-row justify-between pt-6 md:gap-10">
+          <div className="flex md:flex-row justify-between pt-6 md:gap-10 flex-col gap-6">
             <div className="flex flex-col md:basis-[33.3%]">
-              <label htmlFor="minItems" className="text-sm">
+              <label htmlFor="min_purchase_amount" className="text-sm">
                 Minimum items
               </label>
               <input
-                // {...register("minItems", {
+                // {...register("min_purchase_amount", {
                 //   required: "Minimum items is required",
                 // })}
                 type="number"
-                name="minItems"
-                id="minItems"
+                name="min_purchase_amount"
+                id="min_purchase_amount"
                 className="rounded-md border p-2 "
               />
-              {/* {errors.minItems?.type === "required" && (
+              {/* {errors.min_purchase_amount?.type === "required" && (
                 <p role="alert" className="text-xs text-red-500 mt-1">
-                  {errors.minItems.message}
+                  {errors.min_purchase_amount.message}
                 </p>
               )} */}
             </div>
             <div className="flex flex-col md:basis-[33.3%]">
-              <label htmlFor="maxItems" className="text-sm">
+              <label htmlFor="max_purchase_amount" className="text-sm">
                 Maximum items
               </label>
               <input
-                // {...register("maxItems", {
+                // {...register("max_purchase_amount", {
                 //   required: "Maximum items is required",
                 // })}
                 type="number"
-                name="maxItems"
-                id="maxItems"
+                name="max_purchase_amount"
+                id="max_purchase_amount"
                 className="rounded-md border p-2"
               />
-              {/* {errors.maxItems?.type === "required" && (
+              {/* {errors.max_purchase_amount?.type === "required" && (
                 <p role="alert" className="text-xs text-red-500 mt-1">
-                  {errors.maxItems.message}
+                  {errors.max_purchase_amount.message}
                 </p>
               )} */}
             </div>
@@ -297,9 +298,9 @@ const EditPromo = () => {
           </div>
 
           <div className="">
-            <div className="flex justify-between items-center ">
+            <div className="flex justify-between items-center md:flex-row flex-col">
               <h1 className="text-[25px] py-6">Select Products</h1>
-              <div className="flex items-center gap-6">
+              <div className="flex items-center gap-6 md:pb-0 pb-6">
                 <input
                   type="checkbox"
                   className="hover:cursor-pointer"
@@ -343,61 +344,54 @@ const EditPromo = () => {
 
 const SellerAdminHome = () => {
   const [currentPage, setCurrentPage] = useState<string>("all");
-  const [promotionData, setPromotionData] = useState<ISellerPromotion[]>([
-    {
-      name: "Promotion 1",
-      quota: 10,
-      startDate: "2023-11-20T09:12:13.880Z",
-      endDate: "2023-11-27T09:12:13.880Z",
-      minItems: 2,
-      maxItems: 10,
-      discountPercentage: 10,
-      selectedProducts: [1, 2, 3],
-    },
-    {
-      name: "Promotion 2",
-      quota: 10,
-      startDate: "2023-11-20T09:12:13.880Z",
-      endDate: "2023-11-27T09:12:13.880Z",
-      minItems: 2,
-      maxItems: 10,
-      discountPercentage: 10,
-      selectedProducts: [1, 2, 3],
-    },
-  ]);
+  const [promotionData, setPromotionData] = useState<ISellerPromotion[]>([]);
   const router = useRouter();
+  const { updateUser } = useUserStore();
 
   const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false);
   const [showDetailModal, setShowDetailModal] = useState<boolean>(false);
   const [showEditModal, setShowEditModal] = useState<boolean>(false);
 
-  const getPromotionData = () => {
-    const currentData = promotionData;
+  const getPromotionData = async () => {
+    try {
+      const response = await API.get(`shop-promotions`);
 
-    if (currentPage === "ongoing") {
-      const updatedData = currentData.filter((data) => {
-        let currentTime = new Date().getTime();
-        let endTime = new Date(data.endDate).getTime();
-        let startTime = new Date(data.startDate).getTime();
-        return currentTime <= endTime && currentTime >= startTime;
-      });
-      setPromotionData(updatedData);
-    } else if (currentPage === "upcoming") {
-      const updatedData = currentData.filter((data) => {
-        let currentTime = new Date().getTime();
-        let startTime = new Date(data.startDate).getTime();
-        return currentTime <= startTime;
-      });
-      setPromotionData(updatedData);
-    } else if (currentPage === "ended") {
-      const updatedData = currentData.filter((data) => {
-        let currentTime = new Date().getTime();
-        let endTime = new Date(data.endDate).getTime();
-        return endTime <= currentTime;
-      });
-      setPromotionData(updatedData);
-    } else {
-      setPromotionData(currentData);
+      const currentData = response.data.data;
+
+      if (currentPage === "ongoing") {
+        const updatedData = currentData.filter((data: any) => {
+          let currentTime = new Date().getTime();
+          let endTime = new Date(data.end_date).getTime();
+          let startTime = new Date(data.start_date).getTime();
+          return currentTime <= endTime && currentTime >= startTime;
+        });
+        setPromotionData(updatedData);
+      } else if (currentPage === "upcoming") {
+        const updatedData = currentData.filter((data: any) => {
+          let currentTime = new Date().getTime();
+          let startTime = new Date(data.start_date).getTime();
+          return currentTime <= startTime;
+        });
+        setPromotionData(updatedData);
+      } else if (currentPage === "ended") {
+        const updatedData = currentData.filter((data: any) => {
+          let currentTime = new Date().getTime();
+          let endTime = new Date(data.end_date).getTime();
+          return endTime <= currentTime;
+        });
+        setPromotionData(updatedData);
+      } else {
+        setPromotionData(currentData);
+      }
+    } catch (e) {
+      if (axios.isAxiosError(e)) {
+        if (e.response?.status === 401) {
+          return clientUnauthorizeHandler(router, updateUser);
+        }
+        return toast.error(e.message, {
+          autoClose: 1500,
+        });
+      }
     }
   };
 
@@ -435,6 +429,7 @@ const SellerAdminHome = () => {
       )}
 
       <SellerAdminLayout currentPage="Promotions">
+        <ToastContainer />
         <div className="w-full mx-auto mt-6">
           <div className="flex items-center justify-between md:flex-row md:mx-[5%] flex-col p-0 md:gap-0 gap-8">
             <h1 className="text-[30px]">Promotions</h1>
@@ -457,29 +452,38 @@ const SellerAdminHome = () => {
               styling="bg-[#fddf97] p-3 rounded-[8px] w-[200px] my-4"
             />
           </div>
-          <div className="md:mx-[5%] flex flex-col gap-6 pt-4">
+          <div className="mx-[5%] flex flex-col gap-6 pt-4">
+            {promotionData.length === 0 && (
+              <h1 className="font-bold text-[25px] text-center pt-4">
+                You have no promotions at the moment.
+              </h1>
+            )}
             {promotionData.map((data, index) => {
               return (
                 <div key={index} className="border-2 border-black p-6">
-                  <div className="flex justify-between items-center">
+                  <div className="flex justify-between items-center md:flex-row flex-col">
                     <div>
                       <h1 className="text-[25px]">{data.name}</h1>
                       <br />
 
-                      <h1 className="font-bold">
-                        {dateConverter(data.startDate.substring(0, 10))} to{" "}
-                        {dateConverter(data.endDate.substring(0, 10))}
+                      <h1 className="font-bold ">
+                        {dateConverter(data.start_date.substring(0, 10))} to{" "}
+                        {dateConverter(data.end_date.substring(0, 10))}
                       </h1>
                       <h1>
                         Min items:{" "}
-                        {data.minItems === 0 ? "None" : data.minItems}
+                        {data.min_purchase_amount === "0"
+                          ? "None"
+                          : data.min_purchase_amount}
                       </h1>
                       <h1>
                         Max items:{" "}
-                        {data.maxItems === 0 ? "None" : data.maxItems}
+                        {data.max_purchase_amount === "0"
+                          ? "None"
+                          : data.max_purchase_amount}
                       </h1>
                     </div>
-                    <div className="text-right flex flex-col md:gap-3 items-end gap-6">
+                    <div className="md:text-right flex flex-col md:gap-3 md:items-end gap-6 text-center md:pt-0 pt-10">
                       <h1 className="text-[20px]">{data.quota} remaining</h1>
                       <div className="flex justify-end gap-2 ">
                         <h1

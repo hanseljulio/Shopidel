@@ -10,6 +10,7 @@ import { useUserStore } from "@/store/userStore";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { ISellerPromotion } from "@/interfaces/seller_interface";
+import { IAPIResponse } from "@/interfaces/api_interface";
 
 interface ISellerProductSelect {
   id: number;
@@ -100,22 +101,56 @@ const SellerPromotionCreate = () => {
       }
     }
 
+    if (selectedProducts.length === 0) {
+      toast.error("Please select items that will have the promotion.");
+    }
+
     const sendData = {
       name: data.name,
-      quota: data.quota,
-      startDate: data.startDate,
-      endDate: data.endDate,
-      minItems: data.minItems,
-      maxItems: data.maxItems,
-      discountPercentage: data.discountPercentage,
-      selectedProducts: selectedProducts,
+      quota: parseInt(data.quota.toString()),
+      start_date: new Date(data.start_date).toISOString(),
+      end_date: new Date(data.end_date).toISOString(),
+      min_purchase_amount: data.min_purchase_amount,
+      max_purchase_amount: data.max_purchase_amount,
+      discount_percentage: data.discount_percentage,
+      selected_products_id: selectedProducts,
     };
 
-    console.log(sendData);
+    try {
+      toast.promise(
+        API.post("/shop-promotions", sendData),
+        {
+          pending: "Creating promotion...",
+          success: {
+            render() {
+              router.push("/myshop/promotions");
+              return "Promotion successfully updated!";
+            },
+          },
+          error: {
+            render({ data }) {
+              if (axios.isAxiosError(data)) {
+                return `${(data.response?.data as IAPIResponse).message}`;
+              }
+            },
+          },
+        },
+        {
+          autoClose: 1500,
+        }
+      );
+    } catch (e) {
+      if (axios.isAxiosError(e)) {
+        toast.error(e.message, {
+          autoClose: 1500,
+        });
+      }
+    }
   };
 
   return (
     <SellerAdminLayout currentPage="Promotions">
+      <ToastContainer />
       <div className="w-full mx-auto mt-6">
         <div className="flex items-center justify-between md:flex-row md:mx-[5%] flex-col p-0 md:gap-0 gap-8">
           <h1 className="text-[30px]">Create Promotion</h1>
@@ -166,104 +201,104 @@ const SellerPromotionCreate = () => {
                 )}
               </div>
               <div className="flex flex-col md:basis-[33.3%]">
-                <label htmlFor="startDate" className="text-sm">
+                <label htmlFor="start_date" className="text-sm">
                   Start Date
                 </label>
                 <input
-                  {...register("startDate", {
+                  {...register("start_date", {
                     required: "Start date is required",
                   })}
                   type="date"
-                  name="startDate"
-                  id="startDate"
+                  name="start_date"
+                  id="start_date"
                   className="rounded-md border p-2"
                 />
-                {errors.startDate?.type === "required" && (
+                {errors.start_date?.type === "required" && (
                   <p role="alert" className="text-xs text-red-500 mt-1">
-                    {errors.startDate.message}
+                    {errors.start_date.message}
                   </p>
                 )}
               </div>
               <div className="flex flex-col md:basis-[33.3%]">
-                <label htmlFor="endDate" className="text-sm">
+                <label htmlFor="end_date" className="text-sm">
                   End date
                 </label>
                 <input
-                  {...register("endDate", {
+                  {...register("end_date", {
                     required: "End date is required",
                   })}
                   type="date"
-                  name="endDate"
-                  id="endDate"
+                  name="end_date"
+                  id="end_date"
                   className="rounded-md border p-2"
                 />
-                {errors.endDate?.type === "required" && (
+                {errors.end_date?.type === "required" && (
                   <p role="alert" className="text-xs text-red-500 mt-1">
-                    {errors.endDate.message}
+                    {errors.end_date.message}
                   </p>
                 )}
               </div>
             </div>
             <div className="flex md:flex-row justify-between pt-6 md:gap-10 flex-col gap-6">
               <div className="flex flex-col md:basis-[33.3%]">
-                <label htmlFor="minItems" className="text-sm">
+                <label htmlFor="min_purchase_amount" className="text-sm">
                   Minimum items
                 </label>
                 <input
-                  {...register("minItems", {
+                  {...register("min_purchase_amount", {
                     required: "Minimum items is required",
                   })}
                   type="number"
-                  name="minItems"
-                  id="minItems"
+                  name="min_purchase_amount"
+                  id="min_purchase_amount"
                   className="rounded-md border p-2 "
                 />
-                {errors.minItems?.type === "required" && (
+                {errors.min_purchase_amount?.type === "required" && (
                   <p role="alert" className="text-xs text-red-500 mt-1">
-                    {errors.minItems.message}
+                    {errors.min_purchase_amount.message}
                   </p>
                 )}
               </div>
               <div className="flex flex-col md:basis-[33.3%]">
-                <label htmlFor="maxItems" className="text-sm">
+                <label htmlFor="max_purchase_amount" className="text-sm">
                   Maximum items
                 </label>
                 <input
-                  {...register("maxItems", {
+                  {...register("max_purchase_amount", {
                     required: "Maximum items is required",
                   })}
                   type="number"
-                  name="maxItems"
-                  id="maxItems"
+                  name="max_purchase_amount"
+                  id="max_purchase_amount"
                   className="rounded-md border p-2"
                 />
-                {errors.maxItems?.type === "required" && (
+                {errors.max_purchase_amount?.type === "required" && (
                   <p role="alert" className="text-xs text-red-500 mt-1">
-                    {errors.maxItems.message}
+                    {errors.max_purchase_amount.message}
                   </p>
                 )}
               </div>
               <div className="flex flex-col md:basis-[33.3%]">
-                <label htmlFor="discountPercentage" className="text-sm">
+                <label htmlFor="discount_percentage" className="text-sm">
                   Discount percentage
                 </label>
                 <div className="relative">
                   <input
-                    {...register("discountPercentage", {
+                    {...register("discount_percentage", {
                       required: "Discount percentage is required",
                     })}
                     type="number"
-                    name="discountPercentage"
-                    id="discountPercentage"
+                    name="discount_percentage"
+                    id="discount_percentage"
                     className="rounded-md border p-2 w-full"
                   />
                   <div className="absolute right-0 bg-[#F3F4F5] border border-slate-500 h-full flex items-center px-2 rounded-tr-md rounded-br-md top-0">
                     <span className="">%</span>
                   </div>
                 </div>
-                {errors.discountPercentage?.type === "required" && (
+                {errors.discount_percentage?.type === "required" && (
                   <p role="alert" className="text-xs text-red-500 mt-1">
-                    {errors.discountPercentage.message}
+                    {errors.discount_percentage.message}
                   </p>
                 )}
               </div>
