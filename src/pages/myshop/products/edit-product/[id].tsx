@@ -40,7 +40,7 @@ interface IAddProductForm {
   size: string;
   price?: string;
   stock?: number;
-  images: IProductImage[];
+  images: (IProductImage | string)[];
   variantGroup: IVariantGroup[];
   variantTable?: IVariant[];
 }
@@ -57,6 +57,7 @@ interface IVariant {
   stock: number;
   price: string;
   imageId: string;
+  image_url?: string;
 }
 
 interface IVariantGroup {
@@ -96,6 +97,12 @@ export const getServerSideProps = async (
   } catch (e) {
     if (axios.isAxiosError(e)) {
       console.log(e);
+      return {
+        redirect: {
+          permanent: false,
+          destination: "/",
+        },
+      };
     }
   }
 };
@@ -103,7 +110,6 @@ export const getServerSideProps = async (
 const SellerEditProductPage = ({
   product,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
-  const [data, setData] = useState<IAddProductForm>();
   const {
     register,
     setValue,
@@ -116,24 +122,43 @@ const SellerEditProductPage = ({
   } = useForm<IAddProductForm>({
     defaultValues: {
       ...product,
+      variantGroup: product.variant_options as IVariantGroup[],
+      variantTable: product.variants as IVariant[],
     },
   });
   const router = useRouter();
 
+  console.log(product.variant_options);
+
   const watchCategory = watch("category");
   const watchVariantGroup = watch("variantGroup");
   const watchVariantTable = watch("variantTable");
+  console.log(watchVariantTable);
 
   const [categories, setCategories] = useState<ICategory[]>();
   const [isCategoryOpen, setIsCategoryOpen] = useState<boolean>(false);
   const [category2, setCategory2] = useState<ICategory[]>([]);
   const [category3, setCategory3] = useState<ICategory[]>([]);
   const [video, setVideo] = useState<string>("");
-  const [images, setImages] = useState<Partial<IProductImage>[]>([
-    {
-      id: (Math.random() + 1).toString(36).substring(5),
-    },
-  ]);
+  const [images, setImages] = useState<(Partial<IProductImage> | string)[]>(
+    product.images
+  );
+  const [isVariantCorrect, setIsVariantCorrect] = useState<boolean>();
+
+  useEffect(() => {
+    if (isVariantCorrect === false) {
+      watchVariantTable?.pop();
+      setValue("variantTable", [...watchVariantTable!]);
+    }
+  }, [isVariantCorrect]);
+
+  useEffect(() => {
+    if (product.variants.length !== watchVariantTable?.length) {
+      if (product.variants.length !== watchVariantTable?.length) {
+        setIsVariantCorrect(false);
+      }
+    }
+  }, [watchVariantTable]);
 
   const getListCategory = async () => {
     try {
@@ -152,7 +177,11 @@ const SellerEditProductPage = ({
   };
 
   const onSubmit: SubmitHandler<IAddProductForm> = async (data) => {
-    if (data.images.findIndex((img) => img.file === undefined) !== -1) {
+    if (
+      data.images.findIndex(
+        (img) => (img as IProductImage).file === undefined
+      ) !== -1
+    ) {
       return setError("images", { message: "Photo is required" });
     }
 
@@ -168,7 +197,7 @@ const SellerEditProductPage = ({
       formData.append("category_id", String(data.category.id));
       formData.append("size", data.size);
       data.images.forEach((img) => {
-        formData.append("images[]", img.file);
+        formData.append("images[]", typeof img === "string" ? img : img.file);
       });
       if (!data.variantTable) {
         formData.append(
@@ -402,23 +431,29 @@ const SellerEditProductPage = ({
                       onReorder={setImages}
                       axis="x"
                     >
-                      {images.map((item) => {
+                      {images.map((item, i) => {
                         return (
                           <ProductImage
                             key={JSON.stringify(item)}
                             images={images}
-                            id={item.id!}
+                            id={typeof item !== "string" ? item.id! : undefined}
                             item={item}
                             onSet={(data) => {
                               clearErrors("images");
-                              images.find((img) => img.id === item.id)!.file =
-                                data;
+
+                              (images as IProductImage[]).find(
+                                (img) =>
+                                  (img as IProductImage).id ===
+                                  (item as IProductImage).id
+                              )!.file = data;
                               return setImages([...images]);
                             }}
                             onDelete={() => {
-                              let data = images.filter(
-                                (img) => img.id !== item.id
-                              );
+                              let data = images.filter((img) => {
+                                return typeof img === "string"
+                                  ? img !== item
+                                  : img.id !== (item as IProductImage).id;
+                              });
                               clearErrors("images");
                               return setImages(data);
                             }}
@@ -431,9 +466,11 @@ const SellerEditProductPage = ({
                     <div
                       className="hover:cursor-pointer"
                       onClick={() => {
+                        console.log(images);
                         images.push({
                           id: (Math.random() + 1).toString(36).substring(5),
                         });
+                        console.log(images);
                         setImages([...images]);
                       }}
                     >
@@ -554,6 +591,7 @@ const SellerEditProductPage = ({
                                   <ProductVariant
                                     watchVariantTable={watchVariantTable!}
                                     key={i}
+                                    index={i}
                                     variant1type={v0}
                                     getValues={getValues}
                                     setValue={setValue}
@@ -568,6 +606,7 @@ const SellerEditProductPage = ({
                                     <ProductVariant
                                       watchVariantTable={watchVariantTable!}
                                       key={i}
+                                      index={i}
                                       getValues={getValues}
                                       setValue={setValue}
                                       watchVariantGroup={watchVariantGroup}
@@ -898,9 +937,9 @@ const ProductVariantGroup = ({
 };
 
 interface IProductImageProps {
-  images: Partial<IProductImage>[];
-  item: Partial<IProductImage>;
-  id: string;
+  images: (Partial<IProductImage> | string)[];
+  item: Partial<IProductImage> | string;
+  id: string | undefined;
 
   onSet: (data: File) => void;
   onDelete: () => void;
@@ -915,6 +954,7 @@ const ProductImage = ({
   const [isHover, setIsHover] = useState<boolean>(false);
   const imageRef = useRef<HTMLInputElement>(null);
   const controls = useDragControls();
+
   return (
     <Reorder.Item
       className="w-32 h-32 bg-red-200 relative flex items-center justify-center group hover:cursor-pointer"
@@ -944,16 +984,20 @@ const ProductImage = ({
           }
         }}
       />
-      {item.file ? (
+      {typeof item === "string" ? (
         <img
-          src={item.file && URL.createObjectURL(item.file)}
+          src={item as string}
+          className="h-full w-full absolute z-20 object-contain hover:cursor-pointer "
+          draggable={false}
+        />
+      ) : item.file ? (
+        <img
+          src={URL.createObjectURL(item.file)}
           className="h-full w-full absolute z-20 object-contain hover:cursor-pointer "
           draggable={false}
         />
       ) : (
-        <div>
-          <p className="text-xs">+ Add photo</p>
-        </div>
+        <p className="text-sm">+ Add Photo</p>
       )}
 
       {images.length !== 1 && (
@@ -985,6 +1029,7 @@ interface IProductVariantProps {
   watchVariantTable: IVariant[];
   setValue: UseFormSetValue<IAddProductForm>;
   getValues: UseFormGetValues<IAddProductForm>;
+  index: number;
 }
 
 const ProductVariant = ({
@@ -993,10 +1038,13 @@ const ProductVariant = ({
   watchVariantGroup,
   setValue,
   getValues,
+  index,
   watchVariantTable,
 }: IProductVariantProps) => {
   const imageRef = useRef<HTMLInputElement>(null);
-  const [image, setImage] = useState<File>();
+  const [image, setImage] = useState<File | string | undefined>(
+    watchVariantTable.at(index)?.image_url
+  );
   const [variant, setVariant] = useState<IVariant>();
   const [id, setId] = useState<string>("");
 
@@ -1033,6 +1081,7 @@ const ProductVariant = ({
         } as IVariant,
       ]);
     }
+
     setId(id);
   }, []);
 
@@ -1068,12 +1117,17 @@ const ProductVariant = ({
           hidden
         />
         <img
-          src={image && URL.createObjectURL(image)}
+          src={
+            typeof image === "string"
+              ? image
+              : image && URL.createObjectURL(image as File)
+          }
           onClick={() => {
             imageRef.current?.click();
           }}
           className="w-16 h-16 bg-red-200"
         />
+        {}
       </td>
       <td>{variant1type}</td>
       {variant2type && <td>{variant2type}</td>}
@@ -1081,6 +1135,7 @@ const ProductVariant = ({
         <input
           type="text"
           name="price"
+          value={watchVariantTable?.at(index)?.price}
           onChange={(e) => {
             watchVariantTable.find((data) => {
               if (variant2type !== undefined) {
@@ -1106,7 +1161,8 @@ const ProductVariant = ({
       <td>
         <input
           type="text"
-          name="price"
+          name="stock"
+          value={watchVariantTable?.at(index)?.stock}
           onChange={(e) => {
             watchVariantTable.find((data) => {
               if (variant2type !== undefined) {
@@ -1125,7 +1181,7 @@ const ProductVariant = ({
               e.preventDefault();
             }
           }}
-          id="price"
+          id="stock"
           className="py-1  rounded-md text-sm"
         />
       </td>
