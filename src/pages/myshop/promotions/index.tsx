@@ -16,6 +16,7 @@ import { SubmitHandler, useForm } from "react-hook-form";
 
 interface IDeletePromoModal {
   closeFunction: () => void;
+  submitFunction: () => void;
 }
 interface ISellerProductSelect {
   id: number;
@@ -40,10 +41,12 @@ const DeletePromoModal = (props: IDeletePromoModal) => {
       <div className="flex justify-center mt-3 gap-6">
         <Button
           text="Yes"
+          onClick={props.submitFunction}
           styling="bg-red-600 p-3 rounded-[8px] w-[100px] text-white my-4"
         />
         <Button
           text="No"
+          onClick={props.closeFunction}
           styling="bg-[#364968] p-3 rounded-[8px] w-[100px] text-white my-4"
         />
       </div>
@@ -653,8 +656,37 @@ const SellerAdminHome = () => {
     }
   };
 
-  const deletePromo = async (id: number) => {
-    // Delete here
+  const deletePromo = async () => {
+    try {
+      toast.promise(
+        API.delete(`/shop-promotions/${selectedPromoId}`),
+        {
+          pending: "Deleting promotion...",
+          success: {
+            render() {
+              getPromotionData();
+              return "Promotion successfully deleted!";
+            },
+          },
+          error: {
+            render({ data }) {
+              if (axios.isAxiosError(data)) {
+                return `${(data.response?.data as IAPIResponse).message}`;
+              }
+            },
+          },
+        },
+        {
+          autoClose: 1500,
+        }
+      );
+    } catch (e) {
+      if (axios.isAxiosError(e)) {
+        toast.error(e.message, {
+          autoClose: 1500,
+        });
+      }
+    }
   };
 
   return (
@@ -684,7 +716,13 @@ const SellerAdminHome = () => {
       {showDeleteModal && (
         <Modal
           content={
-            <DeletePromoModal closeFunction={() => setShowDeleteModal(false)} />
+            <DeletePromoModal
+              submitFunction={() => {
+                deletePromo();
+                setShowDeleteModal(false);
+              }}
+              closeFunction={() => setShowDeleteModal(false)}
+            />
           }
           onClose={() => setShowDeleteModal(false)}
         />
@@ -771,7 +809,10 @@ const SellerAdminHome = () => {
                         </h1>
                         <h1>|</h1>
                         <h1
-                          onClick={() => setShowDeleteModal(true)}
+                          onClick={() => {
+                            setSelectedPromoId(data.id);
+                            setShowDeleteModal(true);
+                          }}
                           className="text-blue-600 hover:cursor-pointer hover:underline"
                         >
                           Delete
