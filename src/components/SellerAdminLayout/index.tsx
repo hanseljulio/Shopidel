@@ -98,12 +98,6 @@ const SellerAdminSidebar = () => {
           >
             List of orders
           </li>
-          {/* <li
-            onClick={() => router.push("/myshop/delivery/processOrders")}
-            className={`py-1 hover:cursor-pointer w-[150px] hover:text-[#92bcff] transition`}
-          >
-            Process orders
-          </li> */}
         </ul>
       </div>
     </div>
