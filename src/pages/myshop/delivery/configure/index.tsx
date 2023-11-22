@@ -1,8 +1,18 @@
 import SellerAdminLayout from "@/components/SellerAdminLayout";
-import React, { useState } from "react";
+import { useUserStore } from "@/store/userStore";
+import { useRouter } from "next/router";
+import React, { useEffect, useState } from "react";
 
 const SellerConfigurePage = () => {
   const [allowPrintShipping, setAllowPrintShipping] = useState<boolean>(false);
+  const { user } = useUserStore();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (user !== undefined && !user.is_seller) {
+      router.push("/myshop");
+    }
+  }, [user]);
 
   return (
     <SellerAdminLayout currentPage="Configure">

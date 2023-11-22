@@ -9,18 +9,4 @@ export const middleware = async (req: NextRequest) => {
     }
     return NextResponse.next();
   }
-
-  // if (req.nextUrl.pathname.startsWith("/search")) {
-  //   const nextUrl = req.nextUrl;
-  //   nextUrl.searchParams.forEach((item, key) => {
-  //     if (item == "") {
-  //       console.log("yes");
-  //       nextUrl.searchParams.delete(key);
-  //     }
-  //   });
-
-  //   console.log(nextUrl);
-
-  //   return NextResponse.rewrite(nextUrl);
-  // }
 };
