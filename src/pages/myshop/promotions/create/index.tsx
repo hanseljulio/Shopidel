@@ -120,9 +120,9 @@ const SellerPromotionCreate = () => {
         <div className="flex items-center justify-between md:flex-row md:mx-[5%] flex-col p-0 md:gap-0 gap-8">
           <h1 className="text-[30px]">Create Promotion</h1>
         </div>
-        <div className="md:mx-[5%] pt-6">
+        <div className="mx-[5%] pt-6">
           <form onSubmit={handleSubmit(submit)}>
-            <div className="flex flex-col">
+            <div className="flex flex-col ">
               <label htmlFor="username" className="text-sm">
                 Promotion Name
               </label>
@@ -141,7 +141,7 @@ const SellerPromotionCreate = () => {
                 </p>
               )}
             </div>
-            <div className="flex md:flex-row justify-between pt-6 md:gap-10">
+            <div className="flex md:flex-row justify-between pt-6 md:gap-10 flex-col gap-6">
               <div className="flex flex-col md:basis-[33.3%]">
                 <label htmlFor="quota" className="text-sm">
                   Promotion quota
@@ -204,7 +204,7 @@ const SellerPromotionCreate = () => {
                 )}
               </div>
             </div>
-            <div className="flex md:flex-row justify-between pt-6 md:gap-10">
+            <div className="flex md:flex-row justify-between pt-6 md:gap-10 flex-col gap-6">
               <div className="flex flex-col md:basis-[33.3%]">
                 <label htmlFor="minItems" className="text-sm">
                   Minimum items
@@ -270,9 +270,9 @@ const SellerPromotionCreate = () => {
             </div>
 
             <div className="">
-              <div className="flex justify-between items-center ">
+              <div className="flex justify-between items-center md:flex-row flex-col">
                 <h1 className="text-[25px] py-6">Select Products</h1>
-                <div className="flex items-center gap-6">
+                <div className="flex items-center gap-6 md:pb-0 pb-6">
                   <input
                     type="checkbox"
                     className="hover:cursor-pointer"

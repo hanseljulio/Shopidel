@@ -5,9 +5,24 @@ import { useRouter } from "next/router";
 import { ISellerPromotion } from "@/interfaces/seller_interface";
 import Modal from "@/components/Modal";
 import { dateConverter } from "@/utils/utils";
+import { API } from "@/network";
+import { clientUnauthorizeHandler } from "@/utils/utils";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import axios from "axios";
+import { useUserStore } from "@/store/userStore";
 
 interface IDeletePromoModal {
   closeFunction: () => void;
+}
+interface ISellerProductSelect {
+  id: number;
+  name: string;
+  category_id: number;
+  created_at: string;
+  updated_at: string;
+  deleted_at: string;
+  isChecked: boolean;
 }
 
 const DeletePromoModal = (props: IDeletePromoModal) => {
@@ -67,6 +82,66 @@ const OrderDetailModal = () => {
 };
 
 const EditPromo = () => {
+  const [sellerProducts, setSellerProducts] = useState<ISellerProductSelect[]>([
+    {
+      id: 23,
+      name: "TAS SLING BAG CANVAS 2 SIZE MEDIUM & LARGE",
+      category_id: 936,
+      created_at: "2023-11-21T05:36:43.520268Z",
+      updated_at: "2023-11-21T05:36:43.520268Z",
+      deleted_at: "0001-01-01T00:00:00Z",
+      isChecked: false,
+    },
+  ]);
+
+  const handleCheckAll = (e: any) => {
+    const { checked } = e.target;
+    const currentData = [...sellerProducts];
+
+    const updatedData = currentData.map((data) => {
+      return { ...data, isChecked: checked };
+    });
+
+    setSellerProducts(updatedData);
+  };
+
+  const handleCheck = (e: any, id: number) => {
+    const { checked } = e.target;
+    const currentData = [...sellerProducts];
+
+    const updatedData = currentData.map((data) => {
+      if (data.id === id) {
+        return { ...data, isChecked: checked };
+      } else {
+        return data;
+      }
+    });
+    setSellerProducts(updatedData);
+  };
+
+  const router = useRouter();
+  const { updateUser } = useUserStore();
+
+  const getSellerProducts = async () => {
+    try {
+      const response = await API.get(`sellers/products`);
+      setSellerProducts(response.data.data);
+    } catch (e) {
+      if (axios.isAxiosError(e)) {
+        if (e.response?.status === 401) {
+          return clientUnauthorizeHandler(router, updateUser);
+        }
+        return toast.error(e.message, {
+          autoClose: 1500,
+        });
+      }
+    }
+  };
+
+  useEffect(() => {
+    getSellerProducts();
+  }, []);
+
   return (
     <div className="bg-white p-5 rounded-md md:w-[1000px] md:h-[800px] h-[80vh] w-[90vw] overflow-y-auto">
       <div className="py-3 border-b-2">
@@ -228,29 +303,29 @@ const EditPromo = () => {
                 <input
                   type="checkbox"
                   className="hover:cursor-pointer"
-                  // onClick={handleCheckAll}
+                  onClick={handleCheckAll}
                   name="allselect"
                 />
                 <p>Select all</p>
               </div>
             </div>
             <div className="bg-slate-300 h-[300px] overflow-y-scroll flex flex-col items-center">
-              {/* {props.shopItems.map((product, index) => {
+              {sellerProducts.map((product, index) => {
                 return (
                   <div
                     key={index}
                     className="bg-white border-2 rounded-md  p-6 flex gap-6 items-center my-3 w-[95%]"
                   >
                     <input
-                      // onClick={(e) => handleCheck(e, product.id)}
+                      onClick={(e) => handleCheck(e, product.id)}
                       type="checkbox"
                       className="hover:cursor-pointer"
-                      // checked={product.isChecked}
+                      checked={product.isChecked}
                     />
                     <h1>{product.name}</h1>
                   </div>
                 );
-              })} */}
+              })}
             </div>
           </div>
 
