@@ -513,10 +513,7 @@ const SellerAdminHome = () => {
       end_date: currentData.end_date,
       min_purchase_amount: currentData.min_purchase_amount,
       max_purchase_amount: currentData.max_purchase_amount,
-      discount_percentage: currentData.discount_percentage,
-      selected_products_id: currentData.selected_products.map(
-        (data: any) => data.product_id
-      ),
+      discount_amount: currentData.discount_amount,
     };
 
     try {
