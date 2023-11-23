@@ -309,7 +309,7 @@ const ChangePinModal = () => {
       <div>
         {isValid ? (
           <div className="flex flex-col justify-center items-center">
-            <img src="/vm2/images/activate_wallet_pin.png" className="w-36" />
+            <img src="/images/activate_wallet_pin.png" className="w-36" />
             <p>Input your new PIN</p>
             <div className="mt-3">
               <PinCode onSubmit={(pin) => updatePinHandler(pin)} />
@@ -398,7 +398,7 @@ const ActivateWalletModal = () => {
   return (
     <div className="bg-white p-5 rounded-md flex flex-col items-center">
       <img
-        src={"/vm2/images/activate_wallet_pin.png"}
+        src={"/images/activate_wallet_pin.png"}
         width={150}
         height={150}
         alt="activate_wallet_pin"
@@ -437,7 +437,7 @@ const ActivateWallet = ({ onOpenDialog }: IActivateWalletProps) => {
     <div className="flex justify-center items-center h-full">
       <div className="flex flex-col items-center">
         <img
-          src={"/vm2/images/no_wallet.png"}
+          src={"/images/no_wallet.png"}
           width={250}
           height={250}
           alt="no_wallet"
@@ -654,8 +654,12 @@ export const getServerSideProps = async (
   let auth = await checkAuthSSR(context);
 
   if (auth === null) {
-    context.res.writeHead(301, { location: "/login" });
-    context.res.end();
+    return {
+      redirect: {
+        permanent: false,
+        destination: "/login",
+      },
+    };
   }
 
   try {
@@ -668,6 +672,12 @@ export const getServerSideProps = async (
   } catch (e) {
     if (axios.isAxiosError(e)) {
       console.log(e.response?.data);
+      return {
+        redirect: {
+          permanent: false,
+          destination: "/",
+        },
+      };
     }
   }
 

@@ -25,7 +25,7 @@ import {
   InferGetServerSidePropsType,
 } from "next";
 import { useRouter } from "next/router";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { SubmitHandler } from "react-hook-form";
 import { AiOutlineShoppingCart } from "react-icons/ai";
 import { BsStarFill } from "react-icons/bs";
@@ -113,15 +113,41 @@ const ProductDetail = ({
   const [currentStock, setCurrentStock] = useState<number>(0);
   const [subtotal, setSubtotal] = useState<number>(0);
   const [varIndex, setVarIndex] = useState<number>(0);
-
   const [isFavorite, setIsFavorite] = useState(product?.is_favorite || false);
   const [imagesProduct, setImagesProduct] = useState([]);
   const [reviews, setReviews] = useState<IAPIResponse<IReviewProduct[]>>();
   const [page, setPage] = useState<number>(1);
   const [wishlist, setWishlist] = useState<IAPIResponse<IWishlist[]>>();
-
   const [isExpanded, setIsExpanded] = useState<boolean>(false);
+  const variationRef = useRef<HTMLDivElement>(null);
+  const [isLeftButtonDisabled, setIsLeftButtonDisabled] = useState(true);
+  const [isRightButtonDisabled, setIsRightButtonDisabled] = useState(false);
 
+  const scrollLeft = () => {
+    if (variationRef.current) {
+      variationRef.current.scrollLeft -= 100;
+    }
+  };
+
+  const scrollRight = () => {
+    if (variationRef.current) {
+      variationRef.current.scrollLeft += 100;
+    }
+  };
+
+  useEffect(() => {
+    if (variationRef.current) {
+      const { scrollLeft, scrollWidth, clientWidth } = variationRef.current;
+      setIsLeftButtonDisabled(scrollLeft === 0);
+      setIsRightButtonDisabled(scrollLeft + clientWidth === scrollWidth);
+      if (scrollLeft === 0) {
+      } else {
+      }
+      if (scrollLeft + clientWidth === scrollWidth) {
+      } else {
+      }
+    }
+  }, [variationRef]);
   const handleSeeMore = () => {
     setIsExpanded(true);
   };
@@ -136,31 +162,37 @@ const ProductDetail = ({
     IAPIResponse<IAPIProfileShopResponse> | undefined
   >();
 
-  console.log(product);
-
-  const [choosedVariant, setChoosedVariant] = useState<IChoosedVariant>(
-    product.variant_options.length === 1
-      ? {
-          variant1: product.variants[0].selections[0].selection_name,
-        }
-      : {
-          variant1: product.variants[0].selections[0].selection_name,
-          variant2: product.variants[0].selections[1].selection_name,
-        }
+  console.log(product.variants[0]);
+  const [choosedVariant, setChoosedVariant] = useState<
+    IChoosedVariant | undefined
+  >(
+    product.variants[0].selections
+      ? product.variant_options?.length === 1
+        ? {
+            variant1: product.variants[0]?.selections[0]?.selection_name,
+          }
+        : {
+            variant1: product.variants[0]?.selections[0]?.selection_name,
+            variant2: product.variants[0]?.selections[1]?.selection_name,
+          }
+      : undefined
   );
 
   const choosedVariantHandler = () => {
     const variant = product.variants.find((v: any) => {
-      if (product.variant_options.length === 1) {
-        return v.selections[0].selection_name === choosedVariant.variant1;
+      if (product.variant_options?.length === 1) {
+        return v.selections[0]?.selection_name === choosedVariant?.variant1;
+      } else if (product.variant_options?.length === 2) {
+        return (
+          v.selections[0]?.selection_name === choosedVariant?.variant1 &&
+          v.selections[1]?.selection_name === choosedVariant?.variant2
+        );
       }
-      return (
-        v.selections[0].selection_name === choosedVariant.variant1 &&
-        v.selections[1].selection_name === choosedVariant.variant2
-      );
     });
 
-    const price = parseInt(variant.price);
+    console.log(variant);
+    console.log(product);
+    const price = parseInt(variant ? variant.price : product.variants[0].price);
     if (count >= 1) {
       setSubtotal(price * count);
     } else {
@@ -170,21 +202,15 @@ const ProductDetail = ({
         setSubtotal(0);
       }
     }
-
-    console.log("cou", count);
-    console.log("bb", subtotal);
-
-    setVarIndex(variant.variant_id);
-
-    console.log("var index", varIndex);
+    setVarIndex(variant ? variant.variant_id : product.variants[0].variant_id);
     if (currentStock < 1) {
-      setCurrentStock(variant.stock);
+      setCurrentStock(variant ? variant.stock : product.variants[0].stock);
       setCount(0);
     } else {
-      setCurrentStock(variant.stock - count);
+      setCurrentStock(
+        variant ? variant.stock - count : product.variants[0].stock - count
+      );
     }
-
-    console.log("cc", currentStock);
   };
 
   const isYouTubeVideo = (url: string) => {
@@ -201,7 +227,6 @@ const ProductDetail = ({
     if (isHovering) {
       return (
         <>
-          <p>dsddsds</p>
           <img
             width={200}
             height={200}
@@ -356,11 +381,6 @@ const ProductDetail = ({
     if (count >= 0 && count <= currentStock - 1) {
       setCount(count + 1);
     }
-    // if (currentStock > 0) {
-    //   setCurrentStock(currentStock - count);
-    // } else {
-    //   setCurrentStock(0);
-    // }
   };
 
   const dec = () => {
@@ -524,48 +544,65 @@ const ProductDetail = ({
       <div>
         <Navbar />
         <div className="mx-auto lg:max-w-7xl px-4 md:px-0 ">
-          <div className="flex-col md:flex-row justify-between md:flex gap-10 py-5 px-5 md:px-0">
+          <div className="flex-col  md:flex-row justify-between md:flex gap-10 py-5 px-5 md:px-0">
             <div className="order-1 md:order-1 imageProduct w-full md:w-1/4 rounded-md overflow-hidden flex flex-col">
               {isYouTubeVideo(variation) ? renderBigImage() : renderContent()}
 
-              <div className="variation gap-1 mt-2 flex flex-row overflow-auto whitespace-nowrap scrollbar-thin scrollbar-thumb-gray-300   [&::-webkit-scrollbar-thumb] [&::-webkit-scrollbar-track] [-ms-overflow-style:'none'] [scrollbar-width:'none']">
-                <button className="absolute my-auto bg-white p-2">&#60;</button>
-                {imagesProduct?.map((url, index) => (
-                  <div
-                    key={index}
-                    className="flex-shrink-0 cursor-pointer w-28 h-28 rounded-md mr-2 flex"
-                    onClick={() => {
-                      setVariation(url);
-                      setIsHovering(false);
-                    }}
+              <div className="relative ">
+                <div
+                  className="scroll-smooth   justify-between gap-1 mt-2 flex flex-row overflow-auto whitespace-nowrap scrollbar-thin scrollbar-thumb-gray-300   [&::-webkit-scrollbar]:hidden [&::-webkit-scrollbar-track] [-ms-overflow-style:'none'] [scrollbar-width:'none']"
+                  ref={variationRef}
+                >
+                  {imagesProduct?.map((url, index) => (
+                    <div
+                      key={index}
+                      className="flex-shrink-0 cursor-pointer w-28 h-28 rounded-md mr-2 flex"
+                      onClick={() => {
+                        setVariation(url);
+                        setIsHovering(false);
+                      }}
+                    >
+                      {isYouTubeVideo(url) ? (
+                        <>
+                          <img
+                            src={`https://img.youtube.com/vi/${getYoutubeVideoId(
+                              url
+                            )}/0.jpg`}
+                            className="w-full h-full rounded-md"
+                            alt="variation image"
+                          />
+                        </>
+                      ) : (
+                        <>
+                          <img
+                            className="cursor-pointer w-full h-full rounded-md"
+                            src={url}
+                            alt="images"
+                            onMouseOver={() => handleMouseOver(url)}
+                            onMouseOut={handleMouseOut}
+                            onClick={handleZoomImage}
+                          />
+                        </>
+                      )}
+                    </div>
+                  ))}
+                </div>
+                <div className="w-fit absolute top-0  flex justify-between items-center  h-full">
+                  <button
+                    className=" bg-neutral-500 p-2 rounded-full opacity-70 text-white font-extrabold"
+                    onClick={scrollLeft}
                   >
-                    {isYouTubeVideo(url) ? (
-                      <>
-                        <img
-                          src={`https://img.youtube.com/vi/${getYoutubeVideoId(
-                            url
-                          )}/0.jpg`}
-                          className="w-full h-full rounded-md"
-                          alt="variation image"
-                        />
-                      </>
-                    ) : (
-                      <>
-                        <img
-                          className="cursor-pointer w-full h-full rounded-md"
-                          src={url}
-                          alt="images"
-                          onMouseOver={() => handleMouseOver(url)}
-                          onMouseOut={handleMouseOut}
-                          onClick={handleZoomImage}
-                        />
-                      </>
-                    )}
-                  </div>
-                ))}
-                <button className="absolute  bg-red-500 mt-10 p-2 flex">
-                  &gt;
-                </button>
+                    &#60;
+                  </button>
+                </div>
+                <div className="w-fit absolute top-0 right-0  flex justify-between items-center  h-full">
+                  <button
+                    className="bg-neutral-500  p-2 rounded-full opacity-70 text-white font-extrabold"
+                    onClick={scrollRight}
+                  >
+                    &gt;
+                  </button>
+                </div>
               </div>
 
               <div className="favorite-icon mt-5 text-right">
@@ -591,143 +628,145 @@ const ProductDetail = ({
                 </button>
               </div>
             </div>
-            <div className="order-2 md:order-3 purchaseBox border shadow-inner rounded-sm p-5 h-fit md:w-1/4 pt-2 md:sticky md:top-0">
-              <p className="productTitle text-md font-medium pb-3">
-                Set Amounts
-              </p>
+            <div className="order-2 md:order-3 md:w-1/4 pt-3">
+              <div className="border shadow-inner rounded-sm p-5 h-fit pt-2 md:sticky md:top-0">
+                <p className="productTitle text-md font-medium pb-3">
+                  Set Amounts
+                </p>
 
-              <div className="flex gap-x-10 md:gap-1 mb-2 text-sm text-neutral-600 py-3 ">
-                <p className="">Pengiriman</p>
+                <div className="flex gap-x-10 md:gap-1 mb-2 text-sm text-neutral-600 py-3 ">
+                  <p className="">Pengiriman</p>
 
-                <div className="flex items-center gap-1">
-                  <FaLocationDot />
-                  {shopProfile?.data?.seller_district}
+                  <div className="flex items-center gap-1">
+                    <FaLocationDot />
+                    {shopProfile?.data?.seller_district}
+                  </div>
                 </div>
-              </div>
-              <div className="flex flex-col gap-y-3 text-xs text-neutral-600">
-                {product?.variant_options?.map((item: any, i: number) => {
-                  return (
-                    <div
-                      key={i}
-                      className="flex md:gap-x-20 items-start gap-10"
-                    >
-                      <p>{item.variant_option_name}</p>
-                      <div className="grid grid-cols-2 gap-2">
-                        {item.childs.map((variant: any, k: number) => {
-                          return (
-                            <p
-                              key={k}
-                              className={`px-1 py-1 justify-center items-center flex border text-center rounded-md cursor-pointer hover:bg-[#d6e4f8] hover:border hover:border-[#364968] row-span-2 w-full text-ellipsis line-clamp-2 h-10 
+                <div className="flex flex-col gap-y-3 text-xs text-neutral-600">
+                  {product?.variant_options?.map((item: any, i: number) => {
+                    return (
+                      <div
+                        key={i}
+                        className="flex md:gap-x-20 items-start gap-10"
+                      >
+                        <p>{item.variant_option_name}</p>
+                        <div className="grid grid-cols-2 gap-2">
+                          {item.childs.map((variant: any, k: number) => {
+                            return (
+                              <p
+                                key={k}
+                                className={`px-1 py-1 justify-center items-center flex border text-center rounded-md cursor-pointer hover:bg-[#d6e4f8] hover:border hover:border-[#364968] row-span-2 w-full text-ellipsis line-clamp-2 h-10 
                               ${
                                 i === 0
-                                  ? choosedVariant.variant1 === variant &&
+                                  ? choosedVariant?.variant1 === variant &&
                                     "bg-[#d6e4f8] border border-[#364968]"
-                                  : choosedVariant.variant2 === variant &&
+                                  : choosedVariant?.variant2 === variant &&
                                     "bg-[#d6e4f8] border border-[#364968]"
                               }`}
-                              onMouseEnter={
-                                i === 0
-                                  ? () => handleMouseOver(item.pictures[k])
-                                  : undefined
-                              }
-                              onClick={() => {
-                                setChoosedVariant(
+                                onMouseEnter={
                                   i === 0
-                                    ? {
-                                        ...choosedVariant,
-                                        variant1: variant,
-                                      }
-                                    : {
-                                        ...choosedVariant,
-                                        variant2: variant,
-                                      }
-                                );
-                              }}
-                            >
-                              {variant}
-                            </p>
-                          );
-                        })}
+                                    ? () => handleMouseOver(item.pictures[k])
+                                    : undefined
+                                }
+                                onClick={() => {
+                                  setChoosedVariant(
+                                    i === 0
+                                      ? {
+                                          ...choosedVariant!,
+                                          variant1: variant,
+                                        }
+                                      : {
+                                          ...choosedVariant!,
+                                          variant2: variant,
+                                        }
+                                  );
+                                }}
+                              >
+                                {variant}
+                              </p>
+                            );
+                          })}
+                        </div>
                       </div>
-                    </div>
-                  );
-                })}
-              </div>
+                    );
+                  })}
+                </div>
 
-              <div className="flex text-center items-center mt-5">
-                <div className="quantity flex border border-zinc-600">
-                  <button className="minus w-3 md:w-5" onClick={dec}>
-                    -
-                  </button>
-                  <input
-                    className="text-center w-14 md:w-20 border-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none outline-none"
-                    min={1}
-                    max={currentStock}
-                    type="number"
-                    value={count}
-                    onChange={(e: any) => {
-                      setCount(parseInt(e.target.value)), e.preventDefault();
-                      console.log("counter", count);
-                    }}
-                  />
-                  <button className="plus w-3 md:w-5" onClick={inc}>
-                    +
-                  </button>
+                <div className="flex text-center items-center mt-5">
+                  <div className="quantity flex border border-zinc-600">
+                    <button className="minus w-3 md:w-5" onClick={dec}>
+                      -
+                    </button>
+                    <input
+                      className="text-center w-16 md:w-20 border-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none outline-none"
+                      min={1}
+                      max={currentStock}
+                      type="number"
+                      value={count}
+                      onChange={(e: any) => {
+                        setCount(parseInt(e.target.value)), e.preventDefault();
+                        console.log("counter", count);
+                      }}
+                    />
+                    <button className="plus w-3 md:w-5" onClick={inc}>
+                      +
+                    </button>
+                  </div>
+                  <div className="stock text-xs text-neutral-500 py-3 pl-5 ">
+                    <p>{`Stock ${currentStock}`}</p>
+                  </div>
                 </div>
-                <div className="stock text-xs text-neutral-500 py-3 pl-5 ">
-                  <p>{`Stock ${currentStock}`}</p>
+                <div className="flex text-sm text-neutral-600 py-3 justify-between">
+                  <p className="">Subtotal</p>
+                  <p className="subTotal text-lg font-semibold text-neutral-800">
+                    {subtotal}
+                  </p>
                 </div>
-              </div>
-              <div className="flex text-sm text-neutral-600 py-3 justify-between">
-                <p className="">Subtotal</p>
-                <p className="subTotal text-lg font-semibold text-neutral-800">
-                  {subtotal}
-                </p>
-              </div>
-              <div className="btn flex gap-x-2 justify-between mt-10">
-                <div className="w-full">
+                <div className="btn flex gap-x-2 justify-between mt-10">
+                  <div className="w-full">
+                    {currentStock >= 1 ? (
+                      <button
+                        type="submit"
+                        onClick={handleToCart}
+                        className="flex items-center justify-center gap-1 h-10 border border-[#364968] hover:shadow-md bg-[#d6e4f8] p-2 w-full md:w-32 hover:bg-[#eff6fd]  transition-all duration-300"
+                      >
+                        <AiOutlineShoppingCart /> <span>Add to cart</span>
+                      </button>
+                    ) : (
+                      <button
+                        disabled
+                        type="submit"
+                        onClick={handleToCart}
+                        className="flex items-center justify-center gap-1 h-10  bg-[#d6e4f8] p-2 w-full md:w-32  transition-all duration-300"
+                      >
+                        <AiOutlineShoppingCart /> <span>Add to cart</span>
+                      </button>
+                    )}
+                  </div>
+
                   {currentStock >= 1 ? (
-                    <button
-                      type="submit"
-                      onClick={handleToCart}
-                      className="flex items-center justify-center gap-1 h-10 border border-[#364968] hover:shadow-md bg-[#d6e4f8] p-2 w-full md:w-32 hover:bg-[#eff6fd]  transition-all duration-300"
-                    >
-                      <AiOutlineShoppingCart /> <span>Add to cart</span>
-                    </button>
+                    <div onClick={handleToCart} className="w-full">
+                      <button
+                        onClick={() => router.push(`/cart`)}
+                        type="submit"
+                        className=" bg-[#364968] text-white p-2 w-full h-10 md:w-32 justify-center hover:bg-[#394e6f] hover:shadow-lg"
+                      >
+                        Buy now
+                      </button>
+                    </div>
                   ) : (
-                    <button
-                      disabled
-                      type="submit"
-                      onClick={handleToCart}
-                      className="flex items-center justify-center gap-1 h-10  bg-[#d6e4f8] p-2 w-full md:w-32  transition-all duration-300"
-                    >
-                      <AiOutlineShoppingCart /> <span>Add to cart</span>
-                    </button>
+                    <div onClick={handleToCart} className="w-full">
+                      <button
+                        disabled
+                        onClick={() => router.push(`/cart`)}
+                        type="submit"
+                        className=" bg-[#7b94bd] text-white p-2 w-full h-10 md:w-32 justify-center "
+                      >
+                        Buy now
+                      </button>
+                    </div>
                   )}
                 </div>
-
-                {currentStock >= 1 ? (
-                  <div onClick={handleToCart} className="w-full">
-                    <button
-                      onClick={() => router.push(`/cart`)}
-                      type="submit"
-                      className=" bg-[#364968] text-white p-2 w-full h-10 md:w-32 justify-center hover:bg-[#394e6f] hover:shadow-lg"
-                    >
-                      Buy now
-                    </button>
-                  </div>
-                ) : (
-                  <div onClick={handleToCart} className="w-full">
-                    <button
-                      disabled
-                      onClick={() => router.push(`/cart`)}
-                      type="submit"
-                      className=" bg-[#7b94bd] text-white p-2 w-full h-10 md:w-32 justify-center "
-                    >
-                      Buy now
-                    </button>
-                  </div>
-                )}
               </div>
             </div>
 

@@ -181,9 +181,6 @@ const CancelOrderModal = (props: ICancelOrderModal) => {
   );
 };
 
-// Update order status here - On Delivery
-// Process order here - receive or cancel. If you cancel you need to give a note
-
 const IndividualOrder = (props: IIndividualOrderProps) => {
   const processOrder = async (orderId: number) => {
     try {
@@ -464,7 +461,7 @@ const SellerOrderListPage = () => {
     });
 
   const router = useRouter();
-  const { updateUser } = useUserStore();
+  const { user, updateUser } = useUserStore();
 
   const getOrderData = async () => {
     try {
@@ -507,6 +504,12 @@ const SellerOrderListPage = () => {
       }
     }
   };
+
+  useEffect(() => {
+    if (user !== undefined && !user.is_seller) {
+      router.push("/myshop");
+    }
+  }, [user]);
 
   useEffect(() => {
     getOrderData();

@@ -132,9 +132,9 @@ const UserProfile = ({
                 <img
                   src={`${
                     imageFile === null
-                      ? "/vm2/images/defaultuser.png"
+                      ? "/images/defaultuser.png"
                       : imageFile === undefined
-                      ? "/vm2/images/defaultuser.png"
+                      ? "/images/defaultuser.png"
                       : URL.createObjectURL(imageFile)
                   }`}
                   alt="Nothing"
@@ -316,8 +316,12 @@ export const getServerSideProps = async (
   let auth = await checkAuthSSR(context);
 
   if (auth === null) {
-    context.res.writeHead(301, { location: "/login" });
-    context.res.end();
+    return {
+      redirect: {
+        permanent: false,
+        destination: "/login",
+      },
+    };
   }
 
   try {
@@ -331,6 +335,12 @@ export const getServerSideProps = async (
   } catch (e) {
     if (axios.isAxiosError(e)) {
       console.log(e.response?.data);
+      return {
+        redirect: {
+          permanent: false,
+          destination: "/",
+        },
+      };
     }
   }
 

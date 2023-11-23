@@ -142,31 +142,32 @@ function Index() {
       <Navbar />
       <ToastContainer />
       <div className="mx-auto lg:max-w-7xl md:items-center px-4 md:px-0">
-        <div>
-          <p className="text-xl md:text-3xl font-bold mt-10">Wishlist</p>
-        </div>
-        <div className="flex justify-end mt-10 items-center gap-x-5">
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              searchQueryHandler();
-            }}
-          >
-            <input
-              type="text"
-              placeholder="Search in wishlist"
-              className="rounded-md w-full md:w-80"
-              onChange={handleQueryChange}
-              value={query}
-              onBlur={searchQueryHandler}
-            />
-          </form>
+        <div className="flex justify-between mt-10 mb-24">
+          <p className="text-xl md:text-3xl font-bold">Wishlist</p>
+
+          <div className="flex justify-end  items-center gap-x-5">
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                searchQueryHandler();
+              }}
+            >
+              <input
+                type="text"
+                placeholder="Search in wishlist"
+                className="rounded-md w-full md:w-80"
+                onChange={handleQueryChange}
+                value={query}
+                onBlur={searchQueryHandler}
+              />
+            </form>
+          </div>
         </div>
         {wishlistIsEmpty() ? (
           <div className="text-center my-3">
             <img
               alt="cart pic"
-              src={"/vm2/images/emptycart.png"}
+              src={"/images/emptycart.png"}
               className="w-80 h-80 object-cover py-3 mx-auto"
             />
             <p className="text-lg font-semibold text-center py-2 text-neutral-500">
@@ -182,7 +183,7 @@ function Index() {
           <>
             <div className="gap-x-4 gap-y-1 grid grid-cols-2 md:grid-cols-6 mt-10">
               {wishlist?.data?.map((product, i) => (
-                <div key={i} className="rounded-md flex">
+                <div key={i} className="rounded-md flex group">
                   <div className="relative">
                     <ProductCard
                       image={product.picture_url}
@@ -198,7 +199,7 @@ function Index() {
                       }
                     />
                   </div>
-                  <div className="absolute text-red-600 p-2 cursor-pointer">
+                  <div className="absolute group-hover:scale-95 text-red-600 p-2 hover:shadow-none cursor-pointer rounded-md transition-all duration-500 ease-in-out">
                     <FaTrash
                       size={20}
                       onClick={() => handleDelete(product.id)}

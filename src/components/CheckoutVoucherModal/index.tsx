@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import { FaTicketAlt } from "react-icons/fa";
 import Button from "../Button";
 import { AiFillCloseSquare } from "react-icons/ai";
+import { ICheckoutPromotions } from "@/interfaces/seller_interface";
+import { currencyConverter } from "@/utils/utils";
 
 interface IVoucherProps {
   id: number;
@@ -14,6 +16,7 @@ interface IVoucherProps {
 interface IVoucherModalProps {
   updateVoucher: (id: number) => void;
   selectedVoucher: number;
+  voucherData: ICheckoutPromotions[];
   submitVoucherFunction: () => void;
 }
 
@@ -38,7 +41,7 @@ const IndividualVoucher = (props: IVoucherProps) => {
       </div>
       <div>
         <h1 className="md:text-[18px] text-[14px]">{props.name}</h1>
-        <h1 className="md:text-[18px] text-[12px]">{props.description}</h1>
+        <h1 className="md:text-[14px] text-[12px]">{props.description}</h1>
       </div>
     </div>
   );
@@ -53,33 +56,9 @@ const CheckoutVoucherModal = (props: IVoucherModalProps) => {
     setSelectedVoucher(id);
   };
 
-  const [voucherData, setVoucherData] = useState([
-    {
-      id: 1,
-      name: "Free Shipping",
-      description: "Minimum spending Rp 100000",
-    },
-    {
-      id: 2,
-      name: "15% Shipping Discount",
-      description: "Minimum spending Rp 50000",
-    },
-    {
-      id: 3,
-      name: "10% Price Discount",
-      description: "Minimum spending Rp 200000",
-    },
-    {
-      id: 4,
-      name: "Free Purchase",
-      description: "Minimum spending Rp 10000000",
-    },
-    {
-      id: 5,
-      name: "50% Shipping Discount",
-      description: "Minimum spending Rp 500000",
-    },
-  ]);
+  const [voucherData, setVoucherData] = useState<ICheckoutPromotions[]>(
+    props.voucherData
+  );
 
   return (
     <div className="bg-white p-5 rounded-md  md:w-[500px] h-[600px] w-[99%]">
@@ -92,7 +71,11 @@ const CheckoutVoucherModal = (props: IVoucherModalProps) => {
             key={index}
             id={data.id}
             name={data.name}
-            description={data.description}
+            description={`Mininum purchase ${currencyConverter(
+              parseInt(data.min_purchase_amount)
+            )}, Maximum purchase ${currencyConverter(
+              parseInt(data.max_purchase_amount)
+            )}`}
             currentSelectedVoucher={selectedVoucher}
             selectVoucher={changeSelectedVoucherLocal}
           />
