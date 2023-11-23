@@ -398,13 +398,14 @@ const CartPage = () => {
     const token = getCookie("accessToken");
     try {
       const res = await API.get("/accounts/carts");
+      setCartData(res.data.data.cart_shops);
 
-      if (cartStore.cart !== undefined) {
-        setCartData(cartStore.cart);
-        getTotal(cartStore.cart);
-      } else {
-        setCartData(res.data.data.cart_shops);
-      }
+      // if (cartStore.cart !== undefined) {
+      //   setCartData(cartStore.cart);
+      //   getTotal(cartStore.cart);
+      // } else {
+      //   setCartData(res.data.data.cart_shops);
+      // }
     } catch (e) {
       if (axios.isAxiosError(e)) {
         if (e.response?.status === 401) {

@@ -63,12 +63,6 @@ interface IOrderDetailModalProps {
   promoId: number;
 }
 
-interface ISelectedProducts {
-  product_id: number;
-  product_name: string;
-  created_at: string;
-}
-
 interface IPromoDetails {
   id: number;
   name: string;
