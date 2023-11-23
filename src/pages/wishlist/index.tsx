@@ -45,6 +45,18 @@ function Index() {
   const wishlistIsEmpty = () => {
     return !wishlist || !wishlist.data || wishlist.data.length === 0;
   };
+  const [value, setValue] = useState("");
+  const onChange = (e: React.ChangeEvent<HTMLInputElement>) =>
+    setValue(e.target.value);
+
+  const [debouncedValue, setDebouncedValue] = useState(value);
+  const delay = 500;
+
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedValue(value), delay || 500);
+
+    return () => clearTimeout(timer);
+  }, [value, delay]);
 
   const searchQueryHandler = async () => {
     try {
@@ -52,7 +64,7 @@ function Index() {
       router.push({
         pathname: "/wishlist",
         query: {
-          ...(query.trim() !== "" ? { s: query } : {}),
+          ...(debouncedValue.trim() !== "" ? { s: debouncedValue } : {}),
           page: 1,
         },
       });
@@ -60,6 +72,21 @@ function Index() {
       console.error("Error during search:", error);
     }
   };
+
+  // const searchQueryHandler = async () => {
+  //   try {
+  //     await getWishlist();
+  //     router.push({
+  //       pathname: "/wishlist",
+  //       query: {
+  //         ...(query.trim() !== "" ? { s: query } : {}),
+  //         page: 1,
+  //       },
+  //     });
+  //   } catch (error) {
+  //     console.error("Error during search:", error);
+  //   }
+  // };
 
   const handleQueryChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newQuery = e.target.value;
@@ -135,8 +162,8 @@ function Index() {
       <Navbar />
       <ToastContainer />
       <div className="mx-auto lg:max-w-7xl md:items-center px-4 md:px-0">
-        <div className="flex justify-between mt-10 mb-24">
-          <p className="text-xl md:text-3xl font-bold">Wishlist</p>
+        <div className="flex gap-x-5 md:justify-between mt-10 mb-24 items-center">
+          <p className="text-xl md:text-3xl font-bold items-center">Wishlist</p>
 
           <div className="flex justify-end  items-center gap-x-5">
             <form
