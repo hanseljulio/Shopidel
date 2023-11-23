@@ -42,23 +42,6 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import YouTube from "react-youtube";
 
-interface IVariantSelection {
-  selection_variant_name: string;
-  selection_name: string;
-}
-
-interface IVariant {
-  variant_id: string;
-  price: string;
-  stock: number;
-  selections: IVariantSelection[];
-}
-
-interface IProduct {
-  variants: IVariant[];
-  variant_options: any[];
-}
-
 interface IChoosedVariant {
   variant1: string;
   variant2?: string;
@@ -73,7 +56,8 @@ export const getServerSideProps: GetServerSideProps = async (
 
   try {
     const response = await API.get(`/products/detail/${shop}/${productDetail}`);
-    const product = response.data.data;
+    const product = (response.data as IAPIResponse<IAPIProductDetailResponse>)
+      .data;
 
     const responseSeller = await API.get(`/sellers/${shop}/profile`);
     const seller = responseSeller.data.data;
@@ -138,8 +122,6 @@ const ProductDetail = ({
   useEffect(() => {
     if (variationRef.current) {
       const { scrollLeft, scrollWidth, clientWidth } = variationRef.current;
-      setIsLeftButtonDisabled(scrollLeft === 0);
-      setIsRightButtonDisabled(scrollLeft + clientWidth === scrollWidth);
       if (scrollLeft === 0) {
       } else {
       }
@@ -162,7 +144,6 @@ const ProductDetail = ({
     IAPIResponse<IAPIProfileShopResponse> | undefined
   >();
 
-  console.log(product.variants[0]);
   const [choosedVariant, setChoosedVariant] = useState<
     IChoosedVariant | undefined
   >(
@@ -404,10 +385,8 @@ const ProductDetail = ({
 
         if (response.status === 200) {
           toast.success("Added to cart", { autoClose: 1500 });
-          console.log("yes", response.data);
         } else {
           toast.error("Failed to add to cart", { autoClose: 1500 });
-          console.log("no", response.data);
         }
       } catch (error) {
         if (axios.isAxiosError(error)) {
@@ -450,7 +429,6 @@ const ProductDetail = ({
           autoClose: 1500,
         });
       }
-      console.log("salah");
     }
   };
 
@@ -587,21 +565,19 @@ const ProductDetail = ({
                     </div>
                   ))}
                 </div>
-                <div className="w-fit absolute top-0  flex justify-between items-center  h-full">
-                  <button
-                    className=" bg-neutral-500 p-2 rounded-full opacity-70 text-white font-extrabold"
+                <div className="w-fit absolute top-0 flex justify-between items-center h-full">
+                  <Button
+                    styling=" bg-neutral-500 p-2 opacity-70 text-white font-extrabold hover:bg-neutral-300"
                     onClick={scrollLeft}
-                  >
-                    &#60;
-                  </button>
+                    text="&#60;"
+                  />
                 </div>
-                <div className="w-fit absolute top-0 right-0  flex justify-between items-center  h-full">
-                  <button
-                    className="bg-neutral-500  p-2 rounded-full opacity-70 text-white font-extrabold"
+                <div className="w-fit absolute top-0 right-0  flex justify-between items-center h-full ">
+                  <Button
+                    styling="bg-neutral-500  p-2 opacity-70 text-white font-extrabold hover:bg-neutral-300"
                     onClick={scrollRight}
-                  >
-                    &gt;
-                  </button>
+                    text="&gt;"
+                  />
                 </div>
               </div>
 
@@ -694,9 +670,7 @@ const ProductDetail = ({
 
                 <div className="flex text-center items-center mt-5">
                   <div className="quantity flex border border-zinc-600">
-                    <button className="minus w-3 md:w-5" onClick={dec}>
-                      -
-                    </button>
+                    <Button styling="minus w-3 md:w-5" onClick={dec} text="-" />
                     <input
                       className="text-center w-16 md:w-20 border-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none outline-none"
                       min={1}
@@ -708,9 +682,7 @@ const ProductDetail = ({
                         console.log("counter", count);
                       }}
                     />
-                    <button className="plus w-3 md:w-5" onClick={inc}>
-                      +
-                    </button>
+                    <Button styling="plus w-3 md:w-5" onClick={inc} text="+" />
                   </div>
                   <div className="stock text-xs text-neutral-500 py-3 pl-5 ">
                     <p>{`Stock ${currentStock}`}</p>
@@ -746,24 +718,20 @@ const ProductDetail = ({
 
                   {currentStock >= 1 ? (
                     <div onClick={handleToCart} className="w-full">
-                      <button
+                      <Button
                         onClick={() => router.push(`/cart`)}
-                        type="submit"
-                        className=" bg-[#364968] text-white p-2 w-full h-10 md:w-32 justify-center hover:bg-[#394e6f] hover:shadow-lg"
-                      >
-                        Buy now
-                      </button>
+                        styling=" bg-[#364968] text-white p-2 w-full h-10 md:w-32 justify-center hover:bg-[#394e6f] hover:shadow-lg"
+                        text="Buy now"
+                      />
                     </div>
                   ) : (
                     <div onClick={handleToCart} className="w-full">
-                      <button
+                      <Button
                         disabled
                         onClick={() => router.push(`/cart`)}
-                        type="submit"
-                        className=" bg-[#7b94bd] text-white p-2 w-full h-10 md:w-32 justify-center "
-                      >
-                        Buy now
-                      </button>
+                        styling="bg-[#7b94bd] text-white p-2 w-full h-10 md:w-32 justify-center"
+                        text="Buy now"
+                      />
                     </div>
                   )}
                 </div>
@@ -824,7 +792,6 @@ const ProductDetail = ({
                       </button>
                     </p>
                   </div>
-
                   <table className="aboutSeller w-full  md:w-full text-sm md:text-base  self-center ">
                     <thead></thead>
                     <tbody>
