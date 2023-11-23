@@ -18,10 +18,6 @@ import { IAPIResponse } from "@/interfaces/api_interface";
 import { SubmitHandler, useForm } from "react-hook-form";
 import Pagination from "@/components/Pagination";
 
-interface IDeletePromoModal {
-  closeFunction: () => void;
-  submitFunction: () => void;
-}
 interface ISellerProductSelect {
   id: number;
   name: string;
@@ -30,6 +26,11 @@ interface ISellerProductSelect {
   updated_at: string;
   deleted_at: string;
   isChecked: boolean;
+}
+
+interface IDeletePromoModal {
+  closeFunction: () => void;
+  submitFunction: () => void;
 }
 
 const DeletePromoModal = (props: IDeletePromoModal) => {
@@ -224,8 +225,6 @@ const EditPromo = (props: IEditPromoProps) => {
       max_purchase_amount: data.max_purchase_amount,
       discount_amount: data.discount_amount,
     };
-
-    console.log(sendData);
 
     try {
       toast.promise(

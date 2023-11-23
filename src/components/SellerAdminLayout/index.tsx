@@ -3,6 +3,7 @@ import Navbar from "../Navbar";
 import { FaTag, FaDollyFlatbed, FaBox } from "react-icons/fa";
 import { useRouter } from "next/router";
 import Button from "../Button";
+import { BiSolidCategory } from "react-icons/bi";
 
 interface IProfileLayout {
   children: ReactNode;
@@ -76,6 +77,15 @@ const SellerAdminSidebar = () => {
           >
             <FaTag />
             Promotions
+          </h1>
+        </div>
+        <div className="pl-[26px] border-slate-300 border-b-2 pb-[20px]">
+          <h1
+            onClick={() => router.push("/myshop/showcase")}
+            className="text-[20px] flex items-center gap-4 mt-[20px] hover:cursor-pointer transition w-[200px] hover:text-[#92bcff]"
+          >
+            <BiSolidCategory />
+            Showcase
           </h1>
         </div>
       </div>
