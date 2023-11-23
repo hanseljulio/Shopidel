@@ -152,18 +152,16 @@ const Navbar = () => {
                   </>
                 ) : (
                   <>
-                    <Link
-                      href="javascript:void(0)"
-                      className="inline-block w-full px-3 py-1 text-center text-[#6c4343] bg-[#fddf97] rounded-md shadow hover:bg-gray-800"
-                    >
-                      Sign in
-                    </Link>
-                    <Link
-                      href="javascript:void(0)"
-                      className="inline-block w-full px-3 py-1 text-center text-[#364968] bg-white rounded-md shadow hover:bg-gray-100"
-                    >
-                      Sign up
-                    </Link>
+                    <Button
+                      text="Sign in"
+                      styling="inline-block w-full px-3 py-1 text-center text-[#6c4343] bg-[#fddf97] rounded-md shadow hover:bg-gray-800"
+                      onClick={() => router.push("/login")}
+                    />
+                    <Button
+                      text="Sign up"
+                      styling="inline-block w-full px-3 py-1 text-center text-[#364968] bg-white rounded-md shadow hover:bg-gray-100"
+                      onClick={() => router.push("/register")}
+                    />
                   </>
                 )}
               </div>
