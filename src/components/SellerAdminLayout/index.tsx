@@ -46,6 +46,7 @@ const MobileSellerAdminSidebar = (props: MobileSellerAdminSidebarProps) => {
         />
         <Button
           text="Settings"
+          onClick={() => router.push("/myshop/settings")}
           styling="bg-blue-100 py-[12px] rounded-full w-[350px] px-8 hover:bg-blue-300 my-4"
           disabled={props.currentPage === "Settings"}
         />
