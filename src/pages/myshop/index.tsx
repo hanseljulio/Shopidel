@@ -395,7 +395,7 @@ export const getServerSideProps = async (
       return {
         redirect: {
           permanent: false,
-          destination: "/login",
+          destination: "/?force_logout=true",
         },
       };
     }
