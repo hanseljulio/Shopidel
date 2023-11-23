@@ -204,6 +204,10 @@ const ProductDetail = ({
     choosedVariantHandler();
   }, [choosedVariant, count]);
 
+  useEffect(() => {
+    setChoosedVariant(undefined);
+  }, [product]);
+
   const renderContent = () => {
     if (isHovering) {
       return (
@@ -606,66 +610,25 @@ const ProductDetail = ({
             </div>
             <div className="order-2 md:order-3 md:w-1/4 pt-3">
               <div className="border shadow-inner rounded-sm p-5 h-fit pt-2 md:sticky md:top-0">
-                <p className="productTitle text-md font-medium pb-3">
+                <p className="productTitle text-base font-semibold pb-3">
                   Set Amounts
                 </p>
+                <p className="text-sm mb-5">
+                  {choosedVariant?.variant1 !== undefined
+                    ? ` ${choosedVariant?.variant1}`
+                    : ""}
+                  {choosedVariant?.variant2 !== undefined
+                    ? ` - ${choosedVariant?.variant2}`
+                    : ""}
+                </p>
 
-                <div className="flex gap-x-10 md:gap-1 mb-2 text-sm text-neutral-600 py-3 ">
+                <div className="flex justify-between md:gap-1 mb-2 text-sm text-neutral-600 py-3 ">
                   <p className="">Pengiriman</p>
 
                   <div className="flex items-center gap-1">
                     <FaLocationDot />
                     {shopProfile?.data?.seller_district}
                   </div>
-                </div>
-                <div className="flex flex-col gap-y-3 text-xs text-neutral-600">
-                  {product?.variant_options?.map((item: any, i: number) => {
-                    return (
-                      <div
-                        key={i}
-                        className="flex md:gap-x-20 items-start gap-10"
-                      >
-                        <p>{item.variant_option_name}</p>
-                        <div className="grid grid-cols-2 gap-2">
-                          {item.childs.map((variant: any, k: number) => {
-                            return (
-                              <p
-                                key={k}
-                                className={`px-1 py-1 justify-center items-center flex border text-center rounded-md cursor-pointer hover:bg-[#d6e4f8] hover:border hover:border-[#364968] row-span-2 w-full text-ellipsis line-clamp-2 h-10 
-                              ${
-                                i === 0
-                                  ? choosedVariant?.variant1 === variant &&
-                                    "bg-[#d6e4f8] border border-[#364968]"
-                                  : choosedVariant?.variant2 === variant &&
-                                    "bg-[#d6e4f8] border border-[#364968]"
-                              }`}
-                                onMouseEnter={
-                                  i === 0
-                                    ? () => handleMouseOver(item.pictures[k])
-                                    : undefined
-                                }
-                                onClick={() => {
-                                  setChoosedVariant(
-                                    i === 0
-                                      ? {
-                                          ...choosedVariant!,
-                                          variant1: variant,
-                                        }
-                                      : {
-                                          ...choosedVariant!,
-                                          variant2: variant,
-                                        }
-                                  );
-                                }}
-                              >
-                                {variant}
-                              </p>
-                            );
-                          })}
-                        </div>
-                      </div>
-                    );
-                  })}
                 </div>
 
                 <div className="flex text-center items-center mt-5">
@@ -742,6 +705,12 @@ const ProductDetail = ({
               <div className="spesification">
                 <p className="productTitle text-2xl md:text-3xl font-medium pb-3">
                   {product?.name}
+                  {choosedVariant?.variant1 !== undefined
+                    ? ` - ${choosedVariant?.variant1}`
+                    : ""}
+                  {choosedVariant?.variant2 !== undefined
+                    ? ` - ${choosedVariant?.variant2}`
+                    : ""}
                 </p>
                 <div className="historyProduct flex items-center text-xs pb-3">
                   <p className="pr-3">{`Sold ${product?.sold}`} </p>
@@ -755,6 +724,54 @@ const ProductDetail = ({
                     parseInt(product?.variants?.[0]?.price ?? 0)
                   )}
                 </p>
+              </div>
+              <div className="flex flex-col gap-y-3 text-xs text-neutral-600 w-full mt-5">
+                {product?.variant_options?.map((item: any, i: number) => {
+                  return (
+                    <div key={i} className="md:gap-x-20 items-start gap-10">
+                      <p className="text-sm md:text-base text-neutral-700 font-medium">
+                        {item.variant_option_name}
+                      </p>
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:justify-between w-full my-5 ">
+                        {item.childs.map((variant: any, k: number) => {
+                          return (
+                            <p
+                              key={k}
+                              className={`px-1 py-1 justify-center items-center flex border text-center rounded-md cursor-pointer hover:bg-[#d6e4f8] hover:border hover:border-[#364968] row-span-2 w-full text-ellipsis line-clamp-2 h-10 
+                              ${
+                                i === 0
+                                  ? choosedVariant?.variant1 === variant &&
+                                    "bg-[#d6e4f8] border border-[#364968]"
+                                  : choosedVariant?.variant2 === variant &&
+                                    "bg-[#d6e4f8] border border-[#364968]"
+                              }`}
+                              onMouseEnter={
+                                i === 0
+                                  ? () => handleMouseOver(item.pictures[k])
+                                  : undefined
+                              }
+                              onClick={() => {
+                                setChoosedVariant(
+                                  i === 0
+                                    ? {
+                                        ...choosedVariant!,
+                                        variant1: variant,
+                                      }
+                                    : {
+                                        ...choosedVariant!,
+                                        variant2: variant,
+                                      }
+                                );
+                              }}
+                            >
+                              {variant}
+                            </p>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
               <div className="desc pt-5 ">
                 <p className="text-lg font-medium border-b my-4">Description</p>
