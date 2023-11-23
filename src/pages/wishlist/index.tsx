@@ -1,7 +1,10 @@
 import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar";
 import ProductCard from "@/components/ProductCard";
-import { IAPIResponse } from "@/interfaces/api_interface";
+import {
+  IAPIProductDetailResponse,
+  IAPIResponse,
+} from "@/interfaces/api_interface";
 import { API } from "@/network";
 import { clientUnauthorizeHandler } from "@/utils/utils";
 import axios from "axios";
@@ -14,6 +17,7 @@ import Pagination from "@/components/Pagination";
 import { FaTrash } from "react-icons/fa";
 import { getCookie } from "cookies-next";
 import "react-toastify/dist/ReactToastify.css";
+import { SubmitHandler } from "react-hook-form";
 
 export interface IWishlist {
   id: number;
@@ -32,8 +36,7 @@ function Index() {
   const { updateUser } = useUserStore();
   const router = useRouter();
   const [wishlist, setWishlist] = useState<IAPIResponse<IWishlist[]>>();
-  const [paginationNumber, setPaginationNumber] = useState<number[]>([]);
-
+  const [isFavorite, setIsFavorite] = useState(false);
   const [page, setPage] = useState<number>(1);
   const [query, setQuery] = useState<string>(
     router.query.s !== undefined ? router.query.s.toString() : ""
@@ -68,7 +71,7 @@ function Index() {
 
   const getWishlist = async () => {
     try {
-      const res = await API.get(`/products/favorites`, {
+      const res = await API.get(`/products/favorites?${page}`, {
         params: {
           s: query,
           page: page,
@@ -78,17 +81,6 @@ function Index() {
       const data = res.data as IAPIResponse<IWishlist[]>;
       setWishlist(data);
       console.log("dd", data.data);
-
-      if (data.pagination?.total_page! <= 5) {
-        return setPaginationNumber(
-          Array.from(Array(data.pagination?.total_page).keys())
-        );
-      }
-
-      if (paginationNumber.length === 0) {
-        return setPaginationNumber(Array.from(Array(5).keys()));
-      }
-      console.log("betul");
     } catch (e) {
       if (axios.isAxiosError(e)) {
         if (e.response?.status === 401) {
@@ -105,32 +97,33 @@ function Index() {
   useEffect(() => {
     getWishlist();
   }, []);
-  const handleDelete = async (productId: number) => {
+
+  const handleDeleteWishlist = async (id: number) => {
+    let favData: Pick<IAPIProductDetailResponse, "id"> = {
+      id: id,
+    };
     try {
-      const response = await API.delete(`/products/favorites/${productId}`, {
-        headers: {
-          Authorization: `Bearer ${getCookie("accessToken")}`,
-        },
-      });
+      const response = await API.post(
+        `/products/${id}/favorites/add-favorite`,
+        favData,
+        {
+          headers: {
+            Authorization: `Bearer ${getCookie("accessToken")}`,
+          },
+        }
+      );
 
       if (response.status === 200) {
-        toast.success("Product removed from wishlist", { autoClose: 1500 });
+        toast.success("Remove from wishlist", { autoClose: 1500 });
         getWishlist();
       } else {
-        toast.error("Failed to remove product from wishlist", {
-          autoClose: 1500,
-        });
+        toast.error("Failed remove from wishlist", { autoClose: 1500 });
       }
     } catch (error) {
       if (axios.isAxiosError(error)) {
-        if (error.response?.status === 401) {
-          return clientUnauthorizeHandler(router, updateUser);
-        }
-        toast.error(error.response?.data.message || "Error deleting product", {
-          autoClose: 1500,
-        });
+        toast.error(error.response?.data.message, { autoClose: 1500 });
       } else {
-        toast.error("An error occurred while deleting the product", {
+        toast.error("An error occurred while adding to wishlist", {
           autoClose: 1500,
         });
       }
@@ -202,7 +195,7 @@ function Index() {
                   <div className="absolute group-hover:scale-95 text-red-600 p-2 hover:shadow-none cursor-pointer rounded-md transition-all duration-500 ease-in-out">
                     <FaTrash
                       size={20}
-                      onClick={() => handleDelete(product.id)}
+                      onClick={() => handleDeleteWishlist(product.product_id)}
                     />
                   </div>
                 </div>
