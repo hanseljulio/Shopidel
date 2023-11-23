@@ -8,7 +8,7 @@ interface ICategoryProps {
 }
 function Category({ src, alt, text, onClick }: ICategoryProps) {
   return (
-    <div onClick={onClick}>
+    <div onClick={onClick} className="hover:opacity-80  h-32  cursor-pointer">
       <img
         src={src}
         alt={alt}

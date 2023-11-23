@@ -546,7 +546,7 @@ const Search = () => {
               <>
                 <div className="flex flex-col items-center mt-10">
                   <div>
-                    <img src="./images/not_found.png" alt="not_found" />
+                    <img src="/images/not_found.png" alt="not_found" />
                   </div>
                   <h1 className="text-xl">Oops, Product not found</h1>
                   <p>Try another keyword</p>
@@ -558,7 +558,9 @@ const Search = () => {
                   return (
                     <ProductCard
                       onClick={() =>
-                        router.push(`/${product.shop_name}/${product.name}`)
+                        router.push(
+                          `/${product.shop_name_slug}/${product.product_name_slug}`
+                        )
                       }
                       key={i}
                       showStar={true}

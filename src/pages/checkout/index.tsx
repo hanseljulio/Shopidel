@@ -248,6 +248,7 @@ const CheckoutPage = () => {
   const [selectedAddress, setSelectedAddress] = useState<number>(0);
   const [currentAddress, setCurrentAddress] = useState<string>("");
   const [addressData, setAddressData] = useState<IAddress[]>([]);
+  const [promotions, setPromotions] = useState([]);
   const [defaultAddressId, setDefaultAddressId] = useState<number>(0);
   const [sellerId, setSellerId] = useState<number>(0);
 
@@ -257,11 +258,11 @@ const CheckoutPage = () => {
   const [orderTotal, setOrderTotal] = useState<number>(0);
   const [shippingTotal, setShippingTotal] = useState<number>(0);
   const [shippingOption, setShippingOption] = useState<string>("");
-  const [voucherTotal, setVoucherTotal] = useState<number>(50000);
+  const [voucherTotal, setVoucherTotal] = useState<number>(0);
   const [walletMoney, setWalletMoney] = useState<number>(0);
   const [additionalNotes, setAdditionalNotes] = useState<string>("");
   const [courierId, setCourierId] = useState<number>(0);
-  const [marketplaceDiscount, setMarketplaceDiscount] = useState<number>(1000);
+  const [marketplaceDiscount, setMarketplaceDiscount] = useState<number>(0);
 
   const [showNoAddress, setShowNoAddress] = useState<boolean>(false);
   const [showNoWallet, setShowNoWallet] = useState<boolean>(false);
@@ -288,21 +289,39 @@ const CheckoutPage = () => {
     setCurrentAddress(newAddress);
   };
 
-  const getCheckoutData = () => {
+  const getCheckoutData = async () => {
     if (cartStore.cart === undefined || cartStore.cart.length === 0) {
       router.replace("/");
       return;
     }
 
     let total = 0;
+    let currentSellerId = 0;
     for (let i = 0; i < cartStore.cart!.length; i++) {
       for (let j = 0; j < cartStore.cart![i].cart_items.length; j++) {
         if (cartStore.cart![i].cart_items[j].isChecked) {
-          setSellerId(cartStore.cart![i].shop_id);
+          currentSellerId = cartStore.cart![i].shop_id;
+          setSellerId(currentSellerId);
           total +=
             parseInt(cartStore.cart![i].cart_items[j].product_unit_price) *
             cartStore.cart![i].cart_items[j].product_quantity;
         }
+      }
+    }
+
+    try {
+      const response = await API.get(
+        `orders/shop-promotions/${currentSellerId}`
+      );
+      setPromotions(response.data.data);
+    } catch (e) {
+      if (axios.isAxiosError(e)) {
+        if (e.response?.status === 401) {
+          return clientUnauthorizeHandler(router, userStore.updateUser);
+        }
+        return toast.error(e.message, {
+          autoClose: 1500,
+        });
       }
     }
 
@@ -316,7 +335,7 @@ const CheckoutPage = () => {
     try {
       const response = await API.get("/accounts/address");
 
-      if (response.data.data === 0) {
+      if (response.data.data.length === 0) {
         setShowNoAddress(true);
         return;
       }
@@ -497,6 +516,7 @@ const CheckoutPage = () => {
             <CheckoutVoucherModal
               updateVoucher={changeSelectedVoucher}
               selectedVoucher={selectedVoucher}
+              voucherData={promotions}
               submitVoucherFunction={useVoucher}
             />
           }
@@ -578,6 +598,7 @@ const CheckoutPage = () => {
                                 quantity={item.product_quantity}
                                 price={parseInt(item.product_unit_price)}
                                 productName={item.product_name}
+                                productImage={item.product_image_url}
                               />
                             );
                           }
@@ -607,6 +628,7 @@ const CheckoutPage = () => {
                                 quantity={item.product_quantity}
                                 price={parseInt(item.product_unit_price)}
                                 productName={item.product_name}
+                                productImage={item.product_image_url}
                               />
                             );
                           }

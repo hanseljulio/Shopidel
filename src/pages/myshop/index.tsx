@@ -4,14 +4,15 @@ import Navbar from "@/components/Navbar";
 import {
   IAPIResponse,
   IAPIUserProfileResponse,
+  IAPIWalletResponse,
 } from "@/interfaces/api_interface";
 import { ICourier } from "@/interfaces/courier_interface";
 import { IAddress } from "@/interfaces/user_interface";
 import { API } from "@/network";
 import { useUserStore } from "@/store/userStore";
-import { clientUnauthorizeHandler } from "@/utils/utils";
+import { checkAuthSSR, clientUnauthorizeHandler } from "@/utils/utils";
 import axios from "axios";
-import { deleteCookie, getCookie } from "cookies-next";
+import { GetServerSidePropsContext } from "next";
 import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
@@ -42,10 +43,12 @@ const RegisterShop = () => {
     },
   });
   const { user, updateUser } = useUserStore();
+
   const router = useRouter();
   const [logged, setLogged] = useState<IAPIUserProfileResponse>();
   const [listAddress, setListAddress] = useState<IAddress[]>();
   const [listCourier, setListCourier] = useState<ICourier[]>();
+  const [walletDetail, setWalletDetail] = useState<IAPIWalletResponse>();
   const [isDropdownCourier, setIsDropdownCourier] = useState<boolean>(false);
   const [selectedCourier, setSelectedCourier] = useState<number[]>([]);
 
@@ -125,8 +128,43 @@ const RegisterShop = () => {
     }
   };
 
+  const getWalletDetail = async () => {
+    try {
+      const res = await API.get("/accounts/wallets");
+      let data = (res.data as IAPIResponse<IAPIWalletResponse>).data;
+      setWalletDetail(data);
+    } catch (e) {
+      if (axios.isAxiosError(e)) {
+        if (e.response?.status === 401) {
+          return clientUnauthorizeHandler(router, updateUser);
+        }
+        return toast.error("Error fetching wallet", {
+          toastId: "errorWallet",
+          autoClose: 1500,
+        });
+      }
+    }
+  };
+
+  useEffect(() => {
+    toast.onChange((data) => {
+      if (data.status === "removed" && data.type === "success") {
+        updateUser({
+          ...user!,
+          is_seller: true,
+        });
+        router.push("/myshop/products", {
+          query: {
+            page: 1,
+          },
+        });
+      }
+    });
+  }, []);
+
   useEffect(() => {
     getListAddress();
+    getWalletDetail();
     getListCourier();
     setLogged(user);
   }, []);
@@ -134,13 +172,10 @@ const RegisterShop = () => {
   return (
     <>
       <Navbar />
-
       <div className="flex h-screen justify-center items-center">
-        {listAddress?.length === 0 ? (
+        {listAddress?.length === 0 || walletDetail?.isActive === false ? (
           <div>
-            <h1 className="text-xl">
-              Please complete your profile and address first
-            </h1>
+            <h1 className="text-xl">Please setup your address and wallet</h1>
             <div className="mt-3">
               <Button
                 text="Go to Profile"
@@ -322,3 +357,51 @@ const RegisterShop = () => {
 };
 
 export default MyShop;
+
+export const getServerSideProps = async (
+  context: GetServerSidePropsContext
+) => {
+  let auth = await checkAuthSSR(context);
+
+  if (auth === null) {
+    return {
+      redirect: {
+        permanent: false,
+        destination: "/login",
+      },
+    };
+  }
+
+  try {
+    const res = await API.get("/accounts/profile", {
+      headers: {
+        Authorization: `Bearer ${auth?.access_token}`,
+      },
+    });
+    const user = (res.data as IAPIResponse<IAPIUserProfileResponse>).data;
+
+    if (user!.is_seller) {
+      console.log("test");
+      return {
+        redirect: {
+          permanent: false,
+          destination: "/myshop/products?page=1",
+        },
+        props: {},
+      };
+    }
+  } catch (e) {
+    if (axios.isAxiosError(e)) {
+      return {
+        redirect: {
+          permanent: false,
+          destination: "/login",
+        },
+      };
+    }
+  }
+
+  return {
+    props: {},
+  };
+};

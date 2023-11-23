@@ -12,18 +12,31 @@ import {
   IProductSuggestion,
   IReviewProduct,
 } from "@/interfaces/product_interface";
+import { IAPIProfileShopResponse } from "@/interfaces/seller_interface";
 import { API } from "@/network";
 import { currencyConverter } from "@/utils/utils";
 import axios from "axios";
 import { getCookie } from "cookies-next";
-import { GetServerSidePropsContext, InferGetServerSidePropsType } from "next";
+import {
+  GetServerSideProps,
+  GetServerSidePropsContext,
+  GetStaticProps,
+  InferGetServerSidePropsType,
+} from "next";
 import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
 import { SubmitHandler } from "react-hook-form";
 import { AiOutlineShoppingCart } from "react-icons/ai";
 import { BsStarFill } from "react-icons/bs";
-import { FaHeart, FaRegHeart, FaStar, FaStore } from "react-icons/fa";
-import { FaLocationDot, FaTruckFast } from "react-icons/fa6";
+import {
+  FaHeart,
+  FaRegHeart,
+  FaRegStar,
+  FaStar,
+  FaStore,
+} from "react-icons/fa";
+import { FaLocationDot } from "react-icons/fa6";
+import { VscEmptyWindow } from "react-icons/vsc";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -32,63 +45,40 @@ export interface IAPIProductDetailResponseWithSeller
   seller_name: string;
 }
 
-export const getServerSideProps = async (
+export const getServerSideProps: GetServerSideProps = async (
   context: GetServerSidePropsContext
 ) => {
-  let data: IAPIProductDetailResponseWithSeller | undefined;
+  const { params } = context;
+  const shop = params?.shop;
+  const productDetail = params?.productDetail;
 
   try {
-    const res = await API.get("/products/5");
-    data = (res.data as IAPIResponse<IAPIProductDetailResponseWithSeller>).data;
-    console.log("hasil product", data);
-  } catch (e) {
-    if (axios.isAxiosError(e)) {
-      console.error(e.response?.data);
-    }
-    data = {
-      id: 0,
-      name: "",
-      description: "",
-      stars: "",
-      sold: 0,
-      available: 0,
-      images: [],
-      seller_name: "",
-      variant_options: [
-        {
-          variant_option_name: "",
-          childs: [],
-        },
-      ],
-      variants: [
-        {
-          variant_id: 0,
-          variant_name: "",
-          selections: [
-            {
-              selection_variant_name: "",
-              selection_name: "",
-            },
-          ],
-          stock: 0,
-          price: "",
-        },
-      ],
-      is_favorite: false,
+    const response = await API.get(`/products/detail/${shop}/${productDetail}`);
+    const product = response.data.data;
+
+    const responseSeller = await API.get(`/sellers/${shop}/profile`);
+    const seller = responseSeller.data.data;
+    return {
+      props: {
+        product,
+        seller,
+      },
+    };
+  } catch (error) {
+    console.error("Error fetching product details:", error);
+
+    return {
+      notFound: true,
     };
   }
-
-  return {
-    props: {
-      product: data!,
-    },
-  };
 };
 
 const ProductDetail = ({
   product,
+  seller,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   const router = useRouter();
+
   const [count, setCount] = useState<number>(1);
   const [isHovering, setIsHovering] = useState(false);
   const [isModal, setIsModal] = useState<boolean>(false);
@@ -98,20 +88,79 @@ const ProductDetail = ({
   }>({});
   const [subtotal, setSubtotal] = useState<number>(0);
   const [currentStock, setCurrentStock] = useState<number>(0);
-  const [isFavorite, setIsFavorite] = useState(false);
+  const [isFavorite, setIsFavorite] = useState(product?.is_favorite || false);
   const [imagesProduct, setImagesProduct] = useState([]);
+  const [imagesReview, setImagesReview] = useState([]);
   const [reviews, setReviews] = useState<IAPIResponse<IReviewProduct[]>>();
   const [page, setPage] = useState<number>(1);
+  const [showAllDescription, setShowAllDescription] = useState(false);
+  const [descriptionLimit, setDescriptionLimit] = useState(1000);
+
   const [suggestion, setSuggestion] =
     useState<IAPIResponse<IProductSuggestion[]>>();
-  const [shop, setShop] =
-    useState<IAPIResponse<IAPIProductDetailResponseWithSeller[]>>();
+  const [shopProfile, setShopProfile] = useState<
+    IAPIResponse<IAPIProfileShopResponse> | undefined
+  >();
+
+  const isYouTubeVideo = (url: string) => {
+    // Regex to check if the URL is a YouTube video URL
+    const youtubeRegex =
+      /^(https?:\/\/)?(www\.)?(youtube\.com\/(.*\/)?|youtu\.be\/)(.+)$/;
+
+    return youtubeRegex.test(url);
+  };
+
+  const renderContent = () => {
+    if (isHovering) {
+      if (isYouTubeVideo(variation)) {
+        return (
+          <iframe
+            title="YouTube Video"
+            width="560"
+            height="315"
+            src={variation}
+            allowFullScreen
+            className="bigImage w-full cursor-pointer rounded-md"
+            onClick={handleZoomImage}
+          ></iframe>
+        );
+      } else {
+        return (
+          <img
+            width={200}
+            height={200}
+            src={variation}
+            alt=""
+            className="bigImage w-full cursor-pointer rounded-md"
+            onClick={handleZoomImage}
+          />
+        );
+      }
+    } else {
+      return (
+        <img
+          width={100}
+          height={100}
+          src={variation}
+          alt=""
+          className="bigImage w-full cursor-pointer rounded-md"
+          onClick={handleZoomImage}
+        />
+      );
+    }
+  };
 
   useEffect(() => {
-    if (imagesProduct.length > 0) {
+    if (imagesProduct?.length > 0) {
       setVariation(imagesProduct[0]);
     }
   }, [imagesProduct]);
+
+  useEffect(() => {
+    if (product) {
+      setImagesProduct(product.images);
+    }
+  }, [product]);
 
   const getImages = async () => {
     try {
@@ -130,8 +179,9 @@ const ProductDetail = ({
   const getReviewProducts = async () => {
     try {
       const res = await API.get(
-        `products/${product.id}/reviews?page=1&stars=5&comment=true&image=true&orderBy=newest`
+        `products/${product.id}/reviews?page=${page}&comment=true&image=true&orderBy=newest`
       );
+
       const data = res.data as IAPIResponse<IReviewProduct[]>;
       setReviews(data);
     } catch (e) {
@@ -152,8 +202,6 @@ const ProductDetail = ({
       setSuggestion(data);
     } catch (e) {
       if (axios.isAxiosError(e)) {
-        console.log(e);
-
         return toast.error("Error fetching product suggestion", {
           toastId: "errorSuggestion",
           autoClose: 1500,
@@ -164,14 +212,10 @@ const ProductDetail = ({
 
   const getShop = async () => {
     try {
-      const res = await API.get(
-        `/products/${product.seller_name}/recommended-products`
-      );
+      const res = await API.get(`/sellers/${seller.shop_name_slug}/profile`);
 
-      const data = res.data as IAPIResponse<
-        IAPIProductDetailResponseWithSeller[]
-      >;
-      setShop(data);
+      const data = res.data as IAPIResponse<IAPIProfileShopResponse>;
+      setShopProfile(data);
     } catch (e) {
       if (axios.isAxiosError(e)) {
         return toast.error("Error fetching product suggestion", {
@@ -183,16 +227,22 @@ const ProductDetail = ({
   };
 
   useEffect(() => {
-    getImages();
     getSuggest();
     getShop();
-    getReviewProducts();
   }, []);
 
+  useEffect(() => {
+    getImages();
+  }, [product.id]);
+
+  useEffect(() => {
+    getReviewProducts();
+  }, [product.id, page]);
+
   const calculateSubtotal = () => {
-    const selectedVariant = product?.variants.find((variant) => {
+    const selectedVariant = product?.variants?.find((variant: any) => {
       return Object.keys(selectedVariants).every((optionName) => {
-        return variant.selections.some((selection) => {
+        return variant.selections.some((selection: any) => {
           return (
             selection.selection_variant_name === optionName &&
             selection.selection_name === selectedVariants[optionName]
@@ -253,7 +303,7 @@ const ProductDetail = ({
     if (Object.keys(selectedVariants).length === 0) {
       variant = product?.variants[0];
     } else {
-      variant = product?.variants.find((v) => {
+      variant = product?.variants.find((v: any) => {
         const variantKey = v.selections[0].selection_variant_name;
         return selectedVariants[variantKey] === v.selections[0].selection_name;
       });
@@ -280,7 +330,6 @@ const ProductDetail = ({
       } else {
         toast.error("Failed to add to cart", { autoClose: 1500 });
       }
-      console.log(response.data);
     } catch (error) {
       if (axios.isAxiosError(error)) {
         toast.error(error.response?.data.message, { autoClose: 1500 });
@@ -312,12 +361,10 @@ const ProductDetail = ({
 
       if (response.status === 200) {
         toast.success("Added to wishlist", { autoClose: 1500 });
-        setIsFavorite(true);
+        setIsFavorite(true); // Set isFavorite to true when successfully added to wishlist
       } else {
         toast.error("Failed to add to wishlist", { autoClose: 1500 });
       }
-      console.log("yes");
-      console.log(response.data);
     } catch (error) {
       if (axios.isAxiosError(error)) {
         toast.error(error.response?.data.message, { autoClose: 1500 });
@@ -326,7 +373,6 @@ const ProductDetail = ({
           autoClose: 1500,
         });
       }
-      console.log("no");
     }
   };
 
@@ -350,27 +396,10 @@ const ProductDetail = ({
         <div className="mx-auto lg:max-w-7xl px-4 md:px-0">
           <div className="flex-col md:flex-row justify-between md:flex gap-10 py-5 px-5 md:px-0">
             <div className="order-1 md:order-1 imageProduct w-full md:w-1/4 rounded-md overflow-hidden">
-              {isHovering == true ? (
-                <img
-                  width={200}
-                  height={200}
-                  src={variation}
-                  alt=""
-                  className="bigImage w-full cursor-pointer rounded-md"
-                  onClick={handleZoomImage}
-                />
-              ) : (
-                <img
-                  width={100}
-                  height={100}
-                  src={variation}
-                  alt=""
-                  className="bigImage w-full cursor-pointer rounded-md"
-                  onClick={handleZoomImage}
-                />
-              )}
-              <div className="variation justify-center gap-1 mt-2 flex overflow-x-scroll [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none']">
-                {imagesProduct.map((url, index) => {
+              {renderContent()}
+
+              <div className="variation gap-1 mt-2 flex overflow-x-scroll [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none']">
+                {imagesProduct?.map((url, index) => {
                   return (
                     <img
                       key={index}
@@ -388,7 +417,7 @@ const ProductDetail = ({
               </div>
               <div className="favorite-icon mt-5 text-right">
                 <button onClick={() => handleWishlist(product)}>
-                  {isFavorite || product.is_favorite ? (
+                  {isFavorite ? (
                     <div className="flex items-center gap-1">
                       <FaHeart style={{ color: "red" }} />
                       <p>Favorite</p>
@@ -402,24 +431,23 @@ const ProductDetail = ({
                 </button>
               </div>
             </div>
-            <div className="order-2 md:order-3 purchaseBox border shadow-inner rounded-sm p-5 h-fit md:w-1/4 md:sticky md:top-0">
+            <div className="order-2 md:order-3 purchaseBox border shadow-inner rounded-sm p-5 h-fit md:w-1/4 pt-2 md:sticky md:top-0">
               <p className="productTitle text-md font-medium pb-3">
                 Set Amounts
               </p>
 
-              <div className="flex gap-2 md:gap-1 mb-2 text-sm text-neutral-600 py-3 justify-between">
+              <div className="flex gap-x-10 md:gap-1 mb-2 text-sm text-neutral-600 py-3 ">
                 <p className="">Pengiriman</p>
-                <div>
-                  <div className="flex items-center gap-1">
-                    <FaLocationDot /> {"Malang"}
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <FaTruckFast /> {`Jakarta Selatan ${"Rp3000"}`}
-                  </div>
+
+                <div className="flex items-center gap-1">
+                  <FaLocationDot /> {"Malang"}
                 </div>
+                {/* <div className="flex items-center gap-1">
+                    <FaTruckFast /> {`Jakarta Selatan ${"Rp3000"}`}
+                  </div> */}
               </div>
               <div className="flex flex-col gap-y-3 text-xs text-neutral-600">
-                {product?.variant_options?.map((item, i) => {
+                {product?.variant_options?.map((item: any, i: number) => {
                   return (
                     <div
                       key={i}
@@ -427,12 +455,12 @@ const ProductDetail = ({
                     >
                       <p>{item.variant_option_name}</p>
                       <div className="grid grid-cols-2 gap-2">
-                        {item.childs.map((variant, k) => {
+                        {item.childs.map((variant: any, k: number) => {
                           const optionName = item.variant_option_name;
                           return (
                             <p
                               key={k}
-                              className={`px-2 py-1 border text-center rounded-md cursor-pointer ${
+                              className={`px-1 py-1 border text-center rounded-md cursor-pointer hover:bg-[#d6e4f8] hover:border hover:border-[#364968] row-span-2 w-full text-ellipsis line-clamp-2 h-10 ${
                                 selectedVariants[optionName] === variant
                                   ? "bg-[#d6e4f8] border border-[#364968]"
                                   : ""
@@ -451,20 +479,21 @@ const ProductDetail = ({
 
               <div className="flex text-center items-center mt-5">
                 <div className="quantity flex border border-zinc-600">
-                  <button className="minus w-5" onClick={dec}>
+                  <button className="minus w-3 md:w-5" onClick={dec}>
                     -
                   </button>
                   <input
-                    className="text-center border-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none outline-none"
+                    className="text-center w-14 md:w-20 border-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none outline-none"
                     min={1}
                     max={100}
                     type="number"
+                    readOnly={true}
                     value={count}
                     onChange={(e: any) => {
                       setCount(parseInt(e.target.value)), e.preventDefault();
                     }}
                   />
-                  <button className="plus w-5" onClick={inc}>
+                  <button className="plus w-3 md:w-5" onClick={inc}>
                     +
                   </button>
                 </div>
@@ -478,122 +507,131 @@ const ProductDetail = ({
                   {currencyConverter(subtotal)}
                 </p>
               </div>
-              <div className="btn flex gap-5 mt-10">
-                <button
-                  type="submit"
-                  onClick={handleToCart}
-                  className="flex items-center justify-center gap-1 border border-[#364968] hover:shadow-md bg-[#d6e4f8] p-2 w-36 hover:bg-[#eff6fd]  transition-all duration-300"
-                >
-                  <AiOutlineShoppingCart /> <span>Add to cart</span>
-                </button>
-                <button
-                  type="submit"
-                  className=" bg-[#364968] text-white p-2 w-36 justify-center hover:bg-[#394e6f] hover:shadow-lg"
-                >
-                  Buy now
-                </button>
+              <div className="btn flex gap-x-2 justify-between mt-10">
+                <div className="w-full">
+                  <button
+                    type="submit"
+                    onClick={handleToCart}
+                    className="flex items-center justify-center gap-1 h-10 border border-[#364968] hover:shadow-md bg-[#d6e4f8] p-2 w-full md:w-32 hover:bg-[#eff6fd]  transition-all duration-300"
+                  >
+                    <AiOutlineShoppingCart /> <span>Add to cart</span>
+                  </button>
+                </div>
+
+                <div onClick={handleToCart} className="w-full">
+                  <button
+                    onClick={() => router.push(`/cart`)}
+                    type="submit"
+                    className=" bg-[#364968] text-white p-2 w-full h-10 md:w-32 justify-center hover:bg-[#394e6f] hover:shadow-lg"
+                  >
+                    Buy now
+                  </button>
+                </div>
               </div>
             </div>
 
             <div className="order-3 md:order-2 description mt-10 md:mt-0 md:w-2/4">
               <div className="spesification">
-                <p className="productTitle text-2xl font-medium pb-3">
+                <p className="productTitle text-2xl md:text-3xl font-medium pb-3">
                   {product?.name}
                 </p>
                 <div className="historyProduct flex items-center text-xs pb-3">
                   <p className="pr-3">{`Sold ${product?.sold}`} </p>
-                  <p className="px-3 border-l border-slate-600 flex-row  md:flex flex gap-1 items-center justify-center ">
+                  <p className="px-3 border-l border-slate-600 flex-row flex md:flex gap-x-1 items-center justify-center ">
                     <BsStarFill style={{ color: "#f57b29" }} />
                     <span className="items-center">{product?.stars}</span>
                   </p>
                 </div>
                 <p className="productPrice text-2xl font-semibold text-[#f57b29] py-3">
-                  {currencyConverter(parseInt(product?.variants[0].price))}
+                  {currencyConverter(
+                    parseInt(product?.variants?.[0]?.price ?? 0)
+                  )}
                 </p>
               </div>
               <div className="desc pt-5 ">
                 <p className="text-lg font-medium border-b my-4">Description</p>
+
                 <p className="">
                   {product?.description
-                    .split("\n\n")
-                    .map((paragraph, index) => (
+                    ?.split("\n\n")
+                    .map((paragraph: any, index: number) => (
                       <span key={index} className="line-break">
-                        {paragraph.split("\\n").map(
-                          (
-                            line,
-                            lineIndex // Change '\n' to '\\n'
-                          ) => (
+                        {paragraph
+                          .split("\\n")
+                          .map((line: string, lineIndex: number) => (
                             <React.Fragment key={lineIndex}>
                               {line}
                               <br />
                             </React.Fragment>
-                          )
-                        )}
+                          ))}
                       </span>
                     ))}
                 </p>
               </div>
             </div>
           </div>
-          <div className="seller flex-col md:flex-row justify-between md:flex gap-10 py-5 px-5 md:px-0">
-            <div className="order-1 w-full  md:w-3/4">
-              <div className="sellerShop bg-[#364968] flex flex-row gap-y-5 text-white py-3 my-10 gap-10 px-5 ">
+          <div className="seller flex-col md:flex-row justify-between md:flex gap-10 py-5 px-5 md:px-0 ">
+            <div className="order-1 w-full md:w-3/4">
+              <div className="sellerShop rounded-md bg-[#364968] flex flex-col md:flex-row gap-y-5 text-white py-3 my-10 gap-10 px-5 ">
                 <img
-                  width={90}
-                  height={0}
-                  src={"/images/defaultuser.png"}
+                  src={shopProfile?.data?.seller_picture_url}
                   alt="seller"
-                  className="imgSeller w-20 h-full place-self-center"
+                  className="imgSeller w-full md:w-32 h-full place-self-center object-fill rounded-lg"
                 />
-                <div className="flex flex-col md:flex-row gap-y-4 md:gap-x-48">
-                  <div className="aboutSeller justify-between w-full md:w-1/2 ">
-                    <p>Nama Toko</p>
+                <div className="flex flex-col md:flex-row gap-y-4 md:gap-x-48 w-full">
+                  <div className="aboutSeller w-full md:w-1/2">
+                    <p className=" text-lg md:text-xl font-medium md:font-semibold text-center md:text-left">
+                      {shopProfile?.data?.seller_name}
+                    </p>
                     <p>
-                      <button className="flex gap-1 md:gap-2 mt-3 text-sm justify-center items-center w-full border border-[#fddf97] hover:shadow-lg   p-1 md:w-36 text-[#fddf97] hover:bg-[#1c2637]  transition-all duration-300">
-                        <FaStore /> <p>Visit the store</p>
+                      <button
+                        onClick={() =>
+                          router.push(`/${shopProfile?.data?.shop_name_slug}`)
+                        }
+                        className="flex gap-1 md:gap-2 mt-3 text-sm justify-center items-center w-full border border-[#fddf97] hover:shadow-lg   p-1 md:w-36 text-[#fddf97] hover:bg-[#1c2637]  transition-all duration-300"
+                      >
+                        <FaStore />
+                        <p className=" text-sm md:text-base">Visit the store</p>
                       </button>
                     </p>
                   </div>
 
-                  <div className="aboutSeller justify-between w-1/2 md:w-full">
-                    <p className="flex gap-5 md:gap-12">
-                      Rating
-                      <span className="flex items-center ">
-                        <FaStar /> 4.8
-                      </span>
-                    </p>
-                    <p className="flex gap-5 md:gap-14 mt-3">
-                      Product <span>30</span>
-                    </p>
-                  </div>
+                  <table className="aboutSeller w-full  md:w-full text-sm md:text-base  self-center ">
+                    <thead></thead>
+                    <tbody>
+                      <tr className="flex items-center justify-center gap">
+                        <td className="w-full">Shipping from</td>
+                        <td className="w-full flex items-center gap-x-1 font-medium">
+                          <FaLocationDot />
+                          {` ${shopProfile?.data?.seller_district}`}
+                        </td>
+                      </tr>
+                      <tr className="flex mt-3">
+                        <td className="w-full">Stars</td>
+                        <td className="w-full flex gap-x-1 items-center font-medium">
+                          <FaStar style={{ color: "#f57b29" }} />
+                          {shopProfile?.data?.seller_stars}
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
                 </div>
               </div>
               <div className="reviews">
-                <div className="">
-                  <p className="reviewsProduct text-lg font-semibold">
+                <div className="my-5 pt-8">
+                  <p className="reviewsProduct text-xl font-semibold border-b pb-2">
                     Product Reviews
                   </p>
-                  <div>
-                    <p>{"4.8 dari 5"}</p>
-                    <div className="star flex text-[#fc9b5b]">
-                      <FaStar />
-                      <FaStar />
-                      <FaStar />
-                      <FaStar />
-                      <FaStar />
-                    </div>
-                  </div>
                 </div>
                 <div>
                   {reviews?.data?.map((review, index) => (
                     <div
                       key={index}
-                      className="buyerReviews flex mt-5 py-2  border-y"
+                      className="buyerReviews flex mt-5 py-2  border-b"
                     >
-                      <div className="imageCust pr-4 rounded-full overflow-hidden">
+                      <div className="imageCust w-28 h-full pr-4 rounded-full overflow-hidden">
                         <img
-                          width={100}
-                          height={100}
+                          className="w-full h-full"
                           src={review.customer_picture_url}
                           alt="profile"
                           placeholder="https://cdn4.iconfinder.com/data/icons/web-ui-color/128/Account-512.png"
@@ -603,47 +641,63 @@ const ProductDetail = ({
                           }}
                         />
                       </div>
-                      <div className="bodyReview flex-row gap-y-5">
-                        <p className="custName">{review.customer_name}</p>
+                      <div className="bodyReview w-full flex-row gap-y-5">
+                        <p className="pb-1 font-medium">
+                          {review.customer_name}
+                        </p>
 
-                        <p className="flex">
-                          {Array.from({ length: parseInt(review.stars) }).map(
-                            (_, index) => (
-                              <FaStar
-                                key={index}
-                                style={{ color: "#f57b29" }}
-                                size={13}
-                              />
-                            )
-                          )}
+                        <p className="flex pb-1">
+                          {Array.from({
+                            length: Math.min(parseInt(review.stars), 5),
+                          }).map((_, index) => (
+                            <FaStar
+                              key={index}
+                              style={{ color: "#f57b29" }}
+                              size={13}
+                            />
+                          ))}
+                          {Array.from({
+                            length: Math.max(5 - parseInt(review.stars), 0),
+                          }).map((_, index) => (
+                            <FaRegStar
+                              key={index}
+                              style={{ color: "#f57b29" }}
+                              size={13}
+                            />
+                          ))}
                         </p>
                         <p className="dateReview text-sm text-neutral-500 pb-3 items-center">
                           {review.created_at.split("T")[0]} |
                           <span> variation: {review.variant}</span>
                         </p>
                         <p className="theReview">{review.comment}</p>
-                        <div className="grid grid-cols-4 gap-x-2 mt-3">
-                          {imagesProduct.map((url, index) => {
-                            return (
+                        <div className="grid grid-cols-2 md:grid-cols-5 gap-2 mt-3 object-fill">
+                          {review.pictures?.map((e, i) => (
+                            <>
                               <img
-                                key={index}
-                                className="cursor-pointer w-28 h-full rounded-sm"
-                                width={50}
-                                height={50}
-                                src={url}
+                                key={i}
+                                className="cursor-pointer w-full h-full rounded-sm"
+                                src={e}
                                 alt="image review"
-                                onMouseOver={() => handleMouseOver(url)}
-                                onMouseOut={handleMouseOut}
-                                onClick={handleZoomImage}
                               />
-                            );
-                          })}
+                            </>
+                          ))}
                         </div>
                       </div>
                     </div>
                   ))}
                   <div className="flex self-end mt-2 justify-center">
-                    {reviews && (
+                    {reviews?.data === null ? (
+                      <>
+                        <p className="text-center font-semibold text-neutral-500 text-lg justify-center">
+                          <VscEmptyWindow
+                            size={30}
+                            style={{ margin: "0 auto" }}
+                          />
+                          There are no reviews yet
+                        </p>
+                      </>
+                    ) : (
                       <Pagination
                         data={reviews?.pagination}
                         onNavigate={(navPage: any) => setPage(navPage)}
@@ -660,6 +714,11 @@ const ProductDetail = ({
                   (e, i) =>
                     i < 6 && (
                       <ProductCard
+                        onClick={() =>
+                          router.push(
+                            `/${seller.shop_name_slug}/${e.product_name_slug}`
+                          )
+                        }
                         key={i}
                         image={e.product_picture_url}
                         title={e.product_name}
@@ -671,7 +730,7 @@ const ProductDetail = ({
                 <Button
                   text="View More"
                   styling="bg-[#f57b29] rounded-md p-3 shadow-lg text-white hover:bg-[#fc9b5b] col-span-2 md:col-span-1"
-                  onClick={() => router.push(`/`)}
+                  onClick={() => router.push(`/${seller.shop_name_slug}`)}
                 />
               </div>
             </div>

@@ -7,7 +7,7 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { API } from "@/network";
 import {
-  IAPIPagination,
+  IAPIPinValidationResponse,
   IAPIResponse,
   IAPIWalletResponse,
 } from "@/interfaces/api_interface";
@@ -21,7 +21,6 @@ import {
   setAuthCookie,
 } from "@/utils/utils";
 import { useRouter } from "next/router";
-import { getCookie } from "cookies-next";
 import { IWalletTransaction } from "@/interfaces/wallet_interface";
 import { useUserStore } from "@/store/userStore";
 import Pagination from "@/components/Pagination";
@@ -92,6 +91,8 @@ interface ITopupWalletProps {
 
 const TopupWalletModal = ({ onBalanceChange }: ITopupWalletProps) => {
   const [amount, setAmount] = useState<string>("");
+  const [isConfirmPin, setIsConfirmPin] = useState<boolean>(false);
+
   const router = useRouter();
   const { updateUser } = useUserStore();
 
@@ -134,38 +135,84 @@ const TopupWalletModal = ({ onBalanceChange }: ITopupWalletProps) => {
     }
   };
 
+  const checkTopupAmount = () => {
+    if (parseInt(amount) < 50000 || parseInt(amount) > 10000000) {
+      return toast.error("Amount minimum 50.000 maximum 10.000.000", {
+        autoClose: 1500,
+      });
+    }
+    return setIsConfirmPin(true);
+  };
+
+  const checkPinValidation = async (pin: string) => {
+    try {
+      const res = await API.post("/accounts/wallets/validate-pin", {
+        wallet_pin: pin,
+      });
+
+      const isValid = (res.data as IAPIResponse<IAPIPinValidationResponse>).data
+        ?.isCorrect;
+
+      if (!isValid) {
+        return toast.error("Pin not valid", {
+          autoClose: 1500,
+        });
+      }
+
+      return topupHandler();
+    } catch (e) {
+      if (axios.isAxiosError(e)) {
+        toast.error("An error occured", {
+          autoClose: 1500,
+        });
+      }
+    }
+  };
+
   return (
     <>
-      <h1 className="font-bold text-xl">Topup</h1>
-      <form
-        action="#"
-        onSubmit={(e) => {
-          e.preventDefault();
-          topupHandler();
-        }}
-        className="flex flex-col mt-5"
-      >
-        <input
-          onChange={(e) => {
-            if (!/^[0-9]*$/g.test(e.target.value)) return e.preventDefault();
-            setAmount(e.target.value);
-          }}
-          value={amount}
-          type="text"
-          name="amount"
-          id="amount"
-          placeholder="Amount..."
-          className="rounded-md"
-        />
-        <div className="text-xs mt-2 text-slate-500">
-          <p>min {currencyConverter(50000)}</p>
-          <p>max {currencyConverter(10000000)}</p>
+      {isConfirmPin ? (
+        <div className="p-2">
+          <h1 className="text-xl font-bold text-center">Pin Confirmation</h1>
+          <div className="mt-5">
+            <PinCode onSubmit={(pin) => checkPinValidation(pin)} />
+          </div>
         </div>
-        <Button
-          text="Submit"
-          styling="py-2 px-5 bg-[#364968] w-full rounded-md text-white mt-2"
-        />
-      </form>
+      ) : (
+        <>
+          <h1 className="font-bold text-xl">Topup</h1>
+          <form
+            action="#"
+            onSubmit={(e) => {
+              e.preventDefault();
+              return checkTopupAmount();
+            }}
+            className="flex flex-col mt-5"
+          >
+            <input
+              onChange={(e) => {
+                if (!/^[0-9]*$/g.test(e.target.value))
+                  return e.preventDefault();
+                setAmount(e.target.value);
+              }}
+              value={amount}
+              type="text"
+              name="amount"
+              id="amount"
+              placeholder="Amount..."
+              className="rounded-md"
+            />
+            <div className="text-xs mt-2 text-slate-500">
+              <p>min {currencyConverter(50000)}</p>
+              <p>max {currencyConverter(10000000)}</p>
+            </div>
+            <Button
+              text="Submit"
+              styling="py-2 px-5 bg-[#364968] w-full rounded-md text-white mt-2"
+            />
+          </form>
+        </>
+      )}
     </>
   );
 };
@@ -175,11 +222,12 @@ const ChangePinModal = () => {
   const { updateUser } = useUserStore();
   const [isValid, setIsValid] = useState<boolean>(false);
   const [password, setPassword] = useState<string>("");
+
   const passwordValidation = () => {
     try {
       toast.promise(
         API.post("/accounts/check-password", {
-          password: "123",
+          password: password,
         }),
         {
           pending: "Loading",
@@ -606,8 +654,12 @@ export const getServerSideProps = async (
   let auth = await checkAuthSSR(context);
 
   if (auth === null) {
-    context.res.writeHead(301, { location: "/login" });
-    context.res.end();
+    return {
+      redirect: {
+        permanent: false,
+        destination: "/login",
+      },
+    };
   }
 
   try {
@@ -620,6 +672,12 @@ export const getServerSideProps = async (
   } catch (e) {
     if (axios.isAxiosError(e)) {
       console.log(e.response?.data);
+      return {
+        redirect: {
+          permanent: false,
+          destination: "/",
+        },
+      };
     }
   }
 
