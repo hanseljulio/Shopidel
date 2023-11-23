@@ -73,11 +73,10 @@ interface IPromoDetails {
   name: string;
   min_purchase_amount: string;
   max_purchase_amount: string;
-  discount_percentage: string;
+  discount_amount: string;
   quota: number;
   start_date: string;
-  end_date: "2024-01-01T01:01:01+07:00";
-  selected_products: ISelectedProducts[];
+  end_date: string;
   created_at: string;
 }
 
@@ -143,17 +142,7 @@ const OrderDetailModal = (props: IOrderDetailModalProps) => {
             promoDetail ? parseInt(promoDetail?.max_purchase_amount) : 0
           )}
         </h1>
-        <h1>Discount percentage: {promoDetail?.discount_percentage}%</h1>
-      </div>
-      <div className="pt-4">
-        <h1 className="font-bold text-[20px]">
-          Promotion available on these products:
-        </h1>
-        <ul className="flex flex-col gap-3 pt-4">
-          {promoDetail?.selected_products.map((product, index) => {
-            return <li key={index}>&gt; {product.product_name}</li>;
-          })}
-        </ul>
+        <h1>Discount amount: {promoDetail?.discount_amount}</h1>
       </div>
     </div>
   );
@@ -177,61 +166,8 @@ const EditPromo = (props: IEditPromoProps) => {
     },
   ]);
 
-  const handleCheckAll = (e: any) => {
-    const { checked } = e.target;
-    const currentData = [...sellerProducts];
-
-    const updatedData = currentData.map((data) => {
-      return { ...data, isChecked: checked };
-    });
-
-    setSellerProducts(updatedData);
-  };
-
-  const handleCheck = (e: any, id: number) => {
-    const { checked } = e.target;
-    const currentData = [...sellerProducts];
-
-    const updatedData = currentData.map((data) => {
-      if (data.id === id) {
-        return { ...data, isChecked: checked };
-      } else {
-        return data;
-      }
-    });
-    setSellerProducts(updatedData);
-  };
-
   const router = useRouter();
   const { updateUser } = useUserStore();
-
-  const getSellerProducts = async () => {
-    try {
-      const response = await API.get(`sellers/products`);
-      const selectedProducts = promoDetail?.selected_products.map(
-        (data) => data.product_id
-      );
-
-      response.data.data.map((data: any) => {
-        if (selectedProducts?.includes(data.id)) {
-          data.isChecked = true;
-        } else {
-          data.isChecked = false;
-        }
-      });
-
-      setSellerProducts(response.data.data);
-    } catch (e) {
-      if (axios.isAxiosError(e)) {
-        if (e.response?.status === 401) {
-          return clientUnauthorizeHandler(router, updateUser);
-        }
-        return toast.error(e.message, {
-          autoClose: 1500,
-        });
-      }
-    }
-  };
 
   const [promoDetail, setPromoDetail] = useState<IPromoDetails>();
 
@@ -258,7 +194,7 @@ const EditPromo = (props: IEditPromoProps) => {
         end_date: response.data.data.end_date.substring(0, 10),
         min_purchase_amount: response.data.data.min_purchase_amount,
         max_purchase_amount: response.data.data.max_purchase_amount,
-        discount_percentage: response.data.data.discount_percentage,
+        discount_amount: response.data.data.discount_amount,
       };
 
       reset({ ...currentData });
@@ -276,22 +212,9 @@ const EditPromo = (props: IEditPromoProps) => {
 
   useEffect(() => {
     getPromoData();
-    getSellerProducts();
-  }, [sellerProducts.length]);
+  }, []);
 
   const submit: SubmitHandler<ISellerPromotionData> = async (data) => {
-    const selectedProducts = [];
-
-    for (let i = 0; i < sellerProducts.length; i++) {
-      if (sellerProducts[i].isChecked) {
-        selectedProducts.push(sellerProducts[i].id);
-      }
-    }
-
-    if (selectedProducts.length === 0) {
-      toast.error("Please select items that will have the promotion.");
-    }
-
     const sendData = {
       name: data.name,
       quota: parseInt(data.quota.toString()),
@@ -299,8 +222,7 @@ const EditPromo = (props: IEditPromoProps) => {
       end_date: new Date(data.end_date).toISOString(),
       min_purchase_amount: data.min_purchase_amount,
       max_purchase_amount: data.max_purchase_amount,
-      discount_percentage: data.discount_percentage,
-      selected_products_id: selectedProducts,
+      discount_amount: data.discount_amount,
     };
 
     try {
@@ -465,60 +387,22 @@ const EditPromo = (props: IEditPromoProps) => {
             </div>
             <div className="flex flex-col md:basis-[33.3%]">
               <label htmlFor="discountPercentage" className="text-sm">
-                Discount percentage
+                Discount amount
               </label>
-              <div className="relative">
-                <input
-                  {...register("discount_percentage", {
-                    required: "Discount percentage is required",
-                  })}
-                  type="number"
-                  name="discountPercentage"
-                  id="discountPercentage"
-                  className="rounded-md border p-2 w-full"
-                />
-                <div className="absolute right-0 bg-[#F3F4F5] border border-slate-500 h-full flex items-center px-2 rounded-tr-md rounded-br-md top-0">
-                  <span className="">%</span>
-                </div>
-              </div>
-              {errors.discount_percentage?.type === "required" && (
+              <input
+                {...register("discount_amount", {
+                  required: "Discount amount is required",
+                })}
+                type="number"
+                name="discountAmount"
+                id="discountAmount"
+                className="rounded-md border p-2 w-full"
+              />
+              {errors.discount_amount?.type === "required" && (
                 <p role="alert" className="text-xs text-red-500 mt-1">
-                  {errors.discount_percentage.message}
+                  {errors.discount_amount.message}
                 </p>
               )}
-            </div>
-          </div>
-
-          <div className="">
-            <div className="flex justify-between items-center md:flex-row flex-col">
-              <h1 className="text-[25px] py-6">Select Products</h1>
-              <div className="flex items-center gap-6 md:pb-0 pb-6">
-                <input
-                  type="checkbox"
-                  className="hover:cursor-pointer"
-                  onClick={handleCheckAll}
-                  name="allselect"
-                />
-                <p>Select all</p>
-              </div>
-            </div>
-            <div className="bg-slate-300 h-[300px] overflow-y-scroll flex flex-col items-center">
-              {sellerProducts.map((product, index) => {
-                return (
-                  <div
-                    key={index}
-                    className="bg-white border-2 rounded-md  p-6 flex gap-6 items-center my-3 w-[95%]"
-                  >
-                    <input
-                      onClick={(e) => handleCheck(e, product.id)}
-                      type="checkbox"
-                      className="hover:cursor-pointer"
-                      checked={product.isChecked}
-                    />
-                    <h1>{product.name}</h1>
-                  </div>
-                );
-              })}
             </div>
           </div>
 

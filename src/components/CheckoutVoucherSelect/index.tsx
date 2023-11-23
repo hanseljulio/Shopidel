@@ -3,6 +3,7 @@ import { FaTicketAlt } from "react-icons/fa";
 
 interface CheckoutVoucherSelectProps {
   usedVoucher: number;
+  voucherName: string;
   modalOn: () => void;
 }
 
@@ -18,7 +19,7 @@ const CheckoutVoucherSelect = (props: CheckoutVoucherSelectProps) => {
           props.usedVoucher === 0 ? "hidden invisible" : ""
         }`}
       >
-        Used: {props.usedVoucher}
+        Used: {props.voucherName.substring(0, 25) + "..."}
       </span>
       <h1
         onClick={props.modalOn}

@@ -93,18 +93,6 @@ const SellerPromotionCreate = () => {
   }, []);
 
   const submit: SubmitHandler<ISellerPromotionData> = async (data) => {
-    const selectedProducts = [];
-
-    for (let i = 0; i < sellerProducts.length; i++) {
-      if (sellerProducts[i].isChecked) {
-        selectedProducts.push(sellerProducts[i].id);
-      }
-    }
-
-    if (selectedProducts.length === 0) {
-      toast.error("Please select items that will have the promotion.");
-    }
-
     const sendData = {
       name: data.name,
       quota: parseInt(data.quota.toString()),
@@ -112,8 +100,7 @@ const SellerPromotionCreate = () => {
       end_date: new Date(data.end_date).toISOString(),
       min_purchase_amount: data.min_purchase_amount,
       max_purchase_amount: data.max_purchase_amount,
-      discount_percentage: data.discount_percentage,
-      selected_products_id: selectedProducts,
+      discount_amount: data.discount_amount,
     };
 
     try {
@@ -279,61 +266,23 @@ const SellerPromotionCreate = () => {
                 )}
               </div>
               <div className="flex flex-col md:basis-[33.3%]">
-                <label htmlFor="discount_percentage" className="text-sm">
-                  Discount percentage
+                <label htmlFor="discount_amount" className="text-sm">
+                  Discount amount
                 </label>
-                <div className="relative">
-                  <input
-                    {...register("discount_percentage", {
-                      required: "Discount percentage is required",
-                    })}
-                    type="number"
-                    name="discount_percentage"
-                    id="discount_percentage"
-                    className="rounded-md border p-2 w-full"
-                  />
-                  <div className="absolute right-0 bg-[#F3F4F5] border border-slate-500 h-full flex items-center px-2 rounded-tr-md rounded-br-md top-0">
-                    <span className="">%</span>
-                  </div>
-                </div>
-                {errors.discount_percentage?.type === "required" && (
+                <input
+                  {...register("discount_amount", {
+                    required: "Discount amount is required",
+                  })}
+                  type="number"
+                  name="discount_amount"
+                  id="discount_amount"
+                  className="rounded-md border p-2 w-full"
+                />
+                {errors.discount_amount?.type === "required" && (
                   <p role="alert" className="text-xs text-red-500 mt-1">
-                    {errors.discount_percentage.message}
+                    {errors.discount_amount.message}
                   </p>
                 )}
-              </div>
-            </div>
-
-            <div className="">
-              <div className="flex justify-between items-center md:flex-row flex-col">
-                <h1 className="text-[25px] py-6">Select Products</h1>
-                <div className="flex items-center gap-6 md:pb-0 pb-6">
-                  <input
-                    type="checkbox"
-                    className="hover:cursor-pointer"
-                    onClick={handleCheckAll}
-                    name="allselect"
-                  />
-                  <p>Select all</p>
-                </div>
-              </div>
-              <div className="bg-slate-300 h-[300px] overflow-y-scroll flex flex-col items-center">
-                {sellerProducts.map((product, index) => {
-                  return (
-                    <div
-                      key={index}
-                      className="bg-white border-2 rounded-md  p-6 flex gap-6 items-center my-3 w-[95%]"
-                    >
-                      <input
-                        onClick={(e) => handleCheck(e, product.id)}
-                        type="checkbox"
-                        className="hover:cursor-pointer"
-                        checked={product.isChecked}
-                      />
-                      <h1>{product.name}</h1>
-                    </div>
-                  );
-                })}
               </div>
             </div>
 
