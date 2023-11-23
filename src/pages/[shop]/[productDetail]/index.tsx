@@ -93,6 +93,7 @@ const ProductDetail = ({
   const [count, setCount] = useState<number>(0);
   const [isHovering, setIsHovering] = useState(false);
   const [isModal, setIsModal] = useState<boolean>(false);
+  const [isModalReview, setIsModalReview] = useState<boolean>(false);
   const [variation, setVariation] = useState<string>("");
   const [currentStock, setCurrentStock] = useState<number>(0);
   const [subtotal, setSubtotal] = useState<number>(0);
@@ -104,8 +105,7 @@ const ProductDetail = ({
   const [wishlist, setWishlist] = useState<IAPIResponse<IWishlist[]>>();
   const [isExpanded, setIsExpanded] = useState<boolean>(false);
   const variationRef = useRef<HTMLDivElement>(null);
-  const [isLeftButtonDisabled, setIsLeftButtonDisabled] = useState(true);
-  const [isRightButtonDisabled, setIsRightButtonDisabled] = useState(false);
+  const [imageReviewChosen, setImageReviewChosen] = useState("");
 
   const scrollLeft = () => {
     if (variationRef.current) {
@@ -361,6 +361,10 @@ const ProductDetail = ({
   const handleZoomImage = () => {
     setIsModal(true);
   };
+  const handleZoomImageReview = (src: string) => {
+    setIsModalReview(true);
+    setImageReviewChosen(src);
+  };
 
   const inc = () => {
     if (count >= 0 && count <= currentStock - 1) {
@@ -522,6 +526,17 @@ const ProductDetail = ({
           content={<img className="h-[50vh]" src={variation} alt="..." />}
           onClose={() => setIsModal(false)}
         />
+      )}
+      {isModalReview && (
+        <div>
+          <Modal
+            content={
+              <img className="h-[50vh]" src={imageReviewChosen} alt="..." />
+            }
+            onClose={() => setIsModalReview(false)}
+          />
+          <p>{imageReviewChosen}nn</p>
+        </div>
       )}
       <div>
         <Navbar />
@@ -889,9 +904,11 @@ const ProductDetail = ({
                             <>
                               <img
                                 key={i}
-                                className="cursor-pointer w-full h-full rounded-sm"
+                                className={`cursor-pointer w-full h-full rounded-sm
+                                `}
                                 src={e}
                                 alt="image review"
+                                onClick={() => handleZoomImageReview(e)}
                               />
                             </>
                           ))}
