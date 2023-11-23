@@ -32,7 +32,10 @@ const CheckoutGrandTotal = (props: ICheckoutGrandTotalProps) => {
           <br />
           <h1 className="text-[30px]">
             {currencyConverter(
-              props.merchandise + props.shipping - props.voucher
+              props.merchandise +
+                props.shipping -
+                props.voucher -
+                props.marketplace
             )}
           </h1>
         </div>
@@ -60,7 +63,10 @@ const CheckoutGrandTotal = (props: ICheckoutGrandTotalProps) => {
               {currencyConverter(
                 props.total
                   ? props.total
-                  : props.merchandise + props.shipping - props.voucher
+                  : props.merchandise +
+                      props.shipping -
+                      props.voucher -
+                      props.marketplace
               )}
             </h1>
           </div>

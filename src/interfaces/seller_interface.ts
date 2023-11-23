@@ -70,11 +70,28 @@ export interface ICheckoutPromotions {
   name: string;
   min_purchase_amount: string;
   max_purchase_amount: string;
-  discount_percentage: string;
-  selected_products: number[];
+  discount_amount: string;
+}
+
+export interface ICheckoutMarketplace {
+  id: number;
+  name: string;
+  min_purchase_amount: string;
+  max_purchase_amount: string;
+  discount_amount: string;
 }
 
 export interface ISellerPromotion {
+  data: ISellerPromotionData[];
+  pagination: {
+    total_page: number;
+    total_item: number;
+    current_page: number;
+    limit: number;
+  };
+}
+
+export interface ISellerPromotionData {
   id: number;
   name: string;
   quota: number;
@@ -83,7 +100,7 @@ export interface ISellerPromotion {
   end_date: string;
   min_purchase_amount: string;
   max_purchase_amount: string;
-  discount_percentage: string;
+  discount_amount: string;
 }
 
 export interface ISellerOrderHistory {
