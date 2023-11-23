@@ -225,6 +225,8 @@ const EditPromo = (props: IEditPromoProps) => {
       discount_amount: data.discount_amount,
     };
 
+    console.log(sendData);
+
     try {
       toast.promise(
         API.put(`/shop-promotions/${props.promoId}`, sendData),
