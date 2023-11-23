@@ -152,18 +152,16 @@ const Navbar = () => {
                   </>
                 ) : (
                   <>
-                    <Link
-                      href="javascript:void(0)"
-                      className="inline-block w-full px-3 py-1 text-center text-[#6c4343] bg-[#fddf97] rounded-md shadow hover:bg-gray-800"
-                    >
-                      Sign in
-                    </Link>
-                    <Link
-                      href="javascript:void(0)"
-                      className="inline-block w-full px-3 py-1 text-center text-[#364968] bg-white rounded-md shadow hover:bg-gray-100"
-                    >
-                      Sign up
-                    </Link>
+                    <Button
+                      text="Sign in"
+                      styling="inline-block w-full px-3 py-1 text-center text-[#6c4343] bg-[#fddf97] rounded-md shadow hover:bg-gray-800"
+                      onClick={() => router.push("/login")}
+                    />
+                    <Button
+                      text="Sign up"
+                      styling="inline-block w-full px-3 py-1 text-center text-[#364968] bg-white rounded-md shadow hover:bg-gray-100"
+                      onClick={() => router.push("/register")}
+                    />
                   </>
                 )}
               </div>
@@ -242,18 +240,16 @@ const Navbar = () => {
               </div>
             ) : (
               <div className="flex gap-x-2">
-                <button
+                <Button
+                  text="Sign in"
+                  styling="px-3 py-2 text-[#6c4343] bg-[#fddf97] rounded-md shadow transition-all duration-300 hover:bg-[#e09664] hover:text-[#fddf97]"
                   onClick={() => router.push("/login")}
-                  className="px-3 py-2 text-[#6c4343] bg-[#fddf97] rounded-md shadow transition-all duration-300 hover:bg-[#e09664] hover:text-[#fddf97]"
-                >
-                  Sign in
-                </button>
-                <button
+                />
+                <Button
+                  text="Sign up"
+                  styling="px-3 py-2 text[#364968] bg-white rounded-md shadow transition-all duration-300 hover:bg-[#6c4343] hover:text-white"
                   onClick={() => router.push("/register")}
-                  className="px-3 py-2 text[#364968] bg-white rounded-md shadow transition-all duration-300 hover:bg-[#6c4343]  hover:text-white"
-                >
-                  Sign up
-                </button>
+                />
               </div>
             )}
           </div>
