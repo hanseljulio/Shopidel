@@ -253,7 +253,7 @@ const EditPromo = (props: IEditPromoProps) => {
   };
 
   return (
-    <div className="bg-white p-5 rounded-md md:w-[1000px] md:h-[800px] h-[80vh] w-[90vw] overflow-y-auto">
+    <div className="bg-white p-5 rounded-md md:w-[1000px] md:h-[500px] h-[80vh] w-[90vw] overflow-y-auto">
       <div className="py-3 border-b-2">
         <h1 className="text-[20px] font-bold">Edit Promotion</h1>
       </div>
@@ -401,7 +401,7 @@ const EditPromo = (props: IEditPromoProps) => {
             </div>
           </div>
 
-          <div className="flex justify-center pt-6 py-10">
+          <div className="flex justify-center pt-14">
             <Button
               text="Edit promotion"
               styling="p-3 bg-[#364968] w-[300px] rounded-md text-white"
