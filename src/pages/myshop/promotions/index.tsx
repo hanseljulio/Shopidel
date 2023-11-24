@@ -22,15 +22,6 @@ interface IDeletePromoModal {
   closeFunction: () => void;
   submitFunction: () => void;
 }
-interface ISellerProductSelect {
-  id: number;
-  name: string;
-  category_id: number;
-  created_at: string;
-  updated_at: string;
-  deleted_at: string;
-  isChecked: boolean;
-}
 
 const DeletePromoModal = (props: IDeletePromoModal) => {
   return (
@@ -60,12 +51,6 @@ const DeletePromoModal = (props: IDeletePromoModal) => {
 
 interface IOrderDetailModalProps {
   promoId: number;
-}
-
-interface ISelectedProducts {
-  product_id: number;
-  product_name: string;
-  created_at: string;
 }
 
 interface IPromoDetails {
@@ -106,7 +91,7 @@ const OrderDetailModal = (props: IOrderDetailModalProps) => {
   }, []);
 
   return (
-    <div className="bg-white p-5 rounded-md md:w-[1000px] md:h-[800px] h-[80vh] w-[90vw] overflow-y-auto">
+    <div className="bg-white p-5 rounded-md md:w-[1000px] md:h-[500px] h-[80vh] w-[90vw] overflow-y-auto">
       <div className="py-3 border-b-2">
         <h1 className="text-[20px] font-bold">Promotion Details</h1>
       </div>
@@ -142,7 +127,12 @@ const OrderDetailModal = (props: IOrderDetailModalProps) => {
             promoDetail ? parseInt(promoDetail?.max_purchase_amount) : 0
           )}
         </h1>
-        <h1>Discount amount: {promoDetail?.discount_amount}</h1>
+        <h1>
+          Discount amount:{" "}
+          {currencyConverter(
+            promoDetail ? parseInt(promoDetail?.discount_amount) : 0
+          )}
+        </h1>
       </div>
     </div>
   );
@@ -154,22 +144,8 @@ interface IEditPromoProps {
 }
 
 const EditPromo = (props: IEditPromoProps) => {
-  const [sellerProducts, setSellerProducts] = useState<ISellerProductSelect[]>([
-    {
-      id: 0,
-      name: "",
-      category_id: 936,
-      created_at: "2023-11-21T05:36:43.520268Z",
-      updated_at: "2023-11-21T05:36:43.520268Z",
-      deleted_at: "0001-01-01T00:00:00Z",
-      isChecked: false,
-    },
-  ]);
-
   const router = useRouter();
   const { updateUser } = useUserStore();
-
-  const [promoDetail, setPromoDetail] = useState<IPromoDetails>();
 
   const {
     register,
@@ -184,7 +160,6 @@ const EditPromo = (props: IEditPromoProps) => {
   const getPromoData = async () => {
     try {
       const response = await API.get(`shop-promotions/${props.promoId}`);
-      setPromoDetail(response.data.data);
 
       const currentData = {
         id: response.data.data.id,
@@ -225,8 +200,6 @@ const EditPromo = (props: IEditPromoProps) => {
       discount_amount: data.discount_amount,
     };
 
-    console.log(sendData);
-
     try {
       toast.promise(
         API.put(`/shop-promotions/${props.promoId}`, sendData),
@@ -260,7 +233,7 @@ const EditPromo = (props: IEditPromoProps) => {
   };
 
   return (
-    <div className="bg-white p-5 rounded-md md:w-[1000px] md:h-[800px] h-[80vh] w-[90vw] overflow-y-auto">
+    <div className="bg-white p-5 rounded-md md:w-[1000px] md:h-[500px] h-[80vh] w-[90vw] overflow-y-auto">
       <div className="py-3 border-b-2">
         <h1 className="text-[20px] font-bold">Edit Promotion</h1>
       </div>
@@ -408,7 +381,7 @@ const EditPromo = (props: IEditPromoProps) => {
             </div>
           </div>
 
-          <div className="flex justify-center pt-6 py-10">
+          <div className="flex justify-center pt-14">
             <Button
               text="Edit promotion"
               styling="p-3 bg-[#364968] w-[300px] rounded-md text-white"
@@ -514,10 +487,7 @@ const SellerAdminHome = () => {
       end_date: currentData.end_date,
       min_purchase_amount: currentData.min_purchase_amount,
       max_purchase_amount: currentData.max_purchase_amount,
-      discount_percentage: currentData.discount_percentage,
-      selected_products_id: currentData.selected_products.map(
-        (data: any) => data.product_id
-      ),
+      discount_amount: currentData.discount_amount,
     };
 
     try {
