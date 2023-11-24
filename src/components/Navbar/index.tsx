@@ -288,7 +288,7 @@ const Navbar = () => {
           </div>
         </div>
         <div className="hidden space-x-4 md:flex align-middle">
-          {user && (
+          {logged && (
             <div className="flex gap-x-2 group relative">
               <button
                 className=" text-white rounded-md shadow align-middle"
