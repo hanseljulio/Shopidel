@@ -14,17 +14,18 @@ import {
 } from "@/interfaces/product_interface";
 import { IAPIProfileShopResponse } from "@/interfaces/seller_interface";
 import { API } from "@/network";
-import { currencyConverter } from "@/utils/utils";
+import { IWishlist } from "@/interfaces/product_interface";
+import { useUserStore } from "@/store/userStore";
+import { clientUnauthorizeHandler, currencyConverter } from "@/utils/utils";
 import axios from "axios";
 import { getCookie } from "cookies-next";
 import {
   GetServerSideProps,
   GetServerSidePropsContext,
-  GetStaticProps,
   InferGetServerSidePropsType,
 } from "next";
 import { useRouter } from "next/router";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { SubmitHandler } from "react-hook-form";
 import { AiOutlineShoppingCart } from "react-icons/ai";
 import { BsStarFill } from "react-icons/bs";
@@ -39,10 +40,11 @@ import { FaLocationDot } from "react-icons/fa6";
 import { VscEmptyWindow } from "react-icons/vsc";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import YouTube from "react-youtube";
 
-export interface IAPIProductDetailResponseWithSeller
-  extends IAPIProductDetailResponse {
-  seller_name: string;
+interface IChoosedVariant {
+  variant1: string;
+  variant2?: string;
 }
 
 export const getServerSideProps: GetServerSideProps = async (
@@ -54,7 +56,8 @@ export const getServerSideProps: GetServerSideProps = async (
 
   try {
     const response = await API.get(`/products/detail/${shop}/${productDetail}`);
-    const product = response.data.data;
+    const product = (response.data as IAPIResponse<IAPIProductDetailResponse>)
+      .data;
 
     const responseSeller = await API.get(`/sellers/${shop}/profile`);
     const seller = responseSeller.data.data;
@@ -73,28 +76,67 @@ export const getServerSideProps: GetServerSideProps = async (
   }
 };
 
+const getYoutubeVideoId = (url: string) => {
+  const youtubeRegex =
+    /^(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/;
+  const match = url.match(youtubeRegex);
+
+  return match?.[1] || null;
+};
+
 const ProductDetail = ({
   product,
   seller,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   const router = useRouter();
-
-  const [count, setCount] = useState<number>(1);
+  const { updateUser } = useUserStore();
+  const [count, setCount] = useState<number>(0);
   const [isHovering, setIsHovering] = useState(false);
   const [isModal, setIsModal] = useState<boolean>(false);
+  const [isModalReview, setIsModalReview] = useState<boolean>(false);
   const [variation, setVariation] = useState<string>("");
-  const [selectedVariants, setSelectedVariants] = useState<{
-    [key: string]: string;
-  }>({});
-  const [subtotal, setSubtotal] = useState<number>(0);
   const [currentStock, setCurrentStock] = useState<number>(0);
+  const [subtotal, setSubtotal] = useState<number>(0);
+  const [varIndex, setVarIndex] = useState<number>(0);
   const [isFavorite, setIsFavorite] = useState(product?.is_favorite || false);
   const [imagesProduct, setImagesProduct] = useState([]);
-  const [imagesReview, setImagesReview] = useState([]);
   const [reviews, setReviews] = useState<IAPIResponse<IReviewProduct[]>>();
   const [page, setPage] = useState<number>(1);
-  const [showAllDescription, setShowAllDescription] = useState(false);
-  const [descriptionLimit, setDescriptionLimit] = useState(1000);
+  const [wishlist, setWishlist] = useState<IAPIResponse<IWishlist[]>>();
+  const [isExpanded, setIsExpanded] = useState<boolean>(false);
+  const variationRef = useRef<HTMLDivElement>(null);
+  const [imageReviewChosen, setImageReviewChosen] = useState("");
+
+  const scrollLeft = () => {
+    if (variationRef.current) {
+      variationRef.current.scrollLeft -= 100;
+    }
+  };
+
+  const scrollRight = () => {
+    if (variationRef.current) {
+      variationRef.current.scrollLeft += 100;
+    }
+  };
+
+  useEffect(() => {
+    if (variationRef.current) {
+      const { scrollLeft, scrollWidth, clientWidth } = variationRef.current;
+      if (scrollLeft === 0) {
+      } else {
+      }
+      if (scrollLeft + clientWidth === scrollWidth) {
+      } else {
+      }
+    }
+  }, [variationRef]);
+  const handleSeeMore = () => {
+    setIsExpanded(true);
+  };
+
+  const handleSeeLess = () => {
+    setIsExpanded(false);
+  };
 
   const [suggestion, setSuggestion] =
     useState<IAPIResponse<IProductSuggestion[]>>();
@@ -102,30 +144,74 @@ const ProductDetail = ({
     IAPIResponse<IAPIProfileShopResponse> | undefined
   >();
 
+  const [choosedVariant, setChoosedVariant] = useState<
+    IChoosedVariant | undefined
+  >(
+    product.variants[0].selections
+      ? product.variant_options?.length === 1
+        ? {
+            variant1: product.variants[0]?.selections[0]?.selection_name,
+          }
+        : {
+            variant1: product.variants[0]?.selections[0]?.selection_name,
+            variant2: product.variants[0]?.selections[1]?.selection_name,
+          }
+      : undefined
+  );
+
+  const choosedVariantHandler = () => {
+    const variant = product.variants.find((v: any) => {
+      if (product.variant_options?.length === 1) {
+        return v.selections[0]?.selection_name === choosedVariant?.variant1;
+      } else if (product.variant_options?.length === 2) {
+        return (
+          v.selections[0]?.selection_name === choosedVariant?.variant1 &&
+          v.selections[1]?.selection_name === choosedVariant?.variant2
+        );
+      }
+    });
+
+    console.log(variant);
+    console.log(product);
+    const price = parseInt(variant ? variant.price : product.variants[0].price);
+    if (count >= 1) {
+      setSubtotal(price * count);
+    } else {
+      if (currentStock >= 1) {
+        setSubtotal(price);
+      } else {
+        setSubtotal(0);
+      }
+    }
+    setVarIndex(variant ? variant.variant_id : product.variants[0].variant_id);
+    if (currentStock < 1) {
+      setCurrentStock(variant ? variant.stock : product.variants[0].stock);
+      setCount(0);
+    } else {
+      setCurrentStock(
+        variant ? variant.stock - count : product.variants[0].stock - count
+      );
+    }
+  };
+
   const isYouTubeVideo = (url: string) => {
-    // Regex to check if the URL is a YouTube video URL
     const youtubeRegex =
       /^(https?:\/\/)?(www\.)?(youtube\.com\/(.*\/)?|youtu\.be\/)(.+)$/;
-
     return youtubeRegex.test(url);
   };
 
+  useEffect(() => {
+    choosedVariantHandler();
+  }, [choosedVariant, count]);
+
+  useEffect(() => {
+    setChoosedVariant(undefined);
+  }, [product]);
+
   const renderContent = () => {
     if (isHovering) {
-      if (isYouTubeVideo(variation)) {
-        return (
-          <iframe
-            title="YouTube Video"
-            width="560"
-            height="315"
-            src={variation}
-            allowFullScreen
-            className="bigImage w-full cursor-pointer rounded-md"
-            onClick={handleZoomImage}
-          ></iframe>
-        );
-      } else {
-        return (
+      return (
+        <>
           <img
             width={200}
             height={200}
@@ -134,13 +220,36 @@ const ProductDetail = ({
             className="bigImage w-full cursor-pointer rounded-md"
             onClick={handleZoomImage}
           />
-        );
-      }
+        </>
+      );
     } else {
       return (
         <img
           width={100}
           height={100}
+          src={variation}
+          alt=""
+          className="bigImage w-full cursor-pointer rounded-md"
+          onClick={handleZoomImage}
+        />
+      );
+    }
+  };
+
+  const renderBigImage = () => {
+    if (isYouTubeVideo(variation)) {
+      return (
+        <div className="bigImage w-full cursor-pointer rounded-md">
+          <YouTube
+            videoId={getYoutubeVideoId(variation) ?? ""}
+            opts={{ width: "100%", height: 315 }}
+            onReady={(event) => event.target.pauseVideo()}
+          />
+        </div>
+      );
+    } else {
+      return (
+        <img
           src={variation}
           alt=""
           className="bigImage w-full cursor-pointer rounded-md"
@@ -167,6 +276,7 @@ const ProductDetail = ({
       const res = await API.get(`/products/${product.id}/pictures`);
       const data = res.data.data;
       setImagesProduct(data);
+      console.log("img", data);
     } catch (e) {
       if (axios.isAxiosError(e)) {
         return toast.error(e.message, {
@@ -239,36 +349,6 @@ const ProductDetail = ({
     getReviewProducts();
   }, [product.id, page]);
 
-  const calculateSubtotal = () => {
-    const selectedVariant = product?.variants?.find((variant: any) => {
-      return Object.keys(selectedVariants).every((optionName) => {
-        return variant.selections.some((selection: any) => {
-          return (
-            selection.selection_variant_name === optionName &&
-            selection.selection_name === selectedVariants[optionName]
-          );
-        });
-      });
-    });
-
-    if (selectedVariant) {
-      const price = parseInt(selectedVariant.price);
-      setSubtotal(price * count);
-      setCurrentStock(selectedVariant.stock);
-    }
-  };
-
-  useEffect(() => {
-    calculateSubtotal();
-  }, [selectedVariants, count]);
-
-  const handleClick = (variant: string, optionName: string) => {
-    setSelectedVariants({
-      ...selectedVariants,
-      [optionName]: variant,
-    });
-  };
-
   const handleMouseOver = (src: string) => {
     setIsHovering(true);
     setVariation(src);
@@ -280,6 +360,10 @@ const ProductDetail = ({
 
   const handleZoomImage = () => {
     setIsModal(true);
+  };
+  const handleZoomImageReview = (src: string) => {
+    setIsModalReview(true);
+    setImageReviewChosen(src);
   };
 
   const inc = () => {
@@ -295,51 +379,70 @@ const ProductDetail = ({
   };
 
   const handleToCart = async () => {
-    if (count < 1) {
-      return;
-    }
-
-    let variant;
-    if (Object.keys(selectedVariants).length === 0) {
-      variant = product?.variants[0];
-    } else {
-      variant = product?.variants.find((v: any) => {
-        const variantKey = v.selections[0].selection_variant_name;
-        return selectedVariants[variantKey] === v.selections[0].selection_name;
-      });
-    }
-
-    if (!variant) {
-      return;
-    }
-
     const data = {
-      product_id: variant.variant_id,
+      product_id: varIndex,
       quantity: count,
     };
+    if (count >= 1 && currentStock >= 1) {
+      try {
+        const response = await API.post(`/accounts/carts`, data, {
+          headers: {
+            Authorization: `Bearer ${getCookie("accessToken")}`,
+          },
+        });
 
-    try {
-      const response = await API.post(`/accounts/carts`, data, {
-        headers: {
-          Authorization: `Bearer ${getCookie("accessToken")}`,
-        },
-      });
-
-      if (response.status === 200) {
-        toast.success("Added to cart", { autoClose: 1500 });
-      } else {
-        toast.error("Failed to add to cart", { autoClose: 1500 });
+        if (response.status === 200) {
+          toast.success("Added to cart", { autoClose: 1500 });
+        } else {
+          toast.error("Failed to add to cart", { autoClose: 1500 });
+        }
+      } catch (error) {
+        if (axios.isAxiosError(error)) {
+          toast.error(error.response?.data.message, { autoClose: 1500 });
+        } else {
+          toast.error("An error occurred while adding to cart", {
+            autoClose: 1500,
+          });
+        }
       }
-    } catch (error) {
-      if (axios.isAxiosError(error)) {
-        toast.error(error.response?.data.message, { autoClose: 1500 });
-      } else {
-        toast.error("An error occurred while adding to cart", {
+    }
+    if (currentStock < 1) {
+      toast.error("Out of stock", {
+        autoClose: 1500,
+      });
+    }
+    if (count < 1) {
+      toast.error("Add quantity first", {
+        autoClose: 1500,
+      });
+    }
+  };
+
+  const getWishlist = async () => {
+    try {
+      const res = await API.get(`/products/favorites`);
+      console.log(res);
+      const data = res.data as IAPIResponse<IWishlist[]>;
+      setWishlist(data);
+      console.log(data.data);
+
+      console.log("betul");
+    } catch (e) {
+      if (axios.isAxiosError(e)) {
+        if (e.response?.status === 401) {
+          return clientUnauthorizeHandler(router, updateUser);
+        }
+        return toast.error("Error fetching wishlist", {
+          toastId: "errorWishlist",
           autoClose: 1500,
         });
       }
     }
   };
+
+  useEffect(() => {
+    getWishlist();
+  }, []);
 
   const handleWishlist: SubmitHandler<IAPIProductDetailResponse> = async (
     data
@@ -361,7 +464,7 @@ const ProductDetail = ({
 
       if (response.status === 200) {
         toast.success("Added to wishlist", { autoClose: 1500 });
-        setIsFavorite(true); // Set isFavorite to true when successfully added to wishlist
+        setIsFavorite(!isFavorite);
       } else {
         toast.error("Failed to add to wishlist", { autoClose: 1500 });
       }
@@ -376,6 +479,41 @@ const ProductDetail = ({
     }
   };
 
+  const renderDescription = () => {
+    const descriptionToShow = isExpanded
+      ? product?.description
+      : product?.description.slice(0, 250);
+
+    return (
+      <div>
+        {descriptionToShow
+          ?.split("\\n")
+          .map((paragraph: string, index: number) => (
+            <span key={index} className="line-break">
+              {paragraph}
+              <br />
+            </span>
+          ))}
+        {!isExpanded && product?.description.length > 450 && (
+          <p
+            className="text-center text-[#f57b29] cursor-pointer"
+            onClick={handleSeeMore}
+          >
+            &#812; See more
+          </p>
+        )}
+        {isExpanded && (
+          <p
+            className="text-center text-[#f57b29] cursor-pointer"
+            onClick={handleSeeLess}
+          >
+            &#813; See less
+          </p>
+        )}
+      </div>
+    );
+  };
+
   if (product === null) {
     return <div>Loading...</div>;
   }
@@ -384,148 +522,196 @@ const ProductDetail = ({
     <>
       <ToastContainer />
       {isModal && (
-        <div className="z-50 fixed">
+        <Modal
+          content={<img className="h-[50vh]" src={variation} alt="..." />}
+          onClose={() => setIsModal(false)}
+        />
+      )}
+      {isModalReview && (
+        <div>
           <Modal
-            content={<img width={800} height={800} src={variation} alt="..." />}
-            onClose={() => setIsModal(false)}
+            content={
+              <img className="h-[50vh]" src={imageReviewChosen} alt="..." />
+            }
+            onClose={() => setIsModalReview(false)}
           />
+          <p>{imageReviewChosen}nn</p>
         </div>
       )}
       <div>
         <Navbar />
-        <div className="mx-auto lg:max-w-7xl px-4 md:px-0">
-          <div className="flex-col md:flex-row justify-between md:flex gap-10 py-5 px-5 md:px-0">
-            <div className="order-1 md:order-1 imageProduct w-full md:w-1/4 rounded-md overflow-hidden">
-              {renderContent()}
+        <div className="mx-auto lg:max-w-7xl px-4 md:px-0 ">
+          <div className="flex-col  md:flex-row justify-between md:flex gap-10 py-5 px-5 md:px-0">
+            <div className="order-1 md:order-1 imageProduct w-full md:w-1/4 rounded-md overflow-hidden flex flex-col">
+              {isYouTubeVideo(variation) ? renderBigImage() : renderContent()}
 
-              <div className="variation gap-1 mt-2 flex overflow-x-scroll [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none']">
-                {imagesProduct?.map((url, index) => {
-                  return (
-                    <img
+              <div className="relative ">
+                <div
+                  className="scroll-smooth   justify-between gap-1 mt-2 flex flex-row overflow-auto whitespace-nowrap scrollbar-thin scrollbar-thumb-gray-300   [&::-webkit-scrollbar]:hidden [&::-webkit-scrollbar-track] [-ms-overflow-style:'none'] [scrollbar-width:'none']"
+                  ref={variationRef}
+                >
+                  {imagesProduct?.map((url, index) => (
+                    <div
                       key={index}
-                      className="cursor-pointer w-[90px] h-full rounded-md"
-                      width={50}
-                      height={50}
-                      src={url}
-                      alt="images"
-                      onMouseOver={() => handleMouseOver(url)}
-                      onMouseOut={handleMouseOut}
-                      onClick={handleZoomImage}
-                    />
-                  );
-                })}
+                      className="flex-shrink-0 cursor-pointer w-28 h-28 rounded-md mr-2 flex"
+                      onClick={() => {
+                        setVariation(url);
+                        setIsHovering(false);
+                      }}
+                    >
+                      {isYouTubeVideo(url) ? (
+                        <>
+                          <img
+                            src={`https://img.youtube.com/vi/${getYoutubeVideoId(
+                              url
+                            )}/0.jpg`}
+                            className="w-full h-full rounded-md"
+                            alt="variation image"
+                          />
+                        </>
+                      ) : (
+                        <>
+                          <img
+                            className="cursor-pointer w-full h-full rounded-md"
+                            src={url}
+                            alt="images"
+                            onMouseOver={() => handleMouseOver(url)}
+                            onMouseOut={handleMouseOut}
+                            onClick={handleZoomImage}
+                          />
+                        </>
+                      )}
+                    </div>
+                  ))}
+                </div>
+                <div className="w-fit absolute top-0 flex justify-between items-center h-full">
+                  <Button
+                    styling=" bg-neutral-500 p-2 opacity-70 text-white font-extrabold hover:bg-neutral-300"
+                    onClick={scrollLeft}
+                    text="&#60;"
+                  />
+                </div>
+                <div className="w-fit absolute top-0 right-0  flex justify-between items-center h-full ">
+                  <Button
+                    styling="bg-neutral-500  p-2 opacity-70 text-white font-extrabold hover:bg-neutral-300"
+                    onClick={scrollRight}
+                    text="&gt;"
+                  />
+                </div>
               </div>
+
               <div className="favorite-icon mt-5 text-right">
                 <button onClick={() => handleWishlist(product)}>
-                  {isFavorite ? (
+                  {isFavorite &&
+                  wishlist?.data?.map(
+                    (e) => e.product_id === product.product_id
+                  ) ? (
                     <div className="flex items-center gap-1">
                       <FaHeart style={{ color: "red" }} />
-                      <p>Favorite</p>
+                      <p>
+                        Favorite <span>{`(total user)`}</span>
+                      </p>
                     </div>
                   ) : (
                     <div className="flex items-center gap-1">
                       <FaRegHeart style={{ color: "red" }} />
-                      <p>Favorite</p>
+                      <p>
+                        Favorite <span>{`(total user)`}</span>
+                      </p>
                     </div>
                   )}
                 </button>
               </div>
             </div>
-            <div className="order-2 md:order-3 purchaseBox border shadow-inner rounded-sm p-5 h-fit md:w-1/4 pt-2 md:sticky md:top-0">
-              <p className="productTitle text-md font-medium pb-3">
-                Set Amounts
-              </p>
-
-              <div className="flex gap-x-10 md:gap-1 mb-2 text-sm text-neutral-600 py-3 ">
-                <p className="">Pengiriman</p>
-
-                <div className="flex items-center gap-1">
-                  <FaLocationDot /> {"Malang"}
-                </div>
-                {/* <div className="flex items-center gap-1">
-                    <FaTruckFast /> {`Jakarta Selatan ${"Rp3000"}`}
-                  </div> */}
-              </div>
-              <div className="flex flex-col gap-y-3 text-xs text-neutral-600">
-                {product?.variant_options?.map((item: any, i: number) => {
-                  return (
-                    <div
-                      key={i}
-                      className="flex md:gap-x-20 items-start gap-10"
-                    >
-                      <p>{item.variant_option_name}</p>
-                      <div className="grid grid-cols-2 gap-2">
-                        {item.childs.map((variant: any, k: number) => {
-                          const optionName = item.variant_option_name;
-                          return (
-                            <p
-                              key={k}
-                              className={`px-1 py-1 border text-center rounded-md cursor-pointer hover:bg-[#d6e4f8] hover:border hover:border-[#364968] row-span-2 w-full text-ellipsis line-clamp-2 h-10 ${
-                                selectedVariants[optionName] === variant
-                                  ? "bg-[#d6e4f8] border border-[#364968]"
-                                  : ""
-                              }`}
-                              onClick={() => handleClick(variant, optionName)}
-                            >
-                              {variant}
-                            </p>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-
-              <div className="flex text-center items-center mt-5">
-                <div className="quantity flex border border-zinc-600">
-                  <button className="minus w-3 md:w-5" onClick={dec}>
-                    -
-                  </button>
-                  <input
-                    className="text-center w-14 md:w-20 border-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none outline-none"
-                    min={1}
-                    max={100}
-                    type="number"
-                    readOnly={true}
-                    value={count}
-                    onChange={(e: any) => {
-                      setCount(parseInt(e.target.value)), e.preventDefault();
-                    }}
-                  />
-                  <button className="plus w-3 md:w-5" onClick={inc}>
-                    +
-                  </button>
-                </div>
-                <div className="stock text-xs text-neutral-500 py-3 pl-5 ">
-                  <p>{`Stock ${currentStock}`}</p>
-                </div>
-              </div>
-              <div className="flex text-sm text-neutral-600 py-3 justify-between">
-                <p className="">Subtotal</p>
-                <p className="subTotal text-lg font-semibold text-neutral-800">
-                  {currencyConverter(subtotal)}
+            <div className="order-2 md:order-3 md:w-1/4 pt-3">
+              <div className="border shadow-inner rounded-sm p-5 h-fit pt-2 md:sticky md:top-0">
+                <p className="productTitle text-base font-semibold pb-3">
+                  Set Amounts
                 </p>
-              </div>
-              <div className="btn flex gap-x-2 justify-between mt-10">
-                <div className="w-full">
-                  <button
-                    type="submit"
-                    onClick={handleToCart}
-                    className="flex items-center justify-center gap-1 h-10 border border-[#364968] hover:shadow-md bg-[#d6e4f8] p-2 w-full md:w-32 hover:bg-[#eff6fd]  transition-all duration-300"
-                  >
-                    <AiOutlineShoppingCart /> <span>Add to cart</span>
-                  </button>
+                <p className="text-sm mb-5">
+                  {choosedVariant?.variant1 !== undefined
+                    ? ` ${choosedVariant?.variant1}`
+                    : ""}
+                  {choosedVariant?.variant2 !== undefined
+                    ? ` - ${choosedVariant?.variant2}`
+                    : ""}
+                </p>
+
+                <div className="flex justify-between md:gap-1 mb-2 text-sm text-neutral-600 py-3 ">
+                  <p className="">Pengiriman</p>
+
+                  <div className="flex items-center gap-1">
+                    <FaLocationDot />
+                    {shopProfile?.data?.seller_district}
+                  </div>
                 </div>
 
-                <div onClick={handleToCart} className="w-full">
-                  <button
-                    onClick={() => router.push(`/cart`)}
-                    type="submit"
-                    className=" bg-[#364968] text-white p-2 w-full h-10 md:w-32 justify-center hover:bg-[#394e6f] hover:shadow-lg"
-                  >
-                    Buy now
-                  </button>
+                <div className="flex text-center items-center mt-5">
+                  <div className="quantity flex border border-zinc-600">
+                    <Button styling="minus w-3 md:w-5" onClick={dec} text="-" />
+                    <input
+                      className="text-center w-16 md:w-20 border-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none outline-none"
+                      min={1}
+                      max={currentStock}
+                      type="number"
+                      value={count}
+                      onChange={(e: any) => {
+                        setCount(parseInt(e.target.value)), e.preventDefault();
+                        console.log("counter", count);
+                      }}
+                    />
+                    <Button styling="plus w-3 md:w-5" onClick={inc} text="+" />
+                  </div>
+                  <div className="stock text-xs text-neutral-500 py-3 pl-5 ">
+                    <p>{`Stock ${currentStock}`}</p>
+                  </div>
+                </div>
+                <div className="flex text-sm text-neutral-600 py-3 justify-between">
+                  <p className="">Subtotal</p>
+                  <p className="subTotal text-lg font-semibold text-neutral-800">
+                    {subtotal}
+                  </p>
+                </div>
+                <div className="btn flex gap-x-2 justify-between mt-10">
+                  <div className="w-full">
+                    {currentStock >= 1 ? (
+                      <button
+                        type="submit"
+                        onClick={handleToCart}
+                        className="flex items-center justify-center gap-1 h-10 border border-[#364968] hover:shadow-md bg-[#d6e4f8] p-2 w-full md:w-32 hover:bg-[#eff6fd]  transition-all duration-300"
+                      >
+                        <AiOutlineShoppingCart /> <span>Add to cart</span>
+                      </button>
+                    ) : (
+                      <button
+                        disabled
+                        type="submit"
+                        onClick={handleToCart}
+                        className="flex items-center justify-center gap-1 h-10  bg-[#d6e4f8] p-2 w-full md:w-32  transition-all duration-300"
+                      >
+                        <AiOutlineShoppingCart /> <span>Add to cart</span>
+                      </button>
+                    )}
+                  </div>
+
+                  {currentStock >= 1 ? (
+                    <div onClick={handleToCart} className="w-full">
+                      <Button
+                        onClick={() => router.push(`/cart`)}
+                        styling=" bg-[#364968] text-white p-2 w-full h-10 md:w-32 justify-center hover:bg-[#394e6f] hover:shadow-lg"
+                        text="Buy now"
+                      />
+                    </div>
+                  ) : (
+                    <div onClick={handleToCart} className="w-full">
+                      <Button
+                        disabled
+                        onClick={() => router.push(`/cart`)}
+                        styling="bg-[#7b94bd] text-white p-2 w-full h-10 md:w-32 justify-center"
+                        text="Buy now"
+                      />
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -534,6 +720,12 @@ const ProductDetail = ({
               <div className="spesification">
                 <p className="productTitle text-2xl md:text-3xl font-medium pb-3">
                   {product?.name}
+                  {choosedVariant?.variant1 !== undefined
+                    ? ` - ${choosedVariant?.variant1}`
+                    : ""}
+                  {choosedVariant?.variant2 !== undefined
+                    ? ` - ${choosedVariant?.variant2}`
+                    : ""}
                 </p>
                 <div className="historyProduct flex items-center text-xs pb-3">
                   <p className="pr-3">{`Sold ${product?.sold}`} </p>
@@ -548,25 +740,57 @@ const ProductDetail = ({
                   )}
                 </p>
               </div>
+              <div className="flex flex-col gap-y-3 text-xs text-neutral-600 w-full mt-5">
+                {product?.variant_options?.map((item: any, i: number) => {
+                  return (
+                    <div key={i} className="md:gap-x-20 items-start gap-10">
+                      <p className="text-sm md:text-base text-neutral-700 font-medium">
+                        {item.variant_option_name}
+                      </p>
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:justify-between w-full my-5 ">
+                        {item.childs.map((variant: any, k: number) => {
+                          return (
+                            <p
+                              key={k}
+                              className={`px-1 py-1 justify-center items-center flex border text-center rounded-md cursor-pointer hover:bg-[#d6e4f8] hover:border hover:border-[#364968] row-span-2 w-full text-ellipsis line-clamp-2 h-10 
+                              ${
+                                i === 0
+                                  ? choosedVariant?.variant1 === variant &&
+                                    "bg-[#d6e4f8] border border-[#364968]"
+                                  : choosedVariant?.variant2 === variant &&
+                                    "bg-[#d6e4f8] border border-[#364968]"
+                              }`}
+                              onMouseEnter={
+                                i === 0
+                                  ? () => handleMouseOver(item.pictures[k])
+                                  : undefined
+                              }
+                              onClick={() => {
+                                setChoosedVariant(
+                                  i === 0
+                                    ? {
+                                        ...choosedVariant!,
+                                        variant1: variant,
+                                      }
+                                    : {
+                                        ...choosedVariant!,
+                                        variant2: variant,
+                                      }
+                                );
+                              }}
+                            >
+                              {variant}
+                            </p>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
               <div className="desc pt-5 ">
                 <p className="text-lg font-medium border-b my-4">Description</p>
-
-                <p className="">
-                  {product?.description
-                    ?.split("\n\n")
-                    .map((paragraph: any, index: number) => (
-                      <span key={index} className="line-break">
-                        {paragraph
-                          .split("\\n")
-                          .map((line: string, lineIndex: number) => (
-                            <React.Fragment key={lineIndex}>
-                              {line}
-                              <br />
-                            </React.Fragment>
-                          ))}
-                      </span>
-                    ))}
-                </p>
+                <div>{renderDescription()}</div>
               </div>
             </div>
           </div>
@@ -577,6 +801,11 @@ const ProductDetail = ({
                   src={shopProfile?.data?.seller_picture_url}
                   alt="seller"
                   className="imgSeller w-full md:w-32 h-full place-self-center object-fill rounded-lg"
+                  placeholder="https://cdn4.iconfinder.com/data/icons/web-ui-color/128/Account-512.png"
+                  onError={(e) => {
+                    (e.target as HTMLInputElement).src =
+                      "https://cdn4.iconfinder.com/data/icons/web-ui-color/128/Account-512.png";
+                  }}
                 />
                 <div className="flex flex-col md:flex-row gap-y-4 md:gap-x-48 w-full">
                   <div className="aboutSeller w-full md:w-1/2">
@@ -595,7 +824,6 @@ const ProductDetail = ({
                       </button>
                     </p>
                   </div>
-
                   <table className="aboutSeller w-full  md:w-full text-sm md:text-base  self-center ">
                     <thead></thead>
                     <tbody>
@@ -676,9 +904,11 @@ const ProductDetail = ({
                             <>
                               <img
                                 key={i}
-                                className="cursor-pointer w-full h-full rounded-sm"
+                                className={`cursor-pointer w-full h-full rounded-sm
+                                `}
                                 src={e}
                                 alt="image review"
+                                onClick={() => handleZoomImageReview(e)}
                               />
                             </>
                           ))}

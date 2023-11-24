@@ -4,7 +4,7 @@ import { currencyConverter } from "@/utils/utils";
 import QuantityButton from "../QuantityButton";
 import Button from "../Button";
 
-interface ICartTableDataProps {
+export interface ICartTableDataProps {
   id: number;
   index: number;
   productImage: string;
