@@ -340,10 +340,14 @@ const Search = () => {
                       return (
                         <div
                           key={i}
-                          className="flex items-center gap-x-2  w-fit"
+                          className="flex items-center gap-x-2 w-fit"
                         >
                           <div
-                            className="flex hover:cursor-pointer"
+                            className={`flex hover:cursor-pointer  ${
+                              searchParam.get("minRating") &&
+                              searchParam.get("minRating") === String(i + 1) &&
+                              "bg-slate-100"
+                            } p-1 rounded-md`}
                             onClick={(_) => {
                               router.push({
                                 href: router.asPath,
