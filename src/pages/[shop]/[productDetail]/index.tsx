@@ -98,7 +98,6 @@ const ProductDetail = ({
   const [imagesProduct, setImagesProduct] = useState([]);
   const [reviews, setReviews] = useState<IAPIResponse<IReviewProduct[]>>();
   const [page, setPage] = useState<number>(1);
-  const [wishlist, setWishlist] = useState<IAPIResponse<IWishlist[]>>();
   const [isExpanded, setIsExpanded] = useState<boolean>(false);
   const variationRef = useRef<HTMLDivElement>(null);
   const [imageReviewChosen, setImageReviewChosen] = useState("");
@@ -115,17 +114,6 @@ const ProductDetail = ({
     }
   };
 
-  useEffect(() => {
-    if (variationRef.current) {
-      const { scrollLeft, scrollWidth, clientWidth } = variationRef.current;
-      if (scrollLeft === 0) {
-      } else {
-      }
-      if (scrollLeft + clientWidth === scrollWidth) {
-      } else {
-      }
-    }
-  }, [variationRef]);
   const handleSeeMore = () => {
     setIsExpanded(true);
   };
@@ -468,6 +456,9 @@ const ProductDetail = ({
       }
     } catch (error) {
       if (axios.isAxiosError(error)) {
+        if (error.response?.status === 401) {
+          return router.push("/login");
+        }
         toast.error(error.response?.data.message, { autoClose: 1500 });
       } else {
         toast.error("An error occurred while adding to wishlist", {
