@@ -64,7 +64,7 @@ const Navbar = () => {
         <div>
           <div className="flex items-center justify-between py-3 md:py-5 md:block">
             <Link href="/">
-              <h2 className="text-3xl font-bold text-white">LOGO</h2>
+              <h2 className="text-3xl font-bold text-white">Shopidel</h2>
             </Link>
             <div className="md:hidden flex items-center">
               <Link href="/cart" className=" w-full  px-3 py-1 ">
