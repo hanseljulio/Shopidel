@@ -8,11 +8,16 @@ import { useEffect, useState } from "react";
 import Category from "@/components/Category";
 import { useRouter } from "next/router";
 import axios from "axios";
-import { toast } from "react-toastify";
+import { ToastContainer, toast } from "react-toastify";
 import { IListCategory, IProduct } from "@/interfaces/product_interface";
+import { clientUnauthorizeHandler } from "@/utils/utils";
+import { useUserStore } from "@/store/userStore";
+import "react-toastify/dist/ReactToastify.css";
+import { deleteCookie } from "cookies-next";
 
 export default function Home() {
   const router = useRouter();
+  const { updateUser } = useUserStore();
   const [productList, setProductList] = useState<IAPIResponse<IProduct[]>>({});
   const [listCategory, setListCategory] = useState<
     IAPIResponse<IListCategory[]>
@@ -53,12 +58,22 @@ export default function Home() {
   };
 
   useEffect(() => {
+    if (router.query.force_logout === "true") {
+      updateUser(undefined);
+      deleteCookie("accessToken");
+      deleteCookie("refreshToken");
+      toast.error("An error occured, you've been logged out", {
+        autoClose: 1500,
+      });
+    }
+
     getProduct();
     getCategories();
   }, []);
 
   return (
     <div className="bg-gray-100">
+      <ToastContainer />
       <Navbar />
       <CarouselHome />
       <div className="mx-auto lg:max-w-7xl md:items-center px-4 md:px-0 mb-5">
