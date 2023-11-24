@@ -69,7 +69,7 @@ const SellerSettings = () => {
       <ToastContainer />
       <SellerAdminLayout currentPage="Settings">
         <div className="p-5">
-          <div className="flex items-center justify-between max-w-[50%]">
+          <div className="flex items-center justify-between  lg:max-w-[50%]">
             <h1 className="text-3xl">Settings</h1>
             <div
               className="flex gap-x-1 items-center hover:cursor-pointer"
@@ -88,7 +88,7 @@ const SellerSettings = () => {
               )}
             </div>
           </div>
-          <div className="mt-5 flex flex-col gap-y-5 max-w-[50%]">
+          <div className="mt-5 flex flex-col gap-y-5 lg:max-w-[50%]">
             <div className="flex items-center gap-x-5">
               <div>
                 <img
@@ -176,11 +176,11 @@ const SellerSettings = () => {
               </h1>
             </div>
             {isEdit && (
-              <div className="self-end">
+              <div className="lg:self-end">
                 <Button
                   text="Update"
                   onClick={handleSubmit(onSubmit)}
-                  styling="bg-[#364968] p-2 rounded-md text-white text-sm"
+                  styling="bg-[#364968] w-full p-2 rounded-md text-white text-sm"
                 />
               </div>
             )}
