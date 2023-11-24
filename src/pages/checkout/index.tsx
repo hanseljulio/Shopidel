@@ -42,7 +42,8 @@ interface ISendData {
   courier_id: number;
   notes: string;
   weight: string;
-  voucher_id?: number;
+  shop_promotion_id?: number;
+  marketplace_promotion_id?: number;
 }
 
 interface ICourierList {
@@ -319,6 +320,7 @@ const CheckoutPage = () => {
         orderTotal > response.data.data.max_purchase_amount
       ) {
         toast.error("Minimum/maximum purchase amount not met!");
+        setSelectedVoucher(0);
         return;
       }
 
@@ -482,7 +484,8 @@ const CheckoutPage = () => {
       courier_id: courierId,
       notes: additionalNotes,
       weight: "200",
-      // "voucher_id": 1 // optional
+      shop_promotion_id: selectedVoucher,
+      marketplace_promotion_id: selectedDiscount,
     };
 
     for (let i = 0; i < cartStore.cart!.length; i++) {
@@ -501,7 +504,17 @@ const CheckoutPage = () => {
         API.post("/orders/checkout", sendData),
         {
           pending: "Loading",
-          success: "Payment success!",
+          success: {
+            render() {
+              cartStore.updateCart(undefined);
+
+              setTimeout(() => {
+                router.replace("/cart");
+              }, 3000);
+
+              return "Payment success!";
+            },
+          },
           error: {
             render({ data }) {
               if (axios.isAxiosError(data)) {
@@ -564,6 +577,7 @@ const CheckoutPage = () => {
       orderTotal > parseInt(data.max_purchase_amount)
     ) {
       toast.error("Minimum/maximum purchase amount not met!");
+      setSelectedDiscount(0);
       return;
     }
 
