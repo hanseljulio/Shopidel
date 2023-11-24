@@ -1,8 +1,6 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { FaTicketAlt } from "react-icons/fa";
 import Button from "../Button";
-import { AiFillCloseSquare } from "react-icons/ai";
-import { ICheckoutPromotions } from "@/interfaces/seller_interface";
 import { currencyConverter } from "@/utils/utils";
 import { ICheckoutMarketplace } from "@/interfaces/seller_interface";
 
