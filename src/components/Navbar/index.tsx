@@ -181,7 +181,7 @@ const Navbar = () => {
         <div>
           <div className="flex items-center justify-between py-3 md:py-5 md:block">
             <Link href="/">
-              <h2 className="text-3xl font-bold text-white">LOGO</h2>
+              <h2 className="text-3xl font-bold text-white">Shopidel</h2>
             </Link>
             <div className="md:hidden flex items-center">
               <Link href="/cart" className=" w-full  px-3 py-1 ">
@@ -324,6 +324,7 @@ const Navbar = () => {
                   <img
                     src={logged.profile_picture}
                     alt="profile_picture"
+                    className="h-full w-full object-contain rounded-full"
                     placeholder="https://cdn4.iconfinder.com/data/icons/web-ui-color/128/Account-512.png"
                     onError={(e) => {
                       (e.target as HTMLInputElement).src =
