@@ -153,7 +153,9 @@ const SellerSettings = () => {
             <h1 className="text-xl">
               {isEdit ? (
                 <input
-                  {...register("seller_operating_hour.start")}
+                  {...register("seller_operating_hour.start", {
+                    value: data?.seller_operating_hour.start,
+                  })}
                   type="time"
                   className="rounded-md"
                   name="seller_operating_hour.start"
@@ -165,7 +167,9 @@ const SellerSettings = () => {
               -{" "}
               {isEdit ? (
                 <input
-                  {...register("seller_operating_hour.end")}
+                  {...register("seller_operating_hour.end", {
+                    value: data?.seller_operating_hour.end,
+                  })}
                   type="time"
                   className="rounded-md"
                   name="seller_operating_hour.end"
