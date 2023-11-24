@@ -24,6 +24,17 @@ export interface IEtalase {
   };
 }
 
+interface ISellerProduct {
+  name: string;
+  price: string;
+  picture_url: string;
+  stars: string;
+  total_sold: number;
+  created_at: string;
+  category_level_1: string;
+  category_level_2: string;
+  category_level_3: string;
+}
 export interface IAPIProfileShopResponse {
   seller_id: number;
   seller_name: string;
@@ -33,32 +44,10 @@ export interface IAPIProfileShopResponse {
     start: string;
     end: string;
   };
+  seller_description: string;
   seller_stars: string;
   shop_name_slug: string;
-  seller_products: [
-    {
-      name: string;
-      price: string;
-      picture_url: string;
-      stars: string;
-      total_sold: number;
-      created_at: string;
-      category_level_1: string;
-      category_level_2: string;
-      category_level_3: string;
-    },
-    {
-      name: string;
-      price: string;
-      picture_url: string;
-      stars: string;
-      total_sold: number;
-      created_at: string;
-      category_level_1: string;
-      category_level_2: string;
-      category_level_3: string;
-    }
-  ];
+  seller_products: ISellerProduct[];
 }
 
 export interface IProfileShopProps {
