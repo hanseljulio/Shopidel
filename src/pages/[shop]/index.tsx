@@ -175,7 +175,7 @@ function Index({ seller }: IProfileShopProps) {
       <Navbar />
       <div className="mx-auto lg:max-w-7xl md:items-center px-4 md:px-0 mb-5">
         <div className="sellerShop border h-auto border-slate-200 rounded-t-xl text-black flex flex-col md:flex-row items-center md:items-start gap-y-5 py-2 px-2  mt-10 gap-10 md:p-5 ">
-          <div className="md:w-1/2 w-full bg-slate-100 flex-col flex gap-y-10 h-96 p-3 rounded-xl">
+          <div className="md:w-1/2 w-full bg-slate-100 flex-col flex gap-y-10 h-full p-3 rounded-xl">
             <div className="flex flex-col md:flex-row justify-center">
               <img
                 src={seller?.seller_picture_url}
@@ -213,7 +213,7 @@ function Index({ seller }: IProfileShopProps) {
             </div>
           </div>
           <div className="md:w-1/2 w-full">
-            <div className="p-5">
+            <div className="p-3">
               <p className="gap-x-1 flex items-center font-semibold mb-5">
                 About
                 <span className=" text-lg text-[#f57b29]">
@@ -221,19 +221,14 @@ function Index({ seller }: IProfileShopProps) {
                 </span>
               </p>
               <p>
-                Lorem ipsum dolor sit amet consectetur adipisicing elit.
-                Dignissimos laboriosam amet necessitatibus est, ducimus ipsam,
-                nisi ab veniam esse expedita vel nihil eveniet ea aliquam
-                quaerat dolor eum distinctio natus blanditiis quis culpa ipsa
-                voluptas mollitia fuga. Beatae, aperiam dolore et rerum
-                accusamus inventore repellendus rem nesciunt iure obcaecati illo
-                est ducimus reiciendis natus explicabo sunt quasi tempore labore
-                quia culpa modi atque porro officia. Mollitia eos adipisci natus
-                voluptatibus cupiditate, eligendi dolorum totam enim, explicabo
-                delectus labore. Neque voluptatibus ea, nisi delectus voluptates
-                excepturi vitae non eum harum culpa, consequuntur quidem
-                expedita? Quo fuga, quaerat quisquam adipisci praesentium
-                distinctio.
+                {seller.seller_description
+                  ?.split("\\n")
+                  .map((paragraph: string, index: number) => (
+                    <span key={index} className="line-break">
+                      {paragraph}
+                      <br />
+                    </span>
+                  ))}
               </p>
             </div>
           </div>
