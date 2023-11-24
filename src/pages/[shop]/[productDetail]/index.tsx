@@ -359,13 +359,16 @@ const ProductDetail = ({
   const handleZoomImage = () => {
     setIsModal(true);
   };
+
   const handleZoomImageReview = (src: string) => {
     setIsModalReview(true);
     setImageReviewChosen(src);
   };
 
   const inc = () => {
-    if (count >= 0 && count <= currentStock - 1) {
+    if (count >= 0 && currentStock! == 0) {
+      console.log("sto", currentStock);
+
       setCount(count + 1);
     }
   };
@@ -416,32 +419,6 @@ const ProductDetail = ({
       });
     }
   };
-
-  const getWishlist = async () => {
-    try {
-      const res = await API.get(`/products/favorites`);
-      console.log(res);
-      const data = res.data as IAPIResponse<IWishlist[]>;
-      setWishlist(data);
-      console.log(data.data);
-
-      console.log("betul");
-    } catch (e) {
-      if (axios.isAxiosError(e)) {
-        if (e.response?.status === 401) {
-          return clientUnauthorizeHandler(router, updateUser);
-        }
-        return toast.error("Error fetching wishlist", {
-          toastId: "errorWishlist",
-          autoClose: 1500,
-        });
-      }
-    }
-  };
-
-  useEffect(() => {
-    getWishlist();
-  }, []);
 
   const handleWishlist: SubmitHandler<IAPIProductDetailResponse> = async (
     data
@@ -495,7 +472,7 @@ const ProductDetail = ({
           ))}
         {!isExpanded && product?.description.length > 450 && (
           <p
-            className="text-center text-[#f57b29] cursor-pointer"
+            className="text-center text-[#f57b29] cursor-pointer animate-bounce"
             onClick={handleSeeMore}
           >
             &#812; See more
