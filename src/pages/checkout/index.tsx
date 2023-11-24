@@ -137,7 +137,7 @@ const CheckoutVoucherSelect = (props: CheckoutVoucherSelectProps) => {
         Promotions
       </h1>
       <span
-        className={`text-[#bb5d1f] ${
+        className={`text-[#bb5d1f] text-center ${
           props.usedVoucher === 0 ? "hidden invisible" : ""
         }`}
       >
@@ -350,7 +350,7 @@ const CheckoutMarketplaceSelect = (props: ICheckoutMarketplaceSelectProps) => {
         Marketplace
       </h1>
       <span
-        className={`text-[#bb5d1f] ${
+        className={`text-[#bb5d1f] text-center ${
           props.usedDiscount === 0 ? "hidden invisible" : ""
         }`}
       >
