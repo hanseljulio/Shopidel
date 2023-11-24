@@ -14,7 +14,7 @@ import {
 } from "@/interfaces/product_interface";
 import { IAPIProfileShopResponse } from "@/interfaces/seller_interface";
 import { API } from "@/network";
-import { IWishlist } from "@/pages/wishlist";
+import { IWishlist } from "@/interfaces/product_interface";
 import { useUserStore } from "@/store/userStore";
 import { clientUnauthorizeHandler, currencyConverter } from "@/utils/utils";
 import axios from "axios";

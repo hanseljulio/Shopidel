@@ -17,20 +17,7 @@ import Pagination from "@/components/Pagination";
 import { FaTrash } from "react-icons/fa";
 import { getCookie } from "cookies-next";
 import "react-toastify/dist/ReactToastify.css";
-import { SubmitHandler } from "react-hook-form";
-
-export interface IWishlist {
-  id: number;
-  product_id: number;
-  name: string;
-  district: string;
-  total_sold: number;
-  price: string;
-  picture_url: string;
-  created_at: string | Date;
-  product_name_slug: string;
-  shop_name_slug: string;
-}
+import { IWishlist } from "@/interfaces/product_interface";
 
 function Index() {
   const { updateUser } = useUserStore();
@@ -72,21 +59,6 @@ function Index() {
       console.error("Error during search:", error);
     }
   };
-
-  // const searchQueryHandler = async () => {
-  //   try {
-  //     await getWishlist();
-  //     router.push({
-  //       pathname: "/wishlist",
-  //       query: {
-  //         ...(query.trim() !== "" ? { s: query } : {}),
-  //         page: 1,
-  //       },
-  //     });
-  //   } catch (error) {
-  //     console.error("Error during search:", error);
-  //   }
-  // };
 
   const handleQueryChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newQuery = e.target.value;
@@ -203,8 +175,11 @@ function Index() {
           <>
             <div className="gap-x-4 gap-y-1 grid grid-cols-2 md:grid-cols-6 mt-10">
               {wishlist?.data?.map((product, i) => (
-                <div key={i} className="rounded-md flex group">
-                  <div className="relative">
+                <div
+                  key={i}
+                  className="rounded-md flex group group-hover:scale-95 "
+                >
+                  <div className="relative group-hover:group-hover:scale-10">
                     <ProductCard
                       image={product.picture_url}
                       price={product.price}

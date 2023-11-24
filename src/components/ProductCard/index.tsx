@@ -57,11 +57,7 @@ const ProductCard = ({
               )}
             >
               <BsStarFill />
-              <span
-                className={classNames(
-                  "text-gray-500 ml-2 group-hover:text-white items-center"
-                )}
-              >
+              <span className={classNames("text-gray-500 ml-2  items-center")}>
                 {star}
               </span>
             </div>
