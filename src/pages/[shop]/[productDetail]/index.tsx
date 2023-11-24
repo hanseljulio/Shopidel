@@ -413,32 +413,6 @@ const ProductDetail = ({
     }
   };
 
-  const getWishlist = async () => {
-    try {
-      const res = await API.get(`/products/favorites`);
-      console.log(res);
-      const data = res.data as IAPIResponse<IWishlist[]>;
-      setWishlist(data);
-      console.log(data.data);
-
-      console.log("betul");
-    } catch (e) {
-      if (axios.isAxiosError(e)) {
-        if (e.response?.status === 401) {
-          return clientUnauthorizeHandler(router, updateUser);
-        }
-        return toast.error("Error fetching wishlist", {
-          toastId: "errorWishlist",
-          autoClose: 1500,
-        });
-      }
-    }
-  };
-
-  useEffect(() => {
-    getWishlist();
-  }, []);
-
   const handleWishlist: SubmitHandler<IAPIProductDetailResponse> = async (
     data
   ) => {
@@ -449,12 +423,7 @@ const ProductDetail = ({
     try {
       const response = await API.post(
         `/products/${data.id}/favorites/add-favorite`,
-        favData,
-        {
-          headers: {
-            Authorization: `Bearer ${getCookie("accessToken")}`,
-          },
-        }
+        favData
       );
 
       if (response.status === 200) {

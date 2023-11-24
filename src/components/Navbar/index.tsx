@@ -106,8 +106,10 @@ const Navbar = () => {
   };
 
   useEffect(() => {
-    getCartData();
-  }, []);
+    if (user) {
+      getCartData();
+    }
+  }, [user]);
 
   const renderCartProducts = () => {
     const maxProductsToShow = 5;
@@ -286,36 +288,38 @@ const Navbar = () => {
           </div>
         </div>
         <div className="hidden space-x-4 md:flex align-middle">
-          <div className="flex gap-x-2 group relative">
-            <button
-              className=" text-white rounded-md shadow align-middle"
-              onClick={() => router.push("/cart")}
-            >
-              <AiOutlineShoppingCart size={30} />
-            </button>
-            <div className="invisible opacity-0 group-hover:opacity-100 group-hover:visible transition-all duration-150 w-[500px] bg-white absolute top-[53px] right-0 z-50 rounded-bl-md rounded-br-md overflow-hidden shadow-lg">
-              <div className="px-5 pt-5 text-center">
-                <h1 className="font-bold w-full text-xl pb-2">My cart </h1>
-                {cartIsEmpty() ? (
-                  <div className="items-center justify-center">
-                    <img
-                      alt="cart pic"
-                      src={"/vm2/images/emptycart.png"}
-                      width={250}
-                      height={250}
-                      className="w-32 h-32 object-cover items-center justify-center"
-                    />
+          {user && (
+            <div className="flex gap-x-2 group relative">
+              <button
+                className=" text-white rounded-md shadow align-middle"
+                onClick={() => router.push("/cart")}
+              >
+                <AiOutlineShoppingCart size={30} />
+              </button>
+              <div className="invisible opacity-0 group-hover:opacity-100 group-hover:visible transition-all duration-150 w-[500px] bg-white absolute top-[53px] right-0 z-50 rounded-bl-md rounded-br-md overflow-hidden shadow-lg">
+                <div className="px-5 pt-5 text-center">
+                  <h1 className="font-bold w-full text-xl pb-2">My cart </h1>
+                  {cartIsEmpty() ? (
+                    <div className="items-center justify-center">
+                      <img
+                        alt="cart pic"
+                        src={"/vm2/images/emptycart.png"}
+                        width={250}
+                        height={250}
+                        className="w-32 h-32 object-cover items-center justify-center"
+                      />
 
-                    <h1 className="text-center">
-                      Your shopping cart looks empty!
-                    </h1>
-                  </div>
-                ) : (
-                  renderCartProducts()
-                )}
+                      <h1 className="text-center">
+                        Your shopping cart looks empty!
+                      </h1>
+                    </div>
+                  ) : (
+                    renderCartProducts()
+                  )}
+                </div>
               </div>
             </div>
-          </div>
+          )}
 
           <div className="flex gap-x-2 justify-center items-center">
             {logged ? (
