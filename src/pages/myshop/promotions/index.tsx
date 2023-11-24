@@ -629,7 +629,7 @@ const SellerAdminHome = () => {
                   return (
                     <div key={index} className="border-2 border-black p-6">
                       <div className="flex justify-between items-center md:flex-row flex-col">
-                        <div>
+                        <div className="md:text-left text-center">
                           <h1 className="text-[25px]">{data.name}</h1>
                           <br />
 
@@ -654,7 +654,7 @@ const SellerAdminHome = () => {
                           <h1 className="text-[20px]">
                             {data.quota} remaining | {data.total_used} used
                           </h1>
-                          <div className="flex justify-end gap-2 ">
+                          <div className="flex md:justify-end gap-2 justify-center">
                             <h1
                               onClick={() => {
                                 setSelectedPromoId(data.id);
