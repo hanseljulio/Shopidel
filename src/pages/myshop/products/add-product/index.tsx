@@ -24,6 +24,9 @@ import { Reorder, useDragControls } from "framer-motion";
 import { AiFillDelete, AiFillPlusCircle } from "react-icons/ai";
 import { useRouter } from "next/router";
 import { useUserStore } from "@/store/userStore";
+import YouTube from "react-youtube";
+import { getRandomValues } from "crypto";
+import { getYoutubeVideoId } from "@/utils/utils";
 
 interface IAddProductForm {
   product_name: string;
@@ -422,7 +425,7 @@ const SellerAddProductPage = () => {
                 <div>
                   <h1 className="text-xl">Video</h1>
                   <p className="text-xs">
-                    Add your product video from YouTube embed url (optional)
+                    Add your product video from YouTube url (optional)
                   </p>
                   <p className="text-xs">YouTube video should be unlisted</p>
                 </div>
@@ -430,7 +433,7 @@ const SellerAddProductPage = () => {
                   <input
                     {...register("video_url")}
                     onBlur={(e) => {
-                      setVideo(e.target.value);
+                      setVideo(getYoutubeVideoId(e.target.value)!);
                     }}
                     name="video_url"
                     id="video_url"
@@ -441,13 +444,7 @@ const SellerAddProductPage = () => {
                 {video && (
                   <div className="mt-2">
                     <h1>Preview</h1>
-                    <iframe
-                      width="560"
-                      height="315"
-                      src={video}
-                      title="YouTube video player"
-                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                    ></iframe>
+                    <YouTube videoId={video} />
                   </div>
                 )}
               </div>

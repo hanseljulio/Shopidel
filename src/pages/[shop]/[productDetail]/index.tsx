@@ -16,7 +16,11 @@ import { IAPIProfileShopResponse } from "@/interfaces/seller_interface";
 import { API } from "@/network";
 import { IWishlist } from "@/interfaces/product_interface";
 import { useUserStore } from "@/store/userStore";
-import { clientUnauthorizeHandler, currencyConverter } from "@/utils/utils";
+import {
+  clientUnauthorizeHandler,
+  currencyConverter,
+  getYoutubeVideoId,
+} from "@/utils/utils";
 import axios from "axios";
 import { getCookie } from "cookies-next";
 import {
@@ -74,14 +78,6 @@ export const getServerSideProps: GetServerSideProps = async (
       notFound: true,
     };
   }
-};
-
-const getYoutubeVideoId = (url: string) => {
-  const youtubeRegex =
-    /^(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/;
-  const match = url.match(youtubeRegex);
-
-  return match?.[1] || null;
 };
 
 const ProductDetail = ({
