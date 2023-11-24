@@ -18,16 +18,6 @@ import { IAPIResponse } from "@/interfaces/api_interface";
 import { SubmitHandler, useForm } from "react-hook-form";
 import Pagination from "@/components/Pagination";
 
-interface ISellerProductSelect {
-  id: number;
-  name: string;
-  category_id: number;
-  created_at: string;
-  updated_at: string;
-  deleted_at: string;
-  isChecked: boolean;
-}
-
 interface IDeletePromoModal {
   closeFunction: () => void;
   submitFunction: () => void;
@@ -101,7 +91,7 @@ const OrderDetailModal = (props: IOrderDetailModalProps) => {
   }, []);
 
   return (
-    <div className="bg-white p-5 rounded-md md:w-[1000px] md:h-[800px] h-[80vh] w-[90vw] overflow-y-auto">
+    <div className="bg-white p-5 rounded-md md:w-[1000px] md:h-[500px] h-[80vh] w-[90vw] overflow-y-auto">
       <div className="py-3 border-b-2">
         <h1 className="text-[20px] font-bold">Promotion Details</h1>
       </div>
@@ -137,7 +127,12 @@ const OrderDetailModal = (props: IOrderDetailModalProps) => {
             promoDetail ? parseInt(promoDetail?.max_purchase_amount) : 0
           )}
         </h1>
-        <h1>Discount amount: {promoDetail?.discount_amount}</h1>
+        <h1>
+          Discount amount:{" "}
+          {currencyConverter(
+            promoDetail ? parseInt(promoDetail?.discount_amount) : 0
+          )}
+        </h1>
       </div>
     </div>
   );
@@ -149,22 +144,8 @@ interface IEditPromoProps {
 }
 
 const EditPromo = (props: IEditPromoProps) => {
-  const [sellerProducts, setSellerProducts] = useState<ISellerProductSelect[]>([
-    {
-      id: 0,
-      name: "",
-      category_id: 936,
-      created_at: "2023-11-21T05:36:43.520268Z",
-      updated_at: "2023-11-21T05:36:43.520268Z",
-      deleted_at: "0001-01-01T00:00:00Z",
-      isChecked: false,
-    },
-  ]);
-
   const router = useRouter();
   const { updateUser } = useUserStore();
-
-  const [promoDetail, setPromoDetail] = useState<IPromoDetails>();
 
   const {
     register,
@@ -179,7 +160,6 @@ const EditPromo = (props: IEditPromoProps) => {
   const getPromoData = async () => {
     try {
       const response = await API.get(`shop-promotions/${props.promoId}`);
-      setPromoDetail(response.data.data);
 
       const currentData = {
         id: response.data.data.id,
