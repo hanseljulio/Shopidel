@@ -60,3 +60,16 @@ export interface ICategory {
   name: string;
   children?: ICategory[];
 }
+
+export interface IWishlist {
+  id: number;
+  product_id: number;
+  name: string;
+  district: string;
+  total_sold: number;
+  price: string;
+  picture_url: string;
+  created_at: string | Date;
+  product_name_slug: string;
+  shop_name_slug: string;
+}
