@@ -24,7 +24,7 @@ const SellerSettings = () => {
   const [data, setData] = useState<IAPIProfileShopResponse>();
   const { user } = useUserStore();
   const router = useRouter();
-
+  const [descCounter, setDescCounter] = useState<number>(0);
   const [isEdit, setIsEdit] = useState<boolean>(false);
   const { register, handleSubmit, watch } = useForm<IShopProfileForm>();
 
@@ -38,6 +38,12 @@ const SellerSettings = () => {
       }
     }
   };
+
+  useEffect(() => {
+    if (data) {
+      setDescCounter(data.seller_description.length);
+    }
+  }, [data]);
 
   const onSubmit: SubmitHandler<IShopProfileForm> = async (data) => {
     try {
@@ -131,14 +137,21 @@ const SellerSettings = () => {
             <div className="flex flex-col ">
               <p>Shop description</p>
               {isEdit ? (
-                <textarea
-                  {...register("shop_description", {
-                    value: data?.seller_description,
-                  })}
-                  name="shop_description"
-                  id="shop_description"
-                  className="rounded-md w-full h-52 resize-none"
-                />
+                <>
+                  <textarea
+                    {...register("shop_description", {
+                      value: data?.seller_description,
+                      onChange: (e) => {
+                        setDescCounter(e.target.value.length);
+                      },
+                    })}
+                    maxLength={140}
+                    name="shop_description"
+                    id="shop_description"
+                    className="rounded-md w-full h-52 resize-none"
+                  />
+                  <span className="text-xs self-end">{descCounter}/140</span>
+                </>
               ) : (
                 <p>{data?.seller_description}</p>
               )}

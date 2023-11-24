@@ -383,16 +383,13 @@ const ProductDetail = ({
   const handleZoomImage = () => {
     setIsModal(true);
   };
-
   const handleZoomImageReview = (src: string) => {
     setIsModalReview(true);
     setImageReviewChosen(src);
   };
 
   const inc = () => {
-    if (count >= 0 && currentStock! == 0) {
-      console.log("sto", currentStock);
-
+    if (count >= 0 && count <= currentStock - 1) {
       setCount(count + 1);
     }
   };
@@ -497,7 +494,7 @@ const ProductDetail = ({
           ))}
         {!isExpanded && product?.description.length > 450 && (
           <p
-            className="text-center text-[#f57b29] cursor-pointer animate-bounce"
+            className="text-center text-[#f57b29] cursor-pointer"
             onClick={handleSeeMore}
           >
             &#812; See more
