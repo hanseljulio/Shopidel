@@ -85,7 +85,7 @@ const ProductDetail = ({
   seller,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   const router = useRouter();
-  const { updateUser } = useUserStore();
+  const { user } = useUserStore();
   const [count, setCount] = useState<number>(1);
   const [isHovering, setIsHovering] = useState(false);
   const [isModal, setIsModal] = useState<boolean>(false);
@@ -94,7 +94,7 @@ const ProductDetail = ({
   const [currentStock, setCurrentStock] = useState<number>(0);
   const [subtotal, setSubtotal] = useState<number>(0);
   const [varIndex, setVarIndex] = useState<number>(0);
-  const [isFavorite, setIsFavorite] = useState(product?.is_favorite || false);
+  const [isFavorite, setIsFavorite] = useState<boolean>();
   const [imagesProduct, setImagesProduct] = useState([]);
   const [reviews, setReviews] = useState<IAPIResponse<IReviewProduct[]>>();
   const [page, setPage] = useState<number>(1);
@@ -265,6 +265,25 @@ const ProductDetail = ({
     }
   }, [product]);
 
+  const checkFavorite = async (name: string) => {
+    try {
+      const res = await API.get("/products/favorites", {
+        params: {
+          s: name,
+        },
+      });
+
+      if ((res.data as IAPIResponse<IWishlist[]>).data?.length === 0) {
+        return false;
+      }
+      return true;
+    } catch (e) {
+      if (axios.isAxiosError(e)) {
+        console.log(e);
+      }
+    }
+  };
+
   const getImages = async () => {
     try {
       const res = await API.get(`/products/${product.id}/pictures`);
@@ -336,12 +355,21 @@ const ProductDetail = ({
   }, []);
 
   useEffect(() => {
+    if (user) {
+      (async () => {
+        const res = await checkFavorite(product.name!);
+        setIsFavorite(res);
+      })();
+    }
+  }, [user]);
+
+  useEffect(() => {
     getImages();
   }, [product.id]);
 
   useEffect(() => {
     getReviewProducts();
-  }, [product.id, page]);
+  }, [page]);
 
   const handleMouseOver = (src: string) => {
     setIsHovering(true);
@@ -393,6 +421,9 @@ const ProductDetail = ({
         }
       } catch (error) {
         if (axios.isAxiosError(error)) {
+          if (error.response?.status === 401) {
+            return router.push("/login");
+          }
           toast.error(error.response?.data.message, { autoClose: 1500 });
         } else {
           toast.error("An error occurred while adding to cart", {
@@ -427,7 +458,10 @@ const ProductDetail = ({
       );
 
       if (response.status === 200) {
-        toast.success("Added to wishlist", { autoClose: 1500 });
+        toast.success(
+          isFavorite ? "Removed from wishlist" : "Added to wishlist",
+          { autoClose: 1500 }
+        );
         setIsFavorite(!isFavorite);
       } else {
         toast.error("Failed to add to wishlist", { autoClose: 1500 });
@@ -566,24 +600,14 @@ const ProductDetail = ({
 
               <div className="favorite-icon mt-5 text-right">
                 <button onClick={() => handleWishlist(product)}>
-                  {isFavorite &&
-                  wishlist?.data?.map(
-                    (e) => e.product_id === product.product_id
-                  ) ? (
-                    <div className="flex items-center gap-1">
-                      <FaHeart style={{ color: "red" }} />
-                      <p>
-                        Favorite <span>{`(total user)`}</span>
-                      </p>
-                    </div>
-                  ) : (
-                    <div className="flex items-center gap-1">
-                      <FaRegHeart style={{ color: "red" }} />
-                      <p>
-                        Favorite <span>{`(total user)`}</span>
-                      </p>
-                    </div>
-                  )}
+                  <div className="flex items-center gap-x-1">
+                    {isFavorite ? (
+                      <FaHeart color={"red"} />
+                    ) : (
+                      <FaRegHeart color={"red"} />
+                    )}
+                    <p className="text-sm">(total favorites)</p>
+                  </div>
                 </button>
               </div>
             </div>
@@ -659,24 +683,24 @@ const ProductDetail = ({
                     )}
                   </div>
 
-                  {currentStock >= 1 ? (
-                    <div onClick={handleToCart} className="w-full">
-                      <Button
-                        onClick={() => router.push(`/cart`)}
-                        styling=" bg-[#364968] text-white p-2 w-full h-10 md:w-32 justify-center hover:bg-[#394e6f] hover:shadow-lg"
-                        text="Buy now"
-                      />
-                    </div>
-                  ) : (
-                    <div onClick={handleToCart} className="w-full">
-                      <Button
-                        disabled
-                        onClick={() => router.push(`/cart`)}
-                        styling="bg-[#7b94bd] text-white p-2 w-full h-10 md:w-32 justify-center"
-                        text="Buy now"
-                      />
-                    </div>
-                  )}
+                  <div className="w-full">
+                    <Button
+                      disabled={currentStock < 1 || count < 1 ? true : false}
+                      onClick={async () => {
+                        if (user) {
+                          try {
+                            await handleToCart();
+                            return router.push("/cart");
+                          } catch (e) {
+                            return;
+                          }
+                        }
+                        return router.push("/login");
+                      }}
+                      styling="bg-[#364968] text-white p-2 w-full h-10 md:w-32 justify-center"
+                      text="Buy now"
+                    />
+                  </div>
                 </div>
               </div>
             </div>
