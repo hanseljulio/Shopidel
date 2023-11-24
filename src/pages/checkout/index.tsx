@@ -4,8 +4,7 @@ import CheckoutTableHead from "@/components/CheckoutTableHead";
 import CheckoutTableData from "@/components/CheckoutTableData";
 import { clientUnauthorizeHandler, currencyConverter } from "@/utils/utils";
 import Button from "@/components/Button";
-import CheckoutVoucherSelect from "@/components/CheckoutVoucherSelect";
-import CheckoutShippingSelect from "@/components/CheckoutShippingSelect";
+import { FaTicketAlt } from "react-icons/fa";
 import Footer from "@/components/Footer";
 import CheckoutGrandTotal from "@/components/CheckoutGrandTotal";
 import CheckoutTableHeadMobile from "@/components/CheckoutTableHeadMobile";
@@ -14,14 +13,13 @@ import { FaMapMarkerAlt, FaTag } from "react-icons/fa";
 import Modal from "@/components/Modal";
 import CheckoutVoucherModal from "@/components/CheckoutVoucherModal";
 import CheckoutAddressModal from "@/components/CheckoutAddressModal";
-import CheckoutPayment from "@/components/CheckoutPayment";
+import { FaWallet } from "react-icons/fa";
 import { ICartData } from "@/interfaces/cart_interface";
 import { useCartStore } from "@/store/cartStore";
 import { API } from "@/network";
-import axios, { isAxiosError } from "axios";
+import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { getCookie } from "cookies-next";
 import { IAPIResponse } from "@/interfaces/api_interface";
 import { IAddress } from "@/interfaces/user_interface";
 import { useRouter } from "next/router";
@@ -29,6 +27,7 @@ import { useUserStore } from "@/store/userStore";
 import PinCode from "@/components/PinCode";
 import CheckoutMarketplaceModal from "@/components/CheckoutMarketplaceModal";
 import { ICheckoutMarketplace } from "@/interfaces/seller_interface";
+import Input from "@/components/Input";
 
 interface IProductVariant {
   id: number;
@@ -67,6 +66,115 @@ interface IShippingCostData {
 interface IEnterWalletPinModalProps {
   submitFunction: (pin: string) => void;
 }
+
+interface ICheckoutPaymentProps {
+  money: number;
+  canPay: boolean;
+}
+
+interface CheckoutVoucherSelectProps {
+  usedVoucher: number;
+  voucherName: string;
+  modalOn: () => void;
+}
+
+interface ICheckoutMarketplaceSelectProps {
+  usedDiscount: number;
+  discountName: string;
+  modalOn: () => void;
+}
+
+interface ICheckoutShippingSelect {
+  onChange: (e: any) => void;
+  shippingOption: string;
+  shippingTotal: number;
+  openShippingModal: () => void;
+}
+
+const CheckoutShippingSelect = (props: ICheckoutShippingSelect) => {
+  return (
+    <div className="text-[20px] flex justify-between border-x-2 md:flex-row md:pt-0 flex-col pt-6">
+      <div className="basis-[40%] md:py-4 md:pl-6 md:border-r-2 p-0 md:block md:justify-normal flex justify-center border-none">
+        <Input
+          label="Notes:"
+          labelStyle="pt-2"
+          styling="flex md:flex-row flex-col items-center gap-3 text-[16px]"
+          type="text"
+          name="orderMessage"
+          placeholder="Write additional notes here"
+          width="md:w-[350px] w-[300px]"
+          onChange={props.onChange}
+        />
+      </div>
+      <div className="flex-col gap-4 flex md:flex-row md:gap-0 text-[16px] items-center justify-between px-[21px] basis-[60%] py-8 md:py-0">
+        <h1 className="text-emerald-500">Shipping option:</h1>
+        <h1>{props.shippingOption}</h1>
+        <h1
+          onClick={props.openShippingModal}
+          className="text-blue-600 hover:cursor-pointer hover:underline"
+        >
+          CHANGE{" "}
+          <span className="md:hidden md:invisible visible inline">
+            SHIPPING
+          </span>
+        </h1>
+        <h1>
+          <span className="md:hidden md:invisible visible inline">
+            Shipping price:{" "}
+          </span>
+          {currencyConverter(props.shippingTotal)}
+        </h1>
+      </div>
+    </div>
+  );
+};
+
+const CheckoutVoucherSelect = (props: CheckoutVoucherSelectProps) => {
+  return (
+    <div className="text-[20px] px-[20px] flex justify-between border-2 py-4 items-center md:flex-row flex-col gap-6">
+      <h1 className="flex items-center gap-3">
+        <FaTicketAlt className="text-[#e09664]" />
+        Promotions
+      </h1>
+      <span
+        className={`text-[#bb5d1f] text-center ${
+          props.usedVoucher === 0 ? "hidden invisible" : ""
+        }`}
+      >
+        Used: {props.voucherName.substring(0, 25) + "..."}
+      </span>
+      <h1
+        onClick={props.modalOn}
+        className="text-[18px] text-blue-600 hover:cursor-pointer hover:underline"
+      >
+        Select Promotion
+      </h1>
+    </div>
+  );
+};
+
+const CheckoutPayment = (props: ICheckoutPaymentProps) => {
+  return (
+    <div className="text-[20px] px-[20px] flex justify-between border-2 py-4 items-center md:flex-row flex-col md:gap-0 gap-5">
+      <h1 className="flex items-center gap-3">
+        <FaWallet className=" text-amber-700" />
+        My Wallet
+      </h1>
+      <span
+        className={`text-red-600 ${props.canPay ? "hidden invisible" : ""}`}
+      >
+        INSUFFICIENT FUNDS
+      </span>
+      <h1
+        className={`text-[20px] ${
+          props.canPay ? "text-blue-600" : "text-red-600"
+        } font-bold`}
+      >
+        {currencyConverter(props.money)}
+      </h1>
+    </div>
+  );
+};
 
 const NoAddressModal = () => {
   const router = useRouter();
@@ -234,12 +342,6 @@ const EnterWalletPinModal = (props: IEnterWalletPinModalProps) => {
   );
 };
 
-interface ICheckoutMarketplaceSelectProps {
-  usedDiscount: number;
-  discountName: string;
-  modalOn: () => void;
-}
-
 const CheckoutMarketplaceSelect = (props: ICheckoutMarketplaceSelectProps) => {
   return (
     <div className="text-[20px] px-[20px] flex justify-between border-2 py-4 items-center md:flex-row flex-col gap-6">
@@ -248,7 +350,7 @@ const CheckoutMarketplaceSelect = (props: ICheckoutMarketplaceSelectProps) => {
         Marketplace
       </h1>
       <span
-        className={`text-[#bb5d1f] ${
+        className={`text-[#bb5d1f] text-center ${
           props.usedDiscount === 0 ? "hidden invisible" : ""
         }`}
       >
