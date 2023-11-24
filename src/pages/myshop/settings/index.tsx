@@ -5,27 +5,26 @@ import { IAPIProfileShopResponse } from "@/interfaces/seller_interface";
 import { API } from "@/network";
 import { useUserStore } from "@/store/userStore";
 import axios from "axios";
+import { useRouter } from "next/router";
 import React, { useEffect, useRef, useState } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { AiFillEdit } from "react-icons/ai";
 import { TiDelete } from "react-icons/ti";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 interface IShopProfileForm {
-  seller_picture_url: string;
-  seller_name: string;
-  shop_name_slug: string;
-  seller_description: string;
-  seller_operating_hour: {
-    start: string;
-    end: string;
-  };
+  shop_name: string;
+  shop_description: string;
+  opening_hours: string;
+  closing_hours: string;
 }
 
 const SellerSettings = () => {
   const [data, setData] = useState<IAPIProfileShopResponse>();
   const { user } = useUserStore();
-  const imageRef = useRef<HTMLInputElement>(null);
-  const [image, setImage] = useState<File | string>();
+  const router = useRouter();
+
   const [isEdit, setIsEdit] = useState<boolean>(false);
   const { register, handleSubmit, watch } = useForm<IShopProfileForm>();
 
@@ -33,11 +32,6 @@ const SellerSettings = () => {
     try {
       const res = await API.get(`/sellers/${user?.id}/profile`);
       setData((res.data as IAPIResponse<IAPIProfileShopResponse>).data);
-      setImage(
-        (res.data as IAPIResponse<IAPIProfileShopResponse>).data
-          ?.seller_picture_url
-      );
-      return data;
     } catch (e) {
       if (axios.isAxiosError(e)) {
         console.log(e);
@@ -45,153 +39,155 @@ const SellerSettings = () => {
     }
   };
 
-  const onSubmit: SubmitHandler<IShopProfileForm> = (data) => {
-    console.log(data);
+  const onSubmit: SubmitHandler<IShopProfileForm> = async (data) => {
+    try {
+      await toast.promise(
+        API.put("/sellers", data),
+        {
+          pending: "Loading",
+          error: "Error update profile",
+          success: "Update profile success",
+        },
+        {
+          autoClose: 1500,
+        }
+      );
+      router.reload();
+    } catch (e) {
+      if (axios.isAxiosError(e)) {
+        console.log(e);
+      }
+    }
   };
 
   useEffect(() => {
     getSellerDetail();
   }, []);
 
-  useEffect(() => {
-    if (!isEdit) {
-      setImage(data?.seller_picture_url);
-    }
-  }, [isEdit]);
-
   return (
-    <SellerAdminLayout currentPage="Settings">
-      <div className="p-5">
-        <div className="flex items-center justify-between max-w-[50%]">
-          <h1 className="text-3xl">Settings</h1>
-          <div
-            className="flex gap-x-1 items-center hover:cursor-pointer"
-            onClick={() => setIsEdit(!isEdit)}
-          >
-            {isEdit ? (
-              <>
-                <TiDelete size={20} />
-                <p>Discard</p>
-              </>
-            ) : (
-              <>
-                <AiFillEdit size={15} />
-                <p>Edit</p>
-              </>
-            )}
-          </div>
-        </div>
-        <div className="mt-5 flex flex-col gap-y-5 max-w-[50%]">
-          <div className="flex items-center gap-x-5">
-            <div>
-              <input
-                ref={imageRef}
-                type="file"
-                name="shop_image"
-                id="shop_image"
-                onChange={(e) => {
-                  if (e.target.files?.length !== 0) {
-                    setImage(e.target.files![0]);
-                  }
-                }}
-                hidden
-              />
-              <img
-                src={
-                  image
-                    ? typeof image === "string" && image !== ""
-                      ? image
-                      : URL.createObjectURL(image as File)
-                    : "/images/defaultuser.png  "
-                }
-                width={100}
-                alt="shop_image"
-                className="hover:cursor-pointer"
-                onClick={() => isEdit && imageRef.current?.click()}
-              />
+    <>
+      <ToastContainer />
+      <SellerAdminLayout currentPage="Settings">
+        <div className="p-5">
+          <div className="flex items-center justify-between max-w-[50%]">
+            <h1 className="text-3xl">Settings</h1>
+            <div
+              className="flex gap-x-1 items-center hover:cursor-pointer"
+              onClick={() => setIsEdit(!isEdit)}
+            >
+              {isEdit ? (
+                <>
+                  <TiDelete size={20} />
+                  <p>Discard</p>
+                </>
+              ) : (
+                <>
+                  <AiFillEdit size={15} />
+                  <p>Edit</p>
+                </>
+              )}
             </div>
-            <div className="flex flex-col gap-y-2 w-full">
-              <div className="flex flex-col">
-                <p>Shop name</p>
+          </div>
+          <div className="mt-5 flex flex-col gap-y-5 max-w-[50%]">
+            <div className="flex items-center gap-x-5">
+              <div>
+                <img
+                  src={
+                    data?.seller_picture_url !== ""
+                      ? data?.seller_picture_url
+                      : "/images/defaultuser.png"
+                  }
+                  width={100}
+                  alt="shop_image"
+                />
+              </div>
+              <div className="flex flex-col gap-y-2 w-full">
+                <div className="flex flex-col">
+                  <p>Shop name</p>
+                  {isEdit ? (
+                    <input
+                      {...register("shop_name", {
+                        value: data?.seller_name,
+                      })}
+                      type="text"
+                      name="shop_name"
+                      id="shop_name"
+                      className="rounded-md py-2"
+                    />
+                  ) : (
+                    <h1 className="text-xl  line-clamp-1">
+                      {data?.seller_name}
+                    </h1>
+                  )}
+                </div>
+                <div className="flex flex-col">
+                  <p>Shop slug</p>
+                  <h1 className="text-xl line-clamp-1">
+                    {data?.shop_name_slug}
+                  </h1>
+                </div>
+              </div>
+            </div>
+            <div className="flex flex-col ">
+              <p>Shop description</p>
+              {isEdit ? (
+                <textarea
+                  {...register("shop_description", {
+                    value: data?.seller_description,
+                  })}
+                  name="shop_description"
+                  id="shop_description"
+                  className="rounded-md w-full h-52 resize-none"
+                />
+              ) : (
+                <p>{data?.seller_description}</p>
+              )}
+            </div>
+            <div className="flex flex-col ">
+              <p>Shop operating hours</p>
+              <h1 className="text-xl">
                 {isEdit ? (
                   <input
-                    {...register("seller_name", {
-                      value: data?.seller_name,
+                    {...register("opening_hours", {
+                      value: data?.seller_operating_hour.start,
                     })}
-                    type="text"
-                    name="seller_name"
-                    id="seller_name"
-                    className="rounded-md py-2"
+                    type="time"
+                    className="rounded-md"
+                    name="opening_hours"
+                    id="opening_hours"
                   />
                 ) : (
-                  <h1 className="text-xl  line-clamp-1">{data?.seller_name}</h1>
+                  data?.seller_operating_hour.start
+                )}{" "}
+                -{" "}
+                {isEdit ? (
+                  <input
+                    {...register("closing_hours", {
+                      value: data?.seller_operating_hour.end,
+                    })}
+                    type="time"
+                    className="rounded-md"
+                    name="closing_hours"
+                    id="closing_hours"
+                  />
+                ) : (
+                  data?.seller_operating_hour.end
                 )}
-              </div>
-              <div className="flex flex-col">
-                <p>Shop slug</p>
-                <h1 className="text-xl line-clamp-1">{data?.shop_name_slug}</h1>
-              </div>
+              </h1>
             </div>
-          </div>
-          <div className="flex flex-col ">
-            <p>Shop description</p>
-            {isEdit ? (
-              <textarea
-                {...register("seller_description", {
-                  value: data?.seller_description,
-                })}
-                name=""
-                id=""
-                className="rounded-md w-full h-52 resize-none"
-              />
-            ) : (
-              <p>{data?.seller_description}</p>
+            {isEdit && (
+              <div className="self-end">
+                <Button
+                  text="Update"
+                  onClick={handleSubmit(onSubmit)}
+                  styling="bg-[#364968] p-2 rounded-md text-white text-sm"
+                />
+              </div>
             )}
           </div>
-          <div className="flex flex-col ">
-            <p>Shop operating hours</p>
-            <h1 className="text-xl">
-              {isEdit ? (
-                <input
-                  {...register("seller_operating_hour.start", {
-                    value: data?.seller_operating_hour.start,
-                  })}
-                  type="time"
-                  className="rounded-md"
-                  name="seller_operating_hour.start"
-                  id="seller_operating_hour.start"
-                />
-              ) : (
-                data?.seller_operating_hour.start
-              )}{" "}
-              -{" "}
-              {isEdit ? (
-                <input
-                  {...register("seller_operating_hour.end", {
-                    value: data?.seller_operating_hour.end,
-                  })}
-                  type="time"
-                  className="rounded-md"
-                  name="seller_operating_hour.end"
-                  id="seller_operating_hour.end"
-                />
-              ) : (
-                data?.seller_operating_hour.end
-              )}
-            </h1>
-          </div>
-          {isEdit && (
-            <div className="self-end">
-              <Button
-                text="Update"
-                onClick={handleSubmit(onSubmit)}
-                styling="bg-[#364968] p-2 rounded-md text-white text-sm"
-              />
-            </div>
-          )}
         </div>
-      </div>
-    </SellerAdminLayout>
+      </SellerAdminLayout>
+    </>
   );
 };
 
