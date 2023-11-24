@@ -3,6 +3,7 @@ import Navbar from "../Navbar";
 import { FaTag, FaDollyFlatbed, FaBox } from "react-icons/fa";
 import { useRouter } from "next/router";
 import Button from "../Button";
+import { FaGear } from "react-icons/fa6";
 
 interface IProfileLayout {
   children: ReactNode;
@@ -21,28 +22,33 @@ const MobileSellerAdminSidebar = (props: MobileSellerAdminSidebarProps) => {
       <div className="flex gap-6 overflow-x-auto mx-[10px] whitespace-nowrap">
         <Button
           text="Products"
+          onClick={() => router.push("/myshop/products")}
           styling="bg-blue-100 py-[12px] rounded-full w-[150px] px-8 hover:bg-blue-300 my-4"
           disabled={props.currentPage === "Products"}
         />
         <Button
           text="Promotions"
+          onClick={() => router.push("/myshop/promotions")}
           styling="bg-blue-100 py-[12px] rounded-full w-[150px] px-8 hover:bg-blue-300 my-4"
           disabled={props.currentPage === "Promotions"}
         />
         <Button
           text="Configure Delivery"
+          onClick={() => router.push("/myshop/delivery/configure")}
           styling="bg-blue-100 py-[12px] rounded-full w-[350px] px-8 hover:bg-blue-300 my-4"
           disabled={props.currentPage === "Configure"}
         />
         <Button
           text="Delivery List"
+          onClick={() => router.push("/myshop/delivery/listOfOrders")}
           styling="bg-blue-100 py-[12px] rounded-full w-[250px] px-8 hover:bg-blue-300 my-4"
           disabled={props.currentPage === "List of Orders"}
         />
         <Button
-          text="Process Delivery"
+          text="Settings"
+          onClick={() => router.push("/myshop/settings")}
           styling="bg-blue-100 py-[12px] rounded-full w-[350px] px-8 hover:bg-blue-300 my-4"
-          disabled={props.currentPage === "Process Orders"}
+          disabled={props.currentPage === "Settings"}
         />
       </div>
     </div>
@@ -99,6 +105,15 @@ const SellerAdminSidebar = () => {
             List of orders
           </li>
         </ul>
+      </div>
+      <div className="pl-[26px] border-slate-300 border-b-2 pb-[20px] text-white">
+        <h1
+          onClick={() => router.push("/myshop/settings")}
+          className="text-[20px] flex items-center gap-4 mt-[20px] hover:cursor-pointer transition w-[200px] hover:text-[#92bcff]"
+        >
+          <FaGear />
+          Settings
+        </h1>
       </div>
     </div>
   );
