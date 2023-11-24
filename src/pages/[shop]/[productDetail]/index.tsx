@@ -90,7 +90,7 @@ const ProductDetail = ({
 }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   const router = useRouter();
   const { updateUser } = useUserStore();
-  const [count, setCount] = useState<number>(0);
+  const [count, setCount] = useState<number>(1);
   const [isHovering, setIsHovering] = useState(false);
   const [isModal, setIsModal] = useState<boolean>(false);
   const [isModalReview, setIsModalReview] = useState<boolean>(false);
@@ -171,8 +171,6 @@ const ProductDetail = ({
       }
     });
 
-    console.log(variant);
-    console.log(product);
     const price = parseInt(variant ? variant.price : product.variants[0].price);
     if (count >= 1) {
       setSubtotal(price * count);
@@ -393,6 +391,7 @@ const ProductDetail = ({
 
         if (response.status === 200) {
           toast.success("Added to cart", { autoClose: 1500 });
+          console.log("cart", response.data);
         } else {
           toast.error("Failed to add to cart", { autoClose: 1500 });
         }
@@ -653,6 +652,7 @@ const ProductDetail = ({
                       className="text-center w-16 md:w-20 border-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none outline-none"
                       min={1}
                       max={currentStock}
+                      readOnly={true}
                       type="number"
                       value={count}
                       onChange={(e: any) => {
@@ -669,7 +669,7 @@ const ProductDetail = ({
                 <div className="flex text-sm text-neutral-600 py-3 justify-between">
                   <p className="">Subtotal</p>
                   <p className="subTotal text-lg font-semibold text-neutral-800">
-                    {subtotal}
+                    {currencyConverter(subtotal)}
                   </p>
                 </div>
                 <div className="btn flex gap-x-2 justify-between mt-10">
@@ -735,9 +735,10 @@ const ProductDetail = ({
                   </p>
                 </div>
                 <p className="productPrice text-2xl font-semibold text-[#f57b29] py-3">
-                  {currencyConverter(
+                  {/* {currencyConverter(
                     parseInt(product?.variants?.[0]?.price ?? 0)
-                  )}
+                  )} */}
+                  {currencyConverter(subtotal)}
                 </p>
               </div>
               <div className="flex flex-col gap-y-3 text-xs text-neutral-600 w-full mt-5">
