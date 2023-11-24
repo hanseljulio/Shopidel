@@ -548,7 +548,7 @@ const SellerOrderListPage = () => {
               <p>Sort By</p>
               <select
                 onChange={(e) => setSortBy(e.target.value)}
-                className={`p-4 w-[200px] rounded`}
+                className={`p-4 w-[200px] h-[55px] rounded`}
                 name="category-dropdown"
               >
                 {orderStatus.map((option, index) => (
