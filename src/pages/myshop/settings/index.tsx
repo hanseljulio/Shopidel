@@ -25,7 +25,7 @@ const SellerSettings = () => {
   const [data, setData] = useState<IAPIProfileShopResponse>();
   const { user } = useUserStore();
   const imageRef = useRef<HTMLInputElement>(null);
-  const [image, setImage] = useState<File>();
+  const [image, setImage] = useState<File | string>();
   const [isEdit, setIsEdit] = useState<boolean>(false);
   const { register, handleSubmit, watch } = useForm<IShopProfileForm>();
 
@@ -33,6 +33,10 @@ const SellerSettings = () => {
     try {
       const res = await API.get(`/sellers/${user?.id}/profile`);
       setData((res.data as IAPIResponse<IAPIProfileShopResponse>).data);
+      setImage(
+        (res.data as IAPIResponse<IAPIProfileShopResponse>).data
+          ?.seller_picture_url
+      );
       return data;
     } catch (e) {
       if (axios.isAxiosError(e)) {
@@ -48,6 +52,12 @@ const SellerSettings = () => {
   useEffect(() => {
     getSellerDetail();
   }, []);
+
+  useEffect(() => {
+    if (!isEdit) {
+      setImage(data?.seller_picture_url);
+    }
+  }, [isEdit]);
 
   return (
     <SellerAdminLayout currentPage="Settings">
@@ -88,7 +98,11 @@ const SellerSettings = () => {
               />
               <img
                 src={
-                  image ? URL.createObjectURL(image) : "/images/defaultuser.png"
+                  image
+                    ? typeof image === "string" && image !== ""
+                      ? image
+                      : URL.createObjectURL(image as File)
+                    : "/images/defaultuser.png  "
                 }
                 width={100}
                 alt="shop_image"
@@ -115,21 +129,7 @@ const SellerSettings = () => {
               </div>
               <div className="flex flex-col">
                 <p>Shop slug</p>
-                {isEdit ? (
-                  <input
-                    {...register("shop_name_slug", {
-                      value: data?.shop_name_slug,
-                    })}
-                    type="text"
-                    name="shop_name_slug"
-                    id="shop_name_slug"
-                    className="rounded-md py-2"
-                  />
-                ) : (
-                  <h1 className="text-xl line-clamp-1">
-                    {data?.shop_name_slug}
-                  </h1>
-                )}
+                <h1 className="text-xl line-clamp-1">{data?.shop_name_slug}</h1>
               </div>
             </div>
           </div>
