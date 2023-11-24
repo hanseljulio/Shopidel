@@ -34,14 +34,14 @@ const MobileSellerAdminSidebar = (props: MobileSellerAdminSidebarProps) => {
           disabled={props.currentPage === "Promotions"}
         />
         <Button
-          text="Configure Delivery"
-          onClick={() => router.push("/myshop/delivery/configure")}
+          text="Showcase"
+          onClick={() => router.push("/myshop/showcase")}
           styling="bg-blue-100 py-[12px] rounded-full w-[350px] px-8 hover:bg-blue-300 my-4"
-          disabled={props.currentPage === "Configure"}
+          disabled={props.currentPage === "Showcase"}
         />
         <Button
           text="Delivery List"
-          onClick={() => router.push("/myshop/delivery/listOfOrders")}
+          onClick={() => router.push("/myshop/delivery/list-of-orders")}
           styling="bg-blue-100 py-[12px] rounded-full w-[250px] px-8 hover:bg-blue-300 my-4"
           disabled={props.currentPage === "List of Orders"}
         />
@@ -102,14 +102,14 @@ const SellerAdminSidebar = () => {
           Delivery Service
         </h1>
         <ul className="text-[14px] ml-[38px]">
-          <li
+          {/* <li
             onClick={() => router.push("/myshop/delivery/configure")}
             className={`py-1 hover:cursor-pointer w-[80px] hover:text-[#92bcff] transition`}
           >
             Configure
-          </li>
+          </li> */}
           <li
-            onClick={() => router.push("/myshop/delivery/listOfOrders")}
+            onClick={() => router.push("/myshop/delivery/list-of-orders")}
             className={`py-1 hover:cursor-pointer w-[90px] hover:text-[#92bcff] transition`}
           >
             List of orders
