@@ -71,7 +71,7 @@ const UserProfileSidebar = () => {
         </div>
         <div className="pl-[24px] border-slate-300 border-b-2 pb-[20px]">
           <h1
-            onClick={() => router.push("/user/transactionHistory")}
+            onClick={() => router.push("/user/transaction-history")}
             className="text-[20px] flex items-center gap-4 mt-[20px] hover:cursor-pointer transition w-[250px] hover:text-[#92bcff]"
           >
             <FaDollarSign />
