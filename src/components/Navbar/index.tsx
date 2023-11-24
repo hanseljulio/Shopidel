@@ -191,6 +191,7 @@ const Navbar = () => {
                   <img
                     src={logged.profile_picture}
                     alt="profile_picture"
+                    className="h-full w-full object-contain rounded-full"
                     placeholder="https://cdn4.iconfinder.com/data/icons/web-ui-color/128/Account-512.png"
                     onError={(e) => {
                       (e.target as HTMLInputElement).src =
