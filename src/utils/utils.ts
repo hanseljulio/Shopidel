@@ -99,5 +99,5 @@ export const clientUnauthorizeHandler = (
   updateUser(undefined);
   deleteCookie("accessToken");
   deleteCookie("refreshToken");
-  router.push("/login");
+  router.push("/login?session_expired=true");
 };
