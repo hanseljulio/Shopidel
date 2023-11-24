@@ -7,7 +7,10 @@ import { AiOutlineShoppingCart } from "react-icons/ai";
 import Button from "../Button";
 import { BiLogOut } from "react-icons/bi";
 import { IoSettingsSharp } from "react-icons/io5";
-import { IAPIUserProfileResponse } from "@/interfaces/api_interface";
+import {
+  IAPIResponse,
+  IAPIUserProfileResponse,
+} from "@/interfaces/api_interface";
 import { ICartData, ICartItems } from "@/interfaces/cart_interface";
 import { API } from "@/network";
 import axios from "axios";
@@ -103,8 +106,10 @@ const Navbar = () => {
   };
 
   useEffect(() => {
-    getCartData();
-  }, []);
+    if (user) {
+      getCartData();
+    }
+  }, [user]);
 
   const renderCartProducts = () => {
     const maxProductsToShow = 5;
@@ -178,7 +183,7 @@ const Navbar = () => {
         <div>
           <div className="flex items-center justify-between py-3 md:py-5 md:block">
             <Link href="/">
-              <h2 className="text-3xl font-bold text-white">LOGO</h2>
+              <h2 className="text-3xl font-bold text-white">Shopidel</h2>
             </Link>
             <div className="md:hidden flex items-center">
               <Link href="/cart" className=" w-full  px-3 py-1 ">
@@ -283,36 +288,38 @@ const Navbar = () => {
           </div>
         </div>
         <div className="hidden space-x-4 md:flex align-middle">
-          <div className="flex gap-x-2 group relative">
-            <button
-              className=" text-white rounded-md shadow align-middle"
-              onClick={() => router.push("/cart")}
-            >
-              <AiOutlineShoppingCart size={30} />
-            </button>
-            <div className="invisible opacity-0 group-hover:opacity-100 group-hover:visible transition-all duration-150 w-[500px] bg-white absolute top-[53px] right-0 z-50 rounded-bl-md rounded-br-md overflow-hidden shadow-lg">
-              <div className="px-5 pt-5 text-center">
-                <h1 className="font-bold w-full text-xl pb-2">My cart </h1>
-                {cartIsEmpty() ? (
-                  <div className="items-center justify-center flex flex-col p-4">
-                    <img
-                      alt="cart pic"
-                      src={"/images/emptycart.png"}
-                      width={250}
-                      height={250}
-                      className="w-32 h-32 object-cover items-center justify-center"
-                    />
+          {logged && (
+            <div className="flex gap-x-2 group relative">
+              <button
+                className=" text-white rounded-md shadow align-middle"
+                onClick={() => router.push("/cart")}
+              >
+                <AiOutlineShoppingCart size={30} />
+              </button>
+              <div className="invisible opacity-0 group-hover:opacity-100 group-hover:visible transition-all duration-150 w-[500px] bg-white absolute top-[53px] right-0 z-50 rounded-bl-md rounded-br-md overflow-hidden shadow-lg">
+                <div className="px-5 pt-5 text-center">
+                  <h1 className="font-bold w-full text-xl pb-2">My cart </h1>
+                  {cartIsEmpty() ? (
+                    <div className="items-center justify-center">
+                      <img
+                        alt="cart pic"
+                        src={"/vm2/images/emptycart.png"}
+                        width={250}
+                        height={250}
+                        className="w-32 h-32 object-cover items-center justify-center"
+                      />
 
-                    <h1 className="text-center">
-                      Your shopping cart looks empty!
-                    </h1>
-                  </div>
-                ) : (
-                  renderCartProducts()
-                )}
+                      <h1 className="text-center">
+                        Your shopping cart looks empty!
+                      </h1>
+                    </div>
+                  ) : (
+                    renderCartProducts()
+                  )}
+                </div>
               </div>
             </div>
-          </div>
+          )}
 
           <div className="flex gap-x-2 justify-center items-center">
             {logged ? (
@@ -321,6 +328,7 @@ const Navbar = () => {
                   <img
                     src={logged.profile_picture}
                     alt="profile_picture"
+                    className="h-full w-full object-contain rounded-full"
                     placeholder="https://cdn4.iconfinder.com/data/icons/web-ui-color/128/Account-512.png"
                     onError={(e) => {
                       (e.target as HTMLInputElement).src =
