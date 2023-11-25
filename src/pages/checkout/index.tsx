@@ -615,7 +615,7 @@ const CheckoutPage = () => {
                 router.replace("/cart");
               }, 3000);
 
-              return "Payment success!";
+              return "Payment success! Redirecting you back to your cart.";
             },
           },
           error: {
