@@ -10,8 +10,13 @@ import { ICourier } from "@/interfaces/courier_interface";
 import { IAddress } from "@/interfaces/user_interface";
 import { API } from "@/network";
 import { useUserStore } from "@/store/userStore";
-import { checkAuthSSR, clientUnauthorizeHandler } from "@/utils/utils";
+import {
+  checkAuthSSR,
+  clientUnauthorizeHandler,
+  refreshAuth,
+} from "@/utils/utils";
 import axios from "axios";
+import { getCookie, setCookie } from "cookies-next";
 import { GetServerSidePropsContext } from "next";
 import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
@@ -52,9 +57,11 @@ const RegisterShop = () => {
   const [isDropdownCourier, setIsDropdownCourier] = useState<boolean>(false);
   const [selectedCourier, setSelectedCourier] = useState<number[]>([]);
 
-  const registerMerchantHandler: SubmitHandler<IRegisterMerchant> = (data) => {
+  const registerMerchantHandler: SubmitHandler<IRegisterMerchant> = async (
+    data
+  ) => {
     try {
-      toast.promise(
+      await toast.promise(
         API.post("/auth/seller/register", data),
         {
           pending: "Loading",
@@ -76,6 +83,9 @@ const RegisterShop = () => {
           toastId: "registeMerchantError",
         }
       );
+      const newAuth = await refreshAuth(getCookie("refreshToken")!);
+      setCookie("accessToken", newAuth?.access_token);
+      setCookie("refreshToken", newAuth?.refresh_token);
     } catch (e) {
       if (axios.isAxiosError(e)) {
         if (e.response?.status === 401) {

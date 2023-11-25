@@ -630,7 +630,7 @@ const WalletDetail = ({
                 })}
               </div>
             </div>
-            <div className="flex self-end mt-2">
+            <div className="flex self-center mt-2">
               {transactionHistoryRes && (
                 <Pagination
                   data={transactionHistoryRes?.pagination}
