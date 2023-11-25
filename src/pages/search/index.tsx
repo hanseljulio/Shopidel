@@ -17,6 +17,7 @@ import { SubmitHandler, useForm } from "react-hook-form";
 import { IDistrict } from "@/interfaces/courier_interface";
 import { ReadonlyURLSearchParams, useSearchParams } from "next/navigation";
 import { TiDeleteOutline } from "react-icons/ti";
+import Head from "next/head";
 
 const Search = () => {
   const router = useRouter();
@@ -107,7 +108,15 @@ const Search = () => {
 
   return (
     <>
+      <Head>
+        <title>Buy {searchParam.get("s")} from Shopidel</title>
+        <meta
+          name="description"
+          content={`Get the cheapest ${searchParam.get("s")} from Shopidel!`}
+        />
+      </Head>
       <ToastContainer />
+
       {isModal && (
         <Modal content={contentModal!} onClose={() => setIsModal(false)} />
       )}

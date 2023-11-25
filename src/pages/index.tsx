@@ -14,6 +14,7 @@ import { clientUnauthorizeHandler } from "@/utils/utils";
 import { useUserStore } from "@/store/userStore";
 import "react-toastify/dist/ReactToastify.css";
 import { deleteCookie } from "cookies-next";
+import Head from "next/head";
 
 export default function Home() {
   const router = useRouter();
@@ -74,6 +75,10 @@ export default function Home() {
   return (
     <div className="bg-gray-100">
       <ToastContainer />
+      <Head>
+        <title>Shopidel</title>
+        <meta name="description" content="Welcome to Shopidel!" />
+      </Head>
       <Navbar />
       <CarouselHome />
       <div className="mx-auto lg:max-w-7xl md:items-center px-4 md:px-0 mb-5">
