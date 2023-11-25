@@ -17,6 +17,7 @@ import { useUserStore } from "@/store/userStore";
 import { IAPIResponse } from "@/interfaces/api_interface";
 import { SubmitHandler, useForm } from "react-hook-form";
 import Pagination from "@/components/Pagination";
+import Head from "next/head";
 
 interface IDeletePromoModal {
   closeFunction: () => void;
@@ -596,6 +597,9 @@ const SellerAdminHome = () => {
 
       <SellerAdminLayout currentPage="Promotions">
         <ToastContainer />
+        <Head>
+          <title>Promotions</title>
+        </Head>
         <div className="w-full mx-auto mt-6">
           <div className="flex items-center justify-between md:flex-row md:mx-[5%] flex-col p-0 md:gap-0 gap-8">
             <h1 className="text-[30px]">Promotions</h1>

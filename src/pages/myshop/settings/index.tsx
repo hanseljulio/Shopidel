@@ -12,6 +12,7 @@ import { AiFillEdit } from "react-icons/ai";
 import { TiDelete } from "react-icons/ti";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import Head from "next/head";
 
 interface IShopProfileForm {
   shop_name: string;
@@ -73,6 +74,9 @@ const SellerSettings = () => {
   return (
     <>
       <ToastContainer />
+      <Head>
+        <title>Settings</title>
+      </Head>
       <SellerAdminLayout currentPage="Settings">
         <div className="p-5">
           <div className="flex items-center justify-between  lg:max-w-[50%]">

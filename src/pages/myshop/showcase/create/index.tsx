@@ -10,6 +10,7 @@ import axios from "axios";
 import { clientUnauthorizeHandler } from "@/utils/utils";
 import { API } from "@/network";
 import { IAPIResponse } from "@/interfaces/api_interface";
+import Head from "next/head";
 
 interface ICreateShowcaseData {
   name: string;
@@ -148,6 +149,9 @@ const SellerShowcaseCreatePage = () => {
 
   return (
     <SellerAdminLayout currentPage="Promotions">
+      <Head>
+        <title>Create Showcase</title>
+      </Head>
       <ToastContainer />
       <div className="w-full mx-auto mt-6">
         <div className="flex items-center justify-between md:flex-row md:mx-[5%] flex-col p-0 md:gap-0 gap-8">

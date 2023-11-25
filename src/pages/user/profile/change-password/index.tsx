@@ -11,6 +11,7 @@ import "react-toastify/dist/ReactToastify.css";
 import { IAPIResponse } from "@/interfaces/api_interface";
 import { useRouter } from "next/router";
 import { clientUnauthorizeHandler } from "@/utils/utils";
+import Head from "next/head";
 
 interface IChangePasswordForm {
   old_password: string;
@@ -39,6 +40,9 @@ const UserChangePassword = () => {
   return (
     <>
       <ToastContainer />
+      <Head>
+        <title>Change Password</title>
+      </Head>
       {isModal && (
         <Modal
           content={

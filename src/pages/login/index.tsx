@@ -17,6 +17,7 @@ import {
 import { useUserStore } from "@/store/userStore";
 import { clientUnauthorizeHandler, setAuthCookie } from "@/utils/utils";
 import { useCartStore } from "@/store/cartStore";
+import Head from "next/head";
 
 const Login = () => {
   const {
@@ -89,6 +90,9 @@ const Login = () => {
 
   return (
     <div className=" h-screen flex justify-between items-center">
+      <Head>
+        <title>Login</title>
+      </Head>
       <ToastContainer />
       <div className="max-w-7xl w-full mx-auto flex justify-around items-center">
         <div className="hidden md:flex">

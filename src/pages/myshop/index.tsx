@@ -24,6 +24,7 @@ import { SubmitHandler, useForm } from "react-hook-form";
 import { BsCheck } from "react-icons/bs";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import Head from "next/head";
 
 interface IRegisterMerchant {
   shop_name: string;
@@ -182,6 +183,9 @@ const RegisterShop = () => {
   return (
     <>
       <Navbar />
+      <Head>
+        <title>Register Shop</title>
+      </Head>
       <div className="flex h-screen justify-center items-center">
         {listAddress?.length === 0 || walletDetail?.isActive === false ? (
           <div>

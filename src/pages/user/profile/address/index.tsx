@@ -13,6 +13,7 @@ import axios from "axios";
 import { clientUnauthorizeHandler } from "@/utils/utils";
 import { useRouter } from "next/router";
 import { useUserStore } from "@/store/userStore";
+import Head from "next/head";
 
 interface IIndividualAddressProps {
   id: number;
@@ -761,6 +762,9 @@ const AddressPage = () => {
 
       <div className="overflow-hidden">
         <ToastContainer />
+        <Head>
+          <title>Manage Address</title>
+        </Head>
         <ProfileLayout currentPage="My Address">
           <div className="w-full mx-auto mt-6 ">
             <div className="flex items-center justify-between md:flex-row md:pl-[50px] md:pr-[65px] flex-col p-0">

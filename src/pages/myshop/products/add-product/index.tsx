@@ -27,6 +27,7 @@ import { useUserStore } from "@/store/userStore";
 import YouTube from "react-youtube";
 import { getRandomValues } from "crypto";
 import { getYoutubeVideoId } from "@/utils/utils";
+import Head from "next/head";
 
 interface IAddProductForm {
   product_name: string;
@@ -196,6 +197,9 @@ const SellerAddProductPage = () => {
   return (
     <>
       <ToastContainer />
+      <Head>
+        <title>Add Product</title>
+      </Head>
       <SellerAdminLayout currentPage="Products">
         <div className="p-5">
           <div className="flex items-center md:flex-row justify-between  md:gap-0 flex-col gap-6">

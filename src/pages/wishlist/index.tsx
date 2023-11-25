@@ -18,6 +18,7 @@ import { FaTrash } from "react-icons/fa";
 import { getCookie } from "cookies-next";
 import "react-toastify/dist/ReactToastify.css";
 import { IWishlist } from "@/interfaces/product_interface";
+import Head from "next/head";
 
 function Index() {
   const { updateUser } = useUserStore();
@@ -132,6 +133,9 @@ function Index() {
   return (
     <div>
       <Navbar />
+      <Head>
+        <title>Wishlist</title>
+      </Head>
       <ToastContainer />
       <div className="mx-auto lg:max-w-7xl md:items-center px-4 md:px-0">
         <div className="flex gap-x-5 md:justify-between mt-10 mb-24 items-center">

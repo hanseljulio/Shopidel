@@ -12,6 +12,7 @@ import { useUserStore } from "@/store/userStore";
 import Modal from "@/components/Modal";
 import { IAPIResponse } from "@/interfaces/api_interface";
 import { SubmitHandler, useForm } from "react-hook-form";
+import Head from "next/head";
 
 interface IShowcase {
   data: IShowcaseData[];
@@ -427,6 +428,9 @@ const SellerShowcasePage = () => {
       )}
 
       <SellerAdminLayout currentPage="Showcase">
+        <Head>
+          <title>Showcase</title>
+        </Head>
         <ToastContainer />
         <div className="w-full mx-auto mt-6">
           <div className="flex items-center justify-between md:flex-row md:mx-[5%] flex-col p-0 md:gap-0 gap-8">

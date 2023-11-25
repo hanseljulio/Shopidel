@@ -24,6 +24,7 @@ import { useRouter } from "next/router";
 import { IWalletTransaction } from "@/interfaces/wallet_interface";
 import { useUserStore } from "@/store/userStore";
 import Pagination from "@/components/Pagination";
+import Head from "next/head";
 
 interface IActivateWalletProps {
   onOpenDialog: (content: JSX.Element) => void;
@@ -498,6 +499,9 @@ const WalletDetail = ({
 
   return (
     <div className="p-5">
+      <Head>
+        <title>My Wallet</title>
+      </Head>
       <div className="flex flex-col gap-y-3 md:gap-y-0 md:flex-row justify-between md:items-end">
         <div>
           <p className="text-slate-500 text-sm">
