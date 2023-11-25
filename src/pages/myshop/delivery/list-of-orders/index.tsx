@@ -5,7 +5,6 @@ import Button from "@/components/Button";
 import { useRouter } from "next/router";
 import { useUserStore } from "@/store/userStore";
 import Modal from "@/components/Modal";
-import { FaMapMarkerAlt, FaTag } from "react-icons/fa";
 import { API } from "@/network";
 import axios from "axios";
 import { clientUnauthorizeHandler } from "@/utils/utils";
@@ -21,6 +20,8 @@ import Pagination from "@/components/Pagination";
 import ReactToPrint from "react-to-print";
 import { IAddress } from "@/interfaces/user_interface";
 import Head from "next/head";
+import CheckoutGrandTotal from "@/components/CheckoutGrandTotal";
+import { FaDollyFlatbed, FaBox, FaMapMarkerAlt } from "react-icons/fa";
 
 interface IIndividualOrderProps {
   setCancelTransaction: (orderId: number) => void;
@@ -35,55 +36,56 @@ interface IOrderDetailModalProps {
 }
 
 const OrderDetailModal = (props: IOrderDetailModalProps) => {
+  const getTotal = () => {
+    let total = 0;
+    for (let i = 0; i < props.data.products.length; i++) {
+      total +=
+        props.data.products[i].quantity *
+        parseInt(props.data.products[i].individual_price);
+    }
+
+    return total;
+  };
+
   return (
     <div className="bg-white p-5 rounded-md md:w-[1000px] md:h-[800px] h-[80vh] w-[90vw] overflow-y-auto">
       <div className="py-3 border-b-2">
         <h1 className="text-[20px] font-bold">Order Details</h1>
       </div>
-      <div className="pt-4">
+      <div className="py-4">
         <h1>
           Status:{" "}
           <span className="font-bold">{props.data.status.toUpperCase()}</span>
         </h1>
-        <h1>Order Number: {props.data.order_id}</h1>
-        <h1>Buyer: {props.data.buyer_name}</h1>
+        <h1>
+          Order Number: <span className="font-bold">{props.data.order_id}</span>
+        </h1>
+        <h1>
+          Buyer: <span className="font-bold">{props.data.buyer_name}</span>
+        </h1>
       </div>
-      <div className="pt-4">
-        <h1 className="font-bold text-[20px]">Delivery Service</h1>
+      <div className="py-3">
+        <h1 className="font-bold text-[20px] flex items-center gap-4 pb-1">
+          <FaDollyFlatbed className="text-amber-600" />
+          Delivery Service
+        </h1>
         <h1>Courier: {props.data.courier_name.toUpperCase()}</h1>
       </div>
-      <div className="pt-4">
-        <h1 className="font-bold text-[20px]">Payment Information</h1>
-        <h1>
-          Order Total: {currencyConverter(parseInt(props.data.total_payment))}
+      <div className="py-3">
+        <h1 className="font-bold text-[20px] flex items-center gap-4 pb-1">
+          <FaMapMarkerAlt className="text-red-500" />
+          Delivery Address
         </h1>
-        <h1>
-          Shipping total: {currencyConverter(parseInt(props.data.delivery_fee))}
-        </h1>
-        {props.data.promotion.shop_voucher !== "" && (
-          <h1>
-            Voucher Total:{" "}
-            {currencyConverter(parseInt(props.data.promotion.shop_voucher))}
-          </h1>
-        )}
-        {props.data.promotion.marketplace_voucher !== "" && (
-          <h1>
-            Marketplace Total:{" "}
-            {currencyConverter(
-              parseInt(props.data.promotion.marketplace_voucher)
-            )}
-          </h1>
-        )}
-      </div>
-      <div className="pt-4">
-        <h1 className="font-bold text-[20px]">Delivery Address</h1>
         <h1>{props.data.shipping.detail}</h1>
         <h1>{`${props.data.shipping.kelurahan.toUpperCase()}, ${props.data.shipping.sub_district.toUpperCase()}, ${props.data.shipping.district.toUpperCase()}, ${props.data.shipping.province.toUpperCase()}, ID ${
           props.data.shipping.zip_code
         }`}</h1>
       </div>
-      <div className="pt-4">
-        <h1 className="font-bold text-[20px]">Purchased Products:</h1>
+      <div className="pt-3 pb-6">
+        <h1 className="font-bold text-[20px] flex items-center gap-4">
+          <FaBox className="text-amber-800" />
+          Purchased Products:
+        </h1>
         {props.data.products.map((product, index) => {
           return (
             <div key={index} className="py-2">
@@ -97,6 +99,34 @@ const OrderDetailModal = (props: IOrderDetailModalProps) => {
           );
         })}
       </div>
+      <div className="py-3 bg-[#fddf97] px-6 text-[18px]  w-fit rounded-full my-3 mx-auto">
+        <h1 className="text-center">
+          You earned {currencyConverter(parseInt(props.data.total_payment))}
+        </h1>
+      </div>
+      <CheckoutGrandTotal
+        merchandise={getTotal()}
+        shipping={
+          isNaN(parseInt(props.data.delivery_fee))
+            ? 0
+            : parseInt(props.data.delivery_fee)
+        }
+        voucher={
+          isNaN(parseInt(props.data.promotion.shop_voucher))
+            ? 0
+            : parseInt(props.data.promotion.shop_voucher)
+        }
+        marketplace={
+          isNaN(parseInt(props.data.promotion.marketplace_voucher))
+            ? 0
+            : parseInt(props.data.promotion.marketplace_voucher)
+        }
+        total={
+          isNaN(parseInt(props.data.total_payment))
+            ? 0
+            : parseInt(props.data.total_payment)
+        }
+      />
     </div>
   );
 };

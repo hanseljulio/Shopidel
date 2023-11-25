@@ -102,12 +102,6 @@ const SellerAdminSidebar = () => {
           Delivery Service
         </h1>
         <ul className="text-[14px] ml-[38px]">
-          {/* <li
-            onClick={() => router.push("/myshop/delivery/configure")}
-            className={`py-1 hover:cursor-pointer w-[80px] hover:text-[#92bcff] transition`}
-          >
-            Configure
-          </li> */}
           <li
             onClick={() => router.push("/myshop/delivery/list-of-orders")}
             className={`py-1 hover:cursor-pointer w-[90px] hover:text-[#92bcff] transition`}
