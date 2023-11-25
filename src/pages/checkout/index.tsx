@@ -611,11 +611,9 @@ const CheckoutPage = () => {
             render() {
               cartStore.updateCart(undefined);
 
-              setTimeout(() => {
-                router.replace("/cart");
-              }, 3000);
+              router.replace("/user/transaction-history");
 
-              return "Payment success! Redirecting you back to your cart.";
+              return "Payment success! Redirecting you back to your order history.";
             },
           },
           error: {

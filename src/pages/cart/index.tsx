@@ -392,29 +392,20 @@ const CartPage = () => {
 
   const goToCheckout = async (e: any) => {
     e.preventDefault();
-    const emptySelectionMessage = () =>
-      toast.error("Please select an item before checking out.");
-
-    const movingToCheckout = () => toast.success("Redirecting to checkout...");
 
     if (checkEmptySelection()) {
-      emptySelectionMessage();
+      toast.error("Please select an item before checking out.");
       return;
     }
-
-    const multipleStoreError = () => toast.error("Only one store at a time!");
 
     if (checkMultipleStores()) {
-      multipleStoreError();
+      toast.error("Only one store at a time!");
       return;
     }
 
-    setTimeout(() => {
-      router.push("/checkout");
-    }, 3000);
-
-    movingToCheckout();
+    toast.success("Redirecting to checkout...");
     cartStore.updateCart(cartData);
+    router.push("/checkout");
   };
 
   const getCartData = async () => {
