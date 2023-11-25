@@ -19,6 +19,7 @@ import {
 import { useRouter } from "next/router";
 import { useUserStore } from "@/store/userStore";
 import { SubmitHandler, useForm } from "react-hook-form";
+import Head from "next/head";
 
 const UserProfile = ({
   userData,
@@ -114,6 +115,9 @@ const UserProfile = ({
 
   return (
     <div>
+      <Head>
+        <title>My Profile</title>
+      </Head>
       <ToastContainer />
       <ProfileLayout currentPage="My Profile">
         <div className="w-full p-5">

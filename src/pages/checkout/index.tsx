@@ -28,6 +28,7 @@ import PinCode from "@/components/PinCode";
 import CheckoutMarketplaceModal from "@/components/CheckoutMarketplaceModal";
 import { ICheckoutMarketplace } from "@/interfaces/seller_interface";
 import Input from "@/components/Input";
+import Head from "next/head";
 
 interface IProductVariant {
   id: number;
@@ -763,6 +764,9 @@ const CheckoutPage = () => {
 
       <div>
         <Navbar />
+        <Head>
+          <title>Checkout</title>
+        </Head>
         <ToastContainer />
         <div className="lg:max-w-7xl mx-auto">
           <div className="flex md:justify-normal items-center mt-[30px] py-6 justify-center">

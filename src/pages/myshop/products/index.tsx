@@ -12,6 +12,7 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Modal from "@/components/Modal";
 import { useUserStore } from "@/store/userStore";
+import Head from "next/head";
 
 const SellerAdminProducts = () => {
   const [products, setProducts] = useState<IProduct[]>([]);
@@ -68,6 +69,9 @@ const SellerAdminProducts = () => {
   return (
     <>
       <ToastContainer />
+      <Head>
+        <title>My Products</title>
+      </Head>
       {isModal && (
         <Modal
           content={

@@ -18,6 +18,7 @@ import { FaMapMarkerAlt, FaTag } from "react-icons/fa";
 import CheckoutGrandTotal from "@/components/CheckoutGrandTotal";
 import Button from "@/components/Button";
 import { IAPIResponse } from "@/interfaces/api_interface";
+import Head from "next/head";
 
 interface IIndividualOrderProps {
   data: ITransactionHistoryData;
@@ -600,6 +601,9 @@ const TransactionHistory = () => {
 
       <div>
         <ProfileLayout currentPage="Transaction History">
+          <Head>
+            <title>Transaction History</title>
+          </Head>
           <ToastContainer />
           <div className="w-full mx-auto mt-6 ">
             <div className="flex items-center justify-between md:flex-row md:mx-[5%] flex-col p-0 md:gap-0 gap-8">

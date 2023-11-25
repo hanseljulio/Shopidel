@@ -7,6 +7,7 @@ import React, { useState } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import Head from "next/head";
 
 const ForgetPassword = () => {
   const { register, handleSubmit } = useForm<Pick<IUser, "email">>();
@@ -40,6 +41,9 @@ const ForgetPassword = () => {
 
   return (
     <div className="h-screen w-screen flex justify-center items-center">
+      <Head>
+        <title>Forget Password</title>
+      </Head>
       <ToastContainer />
       <div className="flex flex-col items-center w-full px-5 md:px-0">
         <h1 className="text-xl font-bold">Forget Password</h1>

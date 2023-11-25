@@ -20,6 +20,7 @@ import {
 import Pagination from "@/components/Pagination";
 import ReactToPrint from "react-to-print";
 import { IAddress } from "@/interfaces/user_interface";
+import Head from "next/head";
 
 interface IIndividualOrderProps {
   setCancelTransaction: (orderId: number) => void;
@@ -541,6 +542,9 @@ const SellerOrderListPage = () => {
 
       <SellerAdminLayout currentPage="List of Orders">
         <ToastContainer />
+        <Head>
+          <title>List of Orders</title>
+        </Head>
         <div className="w-full mx-auto mt-6">
           <div className="flex items-center justify-between md:flex-row md:mx-[5%] flex-col p-0 md:gap-0 gap-8">
             <h1 className="text-[30px]">List of Orders</h1>

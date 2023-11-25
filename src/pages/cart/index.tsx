@@ -17,6 +17,7 @@ import { IAPIResponse } from "@/interfaces/api_interface";
 import { clientUnauthorizeHandler } from "@/utils/utils";
 import { useUserStore } from "@/store/userStore";
 import { currencyConverter } from "@/utils/utils";
+import Head from "next/head";
 
 interface IDeleteAllModalProps {
   deleteFunction: () => void;
@@ -458,6 +459,9 @@ const CartPage = () => {
       )}
       <div>
         <Navbar />
+        <Head>
+          <title>My Cart</title>
+        </Head>
         <ToastContainer />
         <div className="lg:max-w-7xl mx-auto">
           <div className="md:flex mt-[30px] justify-between block">
