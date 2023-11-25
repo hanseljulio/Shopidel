@@ -18,6 +18,7 @@ const SellerAdminProducts = () => {
   const [pagination, setPagination] = useState<IAPIPagination>();
   const [selectedProduct, setSelectedProduct] = useState<number[]>([]);
   const [isModal, setIsModal] = useState<boolean>(false);
+  const [page, setPage] = useState<number>(1);
   const router = useRouter();
   const { user } = useUserStore();
 
@@ -62,7 +63,7 @@ const SellerAdminProducts = () => {
 
   useEffect(() => {
     getSellerProducts();
-  }, []);
+  }, [router.query.page]);
 
   return (
     <>
@@ -118,7 +119,7 @@ const SellerAdminProducts = () => {
           </div>
           {products.length !== 0 ? (
             <div className="flex flex-col">
-              <div className="mt-5 md:h-[500px]">
+              <div className="mt-5 ">
                 <table className="w-full hidden md:inline-table border-collapse border">
                   <thead>
                     <tr>
@@ -264,7 +265,7 @@ const SellerAdminProducts = () => {
                   })}
                 </div>
               </div>
-              <div className="self-end mt-5 md:mt-0">
+              <div className="self-center mt-5">
                 <Pagination
                   data={pagination}
                   onNavigate={(page) =>
