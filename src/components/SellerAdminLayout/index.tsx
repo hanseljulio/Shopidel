@@ -3,6 +3,8 @@ import Navbar from "../Navbar";
 import { FaTag, FaDollyFlatbed, FaBox } from "react-icons/fa";
 import { useRouter } from "next/router";
 import Button from "../Button";
+import { FaGear } from "react-icons/fa6";
+import { BiSolidCategory } from "react-icons/bi";
 
 interface IProfileLayout {
   children: ReactNode;
@@ -21,28 +23,33 @@ const MobileSellerAdminSidebar = (props: MobileSellerAdminSidebarProps) => {
       <div className="flex gap-6 overflow-x-auto mx-[10px] whitespace-nowrap">
         <Button
           text="Products"
+          onClick={() => router.push("/myshop/products")}
           styling="bg-blue-100 py-[12px] rounded-full w-[150px] px-8 hover:bg-blue-300 my-4"
           disabled={props.currentPage === "Products"}
         />
         <Button
           text="Promotions"
+          onClick={() => router.push("/myshop/promotions")}
           styling="bg-blue-100 py-[12px] rounded-full w-[150px] px-8 hover:bg-blue-300 my-4"
           disabled={props.currentPage === "Promotions"}
         />
         <Button
-          text="Configure Delivery"
+          text="Showcase"
+          onClick={() => router.push("/myshop/showcase")}
           styling="bg-blue-100 py-[12px] rounded-full w-[350px] px-8 hover:bg-blue-300 my-4"
-          disabled={props.currentPage === "Configure"}
+          disabled={props.currentPage === "Showcase"}
         />
         <Button
           text="Delivery List"
+          onClick={() => router.push("/myshop/delivery/list-of-orders")}
           styling="bg-blue-100 py-[12px] rounded-full w-[250px] px-8 hover:bg-blue-300 my-4"
           disabled={props.currentPage === "List of Orders"}
         />
         <Button
-          text="Process Delivery"
+          text="Settings"
+          onClick={() => router.push("/myshop/settings")}
           styling="bg-blue-100 py-[12px] rounded-full w-[350px] px-8 hover:bg-blue-300 my-4"
-          disabled={props.currentPage === "Process Orders"}
+          disabled={props.currentPage === "Settings"}
         />
       </div>
     </div>
@@ -78,6 +85,15 @@ const SellerAdminSidebar = () => {
             Promotions
           </h1>
         </div>
+        <div className="pl-[26px] border-slate-300 border-b-2 pb-[20px]">
+          <h1
+            onClick={() => router.push("/myshop/showcase")}
+            className="text-[20px] flex items-center gap-4 mt-[20px] hover:cursor-pointer transition w-[200px] hover:text-[#92bcff]"
+          >
+            <BiSolidCategory />
+            Showcase
+          </h1>
+        </div>
       </div>
 
       <div className="options-section text-white mt-[30px] pl-[24px] border-slate-300 border-b-2 pb-5">
@@ -87,18 +103,21 @@ const SellerAdminSidebar = () => {
         </h1>
         <ul className="text-[14px] ml-[38px]">
           <li
-            onClick={() => router.push("/myshop/delivery/configure")}
-            className={`py-1 hover:cursor-pointer w-[80px] hover:text-[#92bcff] transition`}
-          >
-            Configure
-          </li>
-          <li
-            onClick={() => router.push("/myshop/delivery/listOfOrders")}
+            onClick={() => router.push("/myshop/delivery/list-of-orders")}
             className={`py-1 hover:cursor-pointer w-[90px] hover:text-[#92bcff] transition`}
           >
             List of orders
           </li>
         </ul>
+      </div>
+      <div className="pl-[26px] border-slate-300 border-b-2 pb-[20px] text-white">
+        <h1
+          onClick={() => router.push("/myshop/settings")}
+          className="text-[20px] flex items-center gap-4 mt-[20px] hover:cursor-pointer transition w-[200px] hover:text-[#92bcff]"
+        >
+          <FaGear />
+          Settings
+        </h1>
       </div>
     </div>
   );

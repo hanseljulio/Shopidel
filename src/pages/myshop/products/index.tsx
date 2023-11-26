@@ -12,12 +12,14 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Modal from "@/components/Modal";
 import { useUserStore } from "@/store/userStore";
+import Head from "next/head";
 
 const SellerAdminProducts = () => {
   const [products, setProducts] = useState<IProduct[]>([]);
   const [pagination, setPagination] = useState<IAPIPagination>();
   const [selectedProduct, setSelectedProduct] = useState<number[]>([]);
   const [isModal, setIsModal] = useState<boolean>(false);
+  const [page, setPage] = useState<number>(1);
   const router = useRouter();
   const { user } = useUserStore();
 
@@ -62,11 +64,14 @@ const SellerAdminProducts = () => {
 
   useEffect(() => {
     getSellerProducts();
-  }, []);
+  }, [router.query.page]);
 
   return (
     <>
       <ToastContainer />
+      <Head>
+        <title>My Products</title>
+      </Head>
       {isModal && (
         <Modal
           content={
@@ -118,7 +123,7 @@ const SellerAdminProducts = () => {
           </div>
           {products.length !== 0 ? (
             <div className="flex flex-col">
-              <div className="mt-5 md:h-[500px]">
+              <div className="mt-5 ">
                 <table className="w-full hidden md:inline-table border-collapse border">
                   <thead>
                     <tr>
@@ -276,7 +281,7 @@ const SellerAdminProducts = () => {
                   })}
                 </div>
               </div>
-              <div className="self-end mt-5 md:mt-0">
+              <div className="self-center mt-5">
                 <Pagination
                   data={pagination}
                   onNavigate={(page) =>

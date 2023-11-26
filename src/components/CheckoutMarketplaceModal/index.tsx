@@ -1,53 +1,65 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { FaTicketAlt } from "react-icons/fa";
 import Button from "../Button";
-import { AiFillCloseSquare } from "react-icons/ai";
-import { ICheckoutPromotions } from "@/interfaces/seller_interface";
 import { currencyConverter } from "@/utils/utils";
+import { ICheckoutMarketplace } from "@/interfaces/seller_interface";
 
 interface IVoucherProps {
-  id: number;
-  name: string;
-  description: string;
   currentSelectedVoucher: number;
+  data: ICheckoutMarketplace;
   selectVoucher: (id: number) => void;
+  selectDiscount: (discount: ICheckoutMarketplace) => void;
 }
 
 interface IVoucherModalProps {
   updateVoucher: (id: number) => void;
   selectedVoucher: number;
-  voucherData: ICheckoutPromotions[];
-  submitVoucherFunction: (id: number) => void;
+  voucherData: ICheckoutMarketplace[];
+  submitVoucherFunction: (discount: ICheckoutMarketplace) => void;
+}
+
+interface IMarketplacePromotions {
+  id: number;
+  name: string;
+  min_purchase_amount: string;
+  max_purchase_amount: string;
+  discount_amount: string;
 }
 
 const IndividualVoucher = (props: IVoucherProps) => {
   const [color, setColor] = useState<string>("");
+
   return (
     <div
       onClick={() => {
-        props.selectVoucher(props.id);
-        if (props.currentSelectedVoucher === props.id) {
+        props.selectVoucher(props.data.id);
+        props.selectDiscount(props.data);
+        if (props.currentSelectedVoucher === props.data.id) {
           setColor("bg-[#fddf97]");
         } else {
           setColor("bg-white");
         }
       }}
       className={`${
-        props.currentSelectedVoucher === props.id ? "bg-[#fddf97]" : color
+        props.currentSelectedVoucher === props.data.id ? "bg-[#fddf97]" : color
       } w-full border-2 shadow-lg rounded-[8px] md:px-14 md:py-8 flex items-center gap-10 hover:cursor-pointer hover:bg-[#fddf97] py-4 px-8`}
     >
       <div>
         <FaTicketAlt className="text-[30px] text-[#e09664]" />
       </div>
       <div>
-        <h1 className="md:text-[18px] text-[14px]">{props.name}</h1>
-        <h1 className="md:text-[14px] text-[12px]">{props.description}</h1>
+        <h1 className="md:text-[18px] text-[14px]">{props.data.name}</h1>
+        <h1 className="md:text-[14px] text-[12px]">{`Mininum purchase ${currencyConverter(
+          parseInt(props.data.min_purchase_amount)
+        )}, Maximum purchase ${currencyConverter(
+          parseInt(props.data.max_purchase_amount)
+        )}`}</h1>
       </div>
     </div>
   );
 };
 
-const CheckoutVoucherModal = (props: IVoucherModalProps) => {
+const CheckoutMarketplaceModal = (props: IVoucherModalProps) => {
   const [selectedVoucher, setSelectedVoucher] = useState<number>(
     props.selectedVoucher
   );
@@ -56,9 +68,18 @@ const CheckoutVoucherModal = (props: IVoucherModalProps) => {
     setSelectedVoucher(id);
   };
 
-  const [voucherData, setVoucherData] = useState<ICheckoutPromotions[]>(
+  const [voucherData, setVoucherData] = useState<IMarketplacePromotions[]>(
     props.voucherData
   );
+
+  const [selectedDiscount, setSelectedDiscount] =
+    useState<ICheckoutMarketplace>({
+      id: 0,
+      name: "",
+      min_purchase_amount: "",
+      max_purchase_amount: "",
+      discount_amount: "",
+    });
 
   return (
     <div className="bg-white p-5 rounded-md  md:w-[500px] h-[600px] w-[99%]">
@@ -70,27 +91,22 @@ const CheckoutVoucherModal = (props: IVoucherModalProps) => {
           return (
             <IndividualVoucher
               key={index}
-              id={data.id}
-              name={data.name}
-              description={`Mininum purchase ${currencyConverter(
-                parseInt(data.min_purchase_amount)
-              )}, Maximum purchase ${currencyConverter(
-                parseInt(data.max_purchase_amount)
-              )}`}
+              data={data}
               currentSelectedVoucher={selectedVoucher}
               selectVoucher={changeSelectedVoucherLocal}
+              selectDiscount={(data) => setSelectedDiscount(data)}
             />
           );
         })}
       </div>
       <div className="flex justify-center mt-3">
         <Button
-          text="Select Voucher"
+          text="Select Discount"
           styling="bg-[#364968] p-3 rounded-[8px] w-[200px] text-white my-4"
           disabled={selectedVoucher === 0}
           onClick={() => {
             props.updateVoucher(selectedVoucher);
-            props.submitVoucherFunction(selectedVoucher);
+            props.submitVoucherFunction(selectedDiscount);
           }}
         />
       </div>
@@ -98,4 +114,4 @@ const CheckoutVoucherModal = (props: IVoucherModalProps) => {
   );
 };
 
-export default CheckoutVoucherModal;
+export default CheckoutMarketplaceModal;

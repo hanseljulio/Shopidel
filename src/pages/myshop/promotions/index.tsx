@@ -2,7 +2,10 @@ import SellerAdminLayout from "@/components/SellerAdminLayout";
 import React, { useEffect, useState } from "react";
 import Button from "@/components/Button";
 import { useRouter } from "next/router";
-import { ISellerPromotion } from "@/interfaces/seller_interface";
+import {
+  ISellerPromotionData,
+  ISellerPromotion,
+} from "@/interfaces/seller_interface";
 import Modal from "@/components/Modal";
 import { currencyConverter, dateConverter } from "@/utils/utils";
 import { API } from "@/network";
@@ -13,19 +16,12 @@ import axios from "axios";
 import { useUserStore } from "@/store/userStore";
 import { IAPIResponse } from "@/interfaces/api_interface";
 import { SubmitHandler, useForm } from "react-hook-form";
+import Pagination from "@/components/Pagination";
+import Head from "next/head";
 
 interface IDeletePromoModal {
   closeFunction: () => void;
   submitFunction: () => void;
-}
-interface ISellerProductSelect {
-  id: number;
-  name: string;
-  category_id: number;
-  created_at: string;
-  updated_at: string;
-  deleted_at: string;
-  isChecked: boolean;
 }
 
 const DeletePromoModal = (props: IDeletePromoModal) => {
@@ -58,22 +54,15 @@ interface IOrderDetailModalProps {
   promoId: number;
 }
 
-interface ISelectedProducts {
-  product_id: number;
-  product_name: string;
-  created_at: string;
-}
-
 interface IPromoDetails {
   id: number;
   name: string;
   min_purchase_amount: string;
   max_purchase_amount: string;
-  discount_percentage: string;
+  discount_amount: string;
   quota: number;
   start_date: string;
-  end_date: "2024-01-01T01:01:01+07:00";
-  selected_products: ISelectedProducts[];
+  end_date: string;
   created_at: string;
 }
 
@@ -103,7 +92,7 @@ const OrderDetailModal = (props: IOrderDetailModalProps) => {
   }, []);
 
   return (
-    <div className="bg-white p-5 rounded-md md:w-[1000px] md:h-[800px] h-[80vh] w-[90vw] overflow-y-auto">
+    <div className="bg-white p-5 rounded-md md:w-[1000px] md:h-[500px] h-[80vh] w-[90vw] overflow-y-auto">
       <div className="py-3 border-b-2">
         <h1 className="text-[20px] font-bold">Promotion Details</h1>
       </div>
@@ -139,17 +128,12 @@ const OrderDetailModal = (props: IOrderDetailModalProps) => {
             promoDetail ? parseInt(promoDetail?.max_purchase_amount) : 0
           )}
         </h1>
-        <h1>Discount percentage: {promoDetail?.discount_percentage}%</h1>
-      </div>
-      <div className="pt-4">
-        <h1 className="font-bold text-[20px]">
-          Promotion available on these products:
+        <h1>
+          Discount amount:{" "}
+          {currencyConverter(
+            promoDetail ? parseInt(promoDetail?.discount_amount) : 0
+          )}
         </h1>
-        <ul className="flex flex-col gap-3 pt-4">
-          {promoDetail?.selected_products.map((product, index) => {
-            return <li key={index}>&gt; {product.product_name}</li>;
-          })}
-        </ul>
       </div>
     </div>
   );
@@ -161,82 +145,15 @@ interface IEditPromoProps {
 }
 
 const EditPromo = (props: IEditPromoProps) => {
-  const [sellerProducts, setSellerProducts] = useState<ISellerProductSelect[]>([
-    {
-      id: 0,
-      name: "",
-      category_id: 936,
-      created_at: "2023-11-21T05:36:43.520268Z",
-      updated_at: "2023-11-21T05:36:43.520268Z",
-      deleted_at: "0001-01-01T00:00:00Z",
-      isChecked: false,
-    },
-  ]);
-
-  const handleCheckAll = (e: any) => {
-    const { checked } = e.target;
-    const currentData = [...sellerProducts];
-
-    const updatedData = currentData.map((data) => {
-      return { ...data, isChecked: checked };
-    });
-
-    setSellerProducts(updatedData);
-  };
-
-  const handleCheck = (e: any, id: number) => {
-    const { checked } = e.target;
-    const currentData = [...sellerProducts];
-
-    const updatedData = currentData.map((data) => {
-      if (data.id === id) {
-        return { ...data, isChecked: checked };
-      } else {
-        return data;
-      }
-    });
-    setSellerProducts(updatedData);
-  };
-
   const router = useRouter();
   const { updateUser } = useUserStore();
-
-  const getSellerProducts = async () => {
-    try {
-      const response = await API.get(`sellers/products`);
-      const selectedProducts = promoDetail?.selected_products.map(
-        (data) => data.product_id
-      );
-
-      response.data.data.map((data: any) => {
-        if (selectedProducts?.includes(data.id)) {
-          data.isChecked = true;
-        } else {
-          data.isChecked = false;
-        }
-      });
-
-      setSellerProducts(response.data.data);
-    } catch (e) {
-      if (axios.isAxiosError(e)) {
-        if (e.response?.status === 401) {
-          return clientUnauthorizeHandler(router, updateUser);
-        }
-        return toast.error(e.message, {
-          autoClose: 1500,
-        });
-      }
-    }
-  };
-
-  const [promoDetail, setPromoDetail] = useState<IPromoDetails>();
 
   const {
     register,
     handleSubmit,
     reset,
     formState: { errors },
-  } = useForm<ISellerPromotion>({
+  } = useForm<ISellerPromotionData>({
     mode: "onBlur",
     defaultValues: {},
   });
@@ -244,7 +161,6 @@ const EditPromo = (props: IEditPromoProps) => {
   const getPromoData = async () => {
     try {
       const response = await API.get(`shop-promotions/${props.promoId}`);
-      setPromoDetail(response.data.data);
 
       const currentData = {
         id: response.data.data.id,
@@ -254,7 +170,7 @@ const EditPromo = (props: IEditPromoProps) => {
         end_date: response.data.data.end_date.substring(0, 10),
         min_purchase_amount: response.data.data.min_purchase_amount,
         max_purchase_amount: response.data.data.max_purchase_amount,
-        discount_percentage: response.data.data.discount_percentage,
+        discount_amount: response.data.data.discount_amount,
       };
 
       reset({ ...currentData });
@@ -272,22 +188,9 @@ const EditPromo = (props: IEditPromoProps) => {
 
   useEffect(() => {
     getPromoData();
-    getSellerProducts();
-  }, [sellerProducts.length]);
+  }, []);
 
-  const submit: SubmitHandler<ISellerPromotion> = async (data) => {
-    const selectedProducts = [];
-
-    for (let i = 0; i < sellerProducts.length; i++) {
-      if (sellerProducts[i].isChecked) {
-        selectedProducts.push(sellerProducts[i].id);
-      }
-    }
-
-    if (selectedProducts.length === 0) {
-      toast.error("Please select items that will have the promotion.");
-    }
-
+  const submit: SubmitHandler<ISellerPromotionData> = async (data) => {
     const sendData = {
       name: data.name,
       quota: parseInt(data.quota.toString()),
@@ -295,8 +198,7 @@ const EditPromo = (props: IEditPromoProps) => {
       end_date: new Date(data.end_date).toISOString(),
       min_purchase_amount: data.min_purchase_amount,
       max_purchase_amount: data.max_purchase_amount,
-      discount_percentage: data.discount_percentage,
-      selected_products_id: selectedProducts,
+      discount_amount: data.discount_amount,
     };
 
     try {
@@ -332,7 +234,7 @@ const EditPromo = (props: IEditPromoProps) => {
   };
 
   return (
-    <div className="bg-white p-5 rounded-md md:w-[1000px] md:h-[800px] h-[80vh] w-[90vw] overflow-y-auto">
+    <div className="bg-white p-5 rounded-md md:w-[1000px] md:h-[500px] h-[80vh] w-[90vw] overflow-y-auto">
       <div className="py-3 border-b-2">
         <h1 className="text-[20px] font-bold">Edit Promotion</h1>
       </div>
@@ -461,64 +363,26 @@ const EditPromo = (props: IEditPromoProps) => {
             </div>
             <div className="flex flex-col md:basis-[33.3%]">
               <label htmlFor="discountPercentage" className="text-sm">
-                Discount percentage
+                Discount amount
               </label>
-              <div className="relative">
-                <input
-                  {...register("discount_percentage", {
-                    required: "Discount percentage is required",
-                  })}
-                  type="number"
-                  name="discountPercentage"
-                  id="discountPercentage"
-                  className="rounded-md border p-2 w-full"
-                />
-                <div className="absolute right-0 bg-[#F3F4F5] border border-slate-500 h-full flex items-center px-2 rounded-tr-md rounded-br-md top-0">
-                  <span className="">%</span>
-                </div>
-              </div>
-              {errors.discount_percentage?.type === "required" && (
+              <input
+                {...register("discount_amount", {
+                  required: "Discount amount is required",
+                })}
+                type="number"
+                name="discountAmount"
+                id="discountAmount"
+                className="rounded-md border p-2 w-full"
+              />
+              {errors.discount_amount?.type === "required" && (
                 <p role="alert" className="text-xs text-red-500 mt-1">
-                  {errors.discount_percentage.message}
+                  {errors.discount_amount.message}
                 </p>
               )}
             </div>
           </div>
 
-          <div className="">
-            <div className="flex justify-between items-center md:flex-row flex-col">
-              <h1 className="text-[25px] py-6">Select Products</h1>
-              <div className="flex items-center gap-6 md:pb-0 pb-6">
-                <input
-                  type="checkbox"
-                  className="hover:cursor-pointer"
-                  onClick={handleCheckAll}
-                  name="allselect"
-                />
-                <p>Select all</p>
-              </div>
-            </div>
-            <div className="bg-slate-300 h-[300px] overflow-y-scroll flex flex-col items-center">
-              {sellerProducts.map((product, index) => {
-                return (
-                  <div
-                    key={index}
-                    className="bg-white border-2 rounded-md  p-6 flex gap-6 items-center my-3 w-[95%]"
-                  >
-                    <input
-                      onClick={(e) => handleCheck(e, product.id)}
-                      type="checkbox"
-                      className="hover:cursor-pointer"
-                      checked={product.isChecked}
-                    />
-                    <h1>{product.name}</h1>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-
-          <div className="flex justify-center pt-6 py-10">
+          <div className="flex justify-center pt-14">
             <Button
               text="Edit promotion"
               styling="p-3 bg-[#364968] w-[300px] rounded-md text-white"
@@ -532,7 +396,7 @@ const EditPromo = (props: IEditPromoProps) => {
 
 const SellerAdminHome = () => {
   const [currentPage, setCurrentPage] = useState<string>("all");
-  const [promotionData, setPromotionData] = useState<ISellerPromotion[]>([]);
+  const [promotionData, setPromotionData] = useState<ISellerPromotion>();
   const router = useRouter();
   const { user, updateUser } = useUserStore();
 
@@ -541,10 +405,11 @@ const SellerAdminHome = () => {
   const [showEditModal, setShowEditModal] = useState<boolean>(false);
 
   const [selectedPromoId, setSelectedPromoId] = useState<number>(0);
+  const [page, setPage] = useState<number>(1);
 
   const getPromotionData = async () => {
     try {
-      const response = await API.get(`shop-promotions`);
+      const response = await API.get(`/shop-promotions?page=${page}&limit=10`);
 
       const currentData = response.data.data;
 
@@ -555,23 +420,26 @@ const SellerAdminHome = () => {
           let startTime = new Date(data.start_date).getTime();
           return currentTime <= endTime && currentTime >= startTime;
         });
-        setPromotionData(updatedData);
+        response.data.data = updatedData;
+        setPromotionData(response.data);
       } else if (currentPage === "upcoming") {
         const updatedData = currentData.filter((data: any) => {
           let currentTime = new Date().getTime();
           let startTime = new Date(data.start_date).getTime();
           return currentTime <= startTime;
         });
-        setPromotionData(updatedData);
+        response.data.data = updatedData;
+        setPromotionData(response.data);
       } else if (currentPage === "ended") {
         const updatedData = currentData.filter((data: any) => {
           let currentTime = new Date().getTime();
           let endTime = new Date(data.end_date).getTime();
           return endTime <= currentTime;
         });
-        setPromotionData(updatedData);
+        response.data.data = updatedData;
+        setPromotionData(response.data);
       } else {
-        setPromotionData(currentData);
+        setPromotionData(response.data);
       }
     } catch (e) {
       if (axios.isAxiosError(e)) {
@@ -593,12 +461,14 @@ const SellerAdminHome = () => {
 
   useEffect(() => {
     getPromotionData();
-  }, [currentPage]);
+  }, [currentPage, page]);
 
-  const duplicatePromo = async () => {
+  const duplicatePromo = async (id: number) => {
     let currentData;
     try {
-      const response = await API.get(`shop-promotions/${selectedPromoId}`);
+      const response = await API.get(`shop-promotions/${id}`);
+      console.log("HERE");
+      console.log(response.data.data);
       currentData = response.data.data;
     } catch (e) {
       if (axios.isAxiosError(e)) {
@@ -618,10 +488,7 @@ const SellerAdminHome = () => {
       end_date: currentData.end_date,
       min_purchase_amount: currentData.min_purchase_amount,
       max_purchase_amount: currentData.max_purchase_amount,
-      discount_percentage: currentData.discount_percentage,
-      selected_products_id: currentData.selected_products.map(
-        (data: any) => data.product_id
-      ),
+      discount_amount: currentData.discount_amount,
     };
 
     try {
@@ -730,6 +597,9 @@ const SellerAdminHome = () => {
 
       <SellerAdminLayout currentPage="Promotions">
         <ToastContainer />
+        <Head>
+          <title>Promotions</title>
+        </Head>
         <div className="w-full mx-auto mt-6">
           <div className="flex items-center justify-between md:flex-row md:mx-[5%] flex-col p-0 md:gap-0 gap-8">
             <h1 className="text-[30px]">Promotions</h1>
@@ -752,86 +622,94 @@ const SellerAdminHome = () => {
               styling="bg-[#fddf97] p-3 rounded-[8px] w-[200px] my-4"
             />
           </div>
-          <div className="mx-[5%] flex flex-col gap-6 pt-4">
-            {promotionData.length === 0 && (
+          <div className="mx-[5%] ">
+            {!promotionData || promotionData.data.length === 0 ? (
               <h1 className="font-bold text-[25px] text-center pt-4">
                 You have no promotions at the moment.
               </h1>
-            )}
-            {promotionData.map((data, index) => {
-              return (
-                <div key={index} className="border-2 border-black p-6">
-                  <div className="flex justify-between items-center md:flex-row flex-col">
-                    <div>
-                      <h1 className="text-[25px]">{data.name}</h1>
-                      <br />
+            ) : (
+              <div className="flex flex-col gap-6 pt-4">
+                {promotionData?.data.map((data, index) => {
+                  return (
+                    <div key={index} className="border-2 border-black p-6">
+                      <div className="flex justify-between items-center md:flex-row flex-col">
+                        <div className="md:text-left text-center">
+                          <h1 className="text-[25px]">{data.name}</h1>
+                          <br />
 
-                      <h1 className="font-bold ">
-                        {dateConverter(data.start_date.substring(0, 10))} to{" "}
-                        {dateConverter(data.end_date.substring(0, 10))}
-                      </h1>
-                      <h1>
-                        Min items:{" "}
-                        {data.min_purchase_amount === "0"
-                          ? "None"
-                          : data.min_purchase_amount}
-                      </h1>
-                      <h1>
-                        Max items:{" "}
-                        {data.max_purchase_amount === "0"
-                          ? "None"
-                          : data.max_purchase_amount}
-                      </h1>
-                    </div>
-                    <div className="md:text-right flex flex-col md:gap-3 md:items-end gap-6 text-center md:pt-0 pt-10">
-                      <h1 className="text-[20px]">
-                        {data.quota} remaining | {data.total_used} used
-                      </h1>
-                      <div className="flex justify-end gap-2 ">
-                        <h1
-                          onClick={() => {
-                            setSelectedPromoId(data.id);
-                            setShowEditModal(true);
-                          }}
-                          className="text-blue-600 hover:cursor-pointer hover:underline"
-                        >
-                          Edit
-                        </h1>
-                        <h1>|</h1>
-                        <h1
-                          onClick={() => {
-                            setSelectedPromoId(data.id);
-                            duplicatePromo();
-                          }}
-                          className="text-blue-600 hover:cursor-pointer hover:underline"
-                        >
-                          Duplicate
-                        </h1>
-                        <h1>|</h1>
-                        <h1
-                          onClick={() => {
-                            setSelectedPromoId(data.id);
-                            setShowDeleteModal(true);
-                          }}
-                          className="text-blue-600 hover:cursor-pointer hover:underline"
-                        >
-                          Delete
-                        </h1>
+                          <h1 className="font-bold ">
+                            {dateConverter(data.start_date.substring(0, 10))} to{" "}
+                            {dateConverter(data.end_date.substring(0, 10))}
+                          </h1>
+                          <h1>
+                            Min items:{" "}
+                            {data.min_purchase_amount === "0"
+                              ? "None"
+                              : data.min_purchase_amount}
+                          </h1>
+                          <h1>
+                            Max items:{" "}
+                            {data.max_purchase_amount === "0"
+                              ? "None"
+                              : data.max_purchase_amount}
+                          </h1>
+                        </div>
+                        <div className="md:text-right flex flex-col md:gap-3 md:items-end gap-6 text-center md:pt-0 pt-10">
+                          <h1 className="text-[20px]">
+                            {data.quota} remaining | {data.total_used} used
+                          </h1>
+                          <div className="flex md:justify-end gap-2 justify-center">
+                            <h1
+                              onClick={() => {
+                                setSelectedPromoId(data.id);
+                                setShowEditModal(true);
+                              }}
+                              className="text-blue-600 hover:cursor-pointer hover:underline"
+                            >
+                              Edit
+                            </h1>
+                            <h1>|</h1>
+                            <h1
+                              onClick={() => {
+                                duplicatePromo(data.id);
+                              }}
+                              className="text-blue-600 hover:cursor-pointer hover:underline"
+                            >
+                              Duplicate
+                            </h1>
+                            <h1>|</h1>
+                            <h1
+                              onClick={() => {
+                                setSelectedPromoId(data.id);
+                                setShowDeleteModal(true);
+                              }}
+                              className="text-blue-600 hover:cursor-pointer hover:underline"
+                            >
+                              Delete
+                            </h1>
+                          </div>
+                          <h1
+                            onClick={() => {
+                              setSelectedPromoId(data.id);
+                              setShowDetailModal(true);
+                            }}
+                            className="text-orange-600 hover:cursor-pointer hover:underline"
+                          >
+                            View Promotion Detail
+                          </h1>
+                        </div>
                       </div>
-                      <h1
-                        onClick={() => {
-                          setSelectedPromoId(data.id);
-                          setShowDetailModal(true);
-                        }}
-                        className="text-orange-600 hover:cursor-pointer hover:underline"
-                      >
-                        View Promotion Detail
-                      </h1>
                     </div>
-                  </div>
+                  );
+                })}
+                <div className="flex justify-center py-10">
+                  <Pagination
+                    data={promotionData.pagination}
+                    onNavigate={(navPage) => setPage(navPage)}
+                  />
                 </div>
-              );
-            })}
+              </div>
+            )}
           </div>
         </div>
       </SellerAdminLayout>

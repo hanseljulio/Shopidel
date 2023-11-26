@@ -24,6 +24,7 @@ import { useRouter } from "next/router";
 import { IWalletTransaction } from "@/interfaces/wallet_interface";
 import { useUserStore } from "@/store/userStore";
 import Pagination from "@/components/Pagination";
+import Head from "next/head";
 
 interface IActivateWalletProps {
   onOpenDialog: (content: JSX.Element) => void;
@@ -498,6 +499,9 @@ const WalletDetail = ({
 
   return (
     <div className="p-5">
+      <Head>
+        <title>My Wallet</title>
+      </Head>
       <div className="flex flex-col gap-y-3 md:gap-y-0 md:flex-row justify-between md:items-end">
         <div>
           <p className="text-slate-500 text-sm">
@@ -630,7 +634,7 @@ const WalletDetail = ({
                 })}
               </div>
             </div>
-            <div className="flex self-end mt-2">
+            <div className="flex self-center mt-2">
               {transactionHistoryRes && (
                 <Pagination
                   data={transactionHistoryRes?.pagination}
@@ -657,7 +661,7 @@ export const getServerSideProps = async (
     return {
       redirect: {
         permanent: false,
-        destination: "/login",
+        destination: "/login?session_expired=true",
       },
     };
   }
@@ -675,7 +679,7 @@ export const getServerSideProps = async (
       return {
         redirect: {
           permanent: false,
-          destination: "/",
+          destination: "/?force_logout=true",
         },
       };
     }

@@ -8,6 +8,7 @@ import React, { useEffect } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import Head from "next/head";
 
 const ResetPassword = () => {
   const router = useRouter();
@@ -64,6 +65,9 @@ const ResetPassword = () => {
 
   return (
     <div className="h-screen w-screen flex justify-center items-center">
+      <Head>
+        <title>Reset Password</title>
+      </Head>
       <ToastContainer />
       <div className="flex flex-col items-center px-5 md:px-0">
         <h1 className="text-xl font-bold">Reset Password</h1>

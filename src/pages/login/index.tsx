@@ -17,6 +17,7 @@ import {
 import { useUserStore } from "@/store/userStore";
 import { clientUnauthorizeHandler, setAuthCookie } from "@/utils/utils";
 import { useCartStore } from "@/store/cartStore";
+import Head from "next/head";
 
 const Login = () => {
   const {
@@ -75,22 +76,23 @@ const Login = () => {
       await getUserData(
         (res.data as IAPIResponse<IAPILoginResponse>).data!.access_token
       );
-    } catch (e) {
-      if (axios.isAxiosError(e)) {
-        if (e.response?.status === 401) {
-          return clientUnauthorizeHandler(router, updateUser);
-        }
-        return toast.error(e.message, { autoClose: 1500 });
-      }
-    }
+    } catch (e) {}
   };
 
   useEffect(() => {
-    updateUser(undefined);
-  }, []);
+    if (router.query.session_expired === "true") {
+      toast.info("Session expired", {
+        autoClose: 1500,
+      });
+      router.push("/login");
+    }
+  }, [router.isReady]);
 
   return (
     <div className=" h-screen flex justify-between items-center">
+      <Head>
+        <title>Login</title>
+      </Head>
       <ToastContainer />
       <div className="max-w-7xl w-full mx-auto flex justify-around items-center">
         <div className="hidden md:flex">

@@ -1,7 +1,7 @@
 import React from "react";
 import Image from "next/image";
 
-interface ICartProductProps {
+export interface ICartProductProps {
   productName: string;
   productImage: string;
 }

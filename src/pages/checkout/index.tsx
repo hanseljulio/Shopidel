@@ -4,29 +4,31 @@ import CheckoutTableHead from "@/components/CheckoutTableHead";
 import CheckoutTableData from "@/components/CheckoutTableData";
 import { clientUnauthorizeHandler, currencyConverter } from "@/utils/utils";
 import Button from "@/components/Button";
-import CheckoutVoucherSelect from "@/components/CheckoutVoucherSelect";
-import CheckoutShippingSelect from "@/components/CheckoutShippingSelect";
+import { FaTicketAlt } from "react-icons/fa";
 import Footer from "@/components/Footer";
 import CheckoutGrandTotal from "@/components/CheckoutGrandTotal";
 import CheckoutTableHeadMobile from "@/components/CheckoutTableHeadMobile";
 import CheckoutTableDataMobile from "@/components/CheckoutTableDataMobile";
-import { FaMapMarkerAlt } from "react-icons/fa";
+import { FaMapMarkerAlt, FaTag } from "react-icons/fa";
 import Modal from "@/components/Modal";
 import CheckoutVoucherModal from "@/components/CheckoutVoucherModal";
 import CheckoutAddressModal from "@/components/CheckoutAddressModal";
-import CheckoutPayment from "@/components/CheckoutPayment";
+import { FaWallet } from "react-icons/fa";
 import { ICartData } from "@/interfaces/cart_interface";
 import { useCartStore } from "@/store/cartStore";
 import { API } from "@/network";
-import axios, { isAxiosError } from "axios";
+import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { getCookie } from "cookies-next";
 import { IAPIResponse } from "@/interfaces/api_interface";
 import { IAddress } from "@/interfaces/user_interface";
 import { useRouter } from "next/router";
 import { useUserStore } from "@/store/userStore";
 import PinCode from "@/components/PinCode";
+import CheckoutMarketplaceModal from "@/components/CheckoutMarketplaceModal";
+import { ICheckoutMarketplace } from "@/interfaces/seller_interface";
+import Input from "@/components/Input";
+import Head from "next/head";
 
 interface IProductVariant {
   id: number;
@@ -40,7 +42,8 @@ interface ISendData {
   courier_id: number;
   notes: string;
   weight: string;
-  voucher_id?: number;
+  shop_promotion_id?: number;
+  marketplace_promotion_id?: number;
 }
 
 interface ICourierList {
@@ -64,6 +67,115 @@ interface IShippingCostData {
 interface IEnterWalletPinModalProps {
   submitFunction: (pin: string) => void;
 }
+
+interface ICheckoutPaymentProps {
+  money: number;
+  canPay: boolean;
+}
+
+interface CheckoutVoucherSelectProps {
+  usedVoucher: number;
+  voucherName: string;
+  modalOn: () => void;
+}
+
+interface ICheckoutMarketplaceSelectProps {
+  usedDiscount: number;
+  discountName: string;
+  modalOn: () => void;
+}
+
+interface ICheckoutShippingSelect {
+  onChange: (e: any) => void;
+  shippingOption: string;
+  shippingTotal: number;
+  openShippingModal: () => void;
+}
+
+const CheckoutShippingSelect = (props: ICheckoutShippingSelect) => {
+  return (
+    <div className="text-[20px] flex justify-between border-x-2 md:flex-row md:pt-0 flex-col pt-6">
+      <div className="basis-[40%] md:py-4 md:pl-6 md:border-r-2 p-0 md:block md:justify-normal flex justify-center border-none">
+        <Input
+          label="Notes:"
+          labelStyle="pt-2"
+          styling="flex md:flex-row flex-col items-center gap-3 text-[16px]"
+          type="text"
+          name="orderMessage"
+          placeholder="Write additional notes here"
+          width="md:w-[350px] w-[300px]"
+          onChange={props.onChange}
+        />
+      </div>
+      <div className="flex-col gap-4 flex md:flex-row md:gap-0 text-[16px] items-center justify-between px-[21px] basis-[60%] py-8 md:py-0">
+        <h1 className="text-emerald-500">Shipping option:</h1>
+        <h1>{props.shippingOption}</h1>
+        <h1
+          onClick={props.openShippingModal}
+          className="text-blue-600 hover:cursor-pointer hover:underline"
+        >
+          CHANGE{" "}
+          <span className="md:hidden md:invisible visible inline">
+            SHIPPING
+          </span>
+        </h1>
+        <h1>
+          <span className="md:hidden md:invisible visible inline">
+            Shipping price:{" "}
+          </span>
+          {currencyConverter(props.shippingTotal)}
+        </h1>
+      </div>
+    </div>
+  );
+};
+
+const CheckoutVoucherSelect = (props: CheckoutVoucherSelectProps) => {
+  return (
+    <div className="text-[20px] px-[20px] flex justify-between border-2 py-4 items-center md:flex-row flex-col gap-6">
+      <h1 className="flex items-center gap-3">
+        <FaTicketAlt className="text-[#e09664]" />
+        Promotions
+      </h1>
+      <span
+        className={`text-[#bb5d1f] text-center ${
+          props.usedVoucher === 0 ? "hidden invisible" : ""
+        }`}
+      >
+        Used: {props.voucherName.substring(0, 25) + "..."}
+      </span>
+      <h1
+        onClick={props.modalOn}
+        className="text-[18px] text-blue-600 hover:cursor-pointer hover:underline"
+      >
+        Select Promotion
+      </h1>
+    </div>
+  );
+};
+
+const CheckoutPayment = (props: ICheckoutPaymentProps) => {
+  return (
+    <div className="text-[20px] px-[20px] flex justify-between border-2 py-4 items-center md:flex-row flex-col md:gap-0 gap-5">
+      <h1 className="flex items-center gap-3">
+        <FaWallet className=" text-amber-700" />
+        My Wallet
+      </h1>
+      <span
+        className={`text-red-600 ${props.canPay ? "hidden invisible" : ""}`}
+      >
+        INSUFFICIENT FUNDS
+      </span>
+      <h1
+        className={`text-[20px] ${
+          props.canPay ? "text-blue-600" : "text-red-600"
+        } font-bold`}
+      >
+        {currencyConverter(props.money)}
+      </h1>
+    </div>
+  );
+};
 
 const NoAddressModal = () => {
   const router = useRouter();
@@ -231,6 +343,30 @@ const EnterWalletPinModal = (props: IEnterWalletPinModalProps) => {
   );
 };
 
+const CheckoutMarketplaceSelect = (props: ICheckoutMarketplaceSelectProps) => {
+  return (
+    <div className="text-[20px] px-[20px] flex justify-between border-2 py-4 items-center md:flex-row flex-col gap-6">
+      <h1 className="flex items-center gap-3">
+        <FaTag className="text-[#e09664]" />
+        Marketplace
+      </h1>
+      <span
+        className={`text-[#bb5d1f] text-center ${
+          props.usedDiscount === 0 ? "hidden invisible" : ""
+        }`}
+      >
+        Used: {props.discountName.substring(0, 25) + "..."}
+      </span>
+      <h1
+        onClick={props.modalOn}
+        className="text-[18px] text-blue-600 hover:cursor-pointer hover:underline"
+      >
+        Select Discount
+      </h1>
+    </div>
+  );
+};
+
 const CheckoutPage = () => {
   const [dataTest, setDataTest] = useState<ICartData[] | undefined>([
     {
@@ -245,12 +381,16 @@ const CheckoutPage = () => {
   const [showVoucherModal, setShowVoucherModal] = useState<boolean>(false);
   const [showAddressModal, setShowAddressModal] = useState<boolean>(false);
   const [selectedVoucher, setSelectedVoucher] = useState<number>(0);
+  const [selectedVoucherName, setSelectedVoucherName] = useState<string>("");
   const [selectedAddress, setSelectedAddress] = useState<number>(0);
   const [currentAddress, setCurrentAddress] = useState<string>("");
   const [addressData, setAddressData] = useState<IAddress[]>([]);
   const [promotions, setPromotions] = useState([]);
+  const [marketplace, setMarketplace] = useState([]);
   const [defaultAddressId, setDefaultAddressId] = useState<number>(0);
   const [sellerId, setSellerId] = useState<number>(0);
+  const [selectedDiscount, setSelectedDiscount] = useState<number>(0);
+  const [selectedDiscountName, setSelectedDiscountName] = useState<string>("");
 
   const [fullName, setFullName] = useState<string>("");
   const [phoneNumber, setPhoneNumber] = useState<string | undefined>("");
@@ -268,12 +408,39 @@ const CheckoutPage = () => {
   const [showNoWallet, setShowNoWallet] = useState<boolean>(false);
   const [showShippingModal, setShowShippingModal] = useState<boolean>(false);
   const [showWalletPin, setShowWalletPin] = useState<boolean>(false);
+  const [showMarketplaceModal, setShowMarketplaceModal] =
+    useState<boolean>(false);
 
   const router = useRouter();
   const cartStore = useCartStore();
 
-  const useVoucher = () => {
-    setShowVoucherModal(false);
+  const getVoucherData = async (id: number) => {
+    try {
+      const response = await API.get(`shop-promotions/${id}`);
+
+      if (
+        response.data.data.min_purchase_amount > orderTotal ||
+        orderTotal > response.data.data.max_purchase_amount
+      ) {
+        toast.error("Minimum/maximum purchase amount not met!");
+        setSelectedVoucher(0);
+        return;
+      }
+
+      setVoucherTotal(response.data.data.discount_amount);
+      setSelectedVoucherName(response.data.data.name);
+      setShowVoucherModal(false);
+      toast.success("Voucher applied!");
+    } catch (e) {
+      if (axios.isAxiosError(e)) {
+        if (e.response?.status === 401) {
+          return clientUnauthorizeHandler(router, userStore.updateUser);
+        }
+        return toast.error(e.message, {
+          autoClose: 1500,
+        });
+      }
+    }
   };
 
   const changeSelectedVoucher = (id: number) => {
@@ -314,6 +481,20 @@ const CheckoutPage = () => {
         `orders/shop-promotions/${currentSellerId}`
       );
       setPromotions(response.data.data);
+    } catch (e) {
+      if (axios.isAxiosError(e)) {
+        if (e.response?.status === 401) {
+          return clientUnauthorizeHandler(router, userStore.updateUser);
+        }
+        return toast.error(e.message, {
+          autoClose: 1500,
+        });
+      }
+    }
+
+    try {
+      const response = await API.get(`orders/marketplace-promotions`);
+      setMarketplace(response.data.data);
     } catch (e) {
       if (axios.isAxiosError(e)) {
         if (e.response?.status === 401) {
@@ -406,7 +587,8 @@ const CheckoutPage = () => {
       courier_id: courierId,
       notes: additionalNotes,
       weight: "200",
-      // "voucher_id": 1 // optional
+      shop_promotion_id: selectedVoucher,
+      marketplace_promotion_id: selectedDiscount,
     };
 
     for (let i = 0; i < cartStore.cart!.length; i++) {
@@ -425,7 +607,15 @@ const CheckoutPage = () => {
         API.post("/orders/checkout", sendData),
         {
           pending: "Loading",
-          success: "Payment success!",
+          success: {
+            render() {
+              cartStore.updateCart(undefined);
+
+              router.replace("/user/transaction-history");
+
+              return "Payment success! Redirecting you back to your order history.";
+            },
+          },
           error: {
             render({ data }) {
               if (axios.isAxiosError(data)) {
@@ -482,6 +672,22 @@ const CheckoutPage = () => {
     setShowShippingModal(false);
   };
 
+  const useMarketplaceDiscount = (data: ICheckoutMarketplace) => {
+    if (
+      parseInt(data.min_purchase_amount) > orderTotal ||
+      orderTotal > parseInt(data.max_purchase_amount)
+    ) {
+      toast.error("Minimum/maximum purchase amount not met!");
+      setSelectedDiscount(0);
+      return;
+    }
+
+    setMarketplaceDiscount(parseInt(data.discount_amount));
+    setSelectedDiscountName(data.name);
+    setShowMarketplaceModal(false);
+    toast.success("Marketplace discount applied!");
+  };
+
   return (
     <>
       {showWalletPin && (
@@ -510,6 +716,20 @@ const CheckoutPage = () => {
         <Modal content={<NoAddressModal />} onClose={() => {}} />
       )}
 
+      {showMarketplaceModal && (
+        <Modal
+          content={
+            <CheckoutMarketplaceModal
+              updateVoucher={(voucher) => setSelectedDiscount(voucher)}
+              selectedVoucher={selectedDiscount}
+              voucherData={marketplace} // RIGHT HERE
+              submitVoucherFunction={useMarketplaceDiscount}
+            />
+          }
+          onClose={() => setShowMarketplaceModal(false)}
+        />
+      )}
+
       {showVoucherModal && (
         <Modal
           content={
@@ -517,7 +737,9 @@ const CheckoutPage = () => {
               updateVoucher={changeSelectedVoucher}
               selectedVoucher={selectedVoucher}
               voucherData={promotions}
-              submitVoucherFunction={useVoucher}
+              submitVoucherFunction={(id) => {
+                getVoucherData(id);
+              }}
             />
           }
           onClose={() => setShowVoucherModal(false)}
@@ -540,6 +762,9 @@ const CheckoutPage = () => {
 
       <div>
         <Navbar />
+        <Head>
+          <title>Checkout</title>
+        </Head>
         <ToastContainer />
         <div className="lg:max-w-7xl mx-auto">
           <div className="flex md:justify-normal items-center mt-[30px] py-6 justify-center">
@@ -654,7 +879,14 @@ const CheckoutPage = () => {
           <br />
           <CheckoutVoucherSelect
             usedVoucher={selectedVoucher}
+            voucherName={selectedVoucherName}
             modalOn={() => setShowVoucherModal(true)}
+          />
+          <br />
+          <CheckoutMarketplaceSelect
+            usedDiscount={selectedDiscount}
+            discountName={selectedDiscountName}
+            modalOn={() => setShowMarketplaceModal(true)}
           />
           <br />
           <CheckoutPayment

@@ -3,7 +3,6 @@ import React, { useState, useEffect } from "react";
 import Button from "@/components/Button";
 import { useRouter } from "next/router";
 import EmptyCart from "@/components/EmptyCart";
-import CartCheckoutArea from "@/components/CartCheckoutArea";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import CartTable from "@/components/CartTable";
@@ -17,11 +16,35 @@ import Modal from "@/components/Modal";
 import { IAPIResponse } from "@/interfaces/api_interface";
 import { clientUnauthorizeHandler } from "@/utils/utils";
 import { useUserStore } from "@/store/userStore";
+import { currencyConverter } from "@/utils/utils";
+import Head from "next/head";
 
 interface IDeleteAllModalProps {
   deleteFunction: () => void;
   exitFunction: () => void;
 }
+
+interface ICartCheckoutAreaProps {
+  totalPrice: number;
+  checkoutFunction: (e: any) => void;
+}
+
+const CartCheckoutArea = (props: ICartCheckoutAreaProps) => {
+  return (
+    <div className="fixed bottom-0 left-0 right-0 bg-[#29374e]">
+      <div className="flex md:justify-between items-center lg:max-w-7xl mx-auto justify-around">
+        <h1 className="md:text-[25px] text-white text-[16px]">
+          Total Price: {currencyConverter(props.totalPrice)}
+        </h1>
+        <Button
+          text="Checkout"
+          onClick={props.checkoutFunction}
+          styling="bg-[#fddf97] p-3 rounded-[8px] md:w-[250px] w-[100px] my-4"
+        />
+      </div>
+    </div>
+  );
+};
 
 const DeleteAllModal = (props: IDeleteAllModalProps) => {
   return (
@@ -369,29 +392,20 @@ const CartPage = () => {
 
   const goToCheckout = async (e: any) => {
     e.preventDefault();
-    const emptySelectionMessage = () =>
-      toast.error("Please select an item before checking out.");
-
-    const movingToCheckout = () => toast.success("Redirecting to checkout...");
 
     if (checkEmptySelection()) {
-      emptySelectionMessage();
+      toast.error("Please select an item before checking out.");
       return;
     }
-
-    const multipleStoreError = () => toast.error("Only one store at a time!");
 
     if (checkMultipleStores()) {
-      multipleStoreError();
+      toast.error("Only one store at a time!");
       return;
     }
 
-    setTimeout(() => {
-      router.push("/checkout");
-    }, 3000);
-
-    movingToCheckout();
+    toast.success("Redirecting to checkout...");
     cartStore.updateCart(cartData);
+    router.push("/checkout");
   };
 
   const getCartData = async () => {
@@ -436,6 +450,9 @@ const CartPage = () => {
       )}
       <div>
         <Navbar />
+        <Head>
+          <title>My Cart</title>
+        </Head>
         <ToastContainer />
         <div className="lg:max-w-7xl mx-auto">
           <div className="md:flex mt-[30px] justify-between block">
