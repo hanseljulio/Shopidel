@@ -11,11 +11,7 @@ import { GetServerSidePropsContext } from "next";
 import { InferGetServerSidePropsType } from "next";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import {
-  checkAuthSSR,
-  clientUnauthorizeHandler,
-  setAuthCookie,
-} from "@/utils/utils";
+import { checkAuthSSR, clientUnauthorizeHandler } from "@/utils/utils";
 import { useRouter } from "next/router";
 import { useUserStore } from "@/store/userStore";
 import { SubmitHandler, useForm } from "react-hook-form";
@@ -23,7 +19,6 @@ import Head from "next/head";
 
 const UserProfile = ({
   userData,
-  auth,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   const router = useRouter();
   const { updateUser } = useUserStore();
@@ -50,12 +45,6 @@ const UserProfile = ({
       profile_picture: userData?.profile_picture,
     },
   });
-
-  useEffect(() => {
-    if (auth !== undefined || auth !== null) {
-      setAuthCookie(auth!);
-    }
-  }, []);
 
   const submit: SubmitHandler<
     Omit<
@@ -135,11 +124,11 @@ const UserProfile = ({
               <div>
                 <img
                   src={`${
-                    imageFile === null
-                      ? "/images/defaultuser.png"
-                      : imageFile === undefined
-                      ? "/images/defaultuser.png"
-                      : URL.createObjectURL(imageFile)
+                    userData?.profile_picture
+                      ? userData?.profile_picture
+                      : imageFile
+                      ? URL.createObjectURL(imageFile)
+                      : "/images/defaultuser.png"
                   }`}
                   alt="Nothing"
                   width={200}
@@ -350,7 +339,6 @@ export const getServerSideProps = async (
   return {
     props: {
       userData: data,
-      auth: auth,
     },
   };
 };
