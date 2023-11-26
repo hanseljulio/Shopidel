@@ -65,22 +65,17 @@ function Index() {
     const newQuery = e.target.value;
     setQuery(newQuery);
     if (newQuery.trim() === "") {
+      setDebouncedValue(newQuery);
       searchQueryHandler();
     }
   };
 
   const getWishlist = async () => {
     try {
-      const res = await API.get(`/products/favorites?${page}`, {
-        params: {
-          s: query,
-          page: page,
-        },
-      });
-      console.log(res);
+      const res = await API.get(`/products/favorites?page=${page}`);
+
       const data = res.data as IAPIResponse<IWishlist[]>;
       setWishlist(data);
-      console.log("dd", data.data);
     } catch (e) {
       if (axios.isAxiosError(e)) {
         if (e.response?.status === 401) {
@@ -91,12 +86,11 @@ function Index() {
           autoClose: 1500,
         });
       }
-      console.log("salah");
     }
   };
   useEffect(() => {
     getWishlist();
-  }, []);
+  }, [page]);
 
   const handleDeleteWishlist = async (id: number) => {
     let favData: Pick<IAPIProductDetailResponse, "id"> = {
@@ -177,7 +171,7 @@ function Index() {
           </div>
         ) : (
           <>
-            <div className="gap-x-4 gap-y-1 grid grid-cols-2 md:grid-cols-6 mt-10">
+            <div className="gap-x-4 gap-y-1 grid grid-cols-2 md:grid-cols-5 mt-10">
               {wishlist?.data?.map((product, i) => (
                 <div
                   key={i}
