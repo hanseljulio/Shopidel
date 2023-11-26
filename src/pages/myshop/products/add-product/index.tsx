@@ -173,7 +173,6 @@ const SellerAddProductPage = () => {
 
       router.back();
     } catch (e) {
-      console.log(data);
       if (axios.isAxiosError(e)) {
         console.log(e);
       }

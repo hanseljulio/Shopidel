@@ -278,7 +278,6 @@ const ProductDetail = ({
       const res = await API.get(`/products/${product.id}/pictures`);
       const data = res.data.data;
       setImagesProduct(data);
-      console.log("img", data);
     } catch (e) {
       if (axios.isAxiosError(e)) {
         return toast.error(e.message, {
@@ -404,7 +403,6 @@ const ProductDetail = ({
 
         if (response.status === 200) {
           toast.success("Added to cart", { autoClose: 1500 });
-          console.log("cart", response.data);
         } else {
           toast.error("Failed to add to cart", { autoClose: 1500 });
         }
@@ -645,7 +643,6 @@ const ProductDetail = ({
                       value={count}
                       onChange={(e: any) => {
                         setCount(parseInt(e.target.value)), e.preventDefault();
-                        console.log("counter", count);
                       }}
                     />
                     <Button styling="plus w-3 md:w-5" onClick={inc} text="+" />
