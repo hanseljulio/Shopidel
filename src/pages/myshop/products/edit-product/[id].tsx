@@ -88,13 +88,12 @@ export const getServerSideProps = async (
   }
 
   try {
-    console.log(id);
     const res = await API.get(`/sellers/products/${id}`, {
       headers: {
         Authorization: `Bearer ${auth?.access_token}`,
       },
     });
-    console.log(res.data.data);
+
     return {
       props: {
         product: res.data.data,
@@ -102,7 +101,6 @@ export const getServerSideProps = async (
     };
   } catch (e) {
     if (axios.isAxiosError(e)) {
-      console.log(e);
       return {
         redirect: {
           permanent: false,
@@ -150,13 +148,9 @@ const SellerEditProductPage = ({
   });
   const router = useRouter();
 
-  console.log(product.variant_options);
-
   const watchCategory = watch("category");
   const watchVariantGroup = watch("variantGroup");
   const watchVariantTable = watch("variantTable");
-
-  console.log(watchVariantTable);
 
   const [selectedCategory, setSelectedCategory] = useState<ICategory>();
   const [categories, setCategories] = useState<ICategory[]>();
@@ -169,10 +163,6 @@ const SellerEditProductPage = ({
   );
   const [isVariantCorrect, setIsVariantCorrect] = useState<boolean>();
   const [deletedImageGlobal, setDeletedImageGlobal] = useState<string[]>([]);
-
-  useEffect(() => {
-    console.log(selectedCategory);
-  }, [selectedCategory]);
 
   useEffect(() => {
     if (isVariantCorrect === false) {
@@ -188,10 +178,6 @@ const SellerEditProductPage = ({
       }
     }
   }, [watchVariantTable]);
-
-  useEffect(() => {
-    console.log(images);
-  }, [images]);
 
   const getListCategory = async () => {
     try {
@@ -235,7 +221,6 @@ const SellerEditProductPage = ({
   };
 
   const onSubmit: SubmitHandler<IAddProductForm> = async (data) => {
-    console.log(data);
     if (
       data.images.findIndex((img) => {
         if (typeof img !== "string") {
@@ -258,7 +243,6 @@ const SellerEditProductPage = ({
       formData.append("category_id", String(data.category.id));
       formData.append("size", data.size);
       data.images.forEach((img) => {
-        console.log(img);
         formData.append("images[]", typeof img === "string" ? img : img.file);
       });
       if (!data.variantTable || data.variantTable.length === 0) {
@@ -276,7 +260,6 @@ const SellerEditProductPage = ({
         );
       } else {
         data.variantTable.forEach((variant) => {
-          console.log(variant);
           let data = {
             imageId: variant.imageId,
             price: variant.price,
@@ -288,7 +271,7 @@ const SellerEditProductPage = ({
           formData.append("variants[]", JSON.stringify(data));
         });
       }
-      console.log(deletedImageGlobal);
+
       if (deletedImageGlobal.length !== 0) {
         for (const data of deletedImageGlobal) {
           formData.append("deleted_images[]", data);
@@ -297,10 +280,6 @@ const SellerEditProductPage = ({
 
       if (data.video_url !== "") {
         formData.append("video_url", data.video_url);
-      }
-
-      for (const data of formData) {
-        console.log(data);
       }
 
       await toast.promise(
@@ -314,12 +293,7 @@ const SellerEditProductPage = ({
       );
 
       router.back();
-    } catch (e) {
-      console.log(data);
-      if (axios.isAxiosError(e)) {
-        console.log(e);
-      }
-    }
+    } catch (e) {}
   };
 
   useEffect(() => {
@@ -444,7 +418,6 @@ const SellerEditProductPage = ({
                                 key={i}
                                 className="py-1 px-3 hover:cursor-pointer hover:bg-slate-100 hover:rounded transition"
                                 onClick={() => {
-                                  console.log(l3);
                                   setValue("category", l3);
                                   setIsCategoryOpen(false);
                                 }}
@@ -532,13 +505,11 @@ const SellerEditProductPage = ({
                               return setImages([...images]);
                             }}
                             onDelete={() => {
-                              console.log("triggered");
                               let data = images.filter((img) => {
                                 return typeof img === "string"
                                   ? img !== item
                                   : img.id !== (item as IProductImage).id;
                               });
-                              console.log(data);
                               clearErrors("images");
                               if (typeof item === "string") {
                                 setDeletedImageGlobal([
@@ -557,11 +528,10 @@ const SellerEditProductPage = ({
                     <div
                       className="hover:cursor-pointer"
                       onClick={() => {
-                        console.log(images);
                         images.push({
                           id: (Math.random() + 1).toString(36).substring(5),
                         });
-                        console.log(images);
+
                         setImages([...images]);
                       }}
                     >
