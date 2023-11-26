@@ -264,7 +264,16 @@ const SellerEditProductPage = ({
         );
       } else {
         data.variantTable.forEach((variant) => {
-          formData.append("variants[]", JSON.stringify(variant));
+          console.log(variant);
+          let data = {
+            imageId: variant.imageId,
+            price: variant.price,
+            variant1: variant.variant1,
+            variant2: variant.variant2,
+            stock: variant.variant2,
+            imageUrl: variant.imageId ? undefined : variant.image_url,
+          };
+          formData.append("variants[]", JSON.stringify(data));
         });
       }
       console.log(deletedImageGlobal);
