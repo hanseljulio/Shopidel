@@ -42,7 +42,7 @@ const ProductCard = ({
       ])}
     >
       <div className={"relative h-44 md:h-48 w-full"}>
-        <div className={" h-auto md:h-full w-auto overflow-hidden top-0"}>
+        <div className={" h-auto md:h-full w-full overflow-hidden top-0"}>
           <img
             src={image}
             className={"object-fill w-full h-44 md:h-48 top-0"}
@@ -69,7 +69,7 @@ const ProductCard = ({
         <p className="text-black text-sm md:text-base pt-2 row-span-2 w-full line-clamp-2 md:h-14">
           {title}
         </p>
-        <p className="text-[#f57b29] text-sm md:text-xl">
+        <p className="text-[#f57b29] text-sm md:text-xl w-full">
           {currencyConverter(parseInt(price))}
         </p>
 

@@ -1,7 +1,8 @@
 import { IAPIUserProfileResponse } from "@/interfaces/api_interface";
 import { ICartData } from "@/interfaces/cart_interface";
-import { create } from "zustand";
+import { create} from "zustand";
 import { persist } from "zustand/middleware";
+
 
 interface ICartStore {
   cart: ICartData[] | undefined;
@@ -19,3 +20,5 @@ export const useCartStore = create(
     }
   )
 );
+
+

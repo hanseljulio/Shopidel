@@ -1,5 +1,5 @@
 import { useUserStore } from "@/store/userStore";
-import { deleteCookie, getCookie } from "cookies-next";
+import { deleteCookie } from "cookies-next";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
@@ -7,10 +7,7 @@ import { AiOutlineShoppingCart } from "react-icons/ai";
 import Button from "../Button";
 import { BiLogOut } from "react-icons/bi";
 import { IoSettingsSharp } from "react-icons/io5";
-import {
-  IAPIResponse,
-  IAPIUserProfileResponse,
-} from "@/interfaces/api_interface";
+import { IAPIUserProfileResponse } from "@/interfaces/api_interface";
 import { ICartData, ICartItems } from "@/interfaces/cart_interface";
 import { API } from "@/network";
 import axios from "axios";
@@ -109,7 +106,7 @@ const Navbar = () => {
     if (user) {
       getCartData();
     }
-  }, [user]);
+  }, [user, updateCart, cartStore.cart]);
 
   const renderCartProducts = () => {
     const maxProductsToShow = 5;
@@ -299,7 +296,7 @@ const Navbar = () => {
                 <div className="px-5 pt-5 text-center">
                   <h1 className="font-bold w-full text-xl pb-2">My cart </h1>
                   {cartIsEmpty() ? (
-                    <div className="flex items-center justify-center gap-6">
+                    <div className="items-center justify-center flex flex-col py-3">
                       <img
                         alt="cart pic"
                         src={"/images/emptycart.png"}

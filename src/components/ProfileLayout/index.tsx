@@ -1,7 +1,13 @@
 import React, { ReactNode, useEffect, useState } from "react";
 import Button from "../Button";
 import Navbar from "../Navbar";
-import { FaUser, FaStar, FaDollarSign, FaWallet } from "react-icons/fa";
+import {
+  FaUser,
+  FaStar,
+  FaDollarSign,
+  FaWallet,
+  FaHeart,
+} from "react-icons/fa";
 import { useRouter } from "next/router";
 import { useUserStore } from "@/store/userStore";
 import { IAPIUserProfileResponse } from "@/interfaces/api_interface";
@@ -143,8 +149,8 @@ const UserProfileSidebar = () => {
             onClick={() => router.push("/wishlist")}
             className="text-[20px] flex items-center gap-4 mt-[20px] hover:cursor-pointer transition w-[200px] hover:text-[#92bcff]"
           >
-            <FaStar />
-            Wishlist
+            <FaHeart />
+            Favorite
           </h1>
         </div>
       </div>

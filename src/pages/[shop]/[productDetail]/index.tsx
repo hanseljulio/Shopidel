@@ -11,6 +11,7 @@ import {
 import {
   IProductSuggestion,
   IReviewProduct,
+  ITotalFavorite,
 } from "@/interfaces/product_interface";
 import { IAPIProfileShopResponse } from "@/interfaces/seller_interface";
 import { API } from "@/network";
@@ -102,7 +103,9 @@ const ProductDetail = ({
   const [isExpanded, setIsExpanded] = useState<boolean>(false);
   const variationRef = useRef<HTMLDivElement>(null);
   const [imageReviewChosen, setImageReviewChosen] = useState("");
-
+  const [totalFavorite, setTotalFavorite] = useState<ITotalFavorite | null>(
+    null
+  );
   const scrollLeft = () => {
     if (variationRef.current) {
       variationRef.current.scrollLeft -= 100;
@@ -337,6 +340,25 @@ const ProductDetail = ({
     }
   };
 
+  const getTotalFavorite = async () => {
+    try {
+      const res = await API.get(`products/${product.id}/total-favorites`);
+      const data = res.data.data as ITotalFavorite;
+      setTotalFavorite(data);
+    } catch (e) {
+      if (axios.isAxiosError(e)) {
+        return toast.error("Error fetching product suggestion", {
+          toastId: "errorWishlist",
+          autoClose: 1500,
+        });
+      }
+    }
+  };
+
+  useEffect(() => {
+    getTotalFavorite();
+  }, [isFavorite]);
+
   useEffect(() => {
     getSuggest();
     getShop();
@@ -377,7 +399,7 @@ const ProductDetail = ({
   };
 
   const inc = () => {
-    if (count >= 0 && count <= currentStock - 1) {
+    if (count >= 0 && currentStock > 0) {
       setCount(count + 1);
     }
   };
@@ -603,7 +625,9 @@ const ProductDetail = ({
                     ) : (
                       <FaRegHeart color={"red"} />
                     )}
-                    <p className="text-sm">(total favorites)</p>
+                    <p className="text-sm ">
+                      Favorites ({totalFavorite?.total_favorites})
+                    </p>
                   </div>
                 </button>
               </div>
@@ -640,7 +664,7 @@ const ProductDetail = ({
                       max={currentStock}
                       readOnly={true}
                       type="number"
-                      value={count}
+                      value={currentStock < 1 ? 0 : count}
                       onChange={(e: any) => {
                         setCount(parseInt(e.target.value)), e.preventDefault();
                       }}
@@ -659,24 +683,14 @@ const ProductDetail = ({
                 </div>
                 <div className="btn flex gap-x-2 justify-between mt-10">
                   <div className="w-full">
-                    {currentStock >= 1 ? (
-                      <button
-                        type="submit"
-                        onClick={handleToCart}
-                        className="flex items-center justify-center gap-1 h-10 border border-[#364968] hover:shadow-md bg-[#d6e4f8] p-2 w-full md:w-32 hover:bg-[#eff6fd]  transition-all duration-300"
-                      >
-                        <AiOutlineShoppingCart /> <span>Add to cart</span>
-                      </button>
-                    ) : (
-                      <button
-                        disabled
-                        type="submit"
-                        onClick={handleToCart}
-                        className="flex items-center justify-center gap-1 h-10  bg-[#d6e4f8] p-2 w-full md:w-32  transition-all duration-300"
-                      >
-                        <AiOutlineShoppingCart /> <span>Add to cart</span>
-                      </button>
-                    )}
+                    <button
+                      disabled={currentStock < 1 || count < 1 ? true : false}
+                      type="submit"
+                      onClick={handleToCart}
+                      className="flex text-sm items-center justify-center gap-1 h-10 border border-[#364968] hover:shadow-md bg-[#d6e4f8] p-2 w-full md:w-32 hover:bg-[#eff6fd]  transition-all duration-300"
+                    >
+                      <AiOutlineShoppingCart /> <span>Add to cart</span>
+                    </button>
                   </div>
 
                   <div className="w-full">
@@ -693,7 +707,7 @@ const ProductDetail = ({
                         }
                         return router.push("/login");
                       }}
-                      styling="bg-[#364968] text-white p-2 w-full h-10 md:w-32 justify-center"
+                      styling="bg-[#364968] text-white p-2 w-full h-10 md:w-32 justify-center text-sm"
                       text="Buy now"
                     />
                   </div>
@@ -720,9 +734,6 @@ const ProductDetail = ({
                   </p>
                 </div>
                 <p className="productPrice text-2xl font-semibold text-[#f57b29] py-3">
-                  {/* {currencyConverter(
-                    parseInt(product?.variants?.[0]?.price ?? 0)
-                  )} */}
                   {currencyConverter(subtotal)}
                 </p>
               </div>
@@ -736,7 +747,8 @@ const ProductDetail = ({
                       <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:justify-between w-full my-5 ">
                         {item.childs.map((variant: any, k: number) => {
                           return (
-                            <p
+                            <button
+                              disabled={variant.stock === 0 ? true : false}
                               key={k}
                               className={`px-1 py-1 justify-center items-center flex border text-center rounded-md cursor-pointer hover:bg-[#d6e4f8] hover:border hover:border-[#364968] row-span-2 w-full text-ellipsis line-clamp-2 h-10 
                               ${
@@ -765,8 +777,8 @@ const ProductDetail = ({
                                 );
                               }}
                             >
-                              {variant}
-                            </p>
+                              {variant} {variant.stock}
+                            </button>
                           );
                         })}
                       </div>
@@ -782,7 +794,7 @@ const ProductDetail = ({
           </div>
           <div className="seller flex-col md:flex-row justify-between md:flex gap-10 py-5 px-5 md:px-0 ">
             <div className="order-1 w-full md:w-3/4">
-              <div className="sellerShop rounded-md bg-[#364968] flex flex-col md:flex-row gap-y-5 text-white py-3 my-10 gap-10 px-5 ">
+              <div className="sellerShop rounded-md bg-[#364968] flex flex-col md:flex-row gap-y-5 text-white py-3 my-10 gap-6 px-3 ">
                 <img
                   src={shopProfile?.data?.seller_picture_url}
                   alt="seller"
@@ -793,7 +805,7 @@ const ProductDetail = ({
                       "https://cdn4.iconfinder.com/data/icons/web-ui-color/128/Account-512.png";
                   }}
                 />
-                <div className="flex flex-col md:flex-row gap-y-4 md:gap-x-48 w-full">
+                <div className="flex flex-col md:flex-row gap-y-4 md:gap-x-28 w-full">
                   <div className="aboutSeller w-full md:w-1/2">
                     <p className=" text-lg md:text-xl font-medium md:font-semibold text-center md:text-left">
                       {shopProfile?.data?.seller_name}
@@ -813,7 +825,7 @@ const ProductDetail = ({
                   <table className="aboutSeller w-full  md:w-full text-sm md:text-base  self-center ">
                     <thead></thead>
                     <tbody>
-                      <tr className="flex items-center justify-center gap">
+                      <tr className="flex items-center justify-center w-full">
                         <td className="w-full">Shipping from</td>
                         <td className="w-full flex items-center gap-x-1 font-medium">
                           <FaLocationDot />

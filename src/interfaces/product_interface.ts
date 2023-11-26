@@ -73,3 +73,8 @@ export interface IWishlist {
   product_name_slug: string;
   shop_name_slug: string;
 }
+
+export interface ITotalFavorite{
+  product_id: number
+  total_favorites: number
+}

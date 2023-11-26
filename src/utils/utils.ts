@@ -8,7 +8,7 @@ import axios from "axios";
 import { deleteCookie, setCookie } from "cookies-next";
 import { jwtDecode } from "jwt-decode";
 import { GetServerSidePropsContext } from "next";
-import { NextRouter, useRouter } from "next/router";
+import { NextRouter } from "next/router";
 
 export const currencyConverter = (money: number): string => {
   return new Intl.NumberFormat("id-ID", {
