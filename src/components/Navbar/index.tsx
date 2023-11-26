@@ -133,14 +133,13 @@ const Navbar = () => {
       <div className="mb-3">
         <div className="py-2">
           {topProducts.map((item, j) => (
-            <>
+            <div key={j}>
               <CartProduct
-                key={j}
                 productImage={item.product_image_url || ""}
                 productName={item.product_name || ""}
               />
               <hr className="py-1" />
-            </>
+            </div>
           ))}
         </div>
 

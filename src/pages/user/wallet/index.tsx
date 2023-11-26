@@ -1,6 +1,5 @@
 import Button from "@/components/Button";
 import ProfileLayout from "@/components/ProfileLayout";
-import Image from "next/image";
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
@@ -240,7 +239,6 @@ const ChangePinModal = () => {
           },
           error: {
             render({ data }) {
-              console.log(data);
               return "Invalid password";
             },
           },
@@ -277,7 +275,6 @@ const ChangePinModal = () => {
           pending: "Loading",
           success: {
             render({ data }) {
-              console.log(data);
               return (data?.data as IAPIResponse).message;
             },
           },
@@ -364,7 +361,6 @@ const ActivateWalletModal = () => {
           error: {
             render({ data }) {
               if (axios.isAxiosError(data)) {
-                console.log(data);
                 return (data.response?.data as IAPIResponse).message;
               }
             },
@@ -675,7 +671,6 @@ export const getServerSideProps = async (
     data = (res.data as IAPIResponse<IAPIWalletResponse>).data;
   } catch (e) {
     if (axios.isAxiosError(e)) {
-      console.log(e.response?.data);
       return {
         redirect: {
           permanent: false,

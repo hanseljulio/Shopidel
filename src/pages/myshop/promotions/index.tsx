@@ -467,8 +467,6 @@ const SellerAdminHome = () => {
     let currentData;
     try {
       const response = await API.get(`shop-promotions/${id}`);
-      console.log("HERE");
-      console.log(response.data.data);
       currentData = response.data.data;
     } catch (e) {
       if (axios.isAxiosError(e)) {

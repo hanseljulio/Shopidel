@@ -37,7 +37,7 @@ const SellerAdminProducts = () => {
     } catch (e) {
       if (axios.isAxiosError(e)) {
         if (e.response?.status === 403) {
-          return router.push("/");
+          return router.reload();
         }
       }
     }
@@ -183,7 +183,13 @@ const SellerAdminProducts = () => {
                           </td>
                           <td className="p-2">
                             <div className="flex justify-around w-full h-full">
-                              <div>
+                              <div
+                                onClick={() => {
+                                  router.push(
+                                    `/myshop/products/edit-product/${product.id}`
+                                  );
+                                }}
+                              >
                                 <AiFillEdit className="hover:cursor-pointer" />
                               </div>
                               <div
@@ -249,7 +255,13 @@ const SellerAdminProducts = () => {
                           </div>
                         </div>
                         <div className="flex gap-x-2">
-                          <div>
+                          <div
+                            onClick={() => {
+                              router.push(
+                                `/myshop/products/edit-product/${product.id}`
+                              );
+                            }}
+                          >
                             <AiFillEdit className="hover:cursor-pointer" />
                           </div>
                           <div

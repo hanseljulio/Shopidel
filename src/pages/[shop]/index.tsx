@@ -144,7 +144,6 @@ function Index({ seller }: IProfileShopProps) {
     );
 
     const averageStars = totalStars / validProducts.length;
-
     return averageStars;
   };
 

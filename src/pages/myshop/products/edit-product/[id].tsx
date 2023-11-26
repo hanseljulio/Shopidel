@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import SellerAdminLayout from "@/components/SellerAdminLayout";
 import {
+  Controller,
   SubmitHandler,
   UseFormGetValues,
   UseFormRegister,
@@ -23,11 +24,10 @@ import "react-toastify/dist/ReactToastify.css";
 import { Reorder, useDragControls } from "framer-motion";
 import { AiFillDelete, AiFillPlusCircle } from "react-icons/ai";
 import { useRouter } from "next/router";
-import { useUserStore } from "@/store/userStore";
+import { ISellerEditProduct } from "@/interfaces/seller_interface";
+import { GetServerSidePropsContext, InferGetServerSidePropsType } from "next";
+import { checkAuthSSR, getYoutubeVideoId } from "@/utils/utils";
 import YouTube from "react-youtube";
-import { getRandomValues } from "crypto";
-import { getYoutubeVideoId } from "@/utils/utils";
-import Head from "next/head";
 
 interface IAddProductForm {
   product_name: string;
@@ -42,12 +42,12 @@ interface IAddProductForm {
   size: string;
   price?: string;
   stock?: number;
-  images: IProductImage[];
+  images: (IProductImage | string)[];
   variantGroup: IVariantGroup[];
   variantTable?: IVariant[];
 }
 
-export interface IVariant {
+interface IVariant {
   variant1: {
     name: string;
     value: string;
@@ -59,6 +59,7 @@ export interface IVariant {
   stock: number;
   price: string;
   imageId: string;
+  image_url?: string;
 }
 
 interface IVariantGroup {
@@ -71,7 +72,48 @@ interface IProductImage {
   file: File;
 }
 
-const SellerAddProductPage = () => {
+export const getServerSideProps = async (
+  context: GetServerSidePropsContext
+) => {
+  const { id } = context.query;
+  let auth = await checkAuthSSR(context);
+
+  if (auth === null) {
+    return {
+      redirect: {
+        permanent: false,
+        destination: "/login?session_expired=true",
+      },
+    };
+  }
+
+  try {
+    const res = await API.get(`/sellers/products/${id}`, {
+      headers: {
+        Authorization: `Bearer ${auth?.access_token}`,
+      },
+    });
+
+    return {
+      props: {
+        product: res.data.data,
+      },
+    };
+  } catch (e) {
+    if (axios.isAxiosError(e)) {
+      return {
+        redirect: {
+          permanent: false,
+          destination: "/?force_logout=true",
+        },
+      };
+    }
+  }
+};
+
+const SellerEditProductPage = ({
+  product,
+}: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   const {
     register,
     setValue,
@@ -83,33 +125,91 @@ const SellerAddProductPage = () => {
     formState: { errors },
   } = useForm<IAddProductForm>({
     defaultValues: {
-      variantGroup: [],
+      ...product,
+      video_url: product.video_url,
+      variantGroup: product.variant_options as IVariantGroup[],
+      variantTable:
+        product.variant_options.length !== 0
+          ? (product.variants as IVariant[])
+          : [],
+      price:
+        product.variant_options.length === 0
+          ? product.variants[0].price
+            ? product.variants[0].price
+            : 0
+          : "",
+      stock:
+        product.variant_options.length === 0
+          ? product.variants[0].stock
+            ? product.variants[0].stock
+            : 0
+          : 0,
     },
   });
   const router = useRouter();
-  const { user } = useUserStore();
 
   const watchCategory = watch("category");
   const watchVariantGroup = watch("variantGroup");
   const watchVariantTable = watch("variantTable");
 
+  const [selectedCategory, setSelectedCategory] = useState<ICategory>();
   const [categories, setCategories] = useState<ICategory[]>();
   const [isCategoryOpen, setIsCategoryOpen] = useState<boolean>(false);
   const [category2, setCategory2] = useState<ICategory[]>([]);
   const [category3, setCategory3] = useState<ICategory[]>([]);
   const [video, setVideo] = useState<string>("");
-  const [images, setImages] = useState<Partial<IProductImage>[]>([
-    {
-      id: (Math.random() + 1).toString(36).substring(5),
-    },
-  ]);
+  const [images, setImages] = useState<(Partial<IProductImage> | string)[]>(
+    product.images
+  );
+  const [isVariantCorrect, setIsVariantCorrect] = useState<boolean>();
+  const [deletedImageGlobal, setDeletedImageGlobal] = useState<string[]>([]);
+
+  useEffect(() => {
+    if (isVariantCorrect === false) {
+      watchVariantTable?.pop();
+      setValue("variantTable", [...watchVariantTable!]);
+    }
+  }, [isVariantCorrect]);
+
+  useEffect(() => {
+    if (product.variants.length !== watchVariantTable?.length) {
+      if (product.variants.length !== watchVariantTable?.length) {
+        setIsVariantCorrect(false);
+      }
+    }
+  }, [watchVariantTable]);
 
   const getListCategory = async () => {
     try {
       const res = await API.get("/categories");
 
-      setCategories(
-        (res.data as IAPIResponse<IAPICategoriesResponse>).data?.categories
+      const categories = (res.data as IAPIResponse<IAPICategoriesResponse>).data
+        ?.categories;
+
+      setCategories(categories);
+
+      let c1 = categories?.find((c) => c.id === product.category_id);
+      if (c1 !== undefined) {
+        setValue("category", c1);
+        setSelectedCategory(c1);
+      }
+      categories?.find((c) => {
+        let data = c.children?.find((c2) => c2.id === product.category_id);
+        if (data === undefined) {
+          return undefined;
+        }
+        setValue("category", data!);
+        setSelectedCategory(data!);
+      });
+      categories?.find((c) =>
+        c.children?.find((c2) => {
+          let data = c2.children?.find((c3) => c3.id === product.category_id);
+          if (data === undefined) {
+            return undefined;
+          }
+          setValue("category", data!);
+          setSelectedCategory(data!);
+        })
       );
     } catch (e) {
       if (axios.isAxiosError(e)) {
@@ -121,7 +221,13 @@ const SellerAddProductPage = () => {
   };
 
   const onSubmit: SubmitHandler<IAddProductForm> = async (data) => {
-    if (data.images.findIndex((img) => img.file === undefined) !== -1) {
+    if (
+      data.images.findIndex((img) => {
+        if (typeof img !== "string") {
+          return (img as IProductImage).file === undefined;
+        }
+      }) !== -1
+    ) {
       return setError("images", { message: "Photo is required" });
     }
 
@@ -137,9 +243,9 @@ const SellerAddProductPage = () => {
       formData.append("category_id", String(data.category.id));
       formData.append("size", data.size);
       data.images.forEach((img) => {
-        formData.append("images[]", img.file);
+        formData.append("images[]", typeof img === "string" ? img : img.file);
       });
-      if (!data.variantTable) {
+      if (!data.variantTable || data.variantTable.length === 0) {
         formData.append(
           "variants[]",
           JSON.stringify({
@@ -154,19 +260,34 @@ const SellerAddProductPage = () => {
         );
       } else {
         data.variantTable.forEach((variant) => {
-          formData.append("variants[]", JSON.stringify(variant));
+          let data = {
+            imageId: variant.imageId,
+            price: variant.price,
+            variant1: variant.variant1,
+            variant2: variant.variant2,
+            stock: variant.stock,
+            imageUrl: variant.imageId ? undefined : variant.image_url,
+          };
+          formData.append("variants[]", JSON.stringify(data));
         });
       }
+
+      if (deletedImageGlobal.length !== 0) {
+        for (const data of deletedImageGlobal) {
+          formData.append("deleted_images[]", data);
+        }
+      }
+
       if (data.video_url !== "") {
         formData.append("video_url", data.video_url);
       }
 
       await toast.promise(
-        API.post("/sellers/products", formData),
+        API.put(`/sellers/products/${product.id}`, formData),
         {
           pending: "Loading",
           success: "Success",
-          error: "Error add product",
+          error: "Error edit product",
         },
         { autoClose: 1500 }
       );
@@ -174,12 +295,6 @@ const SellerAddProductPage = () => {
       router.back();
     } catch (e) {}
   };
-
-  useEffect(() => {
-    if (user !== undefined && !user.is_seller) {
-      router.push("/myshop");
-    }
-  }, [user]);
 
   useEffect(() => {
     getListCategory();
@@ -192,13 +307,10 @@ const SellerAddProductPage = () => {
   return (
     <>
       <ToastContainer />
-      <Head>
-        <title>Add Product</title>
-      </Head>
       <SellerAdminLayout currentPage="Products">
         <div className="p-5">
           <div className="flex items-center md:flex-row justify-between  md:gap-0 flex-col gap-6">
-            <h1 className="text-[30px]">Add Products</h1>
+            <h1 className="text-[30px]">Edit Product</h1>
           </div>
           <div className="mt-10">
             <form
@@ -380,19 +492,31 @@ const SellerAddProductPage = () => {
                           <ProductImage
                             key={JSON.stringify(item)}
                             images={images}
-                            id={item.id!}
+                            id={typeof item !== "string" ? item.id! : undefined}
                             item={item}
                             onSet={(data) => {
                               clearErrors("images");
-                              images.find((img) => img.id === item.id)!.file =
-                                data;
+
+                              (images as IProductImage[]).find(
+                                (img) =>
+                                  (img as IProductImage).id ===
+                                  (item as IProductImage).id
+                              )!.file = data;
                               return setImages([...images]);
                             }}
                             onDelete={() => {
-                              let data = images.filter(
-                                (img) => img.id !== item.id
-                              );
+                              let data = images.filter((img) => {
+                                return typeof img === "string"
+                                  ? img !== item
+                                  : img.id !== (item as IProductImage).id;
+                              });
                               clearErrors("images");
+                              if (typeof item === "string") {
+                                setDeletedImageGlobal([
+                                  ...deletedImageGlobal,
+                                  item,
+                                ]);
+                              }
                               return setImages(data);
                             }}
                           />
@@ -407,6 +531,7 @@ const SellerAddProductPage = () => {
                         images.push({
                           id: (Math.random() + 1).toString(36).substring(5),
                         });
+
                         setImages([...images]);
                       }}
                     >
@@ -455,7 +580,7 @@ const SellerAddProductPage = () => {
                       Add your product variant (optional)
                     </p>
                   </div>
-                  {watchVariantGroup.length < 2 && (
+                  {watchVariantGroup?.length < 2 && (
                     <Button
                       text="Add Variant"
                       onClick={(e) => {
@@ -488,7 +613,7 @@ const SellerAddProductPage = () => {
                       );
                     })}
                 </div>
-                {watchVariantGroup.length !== 0 && (
+                {watchVariantGroup?.length !== 0 && (
                   <div className="mt-10">
                     <div>
                       <p className="text-xl">Variant Table</p>
@@ -501,7 +626,7 @@ const SellerAddProductPage = () => {
                         <thead>
                           <tr>
                             <th className="text-start">Image</th>
-                            {getValues("variantGroup").map((v, i) => {
+                            {getValues("variantGroup")?.map((v, i) => {
                               return (
                                 <th key={i} className="text-start">
                                   {v.name}
@@ -514,13 +639,14 @@ const SellerAddProductPage = () => {
                         </thead>
                         <tbody>
                           {getValues("variantGroup")
-                            .at(0)
+                            ?.at(0)
                             ?.type.map((v0, i) => {
                               if (getValues("variantGroup").length === 1) {
                                 return (
                                   <ProductVariant
                                     watchVariantTable={watchVariantTable!}
                                     key={i}
+                                    index={i}
                                     variant1type={v0}
                                     getValues={getValues}
                                     setValue={setValue}
@@ -535,6 +661,7 @@ const SellerAddProductPage = () => {
                                     <ProductVariant
                                       watchVariantTable={watchVariantTable!}
                                       key={i}
+                                      index={i}
                                       getValues={getValues}
                                       setValue={setValue}
                                       watchVariantGroup={watchVariantGroup}
@@ -550,7 +677,7 @@ const SellerAddProductPage = () => {
                   </div>
                 )}
               </div>
-              {watchVariantGroup.length === 0 && (
+              {watchVariantGroup?.length === 0 && (
                 <>
                   <div>
                     <div>
@@ -716,7 +843,7 @@ const SellerAddProductPage = () => {
               </div>
               <div className="mt-16 text-end">
                 <Button
-                  text="Add Product"
+                  text="Update Product"
                   styling="bg-[#364968] p-2 text-white rounded-md text-sm"
                 />
               </div>
@@ -728,7 +855,7 @@ const SellerAddProductPage = () => {
   );
 };
 
-export default SellerAddProductPage;
+export default SellerEditProductPage;
 
 interface IProductVariantGroupProps {
   register: UseFormRegister<IAddProductForm>;
@@ -893,9 +1020,9 @@ const ProductVariantGroup = ({
 };
 
 interface IProductImageProps {
-  images: Partial<IProductImage>[];
-  item: Partial<IProductImage>;
-  id: string;
+  images: (Partial<IProductImage> | string)[];
+  item: Partial<IProductImage> | string;
+  id: string | undefined;
 
   onSet: (data: File) => void;
   onDelete: () => void;
@@ -910,6 +1037,7 @@ const ProductImage = ({
   const [isHover, setIsHover] = useState<boolean>(false);
   const imageRef = useRef<HTMLInputElement>(null);
   const controls = useDragControls();
+
   return (
     <Reorder.Item
       className="w-32 h-32 bg-red-200 relative flex items-center justify-center group hover:cursor-pointer"
@@ -939,16 +1067,20 @@ const ProductImage = ({
           }
         }}
       />
-      {item.file ? (
+      {typeof item === "string" ? (
         <img
-          src={item.file && URL.createObjectURL(item.file)}
+          src={item as string}
+          className="h-full w-full absolute z-20 object-contain hover:cursor-pointer "
+          draggable={false}
+        />
+      ) : item.file ? (
+        <img
+          src={URL.createObjectURL(item.file)}
           className="h-full w-full absolute z-20 object-contain hover:cursor-pointer "
           draggable={false}
         />
       ) : (
-        <div>
-          <p className="text-xs">+ Add photo</p>
-        </div>
+        <p className="text-sm">+ Add Photo</p>
       )}
 
       {images.length !== 1 && (
@@ -980,6 +1112,7 @@ interface IProductVariantProps {
   watchVariantTable: IVariant[];
   setValue: UseFormSetValue<IAddProductForm>;
   getValues: UseFormGetValues<IAddProductForm>;
+  index: number;
 }
 
 const ProductVariant = ({
@@ -988,15 +1121,19 @@ const ProductVariant = ({
   watchVariantGroup,
   setValue,
   getValues,
+  index,
   watchVariantTable,
 }: IProductVariantProps) => {
   const imageRef = useRef<HTMLInputElement>(null);
-  const [image, setImage] = useState<File>();
+  const [image, setImage] = useState<File | string | undefined>(
+    watchVariantTable.at(index)?.image_url
+  );
   const [variant, setVariant] = useState<IVariant>();
   const [id, setId] = useState<string>("");
 
   useEffect(() => {
     const id = (Math.random() + 1).toString(36).substring(5);
+
     if (variant2type !== undefined) {
       setValue("variantTable", [
         ...getValues("variantTable")!,
@@ -1028,6 +1165,10 @@ const ProductVariant = ({
         } as IVariant,
       ]);
     }
+
+    // if (watchVariantTable.at(index)?.image_url) {
+    //   watchVariantTable.at(index)!.imageId = id;
+    // }
     setId(id);
   }, []);
 
@@ -1053,7 +1194,7 @@ const ProductVariant = ({
                     autoClose: 1500,
                   }
                 );
-
+                watchVariantTable.at(index)!.imageId = id;
                 setImage(e.target.files![0]);
               } catch (e) {}
             }
@@ -1063,12 +1204,17 @@ const ProductVariant = ({
           hidden
         />
         <img
-          src={image && URL.createObjectURL(image)}
+          src={
+            typeof image === "string"
+              ? image
+              : image && URL.createObjectURL(image as File)
+          }
           onClick={() => {
             imageRef.current?.click();
           }}
           className="w-16 h-16 bg-red-200"
         />
+        {}
       </td>
       <td>{variant1type}</td>
       {variant2type && <td>{variant2type}</td>}
@@ -1076,6 +1222,17 @@ const ProductVariant = ({
         <input
           type="text"
           name="price"
+          value={
+            watchVariantTable.find((data) => {
+              if (variant2type !== undefined) {
+                return (
+                  data.variant1.value === variant1type &&
+                  data.variant2?.value === variant2type
+                );
+              }
+              return data.variant1.value === variant1type;
+            })?.price
+          }
           onChange={(e) => {
             if (!/^[0-9]*$/g.test(e.target.value)) return e.preventDefault();
             watchVariantTable.find((data) => {

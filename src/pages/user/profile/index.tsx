@@ -338,7 +338,6 @@ export const getServerSideProps = async (
     data = (res.data as IAPIResponse<IAPIUserProfileResponse>).data;
   } catch (e) {
     if (axios.isAxiosError(e)) {
-      console.log(e.response?.data);
       return {
         redirect: {
           permanent: false,

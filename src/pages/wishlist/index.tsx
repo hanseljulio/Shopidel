@@ -75,7 +75,6 @@ function Index() {
           page: page,
         },
       });
-
       const data = res.data as IAPIResponse<IWishlist[]>;
       setWishlist(data);
     } catch (e) {

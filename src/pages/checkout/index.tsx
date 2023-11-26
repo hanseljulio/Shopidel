@@ -192,7 +192,7 @@ const NoAddressModal = () => {
       <div className="flex justify-center mt-3">
         <Button
           text="Add New Address"
-          onClick={() => router.push("/user/address")}
+          onClick={() => router.push("/user/profile/address")}
           styling="bg-[#364968] p-3 rounded-[8px] w-[200px] text-white my-4"
         />
       </div>
