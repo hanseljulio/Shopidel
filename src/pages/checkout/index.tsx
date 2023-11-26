@@ -255,6 +255,8 @@ const SelectShippingModal = (props: ISelectShippingModalProps) => {
       weight: "200",
     };
 
+    console.log(sendData);
+
     try {
       const response = await API.post("/orders/cost/check", sendData);
       setShippingCostData(response.data.data);
