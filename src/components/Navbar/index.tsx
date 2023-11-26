@@ -324,11 +324,11 @@ const Navbar = () => {
                   <img
                     src={logged.profile_picture}
                     alt="profile_picture"
-                    className="h-full w-full object-contain rounded-full"
-                    placeholder="https://cdn4.iconfinder.com/data/icons/web-ui-color/128/Account-512.png"
+                    className="h-full w-full bg-white object-cover rounded-full"
+                    placeholder="/images/defaultuser.png"
                     onError={(e) => {
                       (e.target as HTMLInputElement).src =
-                        "https://cdn4.iconfinder.com/data/icons/web-ui-color/128/Account-512.png";
+                        "/images/defaultuser.png";
                     }}
                   />
                 </div>
@@ -340,14 +340,15 @@ const Navbar = () => {
                     <p className="w-full truncate">
                       Hi, <span className="font-bold">{user?.full_name}</span>
                     </p>
-                    <div className="w-10">
+                    <div className="w-14 h-10 rounded-full">
                       <img
                         src={logged.profile_picture}
                         alt="profile_picture"
-                        placeholder="https://cdn4.iconfinder.com/data/icons/web-ui-color/128/Account-512.png"
+                        className=" h-full w-full object-cover rounded-full"
+                        placeholder="/images/defaultuser.png"
                         onError={(e) => {
                           (e.target as HTMLInputElement).src =
-                            "https://cdn4.iconfinder.com/data/icons/web-ui-color/128/Account-512.png";
+                            "/images/defaultuser.png";
                         }}
                       />
                     </div>
