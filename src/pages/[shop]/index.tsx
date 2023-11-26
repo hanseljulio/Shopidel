@@ -232,7 +232,7 @@ function Index({ seller }: IProfileShopProps) {
         </div>
 
         <div>
-          <p className="w-full font-semibold text-lg md:text-xl justify-center text-center my-3 py-2 ">
+          <p className="w-full font-semibold text-lg md:text-xl justify-center text-center mt-10 py-5 ">
             Best Selling
           </p>
           <div className="grid grid-cols-2 md:grid-cols-6 gap-3">
@@ -276,15 +276,15 @@ function Index({ seller }: IProfileShopProps) {
             )}
           </div>
         </div>
-        <div className="flex flex-col md:flex-row mt-10 w-full gap-x-5">
-          <div className="w-full md:w-1/4 flex flex-row md:flex-col gap-5  mt-5 pt-0 md:pt-6">
+        <div className="flex flex-col md:flex-row mt-20 w-full gap-x-5">
+          <div className="w-full md:w-1/4 flex flex-row md:flex-col gap-5  mt-5 pt-0 md:pt-6 h-full ">
             <div className="items-start">
               <p className="flex items-center gap-1 font-semibold border-b border-b-slate-2 00 pb-0 md:pb-8">
                 <FaListUl className="hidden md:flex" size={15} />
                 Etalase
               </p>
             </div>
-            <div className="w-full">
+            <div className="w-full h-full ">
               <ul className="etalase gap-y-5 grid grid-cols-4 md:grid-cols-1 w-full text-xs md:text-base justify-between">
                 <li
                   className={`cursor-pointer ${
@@ -308,29 +308,12 @@ function Index({ seller }: IProfileShopProps) {
               </ul>
             </div>
           </div>
-          <div className="w-full md:w-3/4 gap-y-5 mt-5">
-            <div className="w-full justify-start align-middle items-center flex bg-slate-200 gap-x-3 p-3">
-              <p className="text-sm">Sort: </p>{" "}
-              <select
-                name="sortBy"
-                id="sortBy"
-                value={searchParam.get("sortBy") ?? "most_recent_one"}
-                onChange={(e) => {
-                  router.push({
-                    href: router.asPath,
-                    query: {
-                      ...router.query,
-                      sortBy: e.target.value,
-                    },
-                  });
-                }}
-                className="rounded-md border-slate-500 text-sm py-1"
-              >
-                <option value="most_recent_one">the most recent one</option>
-                <option value="most_expensive">the most expensive</option>
-                <option value="cheapest">the cheapest</option>
-              </select>
-            </div>
+          <div className="w-full md:w-3/4 gap-y-5 mt-10">
+            {/* <div className="w-full justify-start align-middle text-center items-center flex bg-slate-200 gap-x-3 p-3">
+              <p className="text-lg font-semibold text-center mx-auto">
+                Products in Etalase
+              </p>
+            </div> */}
             <div className="w-full grid grid-cols-2 md:grid-cols-4 gap-3 md:mt-3">
               {productCategory?.data.map((e, k) => (
                 <>

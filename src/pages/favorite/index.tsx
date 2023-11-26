@@ -133,7 +133,7 @@ function Index() {
     <div>
       <Navbar />
       <Head>
-        <title>Wishlist</title>
+        <title>Favorites</title>
       </Head>
       <ToastContainer />
       <div className="mx-auto lg:max-w-7xl md:items-center px-4 md:px-0">
@@ -181,7 +181,7 @@ function Index() {
             <div className="gap-x-4 gap-y-1 grid grid-cols-2 md:grid-cols-5 mt-10">
               {wishlist?.data?.map((product, i) => (
                 <div key={i} className="rounded-md flex group ">
-                  <div className="relative group-hover:scale-1">
+                  <div className="relative group-hover:scale-1 w-full">
                     <ProductCard
                       image={product.picture_url}
                       price={product.price}
