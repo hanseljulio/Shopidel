@@ -4,59 +4,24 @@ import ProductCard from "@/components/ProductCard";
 import CarouselHome from "@/components/Carousel";
 import { IAPIResponse } from "@/interfaces/api_interface";
 import { API } from "@/network";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import Category from "@/components/Category";
 import { useRouter } from "next/router";
 import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
 import { IListCategory, IProduct } from "@/interfaces/product_interface";
-import { clientUnauthorizeHandler } from "@/utils/utils";
 import { useUserStore } from "@/store/userStore";
 import "react-toastify/dist/ReactToastify.css";
 import { deleteCookie } from "cookies-next";
 import Head from "next/head";
+import { InferGetServerSidePropsType } from "next";
 
-export default function Home() {
+export default function Home({
+  recommendedProducts,
+  categories,
+}: InferGetServerSidePropsType<typeof getServerSideProps>) {
   const router = useRouter();
   const { updateUser } = useUserStore();
-  const [productList, setProductList] = useState<IAPIResponse<IProduct[]>>({});
-  const [listCategory, setListCategory] = useState<
-    IAPIResponse<IListCategory[]>
-  >({});
-
-  const getProduct = async () => {
-    try {
-      const res = await API.get(
-        `/products?page=1&sortBy=price&sort=asc&limit=18`
-      );
-
-      const data = res.data as IAPIResponse<IProduct[]>;
-
-      setProductList(data!);
-    } catch (e) {
-      if (axios.isAxiosError(e)) {
-        return toast.error(e.message, {
-          autoClose: 1500,
-        });
-      }
-    }
-  };
-
-  const getCategories = async () => {
-    try {
-      const res = await API.get(`/products/top-categories`);
-
-      const data = res.data as IAPIResponse<IListCategory[]>;
-
-      setListCategory(data!);
-    } catch (e) {
-      if (axios.isAxiosError(e)) {
-        return toast.error(e.message, {
-          autoClose: 1500,
-        });
-      }
-    }
-  };
 
   useEffect(() => {
     if (router.query.force_logout === "true") {
@@ -67,9 +32,6 @@ export default function Home() {
         autoClose: 1500,
       });
     }
-
-    getProduct();
-    getCategories();
   }, []);
 
   return (
@@ -88,7 +50,7 @@ export default function Home() {
           </p>
         </div>
         <div className="grid grid-cols-4 md:grid-cols-9 gap-x-4 gap-y-4">
-          {listCategory.data?.map((category, i) => (
+          {categories?.map((category, i) => (
             <Category
               key={i}
               src={category.picture_url}
@@ -111,7 +73,7 @@ export default function Home() {
           </p>
         </div>
         <div className="justify-between gap-x-4 gap-y-4 grid grid-cols-2 md:grid-cols-5">
-          {productList.data?.map((product) => (
+          {recommendedProducts?.map((product) => (
             <ProductCard
               key={product.id}
               onClick={() =>
@@ -135,3 +97,51 @@ export default function Home() {
     </div>
   );
 }
+
+export const getServerSideProps = async () => {
+  const prop = {
+    recommendedProducts: [] as IProduct[],
+    categories: [] as IListCategory[],
+  };
+  const getProduct = async () => {
+    try {
+      const res = await API.get(
+        `/products?page=1&sortBy=price&sort=asc&limit=18`
+      );
+
+      const data = (res.data as IAPIResponse<IProduct[]>).data;
+      prop.recommendedProducts = data!;
+    } catch (e) {
+      if (axios.isAxiosError(e)) {
+        return toast.error(e.message, {
+          autoClose: 1500,
+        });
+      }
+    }
+  };
+
+  const getCategories = async () => {
+    try {
+      const res = await API.get(`/products/top-categories`);
+
+      const data = (res.data as IAPIResponse<IListCategory[]>).data;
+      prop.categories = data!;
+    } catch (e) {
+      if (axios.isAxiosError(e)) {
+        return toast.error(e.message, {
+          autoClose: 1500,
+        });
+      }
+    }
+  };
+
+  await getProduct();
+  await getCategories();
+
+  return {
+    props: {
+      recommendedProducts: prop.recommendedProducts,
+      categories: prop.categories,
+    },
+  };
+};
