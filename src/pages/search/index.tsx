@@ -18,6 +18,7 @@ import { IDistrict } from "@/interfaces/courier_interface";
 import { ReadonlyURLSearchParams, useSearchParams } from "next/navigation";
 import { TiDeleteOutline } from "react-icons/ti";
 import Head from "next/head";
+import Pagination from "@/components/Pagination";
 
 const Search = () => {
   const router = useRouter();
@@ -35,6 +36,7 @@ const Search = () => {
   const searchParam = useSearchParams();
   const [districtPopup, setDistrictsPopup] = useState<boolean>(false);
   const [districtSearch, setDistrictsSearch] = useState<string>("");
+  const [page, setPage] = useState<number>(1);
 
   const getDistricts = async () => {
     try {
@@ -58,6 +60,8 @@ const Search = () => {
           ...router.query,
         },
       });
+
+      console.log(res);
 
       const data = res.data as IAPIResponse<IProduct[]>;
       setProductsRes(data);
@@ -566,7 +570,7 @@ const Search = () => {
                 </div>
               </>
             ) : (
-              <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-5 mt-5">
+              <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-5 mt-5  ">
                 {productsRes?.data?.map((product, i) => {
                   return (
                     <ProductCard
@@ -586,6 +590,22 @@ const Search = () => {
                     />
                   );
                 })}
+              </div>
+            )}
+            {productsRes && productsRes?.data?.length !== 0 && (
+              <div className="mt-10 text-center">
+                <Pagination
+                  data={productsRes?.pagination}
+                  onNavigate={(page) =>
+                    router.push({
+                      href: router.asPath,
+                      query: {
+                        ...router.query,
+                        page: page,
+                      },
+                    })
+                  }
+                />
               </div>
             )}
           </div>
