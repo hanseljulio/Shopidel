@@ -25,7 +25,8 @@ import { AiFillDelete, AiFillPlusCircle } from "react-icons/ai";
 import { useRouter } from "next/router";
 import { ISellerEditProduct } from "@/interfaces/seller_interface";
 import { GetServerSidePropsContext, InferGetServerSidePropsType } from "next";
-import { checkAuthSSR } from "@/utils/utils";
+import { checkAuthSSR, getYoutubeVideoId } from "@/utils/utils";
+import YouTube from "react-youtube";
 
 interface IAddProductForm {
   product_name: string;
@@ -77,8 +78,12 @@ export const getServerSideProps = async (
   let auth = await checkAuthSSR(context);
 
   if (auth === null) {
-    context.res.writeHead(301, { location: "/login" });
-    context.res.end();
+    return {
+      redirect: {
+        permanent: false,
+        destination: "/login?session_expired=true",
+      },
+    };
   }
 
   try {
@@ -100,7 +105,7 @@ export const getServerSideProps = async (
       return {
         redirect: {
           permanent: false,
-          destination: "/",
+          destination: "/?force_logout=true",
         },
       };
     }
@@ -122,6 +127,7 @@ const SellerEditProductPage = ({
   } = useForm<IAddProductForm>({
     defaultValues: {
       ...product,
+      video_url: product.video_url,
       variantGroup: product.variant_options as IVariantGroup[],
       variantTable:
         product.variant_options.length !== 0
@@ -140,6 +146,7 @@ const SellerEditProductPage = ({
   const watchVariantTable = watch("variantTable");
   console.log(watchVariantTable);
 
+  const [selectedCategory, setSelectedCategory] = useState<ICategory>();
   const [categories, setCategories] = useState<ICategory[]>();
   const [isCategoryOpen, setIsCategoryOpen] = useState<boolean>(false);
   const [category2, setCategory2] = useState<ICategory[]>([]);
@@ -149,6 +156,11 @@ const SellerEditProductPage = ({
     product.images
   );
   const [isVariantCorrect, setIsVariantCorrect] = useState<boolean>();
+  const [deletedImageGlobal, setDeletedImageGlobal] = useState<string[]>([]);
+
+  useEffect(() => {
+    console.log(selectedCategory);
+  }, [selectedCategory]);
 
   useEffect(() => {
     if (isVariantCorrect === false) {
@@ -173,8 +185,33 @@ const SellerEditProductPage = ({
     try {
       const res = await API.get("/categories");
 
-      setCategories(
-        (res.data as IAPIResponse<IAPICategoriesResponse>).data?.categories
+      const categories = (res.data as IAPIResponse<IAPICategoriesResponse>).data
+        ?.categories;
+
+      setCategories(categories);
+
+      let c1 = categories?.find((c) => c.id === product.category_id);
+      if (c1 !== undefined) {
+        setValue("category", c1);
+        setSelectedCategory(c1);
+      }
+      categories?.find((c) => {
+        let data = c.children?.find((c2) => c2.id === product.category_id);
+        if (data === undefined) {
+          return undefined;
+        }
+        setValue("category", data!);
+        setSelectedCategory(data!);
+      });
+      categories?.find((c) =>
+        c.children?.find((c2) => {
+          let data = c2.children?.find((c3) => c3.id === product.category_id);
+          if (data === undefined) {
+            return undefined;
+          }
+          setValue("category", data!);
+          setSelectedCategory(data!);
+        })
       );
     } catch (e) {
       if (axios.isAxiosError(e)) {
@@ -230,6 +267,13 @@ const SellerEditProductPage = ({
           formData.append("variants[]", JSON.stringify(variant));
         });
       }
+      console.log(deletedImageGlobal);
+      if (deletedImageGlobal.length !== 0) {
+        for (const data of deletedImageGlobal) {
+          formData.append("deleted_images[]", data);
+        }
+      }
+
       if (data.video_url !== "") {
         formData.append("video_url", data.video_url);
       }
@@ -379,6 +423,7 @@ const SellerEditProductPage = ({
                                 key={i}
                                 className="py-1 px-3 hover:cursor-pointer hover:bg-slate-100 hover:rounded transition"
                                 onClick={() => {
+                                  console.log(l3);
                                   setValue("category", l3);
                                   setIsCategoryOpen(false);
                                 }}
@@ -466,12 +511,20 @@ const SellerEditProductPage = ({
                               return setImages([...images]);
                             }}
                             onDelete={() => {
+                              console.log("triggered");
                               let data = images.filter((img) => {
                                 return typeof img === "string"
                                   ? img !== item
                                   : img.id !== (item as IProductImage).id;
                               });
+                              console.log(data);
                               clearErrors("images");
+                              if (typeof item === "string") {
+                                setDeletedImageGlobal([
+                                  ...deletedImageGlobal,
+                                  item,
+                                ]);
+                              }
                               return setImages(data);
                             }}
                           />
@@ -505,7 +558,7 @@ const SellerEditProductPage = ({
                 <div>
                   <h1 className="text-xl">Video</h1>
                   <p className="text-xs">
-                    Add your product video from YouTube embed url (optional)
+                    Add your product video from YouTube url (optional)
                   </p>
                   <p className="text-xs">YouTube video should be unlisted</p>
                 </div>
@@ -513,7 +566,7 @@ const SellerEditProductPage = ({
                   <input
                     {...register("video_url")}
                     onBlur={(e) => {
-                      setVideo(e.target.value);
+                      setVideo(getYoutubeVideoId(e.target.value)!);
                     }}
                     name="video_url"
                     id="video_url"
@@ -524,13 +577,7 @@ const SellerEditProductPage = ({
                 {video && (
                   <div className="mt-2">
                     <h1>Preview</h1>
-                    <iframe
-                      width="560"
-                      height="315"
-                      src={video}
-                      title="YouTube video player"
-                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                    ></iframe>
+                    <YouTube videoId={video} />
                   </div>
                 )}
               </div>
