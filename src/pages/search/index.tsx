@@ -61,8 +61,6 @@ const Search = () => {
         },
       });
 
-      console.log(res);
-
       const data = res.data as IAPIResponse<IProduct[]>;
       setProductsRes(data);
       setInitialSearchProductRes(data);
