@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import SellerAdminLayout from "@/components/SellerAdminLayout";
 import {
+  Controller,
   SubmitHandler,
   UseFormGetValues,
   UseFormRegister,
@@ -133,8 +134,18 @@ const SellerEditProductPage = ({
         product.variant_options.length !== 0
           ? (product.variants as IVariant[])
           : [],
-      price: product.variant_options.length === 0 && product.variants[0].price,
-      stock: product.variant_options.length === 0 && product.variants[0].stock,
+      price:
+        product.variant_options.length === 0
+          ? product.variants[0].price
+            ? product.variants[0].price
+            : 0
+          : "",
+      stock:
+        product.variant_options.length === 0
+          ? product.variants[0].stock
+            ? product.variants[0].stock
+            : 0
+          : 0,
     },
   });
   const router = useRouter();
@@ -144,6 +155,7 @@ const SellerEditProductPage = ({
   const watchCategory = watch("category");
   const watchVariantGroup = watch("variantGroup");
   const watchVariantTable = watch("variantTable");
+
   console.log(watchVariantTable);
 
   const [selectedCategory, setSelectedCategory] = useState<ICategory>();
@@ -270,7 +282,7 @@ const SellerEditProductPage = ({
             price: variant.price,
             variant1: variant.variant1,
             variant2: variant.variant2,
-            stock: variant.variant2,
+            stock: variant.stock,
             imageUrl: variant.imageId ? undefined : variant.image_url,
           };
           formData.append("variants[]", JSON.stringify(data));
@@ -502,7 +514,7 @@ const SellerEditProductPage = ({
                       onReorder={setImages}
                       axis="x"
                     >
-                      {images.map((item, i) => {
+                      {images.map((item) => {
                         return (
                           <ProductImage
                             key={JSON.stringify(item)}
@@ -707,6 +719,12 @@ const SellerEditProductPage = ({
                         {...register("price", {
                           required: "Product price is required",
                         })}
+                        onChange={(e) => {
+                          if (!/^[0-9]*$/g.test(e.target.value))
+                            return e.preventDefault();
+                          setValue("price", e.target.value);
+                        }}
+                        value={watch("price") as string}
                         type="text"
                         name="price"
                         id="price"
@@ -729,6 +747,16 @@ const SellerEditProductPage = ({
                         {...register("stock", {
                           required: "Product stock is required",
                         })}
+                        onChange={(e) => {
+                          if (!/^[0-9]*$/g.test(e.target.value))
+                            return e.preventDefault();
+                          setValue("stock", parseInt(e.target.value));
+                        }}
+                        value={
+                          isNaN(watch("stock")!)
+                            ? 0
+                            : (watch("stock") as number)
+                        }
                         type="text"
                         name="stock"
                         id="stock"
@@ -778,6 +806,12 @@ const SellerEditProductPage = ({
                     {...register("weight", {
                       required: "Weight is required",
                     })}
+                    onChange={(e) => {
+                      if (!/^[0-9]*$/g.test(e.target.value))
+                        return e.preventDefault();
+                      return setValue("weight", e.target.value);
+                    }}
+                    value={watch("weight") as string}
                     name="weight"
                     id="weight"
                     type="text"
@@ -800,6 +834,12 @@ const SellerEditProductPage = ({
                     {...register("size", {
                       required: "Size is required",
                     })}
+                    onChange={(e) => {
+                      if (!/^[0-9]*$/g.test(e.target.value))
+                        return e.preventDefault();
+                      return setValue("size", e.target.value);
+                    }}
+                    value={watch("size") as string}
                     name="size"
                     id="size"
                     type="text"
@@ -1224,6 +1264,7 @@ const ProductVariant = ({
             })?.price
           }
           onChange={(e) => {
+            if (!/^[0-9]*$/g.test(e.target.value)) return e.preventDefault();
             watchVariantTable.find((data) => {
               if (variant2type !== undefined) {
                 return (
@@ -1250,17 +1291,30 @@ const ProductVariant = ({
           type="text"
           name="stock"
           value={
-            watchVariantTable.find((data) => {
-              if (variant2type !== undefined) {
-                return (
-                  data.variant1.value === variant1type &&
-                  data.variant2?.value === variant2type
-                );
-              }
-              return data.variant1.value === variant1type;
-            })?.stock
+            isNaN(
+              watchVariantTable.find((data) => {
+                if (variant2type !== undefined) {
+                  return (
+                    data.variant1.value === variant1type &&
+                    data.variant2?.value === variant2type
+                  );
+                }
+                return data.variant1.value === variant1type;
+              })?.stock as number
+            )
+              ? 0
+              : watchVariantTable.find((data) => {
+                  if (variant2type !== undefined) {
+                    return (
+                      data.variant1.value === variant1type &&
+                      data.variant2?.value === variant2type
+                    );
+                  }
+                  return data.variant1.value === variant1type;
+                })?.stock
           }
           onChange={(e) => {
+            if (!/^[0-9]*$/g.test(e.target.value)) return e.preventDefault();
             watchVariantTable.find((data) => {
               if (variant2type !== undefined) {
                 return (

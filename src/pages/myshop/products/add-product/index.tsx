@@ -567,6 +567,12 @@ const SellerAddProductPage = () => {
                         {...register("price", {
                           required: "Product price is required",
                         })}
+                        onChange={(e) => {
+                          if (!/^[0-9]*$/g.test(e.target.value))
+                            return e.preventDefault();
+                          setValue("price", e.target.value);
+                        }}
+                        value={watch("price") as string}
                         type="text"
                         name="price"
                         id="price"
@@ -589,6 +595,16 @@ const SellerAddProductPage = () => {
                         {...register("stock", {
                           required: "Product stock is required",
                         })}
+                        onChange={(e) => {
+                          if (!/^[0-9]*$/g.test(e.target.value))
+                            return e.preventDefault();
+                          setValue("stock", parseInt(e.target.value));
+                        }}
+                        value={
+                          isNaN(watch("stock")!)
+                            ? 0
+                            : (watch("stock") as number)
+                        }
                         type="text"
                         name="stock"
                         id="stock"
@@ -638,6 +654,12 @@ const SellerAddProductPage = () => {
                     {...register("weight", {
                       required: "Weight is required",
                     })}
+                    onChange={(e) => {
+                      if (!/^[0-9]*$/g.test(e.target.value))
+                        return e.preventDefault();
+                      return setValue("weight", e.target.value);
+                    }}
+                    value={watch("weight") as string}
                     name="weight"
                     id="weight"
                     type="text"
@@ -660,6 +682,12 @@ const SellerAddProductPage = () => {
                     {...register("size", {
                       required: "Size is required",
                     })}
+                    onChange={(e) => {
+                      if (!/^[0-9]*$/g.test(e.target.value))
+                        return e.preventDefault();
+                      return setValue("size", e.target.value);
+                    }}
+                    value={watch("size") as string}
                     name="size"
                     id="size"
                     type="text"
@@ -1054,6 +1082,7 @@ const ProductVariant = ({
           type="text"
           name="price"
           onChange={(e) => {
+            if (!/^[0-9]*$/g.test(e.target.value)) return e.preventDefault();
             watchVariantTable.find((data) => {
               if (variant2type !== undefined) {
                 return (
@@ -1078,8 +1107,32 @@ const ProductVariant = ({
       <td>
         <input
           type="text"
-          name="price"
+          name="stock"
+          value={
+            isNaN(
+              watchVariantTable.find((data) => {
+                if (variant2type !== undefined) {
+                  return (
+                    data.variant1.value === variant1type &&
+                    data.variant2?.value === variant2type
+                  );
+                }
+                return data.variant1.value === variant1type;
+              })?.stock as number
+            )
+              ? 0
+              : watchVariantTable.find((data) => {
+                  if (variant2type !== undefined) {
+                    return (
+                      data.variant1.value === variant1type &&
+                      data.variant2?.value === variant2type
+                    );
+                  }
+                  return data.variant1.value === variant1type;
+                })?.stock
+          }
           onChange={(e) => {
+            if (!/^[0-9]*$/g.test(e.target.value)) return e.preventDefault();
             watchVariantTable.find((data) => {
               if (variant2type !== undefined) {
                 return (
@@ -1097,7 +1150,7 @@ const ProductVariant = ({
               e.preventDefault();
             }
           }}
-          id="price"
+          id="stock"
           className="py-1  rounded-md text-sm"
         />
       </td>
