@@ -41,7 +41,7 @@ function Index() {
     try {
       await getWishlist();
       router.push({
-        pathname: "/wishlist",
+        pathname: "/favorite",
         query: {
           ...(debouncedValue.trim() !== "" ? { s: debouncedValue } : {}),
           page: 1,
