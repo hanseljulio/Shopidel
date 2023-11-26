@@ -4,11 +4,10 @@ import Navbar from "@/components/Navbar";
 import Pagination from "@/components/Pagination";
 import ProductCard from "@/components/ProductCard";
 import { IAPIResponse } from "@/interfaces/api_interface";
-import { IProduct, IProductPagination } from "@/interfaces/product_interface";
+import { IProductPagination } from "@/interfaces/product_interface";
 import {
   IAPIProfileShopResponse,
   IBestSelling,
-  IEtalase,
   IEtalaseSeller,
   IProfileShopProps,
 } from "@/interfaces/seller_interface";
@@ -19,9 +18,9 @@ import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
 import { FaListUl, FaStar, FaStore } from "react-icons/fa";
 import { FaLocationDot } from "react-icons/fa6";
-import { FcAbout, FcQuestions } from "react-icons/fc";
 import { toast } from "react-toastify";
 import Head from "next/head";
+import { useSearchParams } from "next/navigation";
 
 export const getServerSideProps: GetServerSideProps = async (
   context: GetServerSidePropsContext
@@ -56,6 +55,7 @@ function Index({ seller }: IProfileShopProps) {
   const [productCategory, setProductCategory] = useState<IProductPagination>();
   const [showPage, setShowPage] = useState<IAPIResponse<IEtalaseSeller[]>>();
   const [page, setPage] = useState<number>(1);
+  const searchParam = useSearchParams();
   const [activeCategory, setActiveCategory] = useState<number | null>(
     categoryList.length > 0 ? categoryList[0].showcase_id : null
   );
@@ -177,49 +177,46 @@ function Index({ seller }: IProfileShopProps) {
       <div className="mx-auto lg:max-w-7xl md:items-center px-4 md:px-0 mb-5">
         <div className="sellerShop border h-auto border-slate-200 rounded-t-xl text-black flex flex-col md:flex-row items-center md:items-start gap-y-5 py-2 px-2  mt-10 gap-10 md:p-5 ">
           <div className="md:w-1/2 w-full bg-slate-100 flex-col flex gap-y-10 h-full p-3 rounded-xl">
-            <div className="flex flex-col md:flex-row justify-center">
+            <div className="flex flex-col md:flex-row gap-x-5 items-center text-center md:text-left gap-y-3 ">
               <img
                 src={seller?.seller_picture_url}
                 alt={seller?.seller_name}
-                className="imgSeller w-full md:w-80 text-center h-full object-fill rounded-lg"
+                className="imgSeller w-full md:w-44 h-full object-fill rounded-lg items-center"
                 placeholder="https://cdn4.iconfinder.com/data/icons/web-ui-color/128/Account-512.png"
                 onError={(e) => {
                   (e.target as HTMLInputElement).src =
                     "https://cdn4.iconfinder.com/data/icons/web-ui-color/128/Account-512.png";
                 }}
               />
-            </div>
-            <div className="aboutSeller  md:w-full text-center justify-center">
-              <p className="text-xl md:text-2xl font-semibold">
-                {seller?.seller_name}
-              </p>
-              <p className="text-sm md:text-base flex gap-x-1 text-center items-center justify-center text-neutral-600">
-                <FaLocationDot size={13} />
-                <span>{seller?.seller_district}</span>
-              </p>
-            </div>
-            <div className="flex flex-row  items-start text-center justify-between gap-y-2  md:items-center  md:px-14">
-              <div className="text-center md:justify-center">
-                <p className="flex text-left md:text-center md:items-center font-semibold gap-x-1">
-                  <FaStar style={{ color: "#f57b29" }} />
-                  {averageStars.toFixed(1)}
+              <div className="aboutSeller md:w-full text-center md:text-left justify-center ">
+                <p className="text-xl md:text-2xl font-semibold">
+                  {seller?.seller_name}
                 </p>
-                <p className=" text-neutral-600 text-sm">Rating</p>
-              </div>
+                <p className="text-sm md:text-base flex gap-x-1 text-center justify-center md:justify-start md:text-left items-center  text-neutral-600">
+                  <FaLocationDot size={13} />
+                  <span>{seller?.seller_district}</span>
+                </p>
 
-              <div className="w-fit md:text-center text-left md:items-center md:justify-center">
-                <p className="font-semibold">{`${seller?.seller_operating_hour.start} - ${seller?.seller_operating_hour.end} WIB`}</p>
-                <p className=" text-neutral-600 text-sm">Operating hours</p>
+                <div className="text-center md:text-left justify-between flex pt-3 w-full mt-2 md:mt-0">
+                  <div className="w-fit text-center md:text-left md:items-center md:justify-center">
+                    <p className="font-medium">{`${seller?.seller_operating_hour.start} - ${seller?.seller_operating_hour.end} WIB`}</p>
+                    <p className=" text-neutral-600 text-sm">Operating hours</p>
+                  </div>
+                  <div>
+                    <p className="flex text-center md:text-left md:items-center font-medium gap-x-1 pr-4">
+                      <FaStar style={{ color: "#f57b29" }} />
+                      {averageStars.toFixed(1)}
+                    </p>
+                    <p className="text-neutral-600 text-sm">Rating</p>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
           <div className="md:w-1/2 w-full">
             <div className="p-3">
-              <p className="gap-x-1 flex items-center font-semibold mb-5">
-                About
-                <span className=" text-lg text-[#f57b29]">
-                  {seller.seller_name}
-                </span>
+              <p className="gap-x-1 flex text-lg text-[#f57b29] items-center font-semibold mb-1">
+                {seller.seller_name}
               </p>
               <p>
                 {seller.seller_description
@@ -313,20 +310,27 @@ function Index({ seller }: IProfileShopProps) {
             </div>
           </div>
           <div className="w-full md:w-3/4 gap-y-5 mt-5">
-            <div className="w-full justify-start align-middle items-center flex bg-slate-200 py-3">
-              <Dropdown
-                label="Sort"
-                labelStyle="w-0 m-0 p-0"
-                width="w-250px h-15"
-                //   value={}
-                flexLabel="flex md:items-center md:gap-[77px] pl-2 md:flex-row flex-col gap-2 items-start"
-                options={[
-                  "the most recent one",
-                  "the most expensive",
-                  "the cheapest",
-                ]}
-                //   onChange={}
-              />
+            <div className="w-full justify-start align-middle items-center flex bg-slate-200 gap-x-3 p-3">
+              <p className="text-sm">Sort: </p>{" "}
+              <select
+                name="sortBy"
+                id="sortBy"
+                value={searchParam.get("sortBy") ?? "most_recent_one"}
+                onChange={(e) => {
+                  router.push({
+                    href: router.asPath,
+                    query: {
+                      ...router.query,
+                      sortBy: e.target.value,
+                    },
+                  });
+                }}
+                className="rounded-md border-slate-500 text-sm py-1"
+              >
+                <option value="most_recent_one">the most recent one</option>
+                <option value="most_expensive">the most expensive</option>
+                <option value="cheapest">the cheapest</option>
+              </select>
             </div>
             <div className="w-full grid grid-cols-2 md:grid-cols-4 gap-3 md:mt-3">
               {productCategory?.data.map((e, k) => (

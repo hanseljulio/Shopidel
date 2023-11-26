@@ -36,7 +36,6 @@ const Search = () => {
   const searchParam = useSearchParams();
   const [districtPopup, setDistrictsPopup] = useState<boolean>(false);
   const [districtSearch, setDistrictsSearch] = useState<string>("");
-  const [page, setPage] = useState<number>(1);
 
   const getDistricts = async () => {
     try {

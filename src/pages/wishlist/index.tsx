@@ -33,11 +33,9 @@ function Index() {
     return !wishlist || !wishlist.data || wishlist.data.length === 0;
   };
   const [value, setValue] = useState("");
-  const onChange = (e: React.ChangeEvent<HTMLInputElement>) =>
-    setValue(e.target.value);
 
   const [debouncedValue, setDebouncedValue] = useState(value);
-  const delay = 500;
+  const delay = 300;
 
   const searchQueryHandler = async () => {
     try {
@@ -64,16 +62,11 @@ function Index() {
     }
   };
   useEffect(() => {
-    const timer = setTimeout(() => setDebouncedValue(value), delay || 500);
+    const timer = setTimeout(() => setDebouncedValue(value), delay || 300);
 
     return () => clearTimeout(timer);
   }, [value, delay]);
 
-  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter") {
-      searchQueryHandler();
-    }
-  };
   const getWishlist = async () => {
     try {
       const res = await API.get(`/products/favorites?page=${page}`, {
@@ -146,7 +139,9 @@ function Index() {
       <ToastContainer />
       <div className="mx-auto lg:max-w-7xl md:items-center px-4 md:px-0">
         <div className="flex gap-x-5 md:justify-between mt-10 mb-24 items-center">
-          <p className="text-xl md:text-3xl font-bold items-center">Wishlist</p>
+          <p className="text-xl md:text-3xl font-bold items-center">
+            My Favorites
+          </p>
 
           <div className="flex justify-end  items-center gap-x-5">
             <form
@@ -157,7 +152,7 @@ function Index() {
             >
               <input
                 type="text"
-                placeholder="Search in wishlist"
+                placeholder="Find my favorite"
                 className="rounded-md w-full md:w-80"
                 onChange={handleQueryChange}
                 value={query}
@@ -174,7 +169,7 @@ function Index() {
               className="w-80 h-80 object-cover py-3 mx-auto"
             />
             <p className="text-lg font-semibold text-center py-2 text-neutral-500">
-              There is no favorite product
+              No favorite product found
             </p>
             <Button
               text="Find your favorite product"
@@ -186,11 +181,8 @@ function Index() {
           <>
             <div className="gap-x-4 gap-y-1 grid grid-cols-2 md:grid-cols-5 mt-10">
               {wishlist?.data?.map((product, i) => (
-                <div
-                  key={i}
-                  className="rounded-md flex group group-hover:scale-95 "
-                >
-                  <div className="relative group-hover:group-hover:scale-10">
+                <div key={i} className="rounded-md flex group ">
+                  <div className="relative group-hover:scale-1">
                     <ProductCard
                       image={product.picture_url}
                       price={product.price}
@@ -205,9 +197,9 @@ function Index() {
                       }
                     />
                   </div>
-                  <div className="absolute group-hover:scale-95 text-red-600 p-2 hover:shadow-none cursor-pointer rounded-md transition-all duration-500 ease-in-out">
+                  <div className="absolute group-hover:scale-95 text-red-600 p-3 hover:shadow-none cursor-pointer rounded-md transition-all duration-500 ease-in-out">
                     <FaTrash
-                      size={20}
+                      size={15}
                       onClick={() => handleDeleteWishlist(product.product_id)}
                     />
                   </div>

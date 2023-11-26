@@ -1,5 +1,5 @@
 import { useUserStore } from "@/store/userStore";
-import { deleteCookie, getCookie } from "cookies-next";
+import { deleteCookie } from "cookies-next";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
@@ -7,10 +7,7 @@ import { AiOutlineShoppingCart } from "react-icons/ai";
 import Button from "../Button";
 import { BiLogOut } from "react-icons/bi";
 import { IoSettingsSharp } from "react-icons/io5";
-import {
-  IAPIResponse,
-  IAPIUserProfileResponse,
-} from "@/interfaces/api_interface";
+import { IAPIUserProfileResponse } from "@/interfaces/api_interface";
 import { ICartData, ICartItems } from "@/interfaces/cart_interface";
 import { API } from "@/network";
 import axios from "axios";
@@ -24,7 +21,6 @@ const Navbar = () => {
   const [navbar, setNavbar] = useState(false);
   const router = useRouter();
   const { user, updateUser } = useUserStore();
-  const [navbarCartData, setNavbarCartData] = useState<ICartData[]>([]);
   const [logged, setLogged] = useState<IAPIUserProfileResponse | undefined>(
     undefined
   );
@@ -162,25 +158,6 @@ const Navbar = () => {
       </div>
     );
   };
-
-  // useEffect(() => {
-  //   const getNavbarCartData = async () => {
-  //     try {
-  //       const res = await API.get("/accounts/carts");
-
-  //       if (cartStore.cart !== undefined) {
-  //         setNavbarCartData(cartStore.cart);
-  //       } else {
-  //         setNavbarCartData;
-  //         setNavbarCartData(res.data.data.cart_shops);
-  //       }
-  //     } catch (e) {}
-  //   };
-
-  //   if (user) {
-  //     getNavbarCartData();
-  //   }
-  // }, [user, cartStore.cart]);
 
   useEffect(() => {
     setLogged(user!);
@@ -320,10 +297,10 @@ const Navbar = () => {
                 <div className="px-5 pt-5 text-center">
                   <h1 className="font-bold w-full text-xl pb-2">My cart </h1>
                   {cartIsEmpty() ? (
-                    <div className="items-center justify-center">
+                    <div className="items-center justify-center flex flex-col py-3">
                       <img
                         alt="cart pic"
-                        src={"/vm2/images/emptycart.png"}
+                        src={"/images/emptycart.png"}
                         width={250}
                         height={250}
                         className="w-32 h-32 object-cover items-center justify-center"
