@@ -11,6 +11,7 @@ import {
 import {
   IProductSuggestion,
   IReviewProduct,
+  ITotalFavorite,
 } from "@/interfaces/product_interface";
 import { IAPIProfileShopResponse } from "@/interfaces/seller_interface";
 import { API } from "@/network";
@@ -101,7 +102,9 @@ const ProductDetail = ({
   const [isExpanded, setIsExpanded] = useState<boolean>(false);
   const variationRef = useRef<HTMLDivElement>(null);
   const [imageReviewChosen, setImageReviewChosen] = useState("");
-
+  const [totalFavorite, setTotalFavorite] = useState<ITotalFavorite | null>(
+    null
+  );
   const scrollLeft = () => {
     if (variationRef.current) {
       variationRef.current.scrollLeft -= 100;
@@ -336,6 +339,26 @@ const ProductDetail = ({
       }
     }
   };
+
+  const getTotalFavorite = async () => {
+    try {
+      const res = await API.get(`products/${product.id}/total-favorites`);
+      const data = res.data.data as ITotalFavorite;
+      setTotalFavorite(data);
+      console.log("fav", data);
+    } catch (e) {
+      if (axios.isAxiosError(e)) {
+        return toast.error("Error fetching product suggestion", {
+          toastId: "errorWishlist",
+          autoClose: 1500,
+        });
+      }
+    }
+  };
+
+  useEffect(() => {
+    getTotalFavorite();
+  }, [isFavorite]);
 
   useEffect(() => {
     getSuggest();
@@ -597,7 +620,9 @@ const ProductDetail = ({
                     ) : (
                       <FaRegHeart color={"red"} />
                     )}
-                    <p className="text-sm">(total favorites)</p>
+                    <p className="text-sm ">
+                      Favorites ({totalFavorite?.total_favorites})
+                    </p>
                   </div>
                 </button>
               </div>
@@ -715,9 +740,6 @@ const ProductDetail = ({
                   </p>
                 </div>
                 <p className="productPrice text-2xl font-semibold text-[#f57b29] py-3">
-                  {/* {currencyConverter(
-                    parseInt(product?.variants?.[0]?.price ?? 0)
-                  )} */}
                   {currencyConverter(subtotal)}
                 </p>
               </div>
@@ -788,7 +810,7 @@ const ProductDetail = ({
                       "https://cdn4.iconfinder.com/data/icons/web-ui-color/128/Account-512.png";
                   }}
                 />
-                <div className="flex flex-col md:flex-row gap-y-4 md:gap-x-48 w-full">
+                <div className="flex flex-col md:flex-row gap-y-4 md:gap-x-36 w-full">
                   <div className="aboutSeller w-full md:w-1/2">
                     <p className=" text-lg md:text-xl font-medium md:font-semibold text-center md:text-left">
                       {shopProfile?.data?.seller_name}
@@ -808,7 +830,7 @@ const ProductDetail = ({
                   <table className="aboutSeller w-full  md:w-full text-sm md:text-base  self-center ">
                     <thead></thead>
                     <tbody>
-                      <tr className="flex items-center justify-center gap">
+                      <tr className="flex items-center justify-center gap w-full">
                         <td className="w-full">Shipping from</td>
                         <td className="w-full flex items-center gap-x-1 font-medium">
                           <FaLocationDot />

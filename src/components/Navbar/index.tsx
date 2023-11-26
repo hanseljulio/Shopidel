@@ -24,6 +24,7 @@ const Navbar = () => {
   const [navbar, setNavbar] = useState(false);
   const router = useRouter();
   const { user, updateUser } = useUserStore();
+  const [navbarCartData, setNavbarCartData] = useState<ICartData[]>([]);
   const [logged, setLogged] = useState<IAPIUserProfileResponse | undefined>(
     undefined
   );
@@ -109,7 +110,7 @@ const Navbar = () => {
     if (user) {
       getCartData();
     }
-  }, [user]);
+  }, [user, updateCart, cartStore.cart]);
 
   const renderCartProducts = () => {
     const maxProductsToShow = 5;
@@ -161,6 +162,25 @@ const Navbar = () => {
       </div>
     );
   };
+
+  // useEffect(() => {
+  //   const getNavbarCartData = async () => {
+  //     try {
+  //       const res = await API.get("/accounts/carts");
+
+  //       if (cartStore.cart !== undefined) {
+  //         setNavbarCartData(cartStore.cart);
+  //       } else {
+  //         setNavbarCartData;
+  //         setNavbarCartData(res.data.data.cart_shops);
+  //       }
+  //     } catch (e) {}
+  //   };
+
+  //   if (user) {
+  //     getNavbarCartData();
+  //   }
+  // }, [user, cartStore.cart]);
 
   useEffect(() => {
     setLogged(user!);
