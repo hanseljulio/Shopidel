@@ -11,6 +11,7 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { ISellerPromotionData } from "@/interfaces/seller_interface";
 import { IAPIResponse } from "@/interfaces/api_interface";
+import Head from "next/head";
 
 interface ISellerProductSelect {
   id: number;
@@ -137,6 +138,9 @@ const SellerPromotionCreate = () => {
 
   return (
     <SellerAdminLayout currentPage="Promotions">
+      <Head>
+        <title>Create Promotion</title>
+      </Head>
       <ToastContainer />
       <div className="w-full mx-auto mt-6">
         <div className="flex items-center justify-between md:flex-row md:mx-[5%] flex-col p-0 md:gap-0 gap-8">

@@ -14,10 +14,11 @@ import {
 } from "@/interfaces/user_interface";
 import Pagination from "@/components/Pagination";
 import Modal from "@/components/Modal";
-import { FaMapMarkerAlt, FaTag } from "react-icons/fa";
+import { FaMapMarkerAlt, FaBox } from "react-icons/fa";
 import CheckoutGrandTotal from "@/components/CheckoutGrandTotal";
 import Button from "@/components/Button";
 import { IAPIResponse } from "@/interfaces/api_interface";
+import Head from "next/head";
 
 interface IIndividualOrderProps {
   data: ITransactionHistoryData;
@@ -237,7 +238,7 @@ const DetailModal = (props: IDetailModalProps) => {
         </h1>
       </div>
       <div className="pt-8">
-        <h1 className="text-[20px] font-bold flex items-center gap-3">
+        <h1 className="text-[20px] font-bold flex items-center gap-3 pb-1">
           <FaMapMarkerAlt className="text-[#ff3224]" />
           Delivery Address
         </h1>
@@ -249,7 +250,7 @@ const DetailModal = (props: IDetailModalProps) => {
 
       <div className="py-8">
         <h1 className="text-[20px] font-bold flex items-center gap-3">
-          <FaTag className="text-[#ff3224]" />
+          <FaBox className="text-amber-800" />
           Products purchased
         </h1>
         {data.products.map((data, index) => {
@@ -600,6 +601,9 @@ const TransactionHistory = () => {
 
       <div>
         <ProfileLayout currentPage="Transaction History">
+          <Head>
+            <title>Transaction History</title>
+          </Head>
           <ToastContainer />
           <div className="w-full mx-auto mt-6 ">
             <div className="flex items-center justify-between md:flex-row md:mx-[5%] flex-col p-0 md:gap-0 gap-8">

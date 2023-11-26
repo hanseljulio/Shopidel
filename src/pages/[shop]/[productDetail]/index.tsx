@@ -46,6 +46,7 @@ import { VscEmptyWindow } from "react-icons/vsc";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import YouTube from "react-youtube";
+import Head from "next/head";
 
 interface IChoosedVariant {
   variant1: string;
@@ -533,6 +534,13 @@ const ProductDetail = ({
   return (
     <>
       <ToastContainer />
+      <Head>
+        <title>{product?.name} | Shopidel</title>
+        <meta
+          name="description"
+          content={`Buy ${product?.name} from Shopidel!`}
+        />
+      </Head>
       {isModal && (
         <Modal
           content={<img className="h-[50vh]" src={variation} alt="..." />}

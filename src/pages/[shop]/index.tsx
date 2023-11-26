@@ -21,6 +21,7 @@ import { FaListUl, FaStar, FaStore } from "react-icons/fa";
 import { FaLocationDot } from "react-icons/fa6";
 import { FcAbout, FcQuestions } from "react-icons/fc";
 import { toast } from "react-toastify";
+import Head from "next/head";
 
 export const getServerSideProps: GetServerSideProps = async (
   context: GetServerSidePropsContext
@@ -173,6 +174,13 @@ function Index({ seller }: IProfileShopProps) {
   return (
     <div>
       <Navbar />
+      <Head>
+        <title>{seller.seller_name} Shop at Shopidel</title>
+        <meta
+          name="description"
+          content={`Browse the latest products from ${seller.seller_name}`}
+        />
+      </Head>
       <div className="mx-auto lg:max-w-7xl md:items-center px-4 md:px-0 mb-5">
         <div className="sellerShop border h-auto border-slate-200 rounded-t-xl text-black flex flex-col md:flex-row items-center md:items-start gap-y-5 py-2 px-2  mt-10 gap-10 md:p-5 ">
           <div className="md:w-1/2 w-full bg-slate-100 flex-col flex gap-y-10 h-full p-3 rounded-xl">
