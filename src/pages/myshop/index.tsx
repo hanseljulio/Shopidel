@@ -395,7 +395,6 @@ export const getServerSideProps = async (
     const user = (res.data as IAPIResponse<IAPIUserProfileResponse>).data;
 
     if (user!.is_seller) {
-      console.log("test");
       return {
         redirect: {
           permanent: false,

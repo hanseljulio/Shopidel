@@ -77,10 +77,8 @@ function Index() {
           page: page,
         },
       });
-      console.log(res);
       const data = res.data as IAPIResponse<IWishlist[]>;
       setWishlist(data);
-      console.log("dd", data.data);
     } catch (e) {
       if (axios.isAxiosError(e)) {
         if (e.response?.status === 401) {
@@ -91,7 +89,6 @@ function Index() {
           autoClose: 1500,
         });
       }
-      console.log("salah");
     }
   };
   useEffect(() => {
