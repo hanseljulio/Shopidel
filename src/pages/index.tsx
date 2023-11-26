@@ -88,22 +88,21 @@ export default function Home() {
           </p>
         </div>
         <div className="grid grid-cols-4 md:grid-cols-9 gap-x-4 gap-y-4">
-          {listCategory.data?.map((e, i) => (
-            <>
-              <Category
-                src={e.picture_url}
-                text={e.name}
-                alt={e.name}
-                onClick={() =>
-                  router.push({
-                    pathname: "/search",
-                    query: {
-                      categoryId: e.category_id,
-                    },
-                  })
-                }
-              />
-            </>
+          {listCategory.data?.map((category, i) => (
+            <Category
+              key={i}
+              src={category.picture_url}
+              text={category.name}
+              alt={category.name}
+              onClick={() =>
+                router.push({
+                  pathname: "/search",
+                  query: {
+                    categoryId: category.category_id,
+                  },
+                })
+              }
+            />
           ))}
         </div>
         <div>
@@ -113,23 +112,21 @@ export default function Home() {
         </div>
         <div className="justify-between gap-x-4 gap-y-4 grid grid-cols-2 md:grid-cols-5">
           {productList.data?.map((product) => (
-            <>
-              <ProductCard
-                key={product.id}
-                onClick={() =>
-                  router.push(
-                    `/${product.shop_name_slug}/${product.product_name_slug}`
-                  )
-                }
-                image={product.picture_url}
-                price={product.price}
-                showStar={true}
-                star={product.rating}
-                title={product.name}
-                place={product.district}
-                order={product.total_sold}
-              />
-            </>
+            <ProductCard
+              key={product.id}
+              onClick={() =>
+                router.push(
+                  `/${product.shop_name_slug}/${product.product_name_slug}`
+                )
+              }
+              image={product.picture_url}
+              price={product.price}
+              showStar={true}
+              star={product.rating}
+              title={product.name}
+              place={product.district}
+              order={product.total_sold}
+            />
           ))}
         </div>
       </div>
