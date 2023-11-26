@@ -82,7 +82,7 @@ const ProductCard = ({
             </p>
           )}
           {order !== undefined && (
-            <td className={`text-gray-500`}>{order} Sold</td>
+            <span className={`text-gray-500`}>{order} Sold</span>
           )}
         </div>
       </div>
