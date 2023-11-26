@@ -24,7 +24,6 @@ function Index() {
   const { updateUser } = useUserStore();
   const router = useRouter();
   const [wishlist, setWishlist] = useState<IAPIResponse<IWishlist[]>>();
-  const [isFavorite, setIsFavorite] = useState(false);
   const [page, setPage] = useState<number>(1);
   const [query, setQuery] = useState<string>(
     router.query.s !== undefined ? router.query.s.toString() : ""
@@ -39,12 +38,6 @@ function Index() {
 
   const [debouncedValue, setDebouncedValue] = useState(value);
   const delay = 500;
-
-  useEffect(() => {
-    const timer = setTimeout(() => setDebouncedValue(value), delay || 500);
-
-    return () => clearTimeout(timer);
-  }, [value, delay]);
 
   const searchQueryHandler = async () => {
     try {
@@ -64,15 +57,31 @@ function Index() {
   const handleQueryChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newQuery = e.target.value;
     setQuery(newQuery);
+    setValue(newQuery);
+
     if (newQuery.trim() === "") {
       setDebouncedValue(newQuery);
+    }
+  };
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedValue(value), delay || 500);
+
+    return () => clearTimeout(timer);
+  }, [value, delay]);
+
+  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
       searchQueryHandler();
     }
   };
-
   const getWishlist = async () => {
     try {
-      const res = await API.get(`/products/favorites?page=${page}`);
+      const res = await API.get(`/products/favorites?page=${page}`, {
+        params: {
+          s: query,
+          page: page,
+        },
+      });
 
       const data = res.data as IAPIResponse<IWishlist[]>;
       setWishlist(data);
@@ -123,6 +132,10 @@ function Index() {
       }
     }
   };
+
+  useEffect(() => {
+    searchQueryHandler();
+  }, [debouncedValue, page]);
 
   return (
     <div>
