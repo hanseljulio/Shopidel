@@ -299,10 +299,10 @@ const Navbar = () => {
                 <div className="px-5 pt-5 text-center">
                   <h1 className="font-bold w-full text-xl pb-2">My cart </h1>
                   {cartIsEmpty() ? (
-                    <div className="items-center justify-center">
+                    <div className="flex items-center justify-center gap-6">
                       <img
                         alt="cart pic"
-                        src={"/vm2/images/emptycart.png"}
+                        src={"/images/emptycart.png"}
                         width={250}
                         height={250}
                         className="w-32 h-32 object-cover items-center justify-center"

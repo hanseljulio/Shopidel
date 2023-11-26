@@ -66,8 +66,6 @@ function Index({ seller }: IProfileShopProps) {
         `/sellers/${seller.shop_name_slug}/best-selling`
       );
       const data = res.data as IAPIResponse<IBestSelling[]>;
-      console.log("best", data);
-      console.log(`${seller.shop_name_slug} sl`);
 
       setBestSelling(data.data!);
     } catch (e) {
@@ -86,7 +84,6 @@ function Index({ seller }: IProfileShopProps) {
       if (data.data) {
         setCategoryList(data.data);
         setShowPage(data);
-        console.log("etalist", data);
       } else {
         console.error("Data is undefined or null");
       }
@@ -103,22 +100,18 @@ function Index({ seller }: IProfileShopProps) {
   const getProductBasedOnCategory = async (id: number | null) => {
     try {
       let res;
-      console.log("iddddd", id);
 
       if (id !== null) {
         res = await API.get(
           `/sellers/${seller.shop_name_slug}/showcases/${id}/products?page=${page}`
         );
-        console.log("yes");
       } else {
         res = await API.get(
           `/sellers/${seller.shop_name_slug}/showcases/0/products?page=${page}`
         );
-        console.log("buk");
       }
 
       const data = res.data;
-      console.log("eta", data);
       if (data.data) {
         setProductCategory(data);
         setActiveCategory(id);
@@ -151,7 +144,6 @@ function Index({ seller }: IProfileShopProps) {
     );
 
     const averageStars = totalStars / validProducts.length;
-    console.log(averageStars, "averageStars");
     return averageStars;
   };
 
