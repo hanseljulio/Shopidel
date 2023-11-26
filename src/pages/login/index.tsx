@@ -166,7 +166,7 @@ const Login = () => {
                 </div>
               </form>
               <div className="flex flex-col justify-center items-center px-5">
-                <div className="flex w-full justify-center items-center">
+                {/* <div className="flex w-full justify-center items-center">
                   <div className="h-[0.5px] bg-slate-500 w-full"></div>
                   <p className="text-center text-sm text-slate-500 w-full">
                     Or login with
@@ -178,7 +178,7 @@ const Login = () => {
                     <FcGoogle size={20} />
                     <p className="text-sm">Google</p>
                   </div>
-                </div>
+                </div> */}
                 <p className="text-sm mt-5">
                   Don&apos;t have an account?{" "}
                   <span
