@@ -58,8 +58,8 @@ const MobileUserProfileSidebar = (props: MobileUserProfileSidebarProps) => {
           disabled={props.currentPage === "Transaction History"}
         />
         <Button
-          text="Wishlist"
-          onClick={() => router.push("/wishlist")}
+          text="Favorite"
+          onClick={() => router.push("/favorite")}
           styling="bg-blue-100 py-[12px] rounded-full w-[150px] px-8 hover:bg-blue-300 my-4"
         />
       </div>
@@ -146,7 +146,7 @@ const UserProfileSidebar = () => {
         </div>
         <div className="pl-[26px] border-slate-300 border-b-2 pb-[20px]">
           <h1
-            onClick={() => router.push("/wishlist")}
+            onClick={() => router.push("/favorite")}
             className="text-[20px] flex items-center gap-4 mt-[20px] hover:cursor-pointer transition w-[200px] hover:text-[#92bcff]"
           >
             <FaHeart />
