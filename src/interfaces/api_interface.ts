@@ -51,7 +51,7 @@ export interface IAPIProductDetailResponse {
     {
       variant_option_name: string;
       childs: [];
-      pictures:[]
+      pictures: [];
     }
   ];
   variants: [
@@ -77,4 +77,8 @@ export interface IAPICategoriesResponse {
 
 export interface IAPIPinValidationResponse {
   isCorrect: boolean;
+}
+
+export interface IAPIUpdatePhotoProfileResponse {
+  image_url: string;
 }

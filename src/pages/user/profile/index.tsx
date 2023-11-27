@@ -1,10 +1,11 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import Button from "@/components/Button";
 import ProfileLayout from "@/components/ProfileLayout";
 import { API } from "@/network";
 import axios from "axios";
 import {
   IAPIResponse,
+  IAPIUpdatePhotoProfileResponse,
   IAPIUserProfileResponse,
 } from "@/interfaces/api_interface";
 import { GetServerSidePropsContext } from "next";
@@ -21,8 +22,10 @@ const UserProfile = ({
   userData,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   const router = useRouter();
-  const { updateUser } = useUserStore();
-  const [imageFile, setImageFile] = useState<File | null>(null);
+  const { user, updateUser } = useUserStore();
+  const [imageFile, setImageFile] = useState<File | string>(
+    userData?.profile_picture as string
+  );
 
   const {
     register,
@@ -75,31 +78,43 @@ const UserProfile = ({
         if (e.response?.status === 401) {
           return clientUnauthorizeHandler(router, updateUser);
         }
-        return toast.error(e.message, {
-          autoClose: 1500,
-        });
       }
     }
   };
 
-  // Function for getting image from cloudinary
-  const urlToLink = async (link: string) => {
-    const randomName =
-      Math.floor(Math.random() * (999999 - 100000) + 100000).toString() +
-      ".jpg";
+  const profileImageHandler = async (image: File) => {
+    const formData = new FormData();
+    formData.append("image", image);
 
-    let imgFile = fetch(link).then(async (response) => {
-      const blob = await response.blob();
-      const file = new File([blob], randomName);
-      return file;
-    });
-
-    return imgFile;
-  };
-
-  const getFile = async (link: File | string) => {
-    let result = await urlToLink(typeof link === "string" ? link : "");
-    return result;
+    try {
+      const res = await toast.promise(
+        API.put("/accounts/profile/change-photo", formData),
+        {
+          pending: "Loading",
+          success: "Update photo success",
+          error: "An error occured",
+        },
+        {
+          autoClose: 1500,
+        }
+      );
+      setImageFile(
+        (res.data as IAPIResponse<IAPIUpdatePhotoProfileResponse>).data
+          ?.image_url as string
+      );
+      updateUser({
+        ...user,
+        profile_picture: (
+          res.data as IAPIResponse<IAPIUpdatePhotoProfileResponse>
+        ).data?.image_url,
+      } as IAPIUserProfileResponse);
+    } catch (e) {
+      if (axios.isAxiosError(e)) {
+        if (e.response?.status === 401) {
+          return clientUnauthorizeHandler(router, updateUser);
+        }
+      }
+    }
   };
 
   return (
@@ -124,10 +139,10 @@ const UserProfile = ({
               <div>
                 <img
                   src={`${
-                    userData?.profile_picture
-                      ? userData?.profile_picture
-                      : imageFile
-                      ? URL.createObjectURL(imageFile)
+                    imageFile
+                      ? typeof imageFile === "string"
+                        ? imageFile
+                        : URL.createObjectURL(imageFile as File)
                       : "/images/defaultuser.png"
                   }`}
                   alt="Nothing"
@@ -143,14 +158,13 @@ const UserProfile = ({
 
               <label className="bg-[#364968] hover:cursor-pointer text-white py-2 px-4 rounded-md text-sm mt-2">
                 <input
-                  {...register("profile_picture")}
                   type="file"
                   className="hidden"
                   name="profile_picture"
                   id="profile_picture"
                   onChange={(e) => {
-                    if (e.target.files !== null) {
-                      setImageFile(e.target.files[0]);
+                    if (e.target.files?.length !== 0) {
+                      profileImageHandler(e.target.files![0]);
                     }
                   }}
                 />
