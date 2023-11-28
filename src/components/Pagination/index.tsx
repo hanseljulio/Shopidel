@@ -12,12 +12,44 @@ const Pagination = ({ data, onNavigate, limit = 5 }: IPagination) => {
   const [paginationNumber, setPaginationNumber] = useState<number[]>([]);
 
   const setPaginationLimit = () => {
-    if (data?.total_page! <= limit) {
-      return setPaginationNumber(Array.from(Array(data?.total_page).keys()));
-    }
-
-    if (paginationNumber.length === 0) {
-      return setPaginationNumber(Array.from(Array(limit).keys()));
+    if (data) {
+      if (data?.total_page <= limit) {
+        return setPaginationNumber(
+          Array.from(Array(data.total_page).keys()).map((v) => v + 1)
+        );
+      }
+      return setPaginationNumber([
+        data.current_page - 2 === -1 || data.current_page - 2 === 0
+          ? 1
+          : data.current_page === data.total_page - 1 ||
+            data.current_page === data.total_page
+          ? data.total_page - 4
+          : data.current_page - 2,
+        data.current_page - 1 === 0 || data.current_page - 1 === 1
+          ? 2
+          : data.current_page === data.total_page - 1 ||
+            data.current_page === data.total_page
+          ? data.total_page - 3
+          : data.current_page - 1,
+        data.current_page === 1 || data.current_page === 2
+          ? 3
+          : data.current_page === data.total_page - 1 ||
+            data.current_page === data.total_page
+          ? data.total_page - 2
+          : data.current_page,
+        data.current_page + 1 == 2 || data.current_page + 1 == 3
+          ? 4
+          : data.current_page === data.total_page - 1 ||
+            data.current_page === data.total_page
+          ? data.total_page - 1
+          : data.current_page + 1,
+        data.current_page + 2 == 3 || data.current_page + 2 == 4
+          ? 5
+          : data.current_page === data.total_page - 1 ||
+            data.current_page === data.total_page
+          ? data.total_page
+          : data.current_page + 2,
+      ]);
     }
   };
 
@@ -35,12 +67,6 @@ const Pagination = ({ data, onNavigate, limit = 5 }: IPagination) => {
                 text="&lt;&lt;"
                 styling="px-2 py-1 border text-sm rounded-bl-md rounded-tl-md"
                 onClick={() => {
-                  const temp = [];
-                  for (let i = 0; i > limit; i--) {
-                    temp.push(i);
-                  }
-                  setPaginationNumber(temp.reverse());
-                  onNavigate(data?.total_page!);
                   return onNavigate(1);
                 }}
               />
@@ -49,23 +75,20 @@ const Pagination = ({ data, onNavigate, limit = 5 }: IPagination) => {
             text="Prev"
             styling="px-2 py-1 border text-sm"
             onClick={() => {
-              if (data?.current_page === paginationNumber[0] + 1) {
-                setPaginationNumber(Array.from(paginationNumber, (x) => x - 1));
-              }
-              onNavigate(data?.current_page! - 1);
+              return onNavigate(data?.current_page! - 1);
             }}
           />
         </>
       )}
-      {paginationNumber.map((i, _) => {
+      {paginationNumber.map((v, i) => {
         return (
           <Button
             key={i}
-            text={(i + 1).toString()}
+            text={v.toString()}
             styling={`px-3 py-1 border ${
-              data?.current_page === i + 1 && "bg-slate-200 "
+              data?.current_page === v && "bg-slate-200 "
             }`}
-            onClick={() => onNavigate(i + 1)}
+            onClick={() => onNavigate(v)}
           />
         );
       })}
@@ -75,41 +98,18 @@ const Pagination = ({ data, onNavigate, limit = 5 }: IPagination) => {
             text="Next"
             styling="px-2 py-1 border text-sm"
             onClick={() => {
-              if (
-                paginationNumber[paginationNumber.length - 1] <
-                data?.current_page!
-              ) {
-                paginationNumber.shift();
-                paginationNumber.push(
-                  paginationNumber[paginationNumber.length - 1] + 1
-                );
-                setPaginationNumber(paginationNumber);
-              }
-              onNavigate(data?.current_page! + 1);
+              return onNavigate(data?.current_page! + 1);
             }}
           />
-
-          {data?.total_page! > limit &&
-            paginationNumber.findIndex(
-              (page) => page + 1 === data?.total_page!
-            ) === -1 && (
-              <Button
-                text="&gt;&gt;"
-                styling="px-2 py-1 border text-sm rounded-br-md rounded-tr-md"
-                onClick={() => {
-                  const temp = [];
-                  for (
-                    let i = data?.total_page!;
-                    i > data?.total_page! - limit;
-                    i--
-                  ) {
-                    temp.push(i - 1);
-                  }
-                  setPaginationNumber(temp.reverse());
-                  return onNavigate(data?.total_page!);
-                }}
-              />
-            )}
+          {paginationNumber.includes(data?.total_page!) === false && (
+            <Button
+              text="&gt;&gt;"
+              styling="px-2 py-1 border text-sm rounded-br-md rounded-tr-md"
+              onClick={() => {
+                return onNavigate(data?.total_page!);
+              }}
+            />
+          )}
         </>
       )}
     </>
