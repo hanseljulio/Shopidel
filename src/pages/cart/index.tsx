@@ -481,7 +481,16 @@ const CartPage = () => {
             )}
           </div>
           {cartIsEmpty() ? (
-            <EmptyCart />
+            <div className="mt-[30px]">
+              <EmptyCart />
+              <div className="flex justify-center">
+                <Button
+                  text="Go Shopping Now"
+                  styling="bg-[#364968] p-3 rounded-[8px] w-[300px] text-white my-4"
+                  onClick={() => router.push("/")}
+                />
+              </div>
+            </div>
           ) : (
             <div>
               <div className="pt-8 pb-[150px]">

@@ -15,6 +15,7 @@ import { clientUnauthorizeHandler } from "@/utils/utils";
 import { toast } from "react-toastify";
 import { useCartStore } from "@/store/cartStore";
 import CartProduct from "../CartProduct";
+import EmptyCart from "../EmptyCart";
 
 const Navbar = () => {
   const cartStore = useCartStore();
@@ -138,7 +139,7 @@ const Navbar = () => {
                 productImage={item.product_image_url || ""}
                 productName={item.product_name || ""}
               />
-              <hr className="py-1" />
+              <hr className="my-4" />
             </div>
           ))}
         </div>
@@ -296,18 +297,8 @@ const Navbar = () => {
                 <div className="px-5 pt-5 text-center">
                   <h1 className="font-bold w-full text-xl pb-2">My cart </h1>
                   {cartIsEmpty() ? (
-                    <div className="items-center justify-center flex flex-col py-3">
-                      <img
-                        alt="cart pic"
-                        src={"/images/emptycart.png"}
-                        width={250}
-                        height={250}
-                        className="w-32 h-32 object-cover items-center justify-center"
-                      />
-
-                      <h1 className="text-center">
-                        Your shopping cart looks empty!
-                      </h1>
+                    <div className="items-center justify-center flex flex-col py-3 scale-90">
+                      <EmptyCart />
                     </div>
                   ) : (
                     renderCartProducts()
