@@ -204,7 +204,7 @@ const RegisterShop = () => {
             <div className="flex max-w-7xl w-full justify-around">
               <div className="hidden md:inline">
                 <img
-                  src="/images/seller_regis.png"
+                  src="/vm2/images/seller_regis.png"
                   width={400}
                   height={400}
                   alt="seller_regis_logo"

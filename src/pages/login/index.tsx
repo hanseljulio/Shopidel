@@ -105,7 +105,7 @@ const Login = () => {
           <div className=" w-full mx-auto flex justify-around items-center flex-1">
             <div className="hidden md:flex">
               <img
-                src={"/images/auth_hero.png"}
+                src={"/vm2/images/auth_hero.png"}
                 width={400}
                 height={400}
                 alt="auth_hero"

@@ -164,7 +164,7 @@ function Index() {
           <div className="text-center my-3">
             <img
               alt="cart pic"
-              src={"/images/emptycart.png"}
+              src={"/vm2/images/emptycart.png"}
               className="w-80 h-80 object-cover py-3 mx-auto"
             />
             <p className="text-lg font-semibold text-center py-2 text-neutral-500">
