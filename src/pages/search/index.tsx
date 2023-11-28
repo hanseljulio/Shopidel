@@ -119,6 +119,7 @@ const Search = () => {
           name="description"
           content={`Get the cheapest ${searchParam.get("s")} from Shopidel!`}
         />
+        <link rel="icon" href="/vm2/favicon.ico" sizes="any" />
       </Head>
       <ToastContainer />
 

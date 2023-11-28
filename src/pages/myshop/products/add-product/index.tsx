@@ -194,6 +194,7 @@ const SellerAddProductPage = () => {
       <ToastContainer />
       <Head>
         <title>Add Product</title>
+        <link rel="icon" href="/vm2/favicon.ico" sizes="any" />
       </Head>
       <SellerAdminLayout currentPage="Products">
         <div className="p-5">

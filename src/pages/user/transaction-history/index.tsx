@@ -603,6 +603,7 @@ const TransactionHistory = () => {
         <ProfileLayout currentPage="Transaction History">
           <Head>
             <title>Transaction History</title>
+            <link rel="icon" href="/vm2/favicon.ico" sizes="any" />
           </Head>
           <ToastContainer />
           <div className="w-full mx-auto mt-6 ">

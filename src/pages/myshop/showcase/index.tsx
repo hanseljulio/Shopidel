@@ -430,6 +430,7 @@ const SellerShowcasePage = () => {
       <SellerAdminLayout currentPage="Showcase">
         <Head>
           <title>Showcase</title>
+          <link rel="icon" href="/vm2/favicon.ico" sizes="any" />
         </Head>
         <ToastContainer />
         <div className="w-full mx-auto mt-6">

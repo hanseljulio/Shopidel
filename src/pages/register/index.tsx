@@ -10,6 +10,7 @@ const Register = () => {
     <>
       <Head>
         <title>Register</title>
+        <link rel="icon" href="/vm2/favicon.ico" sizes="any" />
       </Head>
       <div className="max-w-7xl mx-auto h-screen flex relative flex-col justify-between items-center">
         <div

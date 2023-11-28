@@ -597,6 +597,7 @@ const SellerAdminHome = () => {
         <ToastContainer />
         <Head>
           <title>Promotions</title>
+          <link rel="icon" href="/vm2/favicon.ico" sizes="any" />
         </Head>
         <div className="w-full mx-auto mt-6">
           <div className="flex items-center justify-between md:flex-row md:mx-[5%] flex-col p-0 md:gap-0 gap-8">

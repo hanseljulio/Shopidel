@@ -133,6 +133,7 @@ function Index() {
       <Navbar />
       <Head>
         <title>Favorites</title>
+        <link rel="icon" href="/vm2/favicon.ico" sizes="any" />
       </Head>
       <ToastContainer />
       <div className="mx-auto lg:max-w-7xl md:items-center px-4 md:px-0">
