@@ -45,7 +45,7 @@ const Navbar = () => {
     },
   ]);
 
-  const { cart, updateCart } = useCartStore();
+  const { updateCart, refreshCart } = useCartStore();
 
   const logoutHandler = () => {
     deleteCookie("accessToken");
@@ -106,7 +106,7 @@ const Navbar = () => {
     if (user) {
       getCartData();
     }
-  }, [user, updateCart, cartStore.cart]);
+  }, [user, refreshCart]);
 
   const renderCartProducts = () => {
     const maxProductsToShow = 5;

@@ -25,7 +25,6 @@ const ForgetPassword = () => {
                 const res = data.response?.data as IAPIResponse;
                 return res.message;
               }
-              console.log(data);
             },
           },
         },
