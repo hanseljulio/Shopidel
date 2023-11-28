@@ -337,7 +337,12 @@ const CartPage = () => {
           autoClose: 1500,
         }
       );
-      cartStore.updateCart(currentData);
+
+      if (currentData[index].cart_items.length === 0) {
+        cartStore.updateCart(undefined);
+      } else {
+        cartStore.updateCart(currentData);
+      }
     } catch (e) {
       if (axios.isAxiosError(e)) {
         if (e.response?.status === 401) {
