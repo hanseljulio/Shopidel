@@ -425,6 +425,51 @@ const ProductDetail = ({
 
         if (response.status === 200) {
           toast.success("Added to cart", { autoClose: 1500 });
+          console.log("data", data);
+        } else {
+          toast.error("Failed to add to cart", { autoClose: 1500 });
+        }
+      } catch (error) {
+        if (axios.isAxiosError(error)) {
+          if (error.response?.status === 401) {
+            return router.push("/login");
+          }
+          toast.error(error.response?.data.message, { autoClose: 1500 });
+        } else {
+          toast.error("An error occurred while adding to cart", {
+            autoClose: 1500,
+          });
+        }
+      }
+    }
+    if (currentStock < 1) {
+      toast.error("Out of stock", {
+        autoClose: 1500,
+      });
+    }
+    if (count < 1) {
+      toast.error("Add quantity first", {
+        autoClose: 1500,
+      });
+    }
+  };
+
+  const handleToBuy = async () => {
+    const data = {
+      product_id: varIndex,
+      quantity: count,
+    };
+    if (count >= 1 && currentStock >= 1) {
+      try {
+        const response = await API.post(`/accounts/carts`, data, {
+          headers: {
+            Authorization: `Bearer ${getCookie("accessToken")}`,
+          },
+        });
+
+        if (response.status === 200) {
+          toast.success("Added to cart", { autoClose: 1500 });
+          router.push("/cart");
         } else {
           toast.error("Failed to add to cart", { autoClose: 1500 });
         }
@@ -506,18 +551,18 @@ const ProductDetail = ({
           ))}
         {!isExpanded && product?.description.length > 450 && (
           <p
-            className="text-center text-[#f57b29] cursor-pointer"
+            className="text-center text-[#f57b29] cursor-pointer pt-3"
             onClick={handleSeeMore}
           >
-            &#812; See more
+            See more
           </p>
         )}
         {isExpanded && (
           <p
-            className="text-center text-[#f57b29] cursor-pointer"
+            className="text-center text-[#f57b29] cursor-pointer pt-3"
             onClick={handleSeeLess}
           >
-            &#813; See less
+            See less
           </p>
         )}
       </div>
@@ -687,7 +732,7 @@ const ProductDetail = ({
                       disabled={currentStock < 1 || count < 1 ? true : false}
                       type="submit"
                       onClick={handleToCart}
-                      className="flex text-sm items-center justify-center gap-1 h-10 border border-[#364968] hover:shadow-md bg-[#d6e4f8] p-2 w-full md:w-32 hover:bg-[#eff6fd]  transition-all duration-300"
+                      className="flex text-sm items-center justify-center gap-1 h-10 border border-[#364968]  bg-[#d6e4f8] p-2 w-full md:w-32   transition-all duration-300"
                     >
                       <AiOutlineShoppingCart /> <span>Add to cart</span>
                     </button>
@@ -699,8 +744,8 @@ const ProductDetail = ({
                       onClick={async () => {
                         if (user) {
                           try {
-                            await handleToCart();
-                            return router.push("/cart");
+                            await handleToBuy();
+                            return;
                           } catch (e) {
                             return;
                           }
@@ -794,11 +839,11 @@ const ProductDetail = ({
           </div>
           <div className="seller flex-col md:flex-row justify-between md:flex gap-10 py-5 px-5 md:px-0 ">
             <div className="order-1 w-full md:w-3/4">
-              <div className="sellerShop rounded-md bg-[#364968] flex flex-col md:flex-row gap-y-5 text-white py-3 my-10 gap-6 px-3 ">
+              <div className="sellerShop rounded-md bg-[#364968] items-center flex flex-col md:flex-row gap-y-5 text-white py-3 my-10 gap-6 px-3 ">
                 <img
                   src={shopProfile?.data?.seller_picture_url}
                   alt="seller"
-                  className="imgSeller w-full md:w-32 h-full place-self-center object-fill rounded-lg"
+                  className="imgSeller w-full md:w-24 h-full place-self-center object-fill rounded-lg"
                   placeholder="https://cdn4.iconfinder.com/data/icons/web-ui-color/128/Account-512.png"
                   onError={(e) => {
                     (e.target as HTMLInputElement).src =

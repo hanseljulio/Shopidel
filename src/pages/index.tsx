@@ -73,7 +73,7 @@ export default function Home({
             Recommendation
           </p>
         </div>
-        <div className="justify-between gap-x-4 gap-y-4 grid grid-cols-2 md:grid-cols-6">
+        <div className="justify-between gap-x-4 gap-y-4 grid grid-cols-2 md:grid-cols-6 w-full">
           {recommendedProducts?.map((product) => (
             <ProductCard
               key={product.id}
@@ -95,7 +95,7 @@ export default function Home({
         <Button
           text="View More"
           onClick={() => router.push("/search")}
-          styling="flex justify-center items-center text-center text-white mx-auto bg-[#f57b29] my-5 py-2 px-5 hover:bg-[#b8642c] rounded-md"
+          styling="flex justify-center items-center text-center text-white mx-auto bg-[#f57b29] my-5 py-2 px-5 hover:bg-[#fddf97] rounded-md"
         />
       </div>
 

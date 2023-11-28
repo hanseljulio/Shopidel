@@ -105,15 +105,19 @@ function Index({ seller }: IProfileShopProps) {
         res = await API.get(
           `/sellers/${seller.shop_name_slug}/showcases/${id}/products?page=${page}`
         );
+        console.log("cat", res);
       } else {
         res = await API.get(
           `/sellers/${seller.shop_name_slug}/showcases/0/products?page=${page}`
         );
+        console.log("all", res);
       }
 
       const data = res.data;
       if (data.data) {
         setProductCategory(data);
+        console.log(productCategory);
+
         setActiveCategory(id);
       } else {
         console.error("Data is undefined or null");
@@ -174,45 +178,38 @@ function Index({ seller }: IProfileShopProps) {
         />
       </Head>
       <div className="mx-auto lg:max-w-7xl md:items-center px-4 md:px-0 mb-5">
-        <div className="sellerShop border h-auto border-slate-200 rounded-t-xl text-black flex flex-col md:flex-row items-center md:items-start gap-y-5 py-2 px-2  mt-10 gap-10 md:p-5 ">
-          <div className="md:w-1/2 w-full bg-slate-100 flex-col flex gap-y-10 h-full p-3 rounded-xl">
-            <div className="flex flex-col md:flex-row gap-x-5 items-center text-center md:text-left gap-y-3 ">
+        <div className="sellerShop border h-auto border-slate-200 rounded-t-xl text-black flex flex-col md:flex-row items-center md:items-start gap-y-5 mt-10 gap-10 overflow-hidden">
+          <div className="md:w-2/3 w-full bg-slate-100 flex-col flex gap-y-10 h-full p-3 ">
+            <div className="flex flex-col w-full md:flex-row gap-x-5 items-center text-center md:text-left gap-y-3 ">
               <img
                 src={seller?.seller_picture_url}
                 alt={seller?.seller_name}
-                className="imgSeller w-full md:w-44 h-full object-fill rounded-lg items-center"
+                className="imgSeller w-full md:w-28 h-full object-fill rounded-lg items-center"
                 placeholder="https://cdn4.iconfinder.com/data/icons/web-ui-color/128/Account-512.png"
                 onError={(e) => {
                   (e.target as HTMLInputElement).src =
                     "https://cdn4.iconfinder.com/data/icons/web-ui-color/128/Account-512.png";
                 }}
               />
-              <div className="aboutSeller md:w-full text-center md:text-left justify-center ">
-                <p className="text-xl md:text-2xl font-semibold">
-                  {seller?.seller_name}
-                </p>
-                <p className="text-sm md:text-base flex gap-x-1 text-center justify-center md:justify-start md:text-left items-center  text-neutral-600">
-                  <FaLocationDot size={13} />
-                  <span>{seller?.seller_district}</span>
-                </p>
+              <div className="aboutSeller flex md:w-full text-center md:text-left justify-between ">
+                <div className="w-full">
+                  <p className="text-xl md:text-2xl font-semibold">
+                    {seller?.seller_name}
+                  </p>
+                  <p className="text-sm md:text-base flex gap-x-1 text-center justify-center md:justify-start md:text-left items-center  text-neutral-600">
+                    <FaLocationDot size={13} />
+                    <span>{seller?.seller_district}</span>
+                  </p>
+                </div>
 
-                <div className="text-center md:text-left justify-between flex pt-3 w-full mt-2 md:mt-0">
-                  <div className="w-fit text-center md:text-left md:items-center md:justify-center">
-                    <p className="font-medium">{`${seller?.seller_operating_hour.start} - ${seller?.seller_operating_hour.end} WIB`}</p>
-                    <p className=" text-neutral-600 text-sm">Operating hours</p>
-                  </div>
-                  <div>
-                    <p className="flex text-center md:text-left md:items-center font-medium gap-x-1 pr-4">
-                      <FaStar style={{ color: "#f57b29" }} />
-                      {averageStars.toFixed(1)}
-                    </p>
-                    <p className="text-neutral-600 text-sm">Rating</p>
-                  </div>
+                <div className="w-full text-center md:text-center md:items-center md:justify-center">
+                  <p className="font-medium">{`${seller?.seller_operating_hour.start} - ${seller?.seller_operating_hour.end} WIB`}</p>
+                  <p className=" text-neutral-600 text-sm">Operating hours</p>
                 </div>
               </div>
             </div>
           </div>
-          <div className="md:w-1/2 w-full">
+          <div className="md:w-1/3 w-full">
             <div className="p-3">
               <p className="gap-x-1 flex text-lg text-[#f57b29] items-center font-semibold mb-1">
                 {seller.seller_name}
@@ -309,11 +306,6 @@ function Index({ seller }: IProfileShopProps) {
             </div>
           </div>
           <div className="w-full md:w-3/4 gap-y-5 mt-10">
-            {/* <div className="w-full justify-start align-middle text-center items-center flex bg-slate-200 gap-x-3 p-3">
-              <p className="text-lg font-semibold text-center mx-auto">
-                Products in Etalase
-              </p>
-            </div> */}
             <div className="w-full grid grid-cols-2 md:grid-cols-4 gap-3 md:mt-3">
               {productCategory?.data.map((e, k) => (
                 <>
