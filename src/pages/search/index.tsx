@@ -19,6 +19,8 @@ import { ReadonlyURLSearchParams, useSearchParams } from "next/navigation";
 import { TiDeleteOutline } from "react-icons/ti";
 import Head from "next/head";
 import Pagination from "@/components/Pagination";
+import Skeleton from "react-loading-skeleton";
+import "react-loading-skeleton/dist/skeleton.css";
 
 const Search = () => {
   const router = useRouter();
@@ -53,6 +55,7 @@ const Search = () => {
   };
 
   const getProductsQuery = async () => {
+    setProductsRes(undefined);
     try {
       const res = await API.get("/products", {
         params: {
@@ -76,6 +79,7 @@ const Search = () => {
   };
 
   const getFilteredProductsQuery = async () => {
+    setProductsRes(undefined);
     try {
       const res = await API.get("/products", {
         params: {
@@ -292,15 +296,19 @@ const Search = () => {
                       <input
                         ref={inputPriceMinRef}
                         onBlur={(e) => {
-                          router.push({
-                            href: router.asPath,
-                            query: {
-                              ...router.query,
-                              minPrice: e.target.value,
-                            },
-                          });
+                          if (searchParam.get("minPrice") !== e.target.value) {
+                            return router.push({
+                              href: router.asPath,
+                              query: {
+                                ...router.query,
+                                minPrice: e.target.value,
+                              },
+                            });
+                          }
                         }}
                         onChange={(e) => {
+                          if (!/^[0-9]*$/g.test(e.target.value))
+                            return e.preventDefault();
                           return setMinPrice(e.target.value);
                         }}
                         value={minPrice}
@@ -320,15 +328,19 @@ const Search = () => {
                       <input
                         ref={inputPriceMaxRef}
                         onBlur={(e) => {
-                          router.push({
-                            href: router.asPath,
-                            query: {
-                              ...router.query,
-                              maxPrice: e.target.value,
-                            },
-                          });
+                          if (searchParam.get("maxPrice") !== e.target.value) {
+                            return router.push({
+                              href: router.asPath,
+                              query: {
+                                ...router.query,
+                                maxPrice: e.target.value,
+                              },
+                            });
+                          }
                         }}
                         onChange={(e) => {
+                          if (!/^[0-9]*$/g.test(e.target.value))
+                            return e.preventDefault();
                           return setMaxPrice(e.target.value);
                         }}
                         type="text"
@@ -402,7 +414,7 @@ const Search = () => {
                     return (
                       <div key={i} className="flex gap-x-2 items-start">
                         <input
-                          onChange={(e) => {
+                          onChange={() => {
                             let categoryId = (
                               searchParam.get("categoryId") ?? ""
                             ).split("#");
@@ -441,7 +453,7 @@ const Search = () => {
                         <p>
                           {
                             initialSearchProductRes?.data?.find(
-                              (raw) => raw.category_id === id
+                              (initialData) => initialData.category_id === id
                             )?.category_name
                           }
                         </p>
@@ -556,6 +568,65 @@ const Search = () => {
                 </div>
               </div>
             </div>
+
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-5 mt-5 ">
+              {productsRes === undefined &&
+                Array(30)
+                  .fill("")
+                  .map((_, i) => {
+                    return (
+                      <div key={i}>
+                        <div className={"relative h-44 md:h-48 w-full"}>
+                          <div
+                            className={
+                              " h-auto md:h-full w-full overflow-hidden top-0"
+                            }
+                          >
+                            <Skeleton className="object-fill w-full h-44 md:h-48 top-0" />
+                          </div>
+
+                          <div
+                            className={
+                              "absolute bottom-0 left-0 -mb-4  ml-3 flex flex-row"
+                            }
+                          >
+                            <div
+                              className={
+                                "h-10 w-fit px-2 flex items-center justify-center text-sm bg-white hover:shadow-none text-[#f57b29]  rounded-2xl shadow-xl"
+                              }
+                            >
+                              <Skeleton />
+                              <span
+                                className={"text-gray-500 ml-2  items-center"}
+                              >
+                                {<Skeleton />}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="pt-3 pb-3 md:pt-5 w-full px-2 gap-y-2 flex flex-col ">
+                          <p className="text-black text-sm md:text-base pt-2 row-span-2 w-full line-clamp-2 md:h-14">
+                            <Skeleton className="text-black text-sm md:text-base pt-2 row-span-2 w-full line-clamp-2 md:h-14" />
+                          </p>
+                          <p className="text-[#f57b29] text-sm md:text-xl w-full">
+                            <Skeleton className="text-[#f57b29] text-sm md:text-xl w-full" />
+                          </p>
+
+                          <div className="flex justify-between text-gray-500 text-xs md:text-sm items-end">
+                            <p className="text-gray-500 ">
+                              <Skeleton />
+                            </p>
+
+                            <span className={`text-gray-500`}>
+                              <Skeleton />
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+            </div>
             {productsRes?.data?.length === 0 ? (
               <>
                 <div className="flex flex-col items-center mt-10">
@@ -563,7 +634,7 @@ const Search = () => {
                     <img src="/images/not_found.png" alt="not_found" />
                   </div>
                   <h1 className="text-xl">Oops, Product not found</h1>
-                  <p>Try another keyword</p>
+                  <p>Try another keyword or filter</p>
                 </div>
               </>
             ) : (
@@ -593,15 +664,16 @@ const Search = () => {
               <div className="mt-10 text-center">
                 <Pagination
                   data={productsRes?.pagination}
-                  onNavigate={(page) =>
+                  onNavigate={(page) => {
+                    setProductsRes(undefined);
                     router.push({
                       href: router.asPath,
                       query: {
                         ...router.query,
                         page: page,
                       },
-                    })
-                  }
+                    });
+                  }}
                 />
               </div>
             )}
@@ -640,7 +712,7 @@ const SortModal = ({ filter, onApply }: SortModalProps) => {
           {...register("sortBy")}
           name="sortBy"
           id="sortBy"
-          className="roole.log(data);unded-md border-slate-500 text-sm py-1"
+          className="rounded-md border-slate-500 text-sm py-1"
         >
           <option value="recommended">Recommended</option>
           <option value="date">Newest</option>
@@ -812,6 +884,12 @@ const FilterModal = ({
                   </div>
                   <input
                     {...register("minPrice")}
+                    onChange={(e) => {
+                      if (!/^[0-9]*$/g.test(e.target.value))
+                        return e.preventDefault();
+                      return setValue("minPrice", e.target.value);
+                    }}
+                    value={watch("minPrice")}
                     type="text"
                     name="minPrice"
                     id="minPrice"
@@ -827,7 +905,13 @@ const FilterModal = ({
                   </div>
                   <input
                     {...register("maxPrice")}
+                    onChange={(e) => {
+                      if (!/^[0-9]*$/g.test(e.target.value))
+                        return e.preventDefault();
+                      return setValue("maxPrice", e.target.value);
+                    }}
                     type="text"
+                    value={watch("maxPrice")}
                     name="maxPrice"
                     id="maxPrice"
                     className="w-full focus:border-none border border-[#F3F4F5] rounded-md text-sm pl-10"
