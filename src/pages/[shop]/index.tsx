@@ -19,7 +19,6 @@ import { FaListUl } from "react-icons/fa";
 import { FaLocationDot } from "react-icons/fa6";
 import { toast } from "react-toastify";
 import Head from "next/head";
-import { useSearchParams } from "next/navigation";
 
 export const getServerSideProps: GetServerSideProps = async (
   context: GetServerSidePropsContext
@@ -54,7 +53,6 @@ function Index({ seller }: IProfileShopProps) {
   const [productCategory, setProductCategory] = useState<IProductPagination>();
   const [showPage, setShowPage] = useState<IAPIResponse<IEtalaseSeller[]>>();
   const [page, setPage] = useState<number>(1);
-  const searchParam = useSearchParams();
   const [activeCategory, setActiveCategory] = useState<number | null>(
     categoryList.length > 0 ? categoryList[0].showcase_id : null
   );
@@ -104,18 +102,15 @@ function Index({ seller }: IProfileShopProps) {
         res = await API.get(
           `/sellers/${seller.shop_name_slug}/showcases/${id}/products?page=${page}`
         );
-        console.log("cat", res);
       } else {
         res = await API.get(
           `/sellers/${seller.shop_name_slug}/showcases/0/products?page=${page}`
         );
-        console.log("all", res);
       }
 
       const data = res.data;
       if (data.data) {
         setProductCategory(data);
-        console.log(productCategory);
 
         setActiveCategory(id);
       } else {
