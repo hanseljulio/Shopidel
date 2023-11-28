@@ -563,7 +563,10 @@ const SellerOrderListPage = () => {
           content={
             <CancelOrderModal
               orderId={cancelOrderId}
-              exitFunction={() => setShowCancelModal(false)}
+              exitFunction={() => {
+                getOrderData();
+                setShowCancelModal(false);
+              }}
             />
           }
           onClose={() => setShowCancelModal(false)}
