@@ -47,6 +47,7 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import YouTube from "react-youtube";
 import Head from "next/head";
+import { useCartStore } from "@/store/cartStore";
 
 interface IChoosedVariant {
   variant1: string;
@@ -111,6 +112,8 @@ const ProductDetail = ({
       variationRef.current.scrollLeft -= 100;
     }
   };
+
+  const { refreshCart, updateRefreshCart } = useCartStore();
 
   const scrollRight = () => {
     if (variationRef.current) {
@@ -424,6 +427,7 @@ const ProductDetail = ({
         });
 
         if (response.status === 200) {
+          updateRefreshCart();
           toast.success("Added to cart", { autoClose: 1500 });
         } else {
           toast.error("Failed to add to cart", { autoClose: 1500 });

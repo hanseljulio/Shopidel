@@ -267,7 +267,12 @@ const CartPage = () => {
         API.post("/accounts/carts/delete", sendData),
         {
           pending: "Deleting",
-          success: "Cart is now empty!",
+          success: {
+            render() {
+              cartStore.updateRefreshCart();
+              return "Cart is now empty!";
+            },
+          },
           error: {
             render({ data }) {
               if (axios.isAxiosError(data)) {
@@ -324,7 +329,12 @@ const CartPage = () => {
         API.post("/accounts/carts/delete", sendData),
         {
           pending: "Deleting",
-          success: "Cart has been updated!",
+          success: {
+            render() {
+              cartStore.updateRefreshCart();
+              return "Cart has been updated!";
+            },
+          },
           error: {
             render({ data }) {
               if (axios.isAxiosError(data)) {

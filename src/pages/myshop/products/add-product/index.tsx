@@ -166,7 +166,13 @@ const SellerAddProductPage = () => {
         {
           pending: "Loading",
           success: "Success",
-          error: "Error add product",
+          error: {
+            render({ data }) {
+              if (axios.isAxiosError(data)) {
+                return `${(data.response?.data as IAPIResponse).message}`;
+              }
+            },
+          },
         },
         { autoClose: 1500 }
       );
