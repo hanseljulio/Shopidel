@@ -109,7 +109,6 @@ function Index() {
       );
 
       if (response.status === 200) {
-        toast.success("Remove from wishlist", { autoClose: 1500 });
         getWishlist();
       } else {
         toast.error("Failed remove from wishlist", { autoClose: 1500 });
