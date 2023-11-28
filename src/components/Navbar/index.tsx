@@ -138,7 +138,7 @@ const Navbar = () => {
                 productImage={item.product_image_url || ""}
                 productName={item.product_name || ""}
               />
-              <hr className="py-1" />
+              <hr className="my-4" />
             </div>
           ))}
         </div>
