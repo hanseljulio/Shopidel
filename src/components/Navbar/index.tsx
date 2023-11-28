@@ -316,10 +316,10 @@ const Navbar = () => {
                     src={logged.profile_picture}
                     alt="profile_picture"
                     className="h-full w-full bg-white object-cover rounded-full"
-                    placeholder="/images/defaultuser.png"
+                    placeholder="/vm2/images/defaultuser.png"
                     onError={(e) => {
                       (e.target as HTMLInputElement).src =
-                        "/images/defaultuser.png";
+                        "/vm2/images/defaultuser.png";
                     }}
                   />
                 </div>
@@ -336,10 +336,10 @@ const Navbar = () => {
                         src={logged.profile_picture}
                         alt="profile_picture"
                         className=" h-full w-full object-cover rounded-full"
-                        placeholder="/images/defaultuser.png"
+                        placeholder="/vm2/images/defaultuser.png"
                         onError={(e) => {
                           (e.target as HTMLInputElement).src =
-                            "/images/defaultuser.png";
+                            "/vm2/images/defaultuser.png";
                         }}
                       />
                     </div>

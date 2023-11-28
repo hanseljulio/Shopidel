@@ -105,7 +105,7 @@ const SellerSettings = () => {
                   src={
                     data?.seller_picture_url !== ""
                       ? data?.seller_picture_url
-                      : "/images/defaultuser.png"
+                      : "/vm2/images/defaultuser.png"
                   }
                   width={100}
                   alt="shop_image"

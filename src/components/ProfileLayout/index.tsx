@@ -85,7 +85,7 @@ const UserProfileSidebar = () => {
             src={
               logged?.profile_picture
                 ? logged.profile_picture
-                : "/images/defaultuser.png"
+                : "/vm2/images/defaultuser.png"
             }
             alt="Nothing"
             width={50}

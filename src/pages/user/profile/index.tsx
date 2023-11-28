@@ -143,7 +143,7 @@ const UserProfile = ({
                       ? typeof imageFile === "string"
                         ? imageFile
                         : URL.createObjectURL(imageFile as File)
-                      : "/images/defaultuser.png"
+                      : "/vm2/images/defaultuser.png"
                   }`}
                   alt="Nothing"
                   width={200}
