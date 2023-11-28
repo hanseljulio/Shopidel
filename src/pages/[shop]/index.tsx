@@ -170,6 +170,7 @@ function Index({ seller }: IProfileShopProps) {
           name="description"
           content={`Browse the latest products from ${seller.seller_name}`}
         />
+        <link rel="icon" href="/vm2/favicon.ico" sizes="any" />
       </Head>
       <div className="mx-auto lg:max-w-7xl md:items-center px-4 md:px-0 mb-5">
         <div className="sellerShop border h-auto border-slate-200 rounded-t-xl text-black flex flex-col md:flex-row items-center md:items-start gap-y-5 mt-10 gap-10 overflow-hidden">

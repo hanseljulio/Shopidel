@@ -41,6 +41,7 @@ export default function Home({
       <Head>
         <title>Shopidel</title>
         <meta name="description" content="Welcome to Shopidel!" />
+        <link rel="icon" href="/vm2/favicon.ico" sizes="any" />
       </Head>
       <Navbar />
       <CarouselHome />

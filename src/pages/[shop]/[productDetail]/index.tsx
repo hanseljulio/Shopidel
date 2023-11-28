@@ -581,6 +581,7 @@ const ProductDetail = ({
           name="description"
           content={`Buy ${product?.name} from Shopidel!`}
         />
+        <link rel="icon" href="/vm2/favicon.ico" sizes="any" />
       </Head>
       {isModal && (
         <Modal

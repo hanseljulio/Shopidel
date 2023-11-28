@@ -121,6 +121,7 @@ const UserProfile = ({
     <div>
       <Head>
         <title>My Profile</title>
+        <link rel="icon" href="/vm2/favicon.ico" sizes="any" />
       </Head>
       <ToastContainer />
       <ProfileLayout currentPage="My Profile">

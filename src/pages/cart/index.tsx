@@ -467,6 +467,7 @@ const CartPage = () => {
         <Navbar />
         <Head>
           <title>My Cart</title>
+          <link rel="icon" href="/vm2/favicon.ico" sizes="any" />
         </Head>
         <ToastContainer />
         <div className="lg:max-w-7xl mx-auto">

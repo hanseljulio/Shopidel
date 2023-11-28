@@ -151,6 +151,7 @@ const SellerShowcaseCreatePage = () => {
     <SellerAdminLayout currentPage="Promotions">
       <Head>
         <title>Create Showcase</title>
+        <link rel="icon" href="/vm2/favicon.ico" sizes="any" />
       </Head>
       <ToastContainer />
       <div className="w-full mx-auto mt-6">

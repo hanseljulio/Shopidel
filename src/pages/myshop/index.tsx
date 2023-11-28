@@ -185,6 +185,7 @@ const RegisterShop = () => {
       <Navbar />
       <Head>
         <title>Register Shop</title>
+        <link rel="icon" href="/vm2/favicon.ico" sizes="any" />
       </Head>
       <div className="flex h-screen justify-center items-center">
         {listAddress?.length === 0 || walletDetail?.isActive === false ? (

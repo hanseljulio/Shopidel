@@ -76,6 +76,7 @@ const SellerSettings = () => {
       <ToastContainer />
       <Head>
         <title>Settings</title>
+        <link rel="icon" href="/vm2/favicon.ico" sizes="any" />
       </Head>
       <SellerAdminLayout currentPage="Settings">
         <div className="p-5">

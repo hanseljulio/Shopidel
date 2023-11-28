@@ -67,6 +67,7 @@ const ResetPassword = () => {
     <div className="h-screen w-screen flex justify-center items-center">
       <Head>
         <title>Reset Password</title>
+        <link rel="icon" href="/vm2/favicon.ico" sizes="any" />
       </Head>
       <ToastContainer />
       <div className="flex flex-col items-center px-5 md:px-0">

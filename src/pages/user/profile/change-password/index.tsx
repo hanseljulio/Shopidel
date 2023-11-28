@@ -42,6 +42,7 @@ const UserChangePassword = () => {
       <ToastContainer />
       <Head>
         <title>Change Password</title>
+        <link rel="icon" href="/vm2/favicon.ico" sizes="any" />
       </Head>
       {isModal && (
         <Modal

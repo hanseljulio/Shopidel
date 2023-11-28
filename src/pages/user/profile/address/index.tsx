@@ -764,6 +764,7 @@ const AddressPage = () => {
         <ToastContainer />
         <Head>
           <title>Manage Address</title>
+          <link rel="icon" href="/vm2/favicon.ico" sizes="any" />
         </Head>
         <ProfileLayout currentPage="My Address">
           <div className="w-full mx-auto mt-6 ">

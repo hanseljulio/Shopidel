@@ -497,6 +497,7 @@ const WalletDetail = ({
     <div className="p-5">
       <Head>
         <title>My Wallet</title>
+        <link rel="icon" href="/vm2/favicon.ico" sizes="any" />
       </Head>
       <div className="flex flex-col gap-y-3 md:gap-y-0 md:flex-row justify-between md:items-end">
         <div>

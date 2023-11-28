@@ -71,6 +71,7 @@ const SellerAdminProducts = () => {
       <ToastContainer />
       <Head>
         <title>My Products</title>
+        <link rel="icon" href="/vm2/favicon.ico" sizes="any" />
       </Head>
       {isModal && (
         <Modal

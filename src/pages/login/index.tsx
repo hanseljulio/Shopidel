@@ -92,6 +92,7 @@ const Login = () => {
     <>
       <Head>
         <title>Login</title>
+        <link rel="icon" href="/vm2/favicon.ico" sizes="any" />
       </Head>
       <div className=" h-screen flex justify-between items-center">
         <ToastContainer />
