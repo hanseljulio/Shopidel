@@ -166,7 +166,7 @@ const SellerAddProductPage = () => {
         {
           pending: "Loading",
           success: "Success",
-          error: "Error add product",
+          error: "Error adding product",
         },
         { autoClose: 1500 }
       );
