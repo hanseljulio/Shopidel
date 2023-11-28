@@ -6,7 +6,7 @@ const EmptyCart = () => {
       <div className="empty-card-div flex items-center justify-center">
         <img
           alt="cart pic"
-          src={"/images/emptycart.png"}
+          src={"/vm2/images/emptycart.png"}
           width={250}
           height={250}
           className="w-[250px] h-[250px] object-cover"
