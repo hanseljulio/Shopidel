@@ -17,11 +17,7 @@ import { IAPIProfileShopResponse } from "@/interfaces/seller_interface";
 import { API } from "@/network";
 import { IWishlist } from "@/interfaces/product_interface";
 import { useUserStore } from "@/store/userStore";
-import {
-  clientUnauthorizeHandler,
-  currencyConverter,
-  getYoutubeVideoId,
-} from "@/utils/utils";
+import { currencyConverter, getYoutubeVideoId } from "@/utils/utils";
 import axios from "axios";
 import { getCookie } from "cookies-next";
 import {
@@ -429,7 +425,6 @@ const ProductDetail = ({
         if (response.status === 200) {
           updateRefreshCart();
           toast.success("Added to cart", { autoClose: 1500 });
-          console.log("data", data);
         } else {
           toast.error("Failed to add to cart", { autoClose: 1500 });
         }
